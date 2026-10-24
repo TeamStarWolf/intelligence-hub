@@ -1,0 +1,8 @@
+.state/
+site/data/
+__pycache__/
+*.pyc
+.venv/
+dist/
+.env
+.env.*

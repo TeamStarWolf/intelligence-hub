@@ -1,0 +1,76 @@
+name: Refresh and publish Intelligence Hub
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: intelligence-hub-pages
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    if: github.repository == 'TeamStarWolf/intelligence-hub' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Read repository source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Select daily public-data cache
+        id: day
+        run: echo "value=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+      - name: Retain bounded public-feed history
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: .state/public-cache.json
+          key: public-v1-${{ hashFiles('intelligence_hub/*.py', 'config/sources.json') }}-${{ steps.day.outputs.value }}
+          restore-keys: |
+            public-v1-${{ hashFiles('intelligence_hub/*.py', 'config/sources.json') }}-
+      - name: Collect actual public intelligence
+        run: |
+          python3 --version
+          python3 -m intelligence_hub
+      - name: Package only public site files
+        shell: python
+        run: |
+          from pathlib import Path
+          expected = {'index.html', 'styles.css', 'app.js', 'icon.svg', 'data/feed.json'}
+          root = Path('site')
+          found = set()
+          for path in root.rglob('*'):
+              if path.is_symlink():
+                  raise SystemExit('Links are not permitted in the site artifact.')
+              if path.is_file():
+                  found.add(path.relative_to(root).as_posix())
+          if found != expected:
+              raise SystemExit('The public artifact file list differs from its allowlist.')
+          if sum((root / name).stat().st_size for name in expected) > 21 * 1024 * 1024:
+              raise SystemExit('The public site exceeds its package limit.')
+      - name: Upload public site
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          path: site
+          retention-days: 1
+
+  deploy:
+    needs: collect
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish Intelligence Hub
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

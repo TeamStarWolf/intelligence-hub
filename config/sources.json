@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "sources": [
+    {"id":"cisa-advisories","name":"CISA Advisories","kind":"advisory","url":"https://www.cisa.gov/cybersecurity-advisories/all.xml","home":"https://www.cisa.gov/cybersecurity-advisories","article_hosts":["www.cisa.gov","cisa.gov"]},
+    {"id":"cert-eu","name":"CERT-EU","kind":"advisory","url":"https://cert.europa.eu/publications/security-advisories-rss","home":"https://cert.europa.eu/publications/security-advisories/","article_hosts":["cert.europa.eu"]},
+    {"id":"microsoft-security","name":"Microsoft Security","kind":"research","url":"https://www.microsoft.com/en-us/security/blog/feed/","home":"https://www.microsoft.com/en-us/security/blog/","article_hosts":["www.microsoft.com"]},
+    {"id":"google-threat-intelligence","name":"Google Threat Intelligence","kind":"research","url":"https://feeds.feedburner.com/threatintelligence/pvexyqv7v0v","home":"https://cloud.google.com/blog/topics/threat-intelligence","article_hosts":["cloud.google.com","blog.google","security.googleblog.com"]},
+    {"id":"talos","name":"Cisco Talos","kind":"research","url":"https://blog.talosintelligence.com/rss/","home":"https://blog.talosintelligence.com/","article_hosts":["blog.talosintelligence.com"]},
+    {"id":"unit42","name":"Palo Alto Unit 42","kind":"research","url":"https://unit42.paloaltonetworks.com/feed/","home":"https://unit42.paloaltonetworks.com/","article_hosts":["unit42.paloaltonetworks.com"]},
+    {"id":"bleepingcomputer","name":"BleepingComputer","kind":"reporting","url":"https://www.bleepingcomputer.com/feed/","home":"https://www.bleepingcomputer.com/","article_hosts":["www.bleepingcomputer.com"]},
+    {"id":"securityweek","name":"SecurityWeek","kind":"reporting","url":"https://www.securityweek.com/feed/","home":"https://www.securityweek.com/","article_hosts":["www.securityweek.com"]},
+    {"id":"krebs","name":"Krebs on Security","kind":"reporting","url":"https://krebsonsecurity.com/feed/","home":"https://krebsonsecurity.com/","article_hosts":["krebsonsecurity.com"]},
+    {"id":"the-record","name":"The Record","kind":"reporting","url":"https://therecord.media/feed","home":"https://therecord.media/","article_hosts":["therecord.media"]}
+  ]
+}

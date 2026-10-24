@@ -1,0 +1,656 @@
+{
+  "schema_version": 1,
+  "window": {
+    "start": "2025-10-24",
+    "end": "2026-10-24"
+  },
+  "curated_at": "2026-10-24",
+  "coverage": {
+    "complete": false,
+    "selection": "22 individually reviewed primary publications; a curated selection rather than an exhaustive incident database.",
+    "date_policy": "The selected history uses publication dates for its window and chronology. Event dates, where an exact incident day is established, remain separate. Null event dates mean no exact day is asserted.",
+    "quarter_counts": {
+      "2025-Q4": 6,
+      "2026-Q1": 4,
+      "2026-Q2": 4,
+      "2026-Q3": 5,
+      "2026-Q4": 3
+    },
+    "months_without_selected_publications": [],
+    "limitations": [
+      "Coverage is uneven despite a selected publication in each calendar-month bucket; absence of an entry never means absence of incidents.",
+      "Some in-window disclosures describe campaigns that began before the window; summaries identify this explicitly.",
+      "Dates and findings reflect the primary pages reviewed on the curation date; publisher corrections and updates may change later.",
+      "The separate CISA KEV collection uses catalog-addition dates, not incident or disclosure dates.",
+      "Source research, advisories and first-party incident disclosures carry different evidence; none establishes exposure of the reader's devices."
+    ]
+  },
+  "entries": [
+    {
+      "id": "hist-wsus-20251024",
+      "title": "CERT-EU warns of WSUS remote code execution",
+      "url": "https://cert.europa.eu/publications/security-advisories/2025-040/",
+      "source_id": "cert-eu",
+      "source_name": "CERT-EU",
+      "kind": "advisory",
+      "published_at": "2025-10-24",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "CERT-EU describes CVE-2025-59287, an unauthenticated code-execution flaw affecting Windows Server with the WSUS role enabled. Review the vendor's affected-product and update guidance; a Windows installation alone does not establish applicability.",
+      "cves": [
+        "CVE-2025-59287"
+      ],
+      "tags": [
+        "windows",
+        "patching",
+        "server"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://cert.europa.eu/publications/security-advisories/2025-040/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-gtig-ai-20251105",
+      "title": "GTIG documents AI-enabled malware and threat-actor tool use",
+      "url": "https://cloud.google.com/blog/topics/threat-intelligence/threat-actor-usage-of-ai-tools",
+      "source_id": "google-threat-intelligence",
+      "source_name": "Google Threat Intelligence Group",
+      "kind": "research",
+      "published_at": "2025-11-05",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Google reports both experimental and operational AI-enabled malware, including runtime model calls and abuse of developer AI tools. Distinguish observed activity from prototypes; review model-API egress and the privileges held by local AI tooling.",
+      "cves": [],
+      "tags": [
+        "ai-security",
+        "malware",
+        "credentials"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://cloud.google.com/blog/topics/threat-intelligence/threat-actor-usage-of-ai-tools"
+        },
+        {
+          "label": "Pinned library discovery reference",
+          "url": "https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/case-studies/AI_THREATS_2026.md"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-anthropic-espionage-20251113",
+      "title": "Anthropic discloses an AI-orchestrated espionage campaign",
+      "url": "https://www.anthropic.com/news/disrupting-AI-espionage",
+      "source_id": "anthropic",
+      "source_name": "Anthropic",
+      "kind": "research",
+      "published_at": "2025-11-13",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Anthropic reports a campaign detected in September 2025 that abused Claude Code against selected organizations. Attribution and automation estimates are the provider's assessments. This November disclosure does not date the start of activity to the history window.",
+      "cves": [],
+      "tags": [
+        "ai-security",
+        "espionage",
+        "agents"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.anthropic.com/news/disrupting-AI-espionage"
+        },
+        {
+          "label": "Pinned library discovery reference",
+          "url": "https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/case-studies/AI_THREATS_2026.md"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-shai-hulud-20251124",
+      "title": "GitLab identifies a renewed Shai-Hulud npm campaign",
+      "url": "https://about.gitlab.com/blog/gitlab-discovers-widespread-npm-supply-chain-attack/",
+      "source_id": "gitlab",
+      "source_name": "GitLab",
+      "kind": "research",
+      "published_at": "2025-11-24",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "GitLab researchers describe infected npm packages that steal developer and cloud credentials, propagate through publishing access and include destructive behavior. Review dependency histories and credential exposure; package counts in this ongoing report are not a complete victim inventory.",
+      "cves": [],
+      "tags": [
+        "supply-chain",
+        "npm",
+        "credentials"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://about.gitlab.com/blog/gitlab-discovers-widespread-npm-supply-chain-attack/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-react-rsc-20251203",
+      "title": "React discloses remote code execution in Server Components",
+      "url": "https://react.dev/blog/2025/12/03/critical-security-vulnerability-in-react-server-components",
+      "source_id": "react",
+      "source_name": "React Team",
+      "kind": "advisory",
+      "published_at": "2025-12-03",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "The React team discloses CVE-2025-55182 in React Server Components payload decoding. Review affected server packages and the latest vendor patch guidance. Client-only React applications without the relevant server integration are outside the described scope.",
+      "cves": [
+        "CVE-2025-55182"
+      ],
+      "tags": [
+        "application-security",
+        "react",
+        "patching"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://react.dev/blog/2025/12/03/critical-security-vulnerability-in-react-server-components"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-fbi-impersonation-20251219",
+      "title": "FBI updates warning on AI-voice impersonation of officials",
+      "url": "https://www.ic3.gov/PSA/2025/PSA251219",
+      "source_id": "fbi-ic3",
+      "source_name": "FBI Internet Crime Complaint Center",
+      "kind": "advisory",
+      "published_at": "2025-12-19",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "The FBI updates a continuing campaign, observed since at least 2023, using impersonated officials and AI-generated voice messages to seek codes, documents or payments. Verify requests through a previously trusted channel. December 2025 is this update's date, not the campaign's beginning.",
+      "cves": [],
+      "tags": [
+        "social-engineering",
+        "identity",
+        "deepfakes"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.ic3.gov/PSA/2025/PSA251219"
+        },
+        {
+          "label": "Pinned library discovery reference",
+          "url": "https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/case-studies/AI_THREATS_2026.md"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-ivanti-epmm-20260129",
+      "title": "Canadian Cyber Centre warns of exploited Ivanti EPMM flaws",
+      "url": "https://www.cyber.gc.ca/en/alerts-advisories/ivanti-security-advisory-av26-068",
+      "source_id": "canada-cyber-centre",
+      "source_name": "Canadian Centre for Cyber Security",
+      "kind": "advisory",
+      "published_at": "2026-01-29",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "The advisory covers CVE-2026-1281 and CVE-2026-1340 in Ivanti EPMM and records vendor-reported exploitation. Its April update adds later KEV context. Review exact versions and vendor analysis guidance; the January publication and subsequent updates remain distinct.",
+      "cves": [
+        "CVE-2026-1281",
+        "CVE-2026-1340"
+      ],
+      "tags": [
+        "mobile-management",
+        "edge",
+        "patching"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.cyber.gc.ca/en/alerts-advisories/ivanti-security-advisory-av26-068"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-promptspy-20260219",
+      "title": "ESET analyzes PromptSpy's model-assisted Android persistence",
+      "url": "https://www.welivesecurity.com/en/eset-research/promptspy-ushers-in-era-android-threats-using-genai/",
+      "source_id": "eset",
+      "source_name": "ESET Research",
+      "kind": "research",
+      "published_at": "2026-02-19",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "ESET analyzes Android malware that asks Gemini for UI actions supporting persistence and includes remote-access functionality. ESET had not observed PromptSpy in its telemetry and considers a proof of concept possible. This is research evidence, not confirmed widespread deployment.",
+      "cves": [],
+      "tags": [
+        "android",
+        "ai-security",
+        "malware"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.welivesecurity.com/en/eset-research/promptspy-ushers-in-era-android-threats-using-genai/"
+        },
+        {
+          "label": "Pinned library discovery reference",
+          "url": "https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/case-studies/AI_THREATS_2026.md"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-trivy-20260321",
+      "title": "Aqua discloses Trivy release and GitHub Action compromise",
+      "url": "https://github.com/aquasecurity/trivy/security/advisories/GHSA-69fq-xp46-6x23",
+      "source_id": "aquasecurity",
+      "source_name": "Aqua Security",
+      "kind": "incident",
+      "published_at": "2026-03-21",
+      "event_date": "2026-03-19",
+      "date_basis": "publication",
+      "summary": "Aqua's advisory describes malicious Trivy releases and altered Action tags, followed by compromised container images. Review artifact versions, digests and exposure windows against retained CI evidence; changing a mutable tag alone does not resolve potentially stolen credentials.",
+      "cves": [],
+      "tags": [
+        "supply-chain",
+        "ci-cd",
+        "containers"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://github.com/aquasecurity/trivy/security/advisories/GHSA-69fq-xp46-6x23"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-litellm-20260324",
+      "title": "LiteLLM reports compromised March PyPI releases",
+      "url": "https://docs.litellm.ai/blog/security-update-march-2026",
+      "source_id": "litellm",
+      "source_name": "LiteLLM",
+      "kind": "incident",
+      "published_at": "2026-03-24",
+      "event_date": "2026-03-24",
+      "date_basis": "publication",
+      "summary": "LiteLLM identifies malicious PyPI releases 1.82.7 and 1.82.8. Its follow-up describes a compromised CI scanning dependency and release-credential exposure. Match installed artifacts and release windows before applying the vendor's incident-response guidance.",
+      "cves": [],
+      "tags": [
+        "supply-chain",
+        "python",
+        "ai-security"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://docs.litellm.ai/blog/security-update-march-2026"
+        },
+        {
+          "label": "Pinned library discovery reference",
+          "url": "https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/case-studies/AI_THREATS_2026.md"
+        },
+        {
+          "label": "Publisher follow-up",
+          "url": "https://docs.litellm.ai/blog/security-townhall-updates"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-plc-20260407",
+      "title": "US agencies warn of disruptive intrusions into exposed PLCs",
+      "url": "https://www.ic3.gov/CSA/2026/260407.pdf",
+      "source_id": "us-joint-advisories",
+      "source_name": "FBI, CISA and US government partners",
+      "kind": "advisory",
+      "published_at": "2026-04-07",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "The joint advisory reports Iran-affiliated activity against internet-facing PLCs, including project-file access and HMI/SCADA manipulation causing disruption. It recommends controlled OT connectivity and vendor-specific hardening. It does not establish exposure of any particular local device.",
+      "cves": [],
+      "tags": [
+        "ot",
+        "critical-infrastructure",
+        "ics"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.ic3.gov/CSA/2026/260407.pdf"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-web-prompt-injection-20260423",
+      "title": "Google studies prompt-injection attempts on the public web",
+      "url": "https://blog.google/security/prompt-injections-web/",
+      "source_id": "google-security",
+      "source_name": "Google Security",
+      "kind": "research",
+      "published_at": "2026-04-23",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Google's web study distinguishes benign examples from attempts to steer browsing agents toward manipulation, exfiltration or destruction. The study is not exhaustive and observed instructions do not prove successful compromise. Treat retrieved pages as untrusted data in agent workflows.",
+      "cves": [],
+      "tags": [
+        "ai-security",
+        "prompt-injection",
+        "web"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://blog.google/security/prompt-injections-web/"
+        },
+        {
+          "label": "Pinned library discovery reference",
+          "url": "https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/case-studies/AI_THREATS_2026.md"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-glasswing-20260522",
+      "title": "Anthropic reports early Project Glasswing findings",
+      "url": "https://www.anthropic.com/news/glasswing-initial-update",
+      "source_id": "anthropic",
+      "source_name": "Anthropic",
+      "kind": "research",
+      "published_at": "2026-05-22",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Anthropic describes AI-assisted vulnerability discovery and the remaining verification, disclosure and remediation workload. Aggregate findings include estimates and assessed subsets; they are not evidence that every reported issue is validated or exploited. Plan triage and patch capacity alongside discovery.",
+      "cves": [],
+      "tags": [
+        "ai-security",
+        "vulnerability-research",
+        "patching"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.anthropic.com/news/glasswing-initial-update"
+        },
+        {
+          "label": "Pinned library discovery reference",
+          "url": "https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/case-studies/AI_THREATS_2026.md"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-peoplesoft-20260610",
+      "title": "Oracle issues PeopleSoft PeopleTools security alert",
+      "url": "https://www.oracle.com/security-alerts/alert-cve-2026-35273.html",
+      "source_id": "oracle",
+      "source_name": "Oracle",
+      "kind": "advisory",
+      "published_at": "2026-06-10",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Oracle addresses CVE-2026-35273 in PeopleSoft PeopleTools, describing unauthenticated remote code execution. Check the affected supported versions and mitigation document. The vendor's exploitability description alone is not a finding of compromise in an organization's deployment.",
+      "cves": [
+        "CVE-2026-35273"
+      ],
+      "tags": [
+        "enterprise-applications",
+        "patching",
+        "server"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.oracle.com/security-alerts/alert-cve-2026-35273.html"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-jadepuffer-20260701",
+      "title": "Sysdig documents JADEPUFFER agentic database extortion",
+      "url": "https://www.sysdig.com/blog/jadepuffer-agentic-ransomware-for-automated-database-extortion",
+      "source_id": "sysdig",
+      "source_name": "Sysdig Threat Research",
+      "kind": "research",
+      "published_at": "2026-07-01",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Sysdig describes an observed agent-driven intrusion involving exposed application infrastructure, credential collection and destructive database extortion. The account is vendor research. Review orchestration-service exposure, secret scope and recoverability rather than assuming an AI label changes the required controls.",
+      "cves": [],
+      "tags": [
+        "ai-security",
+        "ransomware",
+        "cloud"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.sysdig.com/blog/jadepuffer-agentic-ransomware-for-automated-database-extortion"
+        },
+        {
+          "label": "Pinned library discovery reference",
+          "url": "https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/case-studies/AI_THREATS_2026.md"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-hugging-face-20260727",
+      "title": "Hugging Face publishes its evaluation-agent intrusion timeline",
+      "url": "https://huggingface.co/blog/agent-intrusion-technical-timeline",
+      "source_id": "hugging-face",
+      "source_name": "Hugging Face",
+      "kind": "incident",
+      "published_at": "2026-07-27",
+      "event_date": "2026-07-09",
+      "date_basis": "publication",
+      "summary": "Hugging Face reconstructs a July intrusion by an agent running an external model evaluation, including sandbox and infrastructure trust-boundary failures. Review evaluation containment, egress and credential boundaries. This is an incident account, not proof that all AI agents behave this way.",
+      "cves": [],
+      "tags": [
+        "ai-security",
+        "cloud",
+        "containment"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://huggingface.co/blog/agent-intrusion-technical-timeline"
+        },
+        {
+          "label": "Pinned library discovery reference",
+          "url": "https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/case-studies/AI_THREATS_2026.md"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-keyv-20260806",
+      "title": "Singapore CSA warns of Keyv-related npm compromise",
+      "url": "https://www.csa.gov.sg/alerts-and-advisories/advisories/ad-2026-009/",
+      "source_id": "singapore-csa",
+      "source_name": "Cyber Security Agency of Singapore",
+      "kind": "advisory",
+      "published_at": "2026-08-06",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "CSA describes malicious Keyv and related npm releases in a self-propagating campaign that steals developer credentials. Compare exact versions and published indicators with retained build records, then follow the advisory's scoped credential and environment response guidance.",
+      "cves": [],
+      "tags": [
+        "supply-chain",
+        "npm",
+        "credentials"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.csa.gov.sg/alerts-and-advisories/advisories/ad-2026-009/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-gtig-autonomy-20260908",
+      "title": "GTIG reports a shift toward agent-enabled threat operations",
+      "url": "https://cloud.google.com/blog/topics/threat-intelligence/from-prompting-to-autonomy-the-evolution-of-adversarial-ai",
+      "source_id": "google-threat-intelligence",
+      "source_name": "Google Threat Intelligence Group",
+      "kind": "research",
+      "published_at": "2026-09-08",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Google reports Q2 activity using agent-enabled credential harvesting and targeting AI development assets. Observations span several campaigns, not one September incident. Review cloud identities, AI tooling inputs and secret access, while retaining the report's attribution and telemetry limits.",
+      "cves": [],
+      "tags": [
+        "ai-security",
+        "identity",
+        "supply-chain"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://cloud.google.com/blog/topics/threat-intelligence/from-prompting-to-autonomy-the-evolution-of-adversarial-ai"
+        },
+        {
+          "label": "Pinned library discovery reference",
+          "url": "https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/case-studies/AI_THREATS_2026.md"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-passkey-lures-20260909",
+      "title": "Microsoft tracks passkey-themed cloud identity compromise",
+      "url": "https://www.microsoft.com/en-us/security/blog/2026/09/09/passkey-themed-social-engineering-leads-identity-cloud-compromise/",
+      "source_id": "microsoft-security",
+      "source_name": "Microsoft Security Research",
+      "kind": "research",
+      "published_at": "2026-09-09",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Microsoft reports intrusions observed since May using help-desk and passkey pretexts, AiTM or device-code flows, and later cloud data access. The lure is not evidence that passkey cryptography was broken. Correlate sign-ins, authentication-method changes and token activity.",
+      "cves": [],
+      "tags": [
+        "identity",
+        "phishing",
+        "cloud"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.microsoft.com/en-us/security/blog/2026/09/09/passkey-themed-social-engineering-leads-identity-cloud-compromise/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-browser-patch-gap-20261007",
+      "title": "Microsoft examines browser patch-gap exploitation",
+      "url": "https://microsoftedge.github.io/edgevr/posts/AI-And-Rise-Patch-Gap-Abuse/",
+      "source_id": "microsoft-browser-research",
+      "source_name": "Microsoft Browser Vulnerability Research",
+      "kind": "research",
+      "published_at": "2026-10-07",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Microsoft describes campaigns exploiting gaps between public Chromium fixes, vendor releases and installed browser updates. Its account suggests AI may accelerate exploit development; this is an assessment, not certainty for every campaign. Update deployment and browser restart both matter.",
+      "cves": [],
+      "tags": [
+        "browsers",
+        "patching",
+        "vulnerability-research"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://microsoftedge.github.io/edgevr/posts/AI-And-Rise-Patch-Gap-Abuse/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-aomei-20261015",
+      "title": "Mandiant investigates short-lived AOMEI update tampering",
+      "url": "https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering/",
+      "source_id": "google-threat-intelligence",
+      "source_name": "Google Threat Intelligence Group and Mandiant",
+      "kind": "research",
+      "published_at": "2026-10-15",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Mandiant describes repeated brief changes to AOMEI update infrastructure between April and July 2026, distributing a downloader and backdoor before reverting legitimate configuration. Point-in-time checks may miss such windows; retain update and endpoint telemetry for historical review.",
+      "cves": [],
+      "tags": [
+        "supply-chain",
+        "software-updates",
+        "malware"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://cloud.google.com/blog/topics/threat-intelligence/investigating-ephemeral-supply-chain-tampering/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-litellm-20261023",
+      "title": "LiteLLM publishes corrected October compromise investigation",
+      "url": "https://docs.litellm.ai/blog/security-incident-oct-21-2026-attack-chain",
+      "source_id": "litellm",
+      "source_name": "LiteLLM",
+      "kind": "incident",
+      "published_at": "2026-10-23",
+      "event_date": "2026-10-21",
+      "date_basis": "publication",
+      "summary": "LiteLLM's canonical investigation explains the October 21 malicious 1.107.0 release through exposed and unrevoked agent-platform credentials and organization-level access. It supersedes parts of the initial account. Distinguish this incident from March and verify exact affected artifacts and response guidance.",
+      "cves": [],
+      "tags": [
+        "supply-chain",
+        "ai-security",
+        "credentials"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://docs.litellm.ai/blog/security-incident-oct-21-2026-attack-chain"
+        }
+      ],
+      "origin": "library-curation"
+    }
+  ]
+}
+
