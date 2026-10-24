@@ -25,10 +25,15 @@ are retained during background snapshot updates.
 
 ## Interpret evidence before action
 
-The configured inputs are **58 RSS/Atom publisher feeds**, CISA KEV and **63 curated
+The configured inputs are **59 RSS/Atom publisher feeds**, CISA KEV and **63 curated
 primary publications**. A configured feed is not necessarily healthy. Recent RSS,
 bounded retained items and manual curation do not form a complete decade archive.
 See [feed evidence](FEEDS.md) and [history coverage](SOURCES.md).
+
+The count is feed definitions, not unique publishers. **Cisco Talos Threat Advisory
+(category subset)** is a separate, narrower source with its own dates and outcomes.
+It does not make the original all-Talos feed healthy or supply a complete archive;
+see its [dated intake scope](FEEDS.md#talos-threat-advisory-category-subset).
 
 Publication dates, publisher update dates, separate event dates and KEV catalog
 addition dates have different meanings. Unknown dates are not replaced with
@@ -172,6 +177,14 @@ rejected. Actual file content must total at most **21 MiB**. The workflow builds
 an in-memory tar from those five contents and estimates compression using both
 gzip and zlib at level 6. If the larger estimate exceeds **1,200,000 bytes**, it
 fails before artifact upload. The previous live site remains in place.
+
+Final JSON serialization groups CVE-map members by their recorded vendor/product
+text, with the CVE identifier as a tie-breaker, to improve compression. This only
+changes object-member order: record fields, values and array order are preserved.
+It does not create new intelligence, refresh source dates or establish a new
+semantic content revision by itself. Compression gains provide finite headroom;
+they do not remove the unchanged package guard or guarantee space for future
+growth. Actual package estimates still determine whether a publication proceeds.
 
 This is an estimate, not a byte-for-byte reproduction of the upload action's
 tar/ZIP metadata or proof of actual billed storage. The

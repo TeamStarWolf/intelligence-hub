@@ -2,7 +2,7 @@
 
 ## What is configured
 
-The catalog contains **58 publisher RSS/Atom sources**. The first 29 comprise ten retained sources, sixteen additions from the repository owner's public [cybersecurity-resources bookmarks](https://github.com/TeamStarWolf/cybersecurity-resources/blob/f95fb4a3fae14acfa172c22507a1554339cb3655/LINKS.md), and three further requested publishers: watchTowr Labs, Dark Reading and the legacy Threatpost archive. A further 29 advisory, research and reporting feeds are listed below. The fixed configuration is [sources.json](../config/sources.json). CISA KEV is a separate JSON catalog and is not included in this RSS count. Curated historical publications are also a separate input. SEC filings are not connected by this feed intake.
+The catalog contains **59 publisher RSS/Atom sources**, counting feed definitions rather than unique publishers. The first 29 comprise ten retained sources, sixteen additions from the repository owner's public [cybersecurity-resources bookmarks](https://github.com/TeamStarWolf/cybersecurity-resources/blob/f95fb4a3fae14acfa172c22507a1554339cb3655/LINKS.md), and three further requested publishers: watchTowr Labs, Dark Reading and the legacy Threatpost archive. A further 29 advisory, research and reporting feeds and one separately scoped Talos category feed are listed below. The fixed configuration is [sources.json](../config/sources.json). CISA KEV is a separate JSON catalog and is not included in this RSS count. Curated historical publications are also a separate input. SEC filings are not connected by this feed intake.
 
 Configured does not mean every source is currently healthy. The site records each collection attempt and last successful collection. The retained CISA advisory feed failed the initial production intake; its configured address is preserved and its failure remains visible. No replacement CISA advisory URL was established by this expansion. A failed source is not evidence that its publisher has no new advisories.
 
@@ -91,7 +91,7 @@ Source expansion authorizes no automatic remediation, network/device inspection,
 
 ## Further source expansion
 
-The owner requested broader coverage after the first 29-source intake. A further **29 feeds** passed bounded public HTTPS intake, bringing the configured publisher total to **58**, plus the separate CISA KEV catalog. These are configured inputs, not a guarantee that all remain healthy or that their items are distinct incidents.
+The owner requested broader coverage after the first 29-source intake. A further **29 feeds** passed bounded public HTTPS intake, bringing that checkpoint to **58 configured feeds**. The separately scoped Talos category below brings the current total to **59**, plus the separate CISA KEV catalog. These are configured inputs, not a guarantee that all remain healthy or that their items are distinct incidents.
 
 | Publisher | Feed | Role |
 | --- | --- | --- |
@@ -130,3 +130,32 @@ Discovery used the publishers’ own sites or advertised endpoints and the same 
 Cisco PSIRT’s 50 admitted items had unknown dates under this parser, so they may appear as undated records without calendar-year matches. Snyk, F5 and Infosecurity reached the 150-item intake ceiling. F5 also returned publications before the decade boundary; the normal date filter still applies. Graham Cluley’s first observed response yielded six accepted same-publisher links; no extra article hosts were silently admitted. Counts in discovery receipts are neither net new articles nor evidence of complete archives.
 
 This further intake rejected or held other attempts: Rapid7’s advertised feed was malformed XML; Qualys exceeded the per-item CVE mention bound; Fortinet yielded no accepted HTTPS article links; Elastic and Wordfence exceeded the response cap; ZDI contained rejected DTD/entity syntax. Some alternate news endpoints redirected, failed access or produced no accepted entries. Last Watchdog’s mixed press-release material and BankInfoSecurity’s undated results were held for editorial/date review. Those attempts are not configured sources, and the collector’s safeguards were not loosened to accept them. Other sources not attempted remain unreviewed.
+
+## Talos Threat Advisory category subset
+
+The distinct source **Cisco Talos Threat Advisory (category subset)** uses the
+publisher's [Threat Advisory RSS](https://blog.talosintelligence.com/category/threat-advisory/rss/)
+and [category page](https://blog.talosintelligence.com/category/threat-advisory/),
+with article links restricted to `blog.talosintelligence.com`. Its source ID is
+`talos-threat-advisories`; its role remains research.
+
+On **24 October 2026**, the direct HTTPS response returned 15 accepted entries
+dated **5 June 2025 through 21 October 2026**. The largest item contained five
+unique CVE mentions, within the unchanged 100-CVE-per-article limit. These are
+dated intake observations, not a fresh availability check on every page view.
+The rolling category selection is not the full Talos archive or all Talos topics.
+Its response was larger in bytes than the separately observed all-feed response;
+the narrower scope is a content category, not a smaller-response guarantee.
+
+The official Talos HTML identifies the category and Ghost generator but advertises
+only the generic all-posts RSS. The category RSS itself returned the matching
+category title and exact RSS self URL. This establishes an observed
+publisher-served route; it is not an explicitly linked category RSS advertisement
+in that HTML or a verified platform-documentation rule.
+
+The original `talos` all-posts source remains configured and separate. Its
+24 October observation was rejected because one item exceeded 100 CVE mentions;
+that source's failure and retained historical entries are not relabeled as a
+successful category fetch. No CVEs were clipped and no reader limit was relaxed
+to admit this subset. Future category entries can still fail normal validation.
+This addition establishes no replacement CISA advisory route.

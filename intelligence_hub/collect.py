@@ -388,6 +388,10 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     if refresh:
         write_json(cache_path, cache)
         write_json(cve_path, projections, compact=True)
+    # Group final wire members for compression; canonical content meaning is unchanged.
+    snapshot["mitigations"] = dict(sorted(snapshot["mitigations"].items(), key=lambda item: (
+        " ".join(product.get("vendor", "") + " " + product.get("product", "")
+                 for product in item[1]["products"]).casefold(), item[0])))
     write_json(ROOT / "site/data/feed.json", snapshot, compact=True)
     result = {"articles": len(ordered), "source_ok": sum(item["status"] == "ok" for item in health), "source_total": len(health), "coverage": snapshot["coverage"], "mitigations": mitigation_stats, "changed": changed, "generated_at": snapshot["generated_at"]}
     write_json(STATE / "collection-result.json", result)

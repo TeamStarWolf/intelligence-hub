@@ -7,7 +7,7 @@ advisories, known exploited vulnerabilities and a sourced decade timeline.
 
 ## What it does
 
-- Collects **58 configured publisher RSS/Atom feeds**, plus CISA's separate KEV catalog. Configured sources can fail; their outcomes remain visible.
+- Collects **59 configured publisher RSS/Atom feeds**, plus CISA's separate KEV catalog. This counts feed definitions, not unique publishers. Configured sources can fail; their outcomes remain visible.
 - Retains **63 curated primary publications**, including 41 decade additions and the original 22 recent-year entries. This is selective coverage, not a complete incident archive.
 - Provides year/month navigation, date presets, source/kind/exploitation/guidance filters, and ten date, title, source, CVE and CVSS sort choices.
 - Provides a CVE register and source-led briefs with CISA required actions, available CNA product/version information, guidance excerpts and original references.
@@ -20,6 +20,10 @@ window rolls forward ten calendar years from the UTC run date. There are gaps in
 every year; selected history and recent RSS cannot reconstruct every publisher's
 archive. Threatpost is a **legacy archive with observed August 2022 items**; a
 successful fetch does not make those stories current news.
+
+The separately named [Talos Threat Advisory category subset](docs/FEEDS.md#talos-threat-advisory-category-subset)
+adds a narrower publisher stream. It does not replace the original Talos feed,
+erase its recorded failure or establish complete Talos coverage.
 
 Publication, update, incident and CISA catalog-addition dates are distinct.
 Affected version ranges are not automatically fixed versions, and CVSS versions
