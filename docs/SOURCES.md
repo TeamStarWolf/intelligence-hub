@@ -2,22 +2,97 @@
 
 ## What the collection represents
 
-The initial historical selection contains **22 primary publications** dated **24 October 2025 through 24 October 2026**, inclusive. It covers supply-chain compromises, identity and AI-related campaigns, application/edge vulnerabilities, browser exploitation and operational-technology disruption. It is a reading and investigation aid, not a complete list of incidents or a device-exposure assessment.
+The historical selection now contains **63 primary publications** within **24 October 2016 through 24 October 2026**, inclusive. The original **22 publications** from the most recent year are retained unchanged; **41 earlier publications** add decade context. The selection covers ransomware, breaches, supply-chain compromises, cloud and identity campaigns, container and application vulnerabilities, hardware research, disruption and recovery.
 
-There is at least one selected publication in each calendar-month bucket touched by that window. Coverage is uneven: six entries fall in the partial 2025 fourth quarter, four in 2026 Q1, four in Q2, five in Q3 and three in the partial Q4. Those are publication counts, not counts of unique attacks, victims or vulnerabilities. Missing stories remain possible in every period.
+This is a reading and investigation aid, not an exhaustive incident archive or a device-exposure assessment. Counts represent **publications**, not unique attacks, victims or vulnerabilities. Reports from different organizations can concern related activity. A vulnerability disclosure, a blocked phishing attempt and a first-party breach report carry different evidence.
 
-Live publisher feeds, the historical selection and CISA KEV are separate inputs. RSS commonly retains only recent posts, so fetching it cannot establish a full-year archive. Source failures and old cached data must remain visible. Reporting outlets provide useful leads and context; curated historical claims here were checked against an official advisory, publisher's original research or a first-party incident account.
+There is at least one selected publication in every calendar year touched by the window. The earliest selected publication is **1 November 2016**, after the requested window begins. There are **74 calendar-month buckets** and **13 calendar-quarter buckets** with no selected publication. Those gaps are explicit in `config/history.json`; they do not mean no incidents occurred.
+
+| Publication year | Selected publications |
+| --- | --- |
+| 2016 (partial window) | 1 |
+| 2017 | 4 |
+| 2018 | 4 |
+| 2019 | 4 |
+| 2020 | 4 |
+| 2021 | 5 |
+| 2022 | 4 |
+| 2023 | 5 |
+| 2024 | 5 |
+| 2025 | 11 |
+| 2026 (partial window) | 16 |
+
+The boundary years are partial. Coverage within every year remains uneven, including years with several selections. The retained recent-year selection reaches every calendar-month bucket from October 2025 through October 2026; that narrower property must not be generalized to the decade.
+
+Live publisher feeds, curated history and CISA KEV are separate inputs. RSS commonly retains only recent posts, so a successful refresh cannot reconstruct a publisher's decade archive. Source failures, retrieval dates and retained old data must remain visible. Reporting outlets provide leads; curated claims here were checked against readable government advisories, original research or first-party incident accounts.
 
 ## Dates and evidence
 
-- `published_at` is the supported publication day. It is not silently replaced by retrieval time, a search-engine estimate or the latest update date.
-- The initial history uses `date_basis: publication` for filtering and chronology. `event_date` separately records an exact incident day only when supported; otherwise it is null. Neither a null event date nor an in-window publication says when a campaign began.
-- Anthropic's November 2025 disclosure describes September detection; the FBI's December 2025 warning updates activity dating back to 2023. Their summaries make that earlier activity explicit.
-- CISA KEV dates identify **catalog addition**, not original disclosure, exploitation start or a personal remediation deadline. A KEV row and an article about the same CVE are different evidence, not two incidents.
-- `known` denotes a first-party incident or official confirmation of malicious activity in the cited material. `reported` retains a research publisher's observed/assessed activity or attempts; it does not assert independent corroboration or successful compromise. `unknown` means this selection does not establish exploitation; it never means safe or unexploited.
-- A demonstrated capability, experimental sample or aggregate research finding is not presented as a deployed campaign. PromptSpy's lack of observation in ESET telemetry is retained explicitly.
+- `published_at` is a supported original publication day. It is not silently replaced by retrieval time, a search estimate, a detection day or the latest update date.
+- All curated rows use `date_basis: publication` for chronology and filtering. `event_date` records an exact supported incident or action day separately; otherwise it is null.
+- A publication in a particular year does not place all described activity in that year. ShadowHammer's March 2019 disclosure describes 2018 activity; Okta's April 2022 investigation concerns January; the Citrix Bleed investigation describes activity before its October 2023 publication.
+- Twitter's page explicitly retains an **18 July 2020 initial publication** while showing a **30 July update**. Twilio's archived article explicitly identifies its **7 August 2022 initial post**, despite a later October header. The summaries preserve those distinctions.
+- CISA KEV dates identify **catalog addition**, not original disclosure, exploitation start or a personal remediation deadline. A KEV row and an article about the same CVE are different evidence, not automatically two incidents.
+- `known` denotes first-party confirmation or official confirmation of malicious activity in the cited material. `reported` retains a research publisher's observed or assessed activity, or explicitly reported exploitation. It is not independent corroboration of every claim.
+- `unknown` means this selection does not establish exploitation. It never means safe, unexploited today or unaffected. An initial advisory's lack of observed exploitation is a dated statement, not a current verdict.
+- Research proofs of concept and blocked attempts are not silently promoted to successful compromises. Cloudflare's 2022 phishing account explicitly says its security keys prevented access.
+- The **July 2024 CrowdStrike review concerns a defective update and availability failure**, not a documented malicious intrusion. Its publication, the July 19 event and the subsequent full root-cause report are separate.
 
-Published corrections take priority over preliminary theories. The October LiteLLM entry cites the **23 October canonical investigation** for the **21 October incident**, and stays separate from the March compromise. No severity, attribution certainty, victim total or CVE is inferred from a headline. Exact product versions and current vendor response guidance still need review before action.
+Current source pages may contain updates that were not present on the initial publication day. Advisory histories and explicit original-publication statements support the selected dates; summaries identify material later findings. The collection is not a byte-preserved archive of each page as it appeared at publication.
+
+Published corrections take priority over preliminary theories. The retained October LiteLLM entry cites the **23 October 2026 canonical investigation** for the **21 October incident**, separate from March. Okta's concluding 2022 report is used instead of treating early maximum-impact estimates as final findings. No severity, attribution certainty, victim total or CVE is inferred from a headline.
+
+The CVE arrays are selective source-supported indexes, not exhaustive lists or one-to-one incident mappings. An empty array can mean that no specific identifier was indexed, rather than that no vulnerability was involved.
+
+Historical mitigation text is not a current patch plan. Check supported vendor guidance, exact versions, enabled features and deployment context before action. A successful update does not by itself prove that prior access, stolen sessions or credentials were removed.
+
+## Earlier decade reading list
+
+Each entry in `config/history.json` carries its primary URL, original summary, date basis, any supported CVEs, evidence label and references. The following list identifies the **41 additions**, without copying article bodies.
+
+| Publication day | Primary publication selected | Publisher |
+| --- | --- | --- |
+| 2016-11-01 | [Microsoft details STRONTIUM Flash and Windows zero-day attacks](https://www.microsoft.com/en-us/security/blog/2016/11/01/our-commitment-to-our-customers-security/) | Microsoft Security Team |
+| 2017-02-23 | [Cloudflare explains its parser memory-leak incident](https://blog.cloudflare.com/incident-report-on-memory-leak-caused-by-cloudflare-parser-bug/) | Cloudflare |
+| 2017-05-12 | [Microsoft analyzes WannaCry's SMB-based ransomware spread](https://www.microsoft.com/en-us/security/blog/2017/05/12/wannacrypt-ransomware-worm-targets-out-of-date-systems/) | Microsoft Defender Security Research |
+| 2017-06-27 | [Microsoft traces the Petya outbreak through updates and lateral movement](https://www.microsoft.com/en-us/security/blog/2017/06/27/new-ransomware-old-techniques-petya-adds-worm-capabilities/) | Microsoft Defender Security Research |
+| 2017-09-18 | [Cisco Talos finds a malicious payload in signed CCleaner releases](https://blog.talosintelligence.com/avast-distributes-malware/) | Cisco Talos |
+| 2018-01-03 | [Project Zero publishes speculative-execution memory-disclosure research](https://projectzero.google/2018/01/reading-privileged-memory-with-side.html) | Google Project Zero |
+| 2018-03-01 | [GitHub reports a memcached-amplification DDoS outage](https://github.blog/news-insights/company-news/ddos-incident-report/) | GitHub |
+| 2018-03-28 | [Drupal discloses unauthenticated remote code execution in core](https://www.drupal.org/sa-core-2018-002) | Drupal Security Team |
+| 2018-09-28 | [Facebook discloses access-token theft through View As bugs](https://about.fb.com/news/2018/09/security-update/) | Facebook / Meta |
+| 2019-02-11 | [Kubernetes explains the runc container-escape vulnerability](https://kubernetes.io/blog/2019/02/11/runc-and-cve-2019-5736/) | Kubernetes Product Security Committee |
+| 2019-02-20 | [Drupal warns of code execution through web-service field handling](https://www.drupal.org/sa-core-2019-003) | Drupal Security Team |
+| 2019-03-25 | [Kaspersky details the ASUS Live Update supply-chain attack](https://securelist.com/operation-shadowhammer/89992/) | Kaspersky GReAT |
+| 2019-05-14 | [Microsoft releases BlueKeep Remote Desktop Services guidance](https://www.microsoft.com/en-us/msrc/blog/2019/05/prevent-a-worm-by-updating-remote-desktop-services-cve-2019-0708) | Microsoft Security Response Center |
+| 2020-07-14 | [Check Point discloses SIGRed in Windows DNS Server](https://research.checkpoint.com/2020/resolving-your-way-into-domain-admin-exploiting-a-17-year-old-bug-in-windows-dns-servers/) | Check Point Research |
+| 2020-07-18 | [Twitter explains employee phishing behind account takeovers](https://blog.x.com/en/company/an-update-on-our-security-incident) | Twitter / X |
+| 2020-09-15 | [CERT-EU tracks Zerologon domain-controller risk and exploitation](https://cert.europa.eu/publications/security-advisories/2020-046/) | CERT-EU |
+| 2020-12-13 | [FireEye reveals SUNBURST in SolarWinds Orion updates](https://cloud.google.com/blog/topics/threat-intelligence/evasive-attacker-leverages-solarwinds-supply-chain-compromises-with-sunburst-backdoor) | FireEye / Mandiant |
+| 2021-03-02 | [Microsoft reports Exchange zero-day exploitation](https://www.microsoft.com/en-us/security/blog/2021/03/02/hafnium-targeting-exchange-servers/) | Microsoft Threat Intelligence |
+| 2021-04-15 | [Codecov discloses its Bash Uploader credential-exfiltration incident](https://about.codecov.io/security-update/) | Codecov |
+| 2021-05-10 | [FBI confirms DarkSide ransomware in Colonial Pipeline compromise](https://www.fbi.gov/news/press-releases/fbi-statement-on-compromise-of-colonial-pipeline-networks) | Federal Bureau of Investigation |
+| 2021-05-27 | [Microsoft tracks NOBELIUM abuse of a legitimate mailing service](https://www.microsoft.com/en-us/security/blog/2021/05/27/new-sophisticated-email-based-attack-from-nobelium/) | Microsoft Threat Intelligence |
+| 2021-12-10 | [CERT-EU issues Log4Shell guidance and tracks later Log4j flaws](https://cert.europa.eu/publications/security-advisories/2021-067/) | CERT-EU |
+| 2022-04-20 | [Okta concludes its January support-vendor compromise investigation](https://www.okta.com/en-ca/blog/company-and-culture/okta-concludes-its-investigation-into-the-january-2022-compromise/) | Okta |
+| 2022-08-07 | [Twilio discloses employee phishing and customer-data access](https://www.twilio.com/en-us/blog/archive/2022/august-2022-social-engineering-attack) | Twilio |
+| 2022-08-09 | [Cloudflare explains how security keys blocked a phishing intrusion](https://blog.cloudflare.com/2022-07-sms-phishing-attacks/) | Cloudflare |
+| 2022-09-16 | [Uber describes contractor-account compromise and internal access](https://www.uber.com/in/en/newsroom/security-update/) | Uber |
+| 2023-04-20 | [Mandiant links 3CX compromise to an earlier poisoned software package](https://cloud.google.com/blog/topics/threat-intelligence/3cx-software-supply-chain-compromise) | Mandiant |
+| 2023-06-02 | [Singapore CSA warns of active MOVEit Transfer exploitation](https://www.csa.gov.sg/alerts-and-advisories/alerts/al-2023-073/) | Cyber Security Agency of Singapore |
+| 2023-07-11 | [Microsoft discloses forged-token access to cloud email](https://www.microsoft.com/en-us/msrc/blog/2023/07/microsoft-mitigates-china-based-threat-actor-storm-0558-targeting-of-customer-email) | Microsoft Security Response Center |
+| 2023-10-20 | [Okta reports unauthorized access to support-case files](https://sec.okta.com/articles/2023/10/tracking-unauthorized-access-oktas-support-system/) | Okta Security |
+| 2023-10-31 | [Mandiant investigates Citrix Bleed session hijacking](https://cloud.google.com/blog/topics/threat-intelligence/session-hijacking-citrix-cve-2023-4966) | Mandiant |
+| 2024-01-10 | [Volexity identifies an Ivanti VPN zero-day exploit chain](https://www.volexity.com/blog/2024/01/10/active-exploitation-of-two-zero-day-vulnerabilities-in-ivanti-connect-secure-vpn/) | Volexity |
+| 2024-02-20 | [US and UK authorities announce LockBit infrastructure disruption](https://www.justice.gov/archives/opa/pr/us-and-uk-disrupt-lockbit-ransomware-variant) | US Department of Justice |
+| 2024-03-29 | [Red Hat warns of malicious code in XZ Utils release packages](https://www.redhat.com/en/blog/urgent-security-alert-fedora-40-and-rawhide-users) | Red Hat Product Security |
+| 2024-06-10 | [Mandiant tracks stolen credentials targeting Snowflake customer instances](https://cloud.google.com/blog/topics/threat-intelligence/unc5537-snowflake-data-theft-extortion) | Mandiant |
+| 2024-07-24 | [CrowdStrike publishes its preliminary Windows outage review](https://www.crowdstrike.com/en-us/blog/falcon-content-update-preliminary-post-incident-report/) | CrowdStrike |
+| 2025-02-24 | [Chainalysis traces the February Bybit cryptocurrency theft](https://www.chainalysis.com/blog/bybit-exchange-hack-february-2025-crypto-security-dprk/) | Chainalysis |
+| 2025-03-14 | [StepSecurity detects poisoned tj-actions changed-files releases](https://www.stepsecurity.io/blog/harden-runner-detection-tj-actions-changed-files-action-is-compromised) | StepSecurity |
+| 2025-07-19 | [Microsoft issues SharePoint guidance for active ToolShell attacks](https://www.microsoft.com/en-us/msrc/blog/2025/07/customer-guidance-for-sharepoint-vulnerability-cve-2025-53770) | Microsoft Security Response Center |
+| 2025-08-26 | [Google tracks OAuth-token theft through Salesloft Drift integrations](https://cloud.google.com/blog/topics/threat-intelligence/data-theft-salesforce-instances-via-salesloft-drift/) | Google Threat Intelligence Group |
+| 2025-10-22 | [F5 publishes lessons and customer guidance after its security incident](https://www.f5.com/company/blog/lessons-we-are-learning-from-our-security-incident) | F5 |
 
 ## Primary publishers in the initial history
 
@@ -44,10 +119,12 @@ These are source citations, not endorsements, verified build artifacts or proof 
 
 ## Existing library attribution and curation process
 
-The finding aid was the existing [TeamStarWolf AI case study](https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/case-studies/AI_THREATS_2026.md), published 7 October 2026. Its [case-study method](https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/case-studies/README.md) separates confirmed, reported and demonstrated evidence. Its [research index](https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/research/README.md) treats catalogs as dated finding aids. These references were read at the pinned commit, without modifying the existing library.
+The initial recent-year finding aid was the existing [TeamStarWolf AI case study](https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/case-studies/AI_THREATS_2026.md), published 7 October 2026. Its [case-study method](https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/case-studies/README.md) separates confirmed, reported and demonstrated evidence. Its [research index](https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/research/README.md) treats catalogs as dated finding aids. Those references were read at the pinned commit during the initial curation, without modifying the library.
 
-The library covers a longer period than this hub's window. Older incidents were not copied wholesale. Linked primary pages were opened separately, their dates and qualifications checked, and new primary sources added for broader cybersecurity coverage. `origin: library-curation` labels that curated workflow; it does not mean every entry originated in the library or that the library independently verifies every claim.
+The decade extension was curated independently from primary pages. The original 22 records remain unchanged. `origin: library-curation` labels the manual curation workflow; it does not mean every record originated in the library or that the library independently verifies each claim.
 
-Keep the public curation in `config/history.json`. Research receipts, raw library imports, access failures and excluded candidates belong in ignored local state. A source that cannot be read is not admitted from a search snippet alone. A current update date is not substituted for an unknown original publication date. Additional sources can be added through the same bounded, attributed review.
+Keep public curation in `config/history.json`. Research receipts, baseline preservation, access failures and excluded candidates belong in ignored local state. A page that cannot be read is not admitted from a search snippet alone. A current update date is not substituted for an unknown original date. The readable primary page and its explicit date must support each addition.
 
-Treat all article/feed text as untrusted data. Render text and validated HTTPS links, with no publisher HTML, embedded scripts or active instructions. Reading a story authorizes no network probe, patch, credential change, model call or publication of private account data. Personal X content and a supported Grok search integration require their own explicit access and eligibility; a public source link does not connect either account.
+Summaries are short original paraphrases. Full publisher articles, markup, private account data and local source locators are not republished. Primary-source status does not make a publisher infallible or establish the provenance or security of software it distributes.
+
+Treat all article and feed text as untrusted data. Render text and validated HTTPS links, with no publisher HTML, embedded scripts or active instructions. Reading a story authorizes no network probe, patch, credential change, model call or publication of private account data. Personal X content and a supported Grok search integration require their own explicit access and eligibility; a public source link does not connect either account.

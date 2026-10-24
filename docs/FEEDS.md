@@ -1,0 +1,132 @@
+# Publisher feeds and bookmark intake
+
+## What is configured
+
+The catalog contains **58 publisher RSS/Atom sources**. The first 29 comprise ten retained sources, sixteen additions from the repository owner's public [cybersecurity-resources bookmarks](https://github.com/TeamStarWolf/cybersecurity-resources/blob/f95fb4a3fae14acfa172c22507a1554339cb3655/LINKS.md), and three further requested publishers: watchTowr Labs, Dark Reading and the legacy Threatpost archive. A further 29 advisory, research and reporting feeds are listed below. The fixed configuration is [sources.json](../config/sources.json). CISA KEV is a separate JSON catalog and is not included in this RSS count. Curated historical publications are also a separate input. SEC filings are not connected by this feed intake.
+
+Configured does not mean every source is currently healthy. The site records each collection attempt and last successful collection. The retained CISA advisory feed failed the initial production intake; its configured address is preserved and its failure remains visible. No replacement CISA advisory URL was established by this expansion. A failed source is not evidence that its publisher has no new advisories.
+
+The nineteen additions returned direct HTTPS 200 responses with bounded, parseable RSS/Atom and usable HTTPS article links during intake on **24 October 2026**. Threatpost's returned publication dates stop in August 2022: its live transport does not make its reporting current. These are dated transport and structure observations, not promises of continued availability, complete archives, publisher authenticity beyond the observed HTTPS endpoint, factual correctness or permission to reproduce full articles. Scheduled collection and browser behavior are separate evidence.
+
+## Retained sources
+
+| Publisher | Feed | Source role |
+| --- | --- | --- |
+| [CISA](https://www.cisa.gov/cybersecurity-advisories) | [RSS](https://www.cisa.gov/cybersecurity-advisories/all.xml) | Government advisories; initial production read failed |
+| [CERT-EU](https://cert.europa.eu/publications/security-advisories/) | [RSS](https://cert.europa.eu/publications/security-advisories-rss) | Government/CERT advisories |
+| [Microsoft Security](https://www.microsoft.com/en-us/security/blog/) | [RSS](https://www.microsoft.com/en-us/security/blog/feed/) | Vendor research |
+| [Google Threat Intelligence](https://cloud.google.com/blog/topics/threat-intelligence) | [RSS](https://feeds.feedburner.com/threatintelligence/pvexyqv7v0v) | Vendor research; publisher-linked FeedBurner endpoint |
+| [Cisco Talos](https://blog.talosintelligence.com/) | [RSS](https://blog.talosintelligence.com/rss/) | Vendor research |
+| [Palo Alto Unit 42](https://unit42.paloaltonetworks.com/) | [RSS](https://unit42.paloaltonetworks.com/feed/) | Vendor research |
+| [BleepingComputer](https://www.bleepingcomputer.com/) | [RSS](https://www.bleepingcomputer.com/feed/) | Independent reporting |
+| [SecurityWeek](https://www.securityweek.com/) | [RSS](https://www.securityweek.com/feed/) | Reporting |
+| [Krebs on Security](https://krebsonsecurity.com/) | [RSS](https://krebsonsecurity.com/feed/) | Independent reporting |
+| [The Record](https://therecord.media/) | [RSS](https://therecord.media/feed) | Reporting |
+
+## Verified additions
+
+| Publisher | Feed | Source role and intake qualification |
+| --- | --- | --- |
+| [SANS Internet Storm Center](https://isc.sans.edu/xml.html) | [RSS](https://isc.sans.edu/rssfeed.xml) | Handler diaries and observations; publisher's title-only feed |
+| [Ubuntu](https://ubuntu.com/security/notices) | [RSS](https://ubuntu.com/security/notices/rss.xml) | Distribution security notices |
+| [CERT/CC](https://www.kb.cert.org/vuls/) | [Atom](https://www.kb.cert.org/vuls/atomfeed/) | Coordinated vulnerability notes; article host is `kb.cert.org` |
+| [UK NCSC](https://www.ncsc.gov.uk/information/rss-feeds) | [RSS](https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml) | Broad government guidance, research and announcements; not only vulnerability alerts |
+| [Canadian Cyber Centre](https://www.cyber.gc.ca/en) | [Atom](https://www.cyber.gc.ca/api/cccs/atom/v1/get?feed=alerts_advisories&lang=en) | Alerts/advisories; legacy official RSS route advertised this canonical endpoint |
+| [Debian](https://www.debian.org/security/) | [RSS](https://www.debian.org/security/dsa-long) | Distribution advisories; article host is `lists.debian.org` |
+| [AWS](https://aws.amazon.com/security/security-bulletins/) | [RSS](https://aws.amazon.com/security/security-bulletins/rss/feed/) | Vendor security bulletins |
+| [ESET WeLiveSecurity](https://www.welivesecurity.com/en/) | [RSS](https://www.welivesecurity.com/en/rss/feed/) | Vendor research and security analysis |
+| [Check Point Research](https://research.checkpoint.com/) | [RSS](https://research.checkpoint.com/feed/) | Vendor research; direct publisher RSS endpoint |
+| [Volexity](https://www.volexity.com/blog/) | [RSS](https://www.volexity.com/feed/) | Vendor research; root feed works, blog-specific feed redirected to HTML |
+| [The DFIR Report](https://thedfirreport.com/) | [RSS](https://thedfirreport.com/feed/) | Published intrusion analysis; paid products are not connected |
+| [Kaspersky Securelist](https://securelist.com/) | [RSS](https://securelist.com/feed/) | Vendor research |
+| [Sekoia](https://www.sekoia.com/blog) | [RSS](https://www.sekoia.com/blog/rss.xml) | Vendor research; canonical destination inspected separately after legacy redirect |
+| [The Hacker News](https://thehackernews.com/) | [RSS](https://feeds.feedburner.com/TheHackersNews) | Reporting; FeedBurner URL linked by the publisher |
+| [Help Net Security](https://www.helpnetsecurity.com/) | [RSS](https://www.helpnetsecurity.com/feed/) | Reporting, including vendor/product announcements |
+| [Schneier on Security](https://www.schneier.com/) | [Atom](https://www.schneier.com/feed/atom/) | Commentary and reporting, including broader policy and occasional non-security posts |
+| [watchTowr Labs](https://labs.watchtowr.com/) | [RSS](https://labs.watchtowr.com/rss/) | Vendor vulnerability and exploitation research; added from the owner's further request |
+| [Dark Reading](https://www.darkreading.com/) | [RSS](https://www.darkreading.com/rss.xml) | Reporting; publisher's home page advertises this feed |
+| [Threatpost](https://threatpost.com/) | [RSS](https://threatpost.com/feed/) | Legacy archive; ten returned items are dated 18–31 August 2022, within the expanded decade window |
+
+Publisher role describes the source, not independent corroboration of every item. Research can contain demonstrations or hypotheses; reporting can repeat another publisher's claims. A source entry does not establish exploitation, urgency, a required patch or exposure of the reader's devices.
+
+## Admission and collection boundaries
+
+Discovery used official publisher pages, advertised feed links or direct publisher-hosted RSS/Atom endpoints. Redirects were recorded and never followed automatically. Canadian and Sekoia canonical destinations were inspected as new fixed requests. Intake used no proxies, cookies, credentials, API keys, trial accounts or paid services. Official discovery/explanation pages, including Microsoft's feed notice, were read; destination articles linked from feed entries were not crawled.
+
+Each addition has a retained private receipt with the exact URL, retrieval interval, response size, SHA-256 of received bytes, XML structure count and observed article hosts. The byte hash identifies the response received; it is not a signed publisher attestation or an underlying article-content hash. Research receipts remain outside Git.
+
+Admission used a 3 MiB uncompressed response cap, strict UTF-8 and pre-parse NUL/DOCTYPE/ENTITY rejection, with post-parse node/depth bounds. The post-parse checks do not establish a parser memory/CPU bound. Socket/read deadlines are best effort. No adversarial parser test or full source-security audit is claimed by admission. The production collector has its own validation and can reject a feed that changes later.
+
+Exact article-host allowlists are recorded per source. Publisher feed and article hosts can differ, as with CERT/CC and Debian. No wildcard or arbitrary-source endpoint is enabled. No feed text or publisher markup becomes executable page content. The hub publishes headlines, dates and links, with separately curated short summaries where available; it does not republish full RSS article bodies. RSS retention and future failures remain limits on historical coverage.
+
+## Bookmarks that are not connected feeds
+
+The bookmark repository is a discovery catalog, not a declaration that every listed service is integrated. This expansion reviewed a selected publisher subset. Other bookmarked news sources remain unreviewed unless listed above; they are not labeled unavailable merely because they were not attempted.
+
+| Class | Examples from the bookmarks | Treatment |
+| --- | --- | --- |
+| Lookup/data services | NVD, CVE.org, EPSS, OSV, VirusTotal, Shodan, GreyNoise, ThreatFox, certificate search | Keep as references. Their search APIs, IOC exports, accounts and device queries are not RSS article subscriptions. KEV is already a separate explicit catalog input. |
+| Tools and software repositories | Scanners, recon tools, DFIR utilities, reverse-engineering tools, container scanners | Keep as tools/reference links. Listing a tool neither installs it nor runs a scan or exercise. |
+| Standards and frameworks | ATT&CK, D3FEND, CWE, NIST, CIS, OWASP, STIX/TAXII | Reference material; not silently converted into news feeds or automated actions. |
+| Training, labs and reports | Cyber ranges, academies, yearly threat reports, research libraries | Reference/learning material. No lab, exploit, download, purchase or login is initiated. |
+| Social/community sources | Reddit communities and social links | Unverified leads until independently sourced. No consumer account, private timeline or paid search integration is enabled. |
+| Publisher/access gaps | MSRC RSS, Chrome Releases, SEC EDGAR intake | See the specific dated limitations below. No login, HTTP downgrade or permissive redirect fallback is used. |
+
+### Dated access and compatibility gaps
+
+- Microsoft's original [MSRC RSS link](https://msrc.microsoft.com/blog/rss/) redirected to the new HTML blog during intake. The official [Microsoft article advertising that link](https://www.microsoft.com/en-us/security/blog/2025/03/13/how-msrc-coordinates-vulnerability-research-and-disclosure-while-building-community/) was checked. This review did not establish a direct current MSRC RSS endpoint. The separate Microsoft Security Blog feed remains configured; it is not a substitute for complete Security Update Guide coverage.
+- Chrome Releases advertises a feed whose redirect points to FeedBurner. A separately inspected [HTTPS FeedBurner endpoint](https://feeds.feedburner.com/GoogleChromeReleases) returned Atom, but its alternate article links used HTTP. The current collector requires HTTPS article URLs, so Chrome was not added. No URL-upgrade exception or redirect relaxation was implemented.
+- CISA's advisory feed remains configured from the original catalog, with its initial production failure disclosed. The advisory landing page did not establish a reviewed replacement during this expansion. No precise cause is inferred from its generic production error. CISA KEV is separate and does not replace all advisory coverage.
+- Threatpost's feed was accessible, but all ten returned items were dated August 2022. It is labeled a legacy archive in the configuration. Those dates were outside the original recent-year window and are inside the expanded decade window. A successful feed fetch records transport/retrieval, not renewed publication; the latest production snapshot determines retained article counts.
+
+### SEC cybersecurity filings: access prerequisite, not a connected feed
+
+The SEC documents [EDGAR RSS searches](https://www.sec.gov/about/developer-resources) with Form Type filters. A direct fixed request for [current Form 8-K Atom entries](https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=8-K&company=&dateb=&owner=include&start=0&count=100&output=atom) returned HTTP 403 during this intake. The direct developer-page request also returned 403, although the official documentation could be read separately through the research browser. No feed entries, live Atom schema or Item 1.05 filter were established. There is no SEC entry in the configured collector and no alternate provider, browser-session bypass or repeated automated retry.
+
+The SEC's [fair-access guidance](https://www.sec.gov/search-filings/edgar-search-assistance/accessing-edgar-data) requires moderated access, currently no more than ten requests per second across machines, and a declared User-Agent identifying the organization/contact. This intake used an honest project identifier and invented no contact information. Any later production connection needs an owner-approved operational contact and access-policy review; a contact header would not prove that access will succeed. The underlying reason for the observed 403 is unestablished.
+
+A Form 8-K feed includes many non-cybersecurity reports. The SEC's [Item 1.05 explanation](https://www.sec.gov/newsroom/whats-new/gerding-cybersecurity-incidents-05212024) distinguishes incidents determined material by the registrant from voluntary other cybersecurity disclosures, which may use Item 8.01. Thus an Item 1.05 selection could not claim all cyber filings. Future intake must verify actual filing metadata, amendments and item matching, preserve filing dates separately from incident dates, and label issuer disclosures accurately. No filing-document crawl, company contact, investment recommendation or remediation action was performed by this feed review.
+
+Source expansion authorizes no automatic remediation, network/device inspection, credential use, social posting or model call. Deployment health and current source outcomes must come from the dated site snapshot and workflow evidence.
+
+## Further source expansion
+
+The owner requested broader coverage after the first 29-source intake. A further **29 feeds** passed bounded public HTTPS intake, bringing the configured publisher total to **58**, plus the separate CISA KEV catalog. These are configured inputs, not a guarantee that all remain healthy or that their items are distinct incidents.
+
+| Publisher | Feed | Role |
+| --- | --- | --- |
+| [Cisco Systems, Inc. PSIRT](https://sec.cloudapps.cisco.com/security/center/home.x) | [RSS / Atom](https://sec.cloudapps.cisco.com/security/center/psirtrss20/CiscoSecurityAdvisory.xml) | Advisory |
+| [Tenable](https://www.tenable.com/blog) | [RSS / Atom](https://www.tenable.com/blog/feed) | Research |
+| [Red Hat Security Advisories](https://access.redhat.com/security/data) | [RSS / Atom](https://security.access.redhat.com/data/meta/v1/rhsa.rss) | Advisory |
+| [Mozilla Security Blog](https://blog.mozilla.org/security/) | [RSS / Atom](https://blog.mozilla.org/security/feed/) | Research |
+| [Sonatype](https://www.sonatype.com/blog) | [RSS / Atom](https://www.sonatype.com/blog/rss.xml) | Research |
+| [Snyk](https://snyk.io/blog/) | [RSS / Atom](https://snyk.io/blog/feed/) | Research |
+| [Cloudflare Security](https://blog.cloudflare.com/tag/security/) | [RSS / Atom](https://blog.cloudflare.com/tag/security/rss) | Research |
+| [SentinelLabs](https://www.sentinelone.com/labs/) | [RSS / Atom](https://www.sentinelone.com/labs/feed/) | Research |
+| [Google Security Blog](https://blog.google/security/) | [RSS / Atom](https://blog.google/security/rss/) | Research |
+| [Apple Security Research](https://security.apple.com/blog/) | [RSS / Atom](https://security.apple.com/blog/feed.rss) | Research |
+| [Palo Alto Networks Security Advisories](https://security.paloaltonetworks.com/) | [RSS / Atom](https://security.paloaltonetworks.com/rss.xml) | Advisory |
+| [Splunk Security Advisories](https://advisory.splunk.com/) | [RSS / Atom](https://advisory.splunk.com/feed.xml) | Advisory |
+| [PortSwigger Research](https://portswigger.net/research) | [RSS / Atom](https://portswigger.net/research/rss) | Research |
+| [F5 Labs](https://www.f5.com/labs) | [RSS / Atom](https://www.f5.com/labs/rss-feeds/all.xml) | Research |
+| [CyberScoop](https://cyberscoop.com/) | [RSS / Atom](https://cyberscoop.com/feed/) | Reporting |
+| [Graham Cluley](https://grahamcluley.com/) | [RSS / Atom](https://grahamcluley.com/feed/) | Reporting |
+| [Troy Hunt](https://www.troyhunt.com/) | [RSS / Atom](https://www.troyhunt.com/rss/) | Research |
+| [CSO](https://www.csoonline.com/) | [RSS / Atom](https://www.csoonline.com/feed/) | Reporting |
+| [Hackread](https://hackread.com/) | [RSS / Atom](https://hackread.com/feed/) | Reporting |
+| [Ars Technica Security](https://arstechnica.com/security/) | [RSS / Atom](https://arstechnica.com/security/feed/) | Reporting |
+| [TechCrunch Security](https://techcrunch.com/category/security/) | [RSS / Atom](https://techcrunch.com/category/security/feed/) | Reporting |
+| [DataBreaches.net](https://databreaches.net/) | [RSS / Atom](https://databreaches.net/feed/) | Reporting |
+| [CyberInsider](https://cyberinsider.com/) | [RSS / Atom](https://cyberinsider.com/feed/) | Reporting |
+| [WIRED Security](https://www.wired.com/category/security/) | [RSS / Atom](https://www.wired.com/feed/category/security/latest/rss) | Reporting |
+| [Infosecurity Magazine](https://www.infosecurity-magazine.com/) | [RSS / Atom](https://www.infosecurity-magazine.com/rss/news/) | Reporting |
+| [Cybersecurity Dive](https://www.cybersecuritydive.com/) | [RSS / Atom](https://www.cybersecuritydive.com/feeds/news/) | Reporting |
+| [Security Affairs](https://securityaffairs.com/) | [RSS / Atom](https://securityaffairs.com/feed) | Reporting |
+| [Risky Business Newsletters](https://risky.biz/feeds/) | [RSS / Atom](https://risky.biz/feeds/newsletters/) | Reporting |
+| [The Register Security](https://www.theregister.com/security/) | [RSS / Atom](https://www.theregister.com/security/?lab_viewport=rss) | Reporting |
+
+Discovery used the publishers’ own sites or advertised endpoints and the same bounded collector. Each proposed endpoint returned HTTP 200 without following redirects, parsed as RSS/Atom and yielded accepted HTTPS article links on its recorded exact hosts. Private receipts retain the received-byte hashes, UTC intervals, safe item counts and source-specific limits; no full article bodies enter the public output. Admission is a dated observation, not a future availability or correctness guarantee.
+
+Cisco PSIRT’s 50 admitted items had unknown dates under this parser, so they may appear as undated records without calendar-year matches. Snyk, F5 and Infosecurity reached the 150-item intake ceiling. F5 also returned publications before the decade boundary; the normal date filter still applies. Graham Cluley’s first observed response yielded six accepted same-publisher links; no extra article hosts were silently admitted. Counts in discovery receipts are neither net new articles nor evidence of complete archives.
+
+This further intake rejected or held other attempts: Rapid7’s advertised feed was malformed XML; Qualys exceeded the per-item CVE mention bound; Fortinet yielded no accepted HTTPS article links; Elastic and Wordfence exceeded the response cap; ZDI contained rejected DTD/entity syntax. Some alternate news endpoints redirected, failed access or produced no accepted entries. Last Watchdog’s mixed press-release material and BankInfoSecurity’s undated results were held for editorial/date review. Those attempts are not configured sources, and the collector’s safeguards were not loosened to accept them. Other sources not attempted remain unreviewed.

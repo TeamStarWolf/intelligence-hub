@@ -1,31 +1,1265 @@
 {
   "schema_version": 1,
   "window": {
-    "start": "2025-10-24",
+    "start": "2016-10-24",
     "end": "2026-10-24"
   },
   "curated_at": "2026-10-24",
   "coverage": {
     "complete": false,
-    "selection": "22 individually reviewed primary publications; a curated selection rather than an exhaustive incident database.",
-    "date_policy": "The selected history uses publication dates for its window and chronology. Event dates, where an exact incident day is established, remain separate. Null event dates mean no exact day is asserted.",
+    "selection": "63 individually reviewed primary publications: the original 22 retained unchanged, plus 41 earlier publications selected for decade context. This is a reading selection, not an exhaustive incident database.",
+    "date_policy": "All curated entries use actual supported publication dates for their window and chronology. Exact supported event days remain separate; null event dates do not assert an incident's start. Later page updates are described without replacing original publication dates.",
+    "year_counts": {
+      "2016": 1,
+      "2017": 4,
+      "2018": 4,
+      "2019": 4,
+      "2020": 4,
+      "2021": 5,
+      "2022": 4,
+      "2023": 5,
+      "2024": 5,
+      "2025": 11,
+      "2026": 16
+    },
     "quarter_counts": {
-      "2025-Q4": 6,
+      "2016-Q4": 1,
+      "2017-Q1": 1,
+      "2017-Q2": 2,
+      "2017-Q3": 1,
+      "2017-Q4": 0,
+      "2018-Q1": 3,
+      "2018-Q2": 0,
+      "2018-Q3": 1,
+      "2018-Q4": 0,
+      "2019-Q1": 3,
+      "2019-Q2": 1,
+      "2019-Q3": 0,
+      "2019-Q4": 0,
+      "2020-Q1": 0,
+      "2020-Q2": 0,
+      "2020-Q3": 3,
+      "2020-Q4": 1,
+      "2021-Q1": 1,
+      "2021-Q2": 3,
+      "2021-Q3": 0,
+      "2021-Q4": 1,
+      "2022-Q1": 0,
+      "2022-Q2": 1,
+      "2022-Q3": 3,
+      "2022-Q4": 0,
+      "2023-Q1": 0,
+      "2023-Q2": 2,
+      "2023-Q3": 1,
+      "2023-Q4": 2,
+      "2024-Q1": 3,
+      "2024-Q2": 1,
+      "2024-Q3": 1,
+      "2024-Q4": 0,
+      "2025-Q1": 2,
+      "2025-Q2": 0,
+      "2025-Q3": 2,
+      "2025-Q4": 7,
       "2026-Q1": 4,
       "2026-Q2": 4,
       "2026-Q3": 5,
       "2026-Q4": 3
     },
-    "months_without_selected_publications": [],
+    "years_without_selected_publications": [],
+    "months_without_selected_publications": [
+      "2016-10",
+      "2016-12",
+      "2017-01",
+      "2017-03",
+      "2017-04",
+      "2017-07",
+      "2017-08",
+      "2017-10",
+      "2017-11",
+      "2017-12",
+      "2018-02",
+      "2018-04",
+      "2018-05",
+      "2018-06",
+      "2018-07",
+      "2018-08",
+      "2018-10",
+      "2018-11",
+      "2018-12",
+      "2019-01",
+      "2019-04",
+      "2019-06",
+      "2019-07",
+      "2019-08",
+      "2019-09",
+      "2019-10",
+      "2019-11",
+      "2019-12",
+      "2020-01",
+      "2020-02",
+      "2020-03",
+      "2020-04",
+      "2020-05",
+      "2020-06",
+      "2020-08",
+      "2020-10",
+      "2020-11",
+      "2021-01",
+      "2021-02",
+      "2021-06",
+      "2021-07",
+      "2021-08",
+      "2021-09",
+      "2021-10",
+      "2021-11",
+      "2022-01",
+      "2022-02",
+      "2022-03",
+      "2022-05",
+      "2022-06",
+      "2022-07",
+      "2022-10",
+      "2022-11",
+      "2022-12",
+      "2023-01",
+      "2023-02",
+      "2023-03",
+      "2023-05",
+      "2023-08",
+      "2023-09",
+      "2023-11",
+      "2023-12",
+      "2024-04",
+      "2024-05",
+      "2024-08",
+      "2024-09",
+      "2024-10",
+      "2024-11",
+      "2024-12",
+      "2025-01",
+      "2025-04",
+      "2025-05",
+      "2025-06",
+      "2025-09"
+    ],
     "limitations": [
-      "Coverage is uneven despite a selected publication in each calendar-month bucket; absence of an entry never means absence of incidents.",
-      "Some in-window disclosures describe campaigns that began before the window; summaries identify this explicitly.",
-      "Dates and findings reflect the primary pages reviewed on the curation date; publisher corrections and updates may change later.",
-      "The separate CISA KEV collection uses catalog-addition dates, not incident or disclosure dates.",
-      "Source research, advisories and first-party incident disclosures carry different evidence; none establishes exposure of the reader's devices."
+      "At least one selected publication falls in every calendar year touched by the decade window; many months and some quarters have no selected publication. Absence never means absence of incidents.",
+      "Counts describe publications, not unique attacks, victims, campaigns or vulnerabilities. Different first-party reports can concern related activity.",
+      "The 2016 and 2026 boundary years are partial. The earliest selected publication is 2016-11-01, not the window's 2016-10-24 start.",
+      "Some disclosures describe attacks from earlier months or years. The incident day, detection day, initial disclosure, subsequent updates and retrieval date are distinct.",
+      "Known/reported/unknown describe evidence in the cited material reviewed at curation time. Unknown is not a current safety verdict; historical patch instructions can be superseded.",
+      "The selected CrowdStrike 2024 postmortem concerns a defective update and availability failure, not a documented malicious intrusion.",
+      "Current publisher pages can contain corrections or later findings; dates are supported by explicit original publication statements or dated advisory histories.",
+      "The separate CISA KEV collection uses catalog-addition dates, not original disclosure, first exploitation or a personal remediation deadline.",
+      "This selection does not establish exposure or compromise of the reader's devices and does not authorize scanning or remediation."
     ]
   },
   "entries": [
+    {
+      "id": "hist-strontium-20161101",
+      "title": "Microsoft details STRONTIUM Flash and Windows zero-day attacks",
+      "url": "https://www.microsoft.com/en-us/security/blog/2016/11/01/our-commitment-to-our-customers-security/",
+      "source_id": "microsoft-security",
+      "source_name": "Microsoft Security Team",
+      "kind": "research",
+      "published_at": "2016-11-01",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Microsoft describes a targeted spear-phishing campaign chaining an Adobe Flash flaw with Windows kernel privilege escalation. The report illustrates browser-to-kernel trust boundaries and distinguishes observed attacks from the planned Windows patch release.",
+      "cves": [
+        "CVE-2016-7855"
+      ],
+      "tags": [
+        "windows",
+        "zero-day",
+        "espionage"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.microsoft.com/en-us/security/blog/2016/11/01/our-commitment-to-our-customers-security/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-cloudbleed-20170223",
+      "title": "Cloudflare explains its parser memory-leak incident",
+      "url": "https://blog.cloudflare.com/incident-report-on-memory-leak-caused-by-cloudflare-parser-bug/",
+      "source_id": "cloudflare",
+      "source_name": "Cloudflare",
+      "kind": "incident",
+      "published_at": "2017-02-23",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Cloudflare reports that an HTML parser bug exposed memory containing cookies, tokens and other request data, with some leaks cached by search engines. This was an information-disclosure defect; the report does not establish malicious exploitation of every leaked secret.",
+      "cves": [],
+      "tags": [
+        "cloud",
+        "data-exposure",
+        "memory-safety"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://blog.cloudflare.com/incident-report-on-memory-leak-caused-by-cloudflare-parser-bug/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-wannacry-20170512",
+      "title": "Microsoft analyzes WannaCry's SMB-based ransomware spread",
+      "url": "https://www.microsoft.com/en-us/security/blog/2017/05/12/wannacrypt-ransomware-worm-targets-out-of-date-systems/",
+      "source_id": "microsoft-security",
+      "source_name": "Microsoft Defender Security Research",
+      "kind": "research",
+      "published_at": "2017-05-12",
+      "event_date": "2017-05-12",
+      "date_basis": "publication",
+      "summary": "Microsoft documents WannaCry using a previously patched SMB vulnerability to spread between vulnerable Windows systems. The account highlights patch deployment and legacy-protocol risk; the observed outbreak date and the earlier MS17-010 patch date are separate.",
+      "cves": [],
+      "tags": [
+        "ransomware",
+        "windows",
+        "patching"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.microsoft.com/en-us/security/blog/2017/05/12/wannacrypt-ransomware-worm-targets-out-of-date-systems/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-notpetya-20170627",
+      "title": "Microsoft traces the Petya outbreak through updates and lateral movement",
+      "url": "https://www.microsoft.com/en-us/security/blog/2017/06/27/new-ransomware-old-techniques-petya-adds-worm-capabilities/",
+      "source_id": "microsoft-security",
+      "source_name": "Microsoft Defender Security Research",
+      "kind": "research",
+      "published_at": "2017-06-27",
+      "event_date": "2017-06-27",
+      "date_basis": "publication",
+      "summary": "Microsoft's evolving account of the outbreak commonly called NotPetya links some initial infections to the legitimate MEDoc updater and explains credential-assisted lateral movement. Treat the June report as dated research, with its linked follow-up and later corrections.",
+      "cves": [],
+      "tags": [
+        "ransomware",
+        "supply-chain",
+        "lateral-movement"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.microsoft.com/en-us/security/blog/2017/06/27/new-ransomware-old-techniques-petya-adds-worm-capabilities/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-ccleaner-20170918",
+      "title": "Cisco Talos finds a malicious payload in signed CCleaner releases",
+      "url": "https://blog.talosintelligence.com/avast-distributes-malware/",
+      "source_id": "cisco-talos",
+      "source_name": "Cisco Talos",
+      "kind": "research",
+      "published_at": "2017-09-18",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Talos identifies malware in a CCleaner installer distributed through legitimate infrastructure and carrying a valid publisher signature. The case shows why signing alone cannot establish that a release is benign; affected release windows differ from the September disclosure.",
+      "cves": [],
+      "tags": [
+        "supply-chain",
+        "software-updates",
+        "malware"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://blog.talosintelligence.com/avast-distributes-malware/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-spectre-meltdown-20180103",
+      "title": "Project Zero publishes speculative-execution memory-disclosure research",
+      "url": "https://projectzero.google/2018/01/reading-privileged-memory-with-side.html",
+      "source_id": "google-project-zero",
+      "source_name": "Google Project Zero",
+      "kind": "research",
+      "published_at": "2018-01-03",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Project Zero describes three speculative-execution side channels associated with Spectre and Meltdown and demonstrates impacts across selected security boundaries. Research proofs of concept do not establish real-world compromise of every affected processor or deployment.",
+      "cves": [
+        "CVE-2017-5753",
+        "CVE-2017-5715",
+        "CVE-2017-5754"
+      ],
+      "tags": [
+        "hardware",
+        "side-channel",
+        "vulnerability-research"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://projectzero.google/2018/01/reading-privileged-memory-with-side.html"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-github-ddos-20180301",
+      "title": "GitHub reports a memcached-amplification DDoS outage",
+      "url": "https://github.blog/news-insights/company-news/ddos-incident-report/",
+      "source_id": "github",
+      "source_name": "GitHub",
+      "kind": "incident",
+      "published_at": "2018-03-01",
+      "event_date": "2018-02-28",
+      "date_basis": "publication",
+      "summary": "GitHub describes a February 28 availability attack amplified through publicly exposed memcached servers and its traffic-mitigation response. The report separates service disruption from confidentiality or integrity loss; the March publication is not the attack date.",
+      "cves": [],
+      "tags": [
+        "ddos",
+        "availability",
+        "network-security"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://github.blog/news-insights/company-news/ddos-incident-report/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-drupalgeddon-20180328",
+      "title": "Drupal discloses unauthenticated remote code execution in core",
+      "url": "https://www.drupal.org/sa-core-2018-002",
+      "source_id": "drupal",
+      "source_name": "Drupal Security Team",
+      "kind": "advisory",
+      "published_at": "2018-03-28",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Drupal's advisory describes CVE-2018-7600 across multiple Drupal 7 and 8 subsystems and lists affected ranges and fixed releases. This disclosure is historical guidance; the selected page alone is not a current compromise assessment or a complete later exploitation timeline.",
+      "cves": [
+        "CVE-2018-7600"
+      ],
+      "tags": [
+        "web-applications",
+        "remote-code-execution",
+        "patching"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.drupal.org/sa-core-2018-002"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-facebook-tokens-20180928",
+      "title": "Facebook discloses access-token theft through View As bugs",
+      "url": "https://about.fb.com/news/2018/09/security-update/",
+      "source_id": "meta",
+      "source_name": "Facebook / Meta",
+      "kind": "incident",
+      "published_at": "2018-09-28",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Facebook reports that interacting View As and video-upload bugs let attackers obtain account access tokens. Its initial investigation, subsequent updates and token revocation illustrate how session credentials can remain a security boundary beyond passwords.",
+      "cves": [],
+      "tags": [
+        "identity",
+        "data-breach",
+        "session-tokens"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://about.fb.com/news/2018/09/security-update/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-runc-20190211",
+      "title": "Kubernetes explains the runc container-escape vulnerability",
+      "url": "https://kubernetes.io/blog/2019/02/11/runc-and-cve-2019-5736/",
+      "source_id": "kubernetes",
+      "source_name": "Kubernetes Product Security Committee",
+      "kind": "advisory",
+      "published_at": "2019-02-11",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "The Kubernetes security committee explains CVE-2019-5736 in the underlying runc container runtime, including host-root consequences and configuration-dependent mitigations. Container deployment alone is not an isolation guarantee; review the exact runtime and historical advisory scope.",
+      "cves": [
+        "CVE-2019-5736"
+      ],
+      "tags": [
+        "containers",
+        "isolation",
+        "patching"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://kubernetes.io/blog/2019/02/11/runc-and-cve-2019-5736/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-drupal-rest-20190220",
+      "title": "Drupal warns of code execution through web-service field handling",
+      "url": "https://www.drupal.org/sa-core-2019-003",
+      "source_id": "drupal",
+      "source_name": "Drupal Security Team",
+      "kind": "advisory",
+      "published_at": "2019-02-20",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Drupal discloses CVE-2019-6340 in field handling for certain web-service configurations. Its February 22 update reports known exploitation and clarifies that enabled REST resources accepting GET can also be affected; the publication and update dates remain distinct.",
+      "cves": [
+        "CVE-2019-6340"
+      ],
+      "tags": [
+        "web-applications",
+        "api-security",
+        "patching"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.drupal.org/sa-core-2019-003"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-shadowhammer-20190325",
+      "title": "Kaspersky details the ASUS Live Update supply-chain attack",
+      "url": "https://securelist.com/operation-shadowhammer/89992/",
+      "source_id": "kaspersky",
+      "source_name": "Kaspersky GReAT",
+      "kind": "research",
+      "published_at": "2019-03-25",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Kaspersky describes malicious ASUS Live Update software found during its investigation. The report dates the attack to June–November 2018, despite its March 2019 disclosure, and highlights the risk of targeted payloads delivered through a trusted update channel.",
+      "cves": [],
+      "tags": [
+        "supply-chain",
+        "software-updates",
+        "targeted-attacks"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://securelist.com/operation-shadowhammer/89992/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-bluekeep-20190514",
+      "title": "Microsoft releases BlueKeep Remote Desktop Services guidance",
+      "url": "https://www.microsoft.com/en-us/msrc/blog/2019/05/prevent-a-worm-by-updating-remote-desktop-services-cve-2019-0708",
+      "source_id": "microsoft-msrc",
+      "source_name": "Microsoft Security Response Center",
+      "kind": "advisory",
+      "published_at": "2019-05-14",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Microsoft discloses CVE-2019-0708 in Remote Desktop Services on selected older Windows versions and warns of wormable potential. The initial notice says exploitation had not been observed then; that historical statement is not a claim about subsequent attacks or current safety.",
+      "cves": [
+        "CVE-2019-0708"
+      ],
+      "tags": [
+        "windows",
+        "remote-access",
+        "patching"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.microsoft.com/en-us/msrc/blog/2019/05/prevent-a-worm-by-updating-remote-desktop-services-cve-2019-0708"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-sigred-20200714",
+      "title": "Check Point discloses SIGRed in Windows DNS Server",
+      "url": "https://research.checkpoint.com/2020/resolving-your-way-into-domain-admin-exploiting-a-17-year-old-bug-in-windows-dns-servers/",
+      "source_id": "check-point-research",
+      "source_name": "Check Point Research",
+      "kind": "research",
+      "published_at": "2020-07-14",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Check Point describes CVE-2020-1350, a Windows DNS Server flaw triggered by crafted DNS responses with potential privileged code execution. Its demonstration and wormability assessment do not prove an operational campaign; affected server roles and versions matter.",
+      "cves": [
+        "CVE-2020-1350"
+      ],
+      "tags": [
+        "windows",
+        "dns",
+        "vulnerability-research"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://research.checkpoint.com/2020/resolving-your-way-into-domain-admin-exploiting-a-17-year-old-bug-in-windows-dns-servers/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-twitter-20200718",
+      "title": "Twitter explains employee phishing behind account takeovers",
+      "url": "https://blog.x.com/en/company/an-update-on-our-security-incident",
+      "source_id": "x",
+      "source_name": "Twitter / X",
+      "kind": "incident",
+      "published_at": "2020-07-18",
+      "event_date": "2020-07-15",
+      "date_basis": "publication",
+      "summary": "Twitter's July 18 account, updated July 30, describes a July 15 phone spear-phishing attack that led to employee credentials and internal support-tool access. The case highlights privileged support workflows, account segmentation and response evidence beyond password resets.",
+      "cves": [],
+      "tags": [
+        "social-engineering",
+        "identity",
+        "support-access"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://blog.x.com/en/company/an-update-on-our-security-incident"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-zerologon-20200915",
+      "title": "CERT-EU tracks Zerologon domain-controller risk and exploitation",
+      "url": "https://cert.europa.eu/publications/security-advisories/2020-046/",
+      "source_id": "cert-eu",
+      "source_name": "CERT-EU",
+      "kind": "advisory",
+      "published_at": "2020-09-15",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "CERT-EU explains CVE-2020-1472 in Netlogon authentication and the risk of domain compromise from a network foothold. Its September 25 update incorporates Microsoft-reported attacks; the September 15 initial publication is not the exploitation start date.",
+      "cves": [
+        "CVE-2020-1472"
+      ],
+      "tags": [
+        "active-directory",
+        "identity",
+        "patching"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://cert.europa.eu/publications/security-advisories/2020-046/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-solarwinds-20201213",
+      "title": "FireEye reveals SUNBURST in SolarWinds Orion updates",
+      "url": "https://cloud.google.com/blog/topics/threat-intelligence/evasive-attacker-leverages-solarwinds-supply-chain-compromises-with-sunburst-backdoor",
+      "source_id": "google-threat-intelligence",
+      "source_name": "FireEye / Mandiant",
+      "kind": "research",
+      "published_at": "2020-12-13",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "FireEye reports a global intrusion campaign delivered through trojanized SolarWinds Orion updates and publishes detection material. The account illustrates post-compromise identity and network investigation; later attribution updates should not be mistaken for the original disclosure date.",
+      "cves": [],
+      "tags": [
+        "supply-chain",
+        "espionage",
+        "enterprise-software"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://cloud.google.com/blog/topics/threat-intelligence/evasive-attacker-leverages-solarwinds-supply-chain-compromises-with-sunburst-backdoor"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-exchange-hafnium-20210302",
+      "title": "Microsoft reports Exchange zero-day exploitation",
+      "url": "https://www.microsoft.com/en-us/security/blog/2021/03/02/hafnium-targeting-exchange-servers/",
+      "source_id": "microsoft-security",
+      "source_name": "Microsoft Threat Intelligence",
+      "kind": "research",
+      "published_at": "2021-03-02",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Microsoft reports an on-premises Exchange exploit chain used to access mail and install persistence. Later updates describe attacks beyond the initially tracked HAFNIUM cluster. Exchange Online is outside the original affected-product scope; patching and compromise investigation are separate tasks.",
+      "cves": [
+        "CVE-2021-26855",
+        "CVE-2021-26857",
+        "CVE-2021-26858",
+        "CVE-2021-27065"
+      ],
+      "tags": [
+        "email",
+        "zero-day",
+        "web-shells"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.microsoft.com/en-us/security/blog/2021/03/02/hafnium-targeting-exchange-servers/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-codecov-20210415",
+      "title": "Codecov discloses its Bash Uploader credential-exfiltration incident",
+      "url": "https://about.codecov.io/security-update/",
+      "source_id": "codecov",
+      "source_name": "Codecov",
+      "kind": "incident",
+      "published_at": "2021-04-15",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Codecov reports unauthorized changes to its Bash Uploader that exfiltrated CI environment variables and repository information. The affected period preceded the April 15 notice. The incident demonstrates how build-tool compromise can expose credentials beyond the code being built.",
+      "cves": [],
+      "tags": [
+        "supply-chain",
+        "ci-cd",
+        "credentials"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://about.codecov.io/security-update/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-colonial-20210510",
+      "title": "FBI confirms DarkSide ransomware in Colonial Pipeline compromise",
+      "url": "https://www.fbi.gov/news/press-releases/fbi-statement-on-compromise-of-colonial-pipeline-networks",
+      "source_id": "fbi",
+      "source_name": "Federal Bureau of Investigation",
+      "kind": "advisory",
+      "published_at": "2021-05-10",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "The FBI confirms that DarkSide ransomware was responsible for the Colonial Pipeline network compromise. This brief statement establishes the agency's confirmation; it does not provide a full intrusion timeline, initial-access explanation or proof of direct operational-technology compromise.",
+      "cves": [],
+      "tags": [
+        "ransomware",
+        "critical-infrastructure",
+        "incident-response"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.fbi.gov/news/press-releases/fbi-statement-on-compromise-of-colonial-pipeline-networks"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-nobelium-mail-20210527",
+      "title": "Microsoft tracks NOBELIUM abuse of a legitimate mailing service",
+      "url": "https://www.microsoft.com/en-us/security/blog/2021/05/27/new-sophisticated-email-based-attack-from-nobelium/",
+      "source_id": "microsoft-security",
+      "source_name": "Microsoft Threat Intelligence",
+      "kind": "research",
+      "published_at": "2021-05-27",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Microsoft describes NOBELIUM's use of Constant Contact resources to distribute malicious links while impersonating a development organization. The May 25 escalation followed earlier campaign activity. Trusted email infrastructure and authentic-looking senders do not establish safe content.",
+      "cves": [],
+      "tags": [
+        "phishing",
+        "espionage",
+        "trusted-services"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.microsoft.com/en-us/security/blog/2021/05/27/new-sophisticated-email-based-attack-from-nobelium/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-log4shell-20211210",
+      "title": "CERT-EU issues Log4Shell guidance and tracks later Log4j flaws",
+      "url": "https://cert.europa.eu/publications/security-advisories/2021-067/",
+      "source_id": "cert-eu",
+      "source_name": "CERT-EU",
+      "kind": "advisory",
+      "published_at": "2021-12-10",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "CERT-EU describes CVE-2021-44228 in Log4j and reports of active exploitation, then records subsequent related flaws and revised mitigations. The evolving advisory illustrates why a first patch or version recommendation may be superseded; consult current supported guidance.",
+      "cves": [
+        "CVE-2021-44228"
+      ],
+      "tags": [
+        "java",
+        "remote-code-execution",
+        "supply-chain"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://cert.europa.eu/publications/security-advisories/2021-067/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-okta-vendor-20220420",
+      "title": "Okta concludes its January support-vendor compromise investigation",
+      "url": "https://www.okta.com/en-ca/blog/company-and-culture/okta-concludes-its-investigation-into-the-january-2022-compromise/",
+      "source_id": "okta",
+      "source_name": "Okta",
+      "kind": "incident",
+      "published_at": "2022-04-20",
+      "event_date": "2022-01-21",
+      "date_basis": "publication",
+      "summary": "Okta's concluding report narrows the January support-vendor incident to a brief period of attacker control and limited tenant access, superseding broader early potential-impact estimates. The April publication is a follow-up investigation, not the date of the January compromise.",
+      "cves": [],
+      "tags": [
+        "identity",
+        "third-party-risk",
+        "support-access"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.okta.com/en-ca/blog/company-and-culture/okta-concludes-its-investigation-into-the-january-2022-compromise/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-twilio-phishing-20220807",
+      "title": "Twilio discloses employee phishing and customer-data access",
+      "url": "https://www.twilio.com/en-us/blog/archive/2022/august-2022-social-engineering-attack",
+      "source_id": "twilio",
+      "source_name": "Twilio",
+      "kind": "incident",
+      "published_at": "2022-08-07",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Twilio reports employee-targeted text-message phishing that yielded credentials and access to some customer data. The archived page explicitly identifies August 7 as its initial publication and includes later October findings; the current page header is not substituted for that original date.",
+      "cves": [],
+      "tags": [
+        "social-engineering",
+        "identity",
+        "data-breach"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.twilio.com/en-us/blog/archive/2022/august-2022-social-engineering-attack"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-cloudflare-phishing-20220809",
+      "title": "Cloudflare explains how security keys blocked a phishing intrusion",
+      "url": "https://blog.cloudflare.com/2022-07-sms-phishing-attacks/",
+      "source_id": "cloudflare",
+      "source_name": "Cloudflare",
+      "kind": "research",
+      "published_at": "2022-08-09",
+      "event_date": "2022-07-20",
+      "date_basis": "publication",
+      "summary": "Cloudflare describes a July 20 employee phishing attempt resembling attacks on other companies. Some employees entered credentials, but required physical security keys prevented access. This is a documented blocked attempt, not a claim that Cloudflare suffered the same breach as Twilio.",
+      "cves": [],
+      "tags": [
+        "phishing",
+        "identity",
+        "security-keys"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://blog.cloudflare.com/2022-07-sms-phishing-attacks/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-uber-20220916",
+      "title": "Uber describes contractor-account compromise and internal access",
+      "url": "https://www.uber.com/in/en/newsroom/security-update/",
+      "source_id": "uber",
+      "source_name": "Uber",
+      "kind": "incident",
+      "published_at": "2022-09-16",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Uber's September 16 notice, expanded September 19, describes a compromised contractor account, repeated authentication prompts and access to internal tools. The report underscores the need to scope privileged sessions and downstream credentials; the initial notice and later findings are distinct.",
+      "cves": [],
+      "tags": [
+        "identity",
+        "social-engineering",
+        "privileged-access"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.uber.com/in/en/newsroom/security-update/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-3cx-20230420",
+      "title": "Mandiant links 3CX compromise to an earlier poisoned software package",
+      "url": "https://cloud.google.com/blog/topics/threat-intelligence/3cx-software-supply-chain-compromise",
+      "source_id": "google-threat-intelligence",
+      "source_name": "Mandiant",
+      "kind": "research",
+      "published_at": "2023-04-20",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Mandiant's incident-response investigation links the 3CX Desktop App supply-chain compromise to malicious software obtained from Trading Technologies. The case demonstrates one software supply-chain intrusion enabling another; the April report follows the March discovery and response.",
+      "cves": [],
+      "tags": [
+        "supply-chain",
+        "desktop-software",
+        "espionage"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://cloud.google.com/blog/topics/threat-intelligence/3cx-software-supply-chain-compromise"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-moveit-20230602",
+      "title": "Singapore CSA warns of active MOVEit Transfer exploitation",
+      "url": "https://www.csa.gov.sg/alerts-and-advisories/alerts/al-2023-073/",
+      "source_id": "singapore-csa",
+      "source_name": "Cyber Security Agency of Singapore",
+      "kind": "advisory",
+      "published_at": "2023-06-02",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "CSA warns that CVE-2023-34362 in MOVEit Transfer is reportedly being exploited, with potential unauthorized access, code execution and data theft. Its advisory and later updates concern specific product versions; a file-transfer deployment alone does not establish compromise.",
+      "cves": [
+        "CVE-2023-34362"
+      ],
+      "tags": [
+        "file-transfer",
+        "data-theft",
+        "patching"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.csa.gov.sg/alerts-and-advisories/alerts/al-2023-073/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-storm0558-20230711",
+      "title": "Microsoft discloses forged-token access to cloud email",
+      "url": "https://www.microsoft.com/en-us/msrc/blog/2023/07/microsoft-mitigates-china-based-threat-actor-storm-0558-targeting-of-customer-email",
+      "source_id": "microsoft-msrc",
+      "source_name": "Microsoft Security Response Center",
+      "kind": "incident",
+      "published_at": "2023-07-11",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Microsoft reports Storm-0558 access to customer cloud email using forged authentication tokens and an acquired consumer signing key. The account highlights token-validation boundaries between consumer and enterprise systems and links a later technical investigation.",
+      "cves": [],
+      "tags": [
+        "cloud",
+        "identity",
+        "email"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.microsoft.com/en-us/msrc/blog/2023/07/microsoft-mitigates-china-based-threat-actor-storm-0558-targeting-of-customer-email"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-okta-support-20231020",
+      "title": "Okta reports unauthorized access to support-case files",
+      "url": "https://sec.okta.com/articles/2023/10/tracking-unauthorized-access-oktas-support-system/",
+      "source_id": "okta",
+      "source_name": "Okta Security",
+      "kind": "incident",
+      "published_at": "2023-10-20",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Okta reports stolen-credential access to its support case-management system and customer-uploaded files. It explains that HAR diagnostic files can contain session tokens. Support-system exposure must be distinguished from the production identity service and from the separate January 2022 incident.",
+      "cves": [],
+      "tags": [
+        "identity",
+        "session-tokens",
+        "support-access"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://sec.okta.com/articles/2023/10/tracking-unauthorized-access-oktas-support-system/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-citrixbleed-20231031",
+      "title": "Mandiant investigates Citrix Bleed session hijacking",
+      "url": "https://cloud.google.com/blog/topics/threat-intelligence/session-hijacking-citrix-cve-2023-4966",
+      "source_id": "google-threat-intelligence",
+      "source_name": "Mandiant",
+      "kind": "research",
+      "published_at": "2023-10-31",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Mandiant documents CVE-2023-4966 exploitation against NetScaler ADC and Gateway, enabling takeover of legitimate sessions despite password and MFA controls. The October 31 investigation dates observed zero-day activity to late August; publication does not establish the campaign's start.",
+      "cves": [
+        "CVE-2023-4966"
+      ],
+      "tags": [
+        "edge",
+        "session-hijacking",
+        "remote-access"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://cloud.google.com/blog/topics/threat-intelligence/session-hijacking-citrix-cve-2023-4966"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-ivanti-vpn-20240110",
+      "title": "Volexity identifies an Ivanti VPN zero-day exploit chain",
+      "url": "https://www.volexity.com/blog/2024/01/10/active-exploitation-of-two-zero-day-vulnerabilities-in-ivanti-connect-secure-vpn/",
+      "source_id": "volexity",
+      "source_name": "Volexity",
+      "kind": "research",
+      "published_at": "2024-01-10",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Volexity reports authentication bypass and command injection chained against Ivanti Connect Secure, followed by credential theft and modified appliance components. Its December 2023 investigation preceded this January disclosure; applying mitigation alone does not remove an existing compromise.",
+      "cves": [
+        "CVE-2023-46805",
+        "CVE-2024-21887"
+      ],
+      "tags": [
+        "vpn",
+        "edge",
+        "zero-day"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.volexity.com/blog/2024/01/10/active-exploitation-of-two-zero-day-vulnerabilities-in-ivanti-connect-secure-vpn/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-lockbit-disruption-20240220",
+      "title": "US and UK authorities announce LockBit infrastructure disruption",
+      "url": "https://www.justice.gov/archives/opa/pr/us-and-uk-disrupt-lockbit-ransomware-variant",
+      "source_id": "us-doj",
+      "source_name": "US Department of Justice",
+      "kind": "advisory",
+      "published_at": "2024-02-20",
+      "event_date": "2024-02-20",
+      "date_basis": "publication",
+      "summary": "Authorities describe seizing infrastructure and disrupting the LockBit ransomware operation with international partners. This is a dated law-enforcement action, not proof that all affiliates, copies of the malware or future ransomware activity were permanently eliminated.",
+      "cves": [],
+      "tags": [
+        "ransomware",
+        "law-enforcement",
+        "incident-response"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.justice.gov/archives/opa/pr/us-and-uk-disrupt-lockbit-ransomware-variant"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-xz-backdoor-20240329",
+      "title": "Red Hat warns of malicious code in XZ Utils release packages",
+      "url": "https://www.redhat.com/en/blog/urgent-security-alert-fedora-40-and-rawhide-users",
+      "source_id": "red-hat",
+      "source_name": "Red Hat Product Security",
+      "kind": "advisory",
+      "published_at": "2024-03-29",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Red Hat describes CVE-2024-3094 and malicious code in XZ 5.6.0/5.6.1, including differences between release packages and Git source. Distribution and build details affect applicability; detecting a backdoor is not proof that every affected installation was remotely exploited.",
+      "cves": [
+        "CVE-2024-3094"
+      ],
+      "tags": [
+        "supply-chain",
+        "linux",
+        "build-security"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.redhat.com/en/blog/urgent-security-alert-fedora-40-and-rawhide-users"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-snowflake-20240610",
+      "title": "Mandiant tracks stolen credentials targeting Snowflake customer instances",
+      "url": "https://cloud.google.com/blog/topics/threat-intelligence/unc5537-snowflake-data-theft-extortion",
+      "source_id": "google-threat-intelligence",
+      "source_name": "Mandiant",
+      "kind": "research",
+      "published_at": "2024-06-10",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Mandiant reports UNC5537 data theft and extortion using stolen customer credentials against Snowflake instances, including accounts without MFA. The investigation concerns customer identity and configuration exposure; it does not establish a breach of Snowflake's underlying platform.",
+      "cves": [],
+      "tags": [
+        "cloud",
+        "credentials",
+        "data-theft"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://cloud.google.com/blog/topics/threat-intelligence/unc5537-snowflake-data-theft-extortion"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-crowdstrike-update-20240724",
+      "title": "CrowdStrike publishes its preliminary Windows outage review",
+      "url": "https://www.crowdstrike.com/en-us/blog/falcon-content-update-preliminary-post-incident-report/",
+      "source_id": "crowdstrike",
+      "source_name": "CrowdStrike",
+      "kind": "incident",
+      "published_at": "2024-07-24",
+      "event_date": "2024-07-19",
+      "date_basis": "publication",
+      "summary": "CrowdStrike explains how defective Rapid Response Content caused Windows crashes on July 19. This was an update-validation and availability incident, not a documented malicious intrusion. The preliminary July 24 report is distinct from the event and the later full root-cause analysis.",
+      "cves": [],
+      "tags": [
+        "availability",
+        "software-updates",
+        "recovery"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.crowdstrike.com/en-us/blog/falcon-content-update-preliminary-post-incident-report/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-bybit-20250224",
+      "title": "Chainalysis traces the February Bybit cryptocurrency theft",
+      "url": "https://www.chainalysis.com/blog/bybit-exchange-hack-february-2025-crypto-security-dprk/",
+      "source_id": "chainalysis",
+      "source_name": "Chainalysis",
+      "kind": "research",
+      "published_at": "2025-02-24",
+      "event_date": "2025-02-21",
+      "date_basis": "publication",
+      "summary": "Chainalysis analyzes the February 21 Bybit theft and its work tracing stolen assets with the exchange and investigators. Treat actor attribution and transaction analysis as the researcher's findings; asset-tracing visibility does not itself establish recovery or the security of a wallet workflow.",
+      "cves": [],
+      "tags": [
+        "cryptocurrency",
+        "data-theft",
+        "incident-response"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.chainalysis.com/blog/bybit-exchange-hack-february-2025-crypto-security-dprk/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-tj-actions-20250314",
+      "title": "StepSecurity detects poisoned tj-actions changed-files releases",
+      "url": "https://www.stepsecurity.io/blog/harden-runner-detection-tj-actions-changed-files-action-is-compromised",
+      "source_id": "stepsecurity",
+      "source_name": "StepSecurity",
+      "kind": "research",
+      "published_at": "2025-03-14",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "StepSecurity documents CVE-2025-30066, a compromised GitHub Action that exposed CI secrets through build logs. Its investigation highlights mutable tags and downstream credential exposure. Compare exact workflow revisions and logs rather than assuming every repository using the action lost secrets.",
+      "cves": [
+        "CVE-2025-30066"
+      ],
+      "tags": [
+        "supply-chain",
+        "ci-cd",
+        "credentials"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.stepsecurity.io/blog/harden-runner-detection-tj-actions-changed-files-action-is-compromised"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-sharepoint-toolshell-20250719",
+      "title": "Microsoft issues SharePoint guidance for active ToolShell attacks",
+      "url": "https://www.microsoft.com/en-us/msrc/blog/2025/07/customer-guidance-for-sharepoint-vulnerability-cve-2025-53770",
+      "source_id": "microsoft-msrc",
+      "source_name": "Microsoft Security Response Center",
+      "kind": "advisory",
+      "published_at": "2025-07-19",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Microsoft warns of active attacks against on-premises SharePoint and tracks CVE-2025-53770/53771. The revision history separates the July 19 initial notice from later fixes and investigation advice, including machine-key rotation. A patch alone does not establish that prior access was removed.",
+      "cves": [
+        "CVE-2025-53770",
+        "CVE-2025-53771"
+      ],
+      "tags": [
+        "web-applications",
+        "zero-day",
+        "incident-response"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.microsoft.com/en-us/msrc/blog/2025/07/customer-guidance-for-sharepoint-vulnerability-cve-2025-53770"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-salesloft-drift-20250826",
+      "title": "Google tracks OAuth-token theft through Salesloft Drift integrations",
+      "url": "https://cloud.google.com/blog/topics/threat-intelligence/data-theft-salesforce-instances-via-salesloft-drift/",
+      "source_id": "google-threat-intelligence",
+      "source_name": "Google Threat Intelligence Group",
+      "kind": "research",
+      "published_at": "2025-08-26",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "GTIG describes stolen OAuth tokens enabling data theft from Salesforce instances linked to Salesloft Drift. Its August 28 update extends guidance to other connected integrations. The campaign illustrates delegated-token risk; it is not a claim that the core Salesforce or Google Workspace platform was compromised.",
+      "cves": [],
+      "tags": [
+        "supply-chain",
+        "oauth",
+        "cloud"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://cloud.google.com/blog/topics/threat-intelligence/data-theft-salesforce-instances-via-salesloft-drift/"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-f5-followup-20251022",
+      "title": "F5 publishes lessons and customer guidance after its security incident",
+      "url": "https://www.f5.com/company/blog/lessons-we-are-learning-from-our-security-incident",
+      "source_id": "f5",
+      "source_name": "F5",
+      "kind": "incident",
+      "published_at": "2025-10-22",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "F5 discusses its recently disclosed intrusion and access to BIG-IP source code, while stating that its reviews found no evidence of software supply-chain modification. The follow-up is a first-party assessment, not independent proof of absence or a finding that every customer's device was compromised.",
+      "cves": [],
+      "tags": [
+        "enterprise-software",
+        "source-code",
+        "incident-response"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://www.f5.com/company/blog/lessons-we-are-learning-from-our-security-incident"
+        }
+      ],
+      "origin": "library-curation"
+    },
     {
       "id": "hist-wsus-20251024",
       "title": "CERT-EU warns of WSUS remote code execution",

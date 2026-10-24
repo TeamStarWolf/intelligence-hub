@@ -19,8 +19,9 @@ STATE = ROOT / ".state"
 CATALOG_URL = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
 MAX_BYTES = 3 * 1024 * 1024
 MAX_ARTICLES = 8000
-KINDS = {"advisory", "research", "reporting", "incident", "kev"}
+KINDS = {"advisory", "research", "reporting", "incident", "kev", "filing"}
 CVE = re.compile(r"\bCVE-[0-9]{4}-[0-9]{4,8}\b", re.I)
+PUBLIC_FEED = "https://teamstarwolf.github.io/intelligence-hub/data/feed.json"
 
 
 def require(value, message):
@@ -33,14 +34,14 @@ def now():
 
 
 def safe_url(value, hosts=None):
-    if not isinstance(value, str) or len(value) > 4096 or any(ord(c) <= 32 for c in value) or "\\" in value:
+    if not isinstance(value, str) or len(value) > 4000 or any(ord(c) <= 32 or ord(c) == 127 for c in value) or "\\" in value:
         return None
     try:
         parts = urllib.parse.urlsplit(value)
         host = parts.hostname or ""
         if parts.scheme != "https" or parts.username is not None or parts.password is not None or parts.port not in (None, 443):
             return None
-        if not host.isascii() or host.endswith(".") or not re.fullmatch(r"[a-z0-9-]+(?:\.[a-z0-9-]+)+", host) or host.endswith((".local", ".localhost", ".internal", ".test", ".invalid")):
+        if not host.isascii() or host.endswith(".") or not re.fullmatch(r"[a-z0-9-]+(?:\.[a-z0-9-]+)+", host) or host.endswith((".local", ".localhost", ".internal", ".test", ".invalid", ".localdomain", ".lan", ".home", ".home.arpa", ".example")):
             return None
         try:
             ipaddress.ip_address(host)
@@ -60,8 +61,9 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         raise ValueError("Publisher redirected; the source needs a reviewed canonical URL.")
 
 
-def fetch(url):
+def fetch(url, maximum=MAX_BYTES):
     require(safe_url(url) == url, "Source URL must be a canonical public HTTPS URL.")
+    require(type(maximum) is int and 1 <= maximum <= 16 * 1024 * 1024, "Invalid bounded read size.")
     started = time.monotonic()
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
     request = urllib.request.Request(url, headers={"User-Agent": "TeamStarWolf-IntelligenceHub/0.1 (public feed reader)", "Accept": "application/rss+xml, application/atom+xml, application/json, text/xml, application/xml", "Accept-Encoding": "identity"})
@@ -75,21 +77,25 @@ def fetch(url):
             if not block:
                 break
             size += len(block)
-            require(size <= MAX_BYTES, "Source exceeded the three-MiB read limit.")
+            require(size <= maximum, "Source exceeded its bounded read limit.")
             chunks.append(block)
     return b"".join(chunks)
+
+
+def reject_constant(_value):
+    raise ValueError("Nonfinite JSON numbers are not accepted.")
 
 
 def read_json(path, limit=16 * 1024 * 1024):
     with path.open("rb") as stream:
         raw = stream.read(limit + 1)
     require(len(raw) <= limit, "Local JSON input exceeds its limit.")
-    return json.loads(raw)
+    return json.loads(raw, parse_constant=reject_constant)
 
 
-def write_json(path, value):
+def write_json(path, value, compact=False):
     path.parent.mkdir(parents=True, exist_ok=True)
-    raw = (json.dumps(value, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+    raw = (json.dumps(value, ensure_ascii=False, allow_nan=False, indent=None if compact else 2, separators=(",", ":") if compact else None) + "\n").encode("utf-8")
     require(len(raw) <= 16 * 1024 * 1024, "Snapshot output exceeds its limit.")
     temporary = path.with_name(path.name + ".pending")
     with temporary.open("xb") as stream:
@@ -118,10 +124,28 @@ def published(value):
         return None
 
 
+class BoundedTreeBuilder(ET.TreeBuilder):
+    def __init__(self):
+        super().__init__()
+        self.nodes = 0
+        self.depth = 0
+
+    def start(self, tag, attrs):
+        self.nodes += 1
+        self.depth += 1
+        require(self.nodes <= 40000 and self.depth <= 48, "XML structure exceeds its bounds.")
+        return super().start(tag, attrs)
+
+    def end(self, tag):
+        element = super().end(tag)
+        self.depth -= 1
+        return element
+
+
 def parse_feed(raw, source):
     decoded = raw.decode("utf-8-sig")
     require("\x00" not in decoded and "<!DOCTYPE" not in decoded.upper() and "<!ENTITY" not in decoded.upper(), "DTD/entity/binary XML is not accepted.")
-    root = ET.fromstring(decoded)
+    root = ET.fromstring(decoded, parser=ET.XMLParser(target=BoundedTreeBuilder()))
     stack, count = [(root, 0)], 0
     while stack:
         element, depth = stack.pop()
@@ -150,11 +174,16 @@ def parse_feed(raw, source):
             continue
         stamp = published(fields.get("pubDate") or fields.get("published") or fields.get("date") or fields.get("updated") or "")
         basis = "publication" if (fields.get("pubDate") or fields.get("published") or fields.get("date")) else "publisher update" if fields.get("updated") else "unknown"
+        mention_text = title + " " + " ".join(fields.get(key, "") for key in ("description", "summary", "content", "encoded"))
+        if source.get("include_terms") and not any(term.casefold() in text(mention_text, MAX_BYTES).casefold() for term in source["include_terms"]):
+            continue
+        cves = sorted(set(CVE.findall(mention_text.upper())))
+        require(len(cves) <= 100, "An article exceeds the CVE mention bound; source review is required.")
         articles.append({"id": "feed-" + hashlib.sha256(url.encode()).hexdigest()[:20], "title": title, "url": url,
             "source_id": source["id"], "source_name": source["name"], "kind": source["kind"], "published_at": stamp,
-            "event_date": None, "date_basis": basis, "summary": "", "cves": sorted(set(CVE.findall(title.upper()))),
+            "event_date": None, "date_basis": "filing" if source["kind"] == "filing" else basis, "summary": "", "cves": cves,
             "tags": [], "exploitation": "unknown", "references": [], "origin": "publisher-feed"})
-    require(articles, "No safe article links were available in the publisher feed.")
+    require(articles or source.get("include_terms"), "No safe article links were available in the publisher feed.")
     return articles
 
 
@@ -177,7 +206,7 @@ def update_kev(cached):
     attempted = now()
     try:
         raw = fetch(CATALOG_URL)
-        catalog = json.loads(raw)
+        catalog = json.loads(raw, parse_constant=reject_constant)
         validate_catalog(catalog)
         return {"status": "ok", "last_attempt": attempted, "last_success": now(), "error": None,
                 "sha256": hashlib.sha256(raw).hexdigest(), "catalog": catalog}
@@ -246,7 +275,7 @@ def validate_observation(observation):
 
 
 def validate_registry(registry):
-    require(registry.get("schema_version") == 1 and isinstance(registry.get("sources"), list) and 1 <= len(registry["sources"]) <= 32, "Unexpected source registry.")
+    require(registry.get("schema_version") == 1 and isinstance(registry.get("sources"), list) and 1 <= len(registry["sources"]) <= 96, "Unexpected source registry.")
     seen = set()
     for source in registry["sources"]:
         require(re.fullmatch(r"[a-z0-9-]{1,80}", source["id"]) and source["id"] not in seen, "Invalid source identity.")
@@ -254,15 +283,30 @@ def validate_registry(registry):
         require(source["kind"] in KINDS and isinstance(source["name"], str) and len(source["name"]) <= 100, "Invalid source metadata.")
         require(safe_url(source["url"]) == source["url"] and safe_url(source["home"]) is not None, "Invalid source URL.")
         require(isinstance(source["article_hosts"], list) and 1 <= len(source["article_hosts"]) <= 8 and all(safe_url("https://" + host + "/") is not None for host in source["article_hosts"]), "Invalid publisher hosts.")
+        if "include_terms" in source:
+            require(isinstance(source["include_terms"], list) and 1 <= len(source["include_terms"]) <= 12 and all(isinstance(term, str) and 1 <= len(term) <= 80 for term in source["include_terms"]), "Invalid source selection terms.")
     return registry["sources"]
 
 
-def build_snapshot(start, end, refresh=True):
-    require(start <= end and (end - start).days <= 370, "History window must be at most370days.")
+def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=40):
+    from .mitigations import build_briefs, merge_retained
+
+    require(start <= end and (end - start).days <= 3661, "History window must be at most ten years.")
+    require(type(enrich_limit) is int and 0 <= enrich_limit <= 2000, "CVE enrichment limit must be0..2000.")
     sources = validate_registry(read_json(ROOT / "config/sources.json", 128 * 1024))
     cache_path = STATE / "public-cache.json"
     cache = read_json(cache_path) if cache_path.exists() else {"sources": {}, "kev": {}}
     validate_cache(cache, sources)
+    previous = resume_deployed(sources, cache) if resume_public else None
+    require(not resume_public or previous is not None, "The deployed snapshot could not be resumed safely; preserving the current publication.")
+    cve_path = STATE / "cve-projections.json"
+    retained = read_json(cve_path) if cve_path.exists() else {}
+    require(isinstance(retained, dict) and len(retained) <= 15000, "Invalid retained CVE projections.")
+    if previous and isinstance(previous.get("mitigations"), dict):
+        require(len(previous["mitigations"]) <= 15000, "Invalid deployed CVE projection count.")
+        for cve, candidate in previous["mitigations"].items():
+            retained[cve] = merge_retained(retained.get(cve), candidate, cve, safe_url, published)
+        require(len(retained) <= 15000, "Merged CVE projections exceed their bound.")
     if refresh:
         with ThreadPoolExecutor(max_workers=4) as pool:
             futures = {source["id"]: pool.submit(update_source, source, cache["sources"].get(source["id"], {})) for source in sources}
@@ -275,7 +319,7 @@ def build_snapshot(start, end, refresh=True):
         observation = cache["sources"].get(source["id"], {})
         health.append({"id": source["id"], "name": source["name"], "kind": source["kind"], "url": source["home"],
             "status": observation.get("status", "not_fetched"), "last_attempt": observation.get("last_attempt"),
-            "last_success": observation.get("last_success"), "error": observation.get("error"), "articles": len(observation.get("articles", []))})
+            "last_success": observation.get("last_success"), "error": observation.get("error"), "sha256": observation.get("sha256"), "articles": len(observation.get("articles", []))})
         articles.extend(observation.get("articles", []))
     kev = cache["kev"]
     for item in kev.get("catalog", {}).get("vulnerabilities", []):
@@ -292,10 +336,10 @@ def build_snapshot(start, end, refresh=True):
             "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=" + ident,
             "source_id": "cisa-kev", "source_name": "CISA Known Exploited Vulnerabilities", "kind": "kev", "published_at": added,
             "event_date": None, "date_basis": "CISA catalog addition", "summary": text(item.get("shortDescription"), 420),
-            "cves": [ident], "tags": [text(item.get("vendorProject"), 80), text(item.get("product"), 100)],
+            "cves": [ident], "tags": [value for value in (text(item.get("vendorProject"), 80), text(item.get("product"), 100)) if value],
             "exploitation": "known", "references": [{"label": "CVE record", "url": "https://www.cve.org/CVERecord?id=" + ident}], "origin": "cisa-kev"})
     health.append({"id": "cisa-kev", "name": "CISA KEV", "kind": "advisory", "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
-        "status": kev.get("status", "not_fetched"), "last_attempt": kev.get("last_attempt"), "last_success": kev.get("last_success"), "error": kev.get("error"), "articles": sum(article["origin"] == "cisa-kev" for article in articles)})
+        "status": kev.get("status", "not_fetched"), "last_attempt": kev.get("last_attempt"), "last_success": kev.get("last_success"), "error": kev.get("error"), "sha256": kev.get("sha256"), "articles": sum(article["origin"] == "cisa-kev" for article in articles)})
     history_path = ROOT / "config/history.json"
     history = read_json(history_path, 2 * 1024 * 1024) if history_path.exists() else {"entries": []}
     require(isinstance(history.get("entries"), list) and len(history["entries"]) <= 500, "Invalid history collection.")
@@ -303,7 +347,7 @@ def build_snapshot(start, end, refresh=True):
         validate_article(entry)
         require(entry["origin"] == "library-curation", "History entries require curated provenance.")
         articles.append(entry)
-    selected = {}
+    selected, duplicates = {}, 0
     for article in articles:
         validate_article(article)
         stamp = article_date(article)[:10]
@@ -313,20 +357,88 @@ def build_snapshot(start, end, refresh=True):
                     continue
             except ValueError:
                 continue
-        require(safe_url(article.get("url")) is not None, "An article contains an unsafe link.")
+        canonical = safe_url(article.get("url"))
+        require(canonical is not None, "An article contains an unsafe link.")
         # Source URL identity preserves distinct publisher coverage; curated explanations take precedence.
-        selected[article["url"]] = article
+        if canonical in selected:
+            duplicates += 1
+            article = {**article, "cves": sorted(set(article["cves"]) | set(selected[canonical]["cves"]))}
+            validate_article(article)
+        selected[canonical] = {**article, "url": canonical}
     require(len(selected) <= MAX_ARTICLES, "Article collection exceeds its limit.")
     ordered = sorted(selected.values(), key=article_date, reverse=True)
     require(ordered, "No articles are available in the selected window; preserving the previous deployment.")
+    require(len({article["id"] for article in ordered}) == len(ordered), "Article identities must be unique.")
     counts = {origin: sum(article["origin"] == origin for article in ordered) for origin in ("cisa-kev", "library-curation", "publisher-feed")}
-    snapshot = {"schema_version": 1, "generated_at": now(), "window": {"start": start.isoformat(), "end": end.isoformat()},
+    prepared_at = now()
+    briefs, projections, mitigation_stats = build_briefs(ordered, kev.get("catalog", {}), retained, refresh, enrich_limit, fetch, text, safe_url, published, prepared_at)
+    snapshot = {"schema_version": 2, "generated_at": now(), "window": {"start": start.isoformat(), "end": end.isoformat()},
         "articles": ordered, "sources": health, "history_reviewed_at": history.get("curated_at"),
+        "mitigations": briefs, "mitigation_coverage": mitigation_stats, "deduplication": {"url_duplicates_removed": duplicates},
+        "refresh": {"requested_minutes": 5, "mode": "scheduled-check", "status_url": "https://github.com/TeamStarWolf/intelligence-hub/actions/workflows/publish.yml",
+            "notes": ["GitHub requests collection every five minutes; scheduling can be delayed, dropped or disabled after repository inactivity.", "The visible page checks the saved snapshot every five minutes. This is not a guaranteed five-minute news delivery service.", "Snapshot and source dates describe the last published collection; unchanged checks can complete without republishing. Latest workflow outcomes are linked separately."]},
         "coverage": {"kev_records": counts["cisa-kev"], "curated_events": counts["library-curation"], "feed_articles": counts["publisher-feed"],
-            "notes": ["This is a growing selection, not every cyber incident or vulnerability.", "KEV dates indicate catalog addition, not first disclosure or first exploitation.", "RSS feeds usually expose recent posts only; the full year is not a backfill of every publisher.", "Unknown publication dates remain explicit; stale or failed sources retain their last successful cache.", "Headlines link to publishers; full article bodies are not copied. No environment exposure is inferred."]},
+            "notes": ["This is a growing decade selection, not every cyber incident, article or vulnerability.", "KEV dates indicate catalog addition, not first disclosure or first exploitation.", "RSS usually exposes recent posts; historical curation and legacy feeds do not form a complete decade archive.", "Unknown dates remain explicit. Failed sources retain last-good input when available; public snapshot resume helps retain prior publisher items.", "Per-feed retained history is bounded to600articles. Missing, evicted or changed inputs can leave coverage gaps.", "Canonical article URLs are deduplicated; distinct publishers covering one CVE remain separate evidence.", "CVE mentions can come from RSS metadata/body text; they do not mean every mentioned CVE was exploited.", "Headlines link to publishers; full article bodies are not copied. No environment exposure is inferred.", "Threatpost is a legacy archive with observed August2022 items; a successful fetch does not imply current reporting.", "SEC direct filing access is pending after HTTP403; news reporting about filings is not complete Item1.05/8.01 coverage."]},
         "integrations": {"xai": {"status": "not_connected", "message": "Grok X Search is a separate supported API route; access and zero-additional-spend eligibility are not established. No model calls are enabled."},
-                         "x": {"status": "not_connected", "message": "Personal X timeline/bookmarks are not connected or published. Public X search is not account authorization."}}}
+                         "x": {"status": "not_connected", "message": "Personal X timeline/bookmarks are not connected or published. Future article sharing is recorded for owner review; no automatic posts are enabled."},
+                         "sec": {"status": "not_connected", "message": "Direct SEC filing-feed intake returned HTTP403. Operational contact and accepted access/schema remain prerequisites; no direct filings are claimed."}}}
+    snapshot["content_revision"] = content_revision(snapshot)
+    snapshot["layout_revision"] = hashlib.sha256(b"".join((ROOT / "site" / name).read_bytes() for name in ("index.html", "styles.css", "app.js", "icon.svg"))).hexdigest()
+    changed = previous is None or previous.get("content_revision") != snapshot["content_revision"] or previous.get("layout_revision") != snapshot["layout_revision"]
     if refresh:
         write_json(cache_path, cache)
-    write_json(ROOT / "site/data/feed.json", snapshot)
-    return {"articles": len(ordered), "source_ok": sum(item["status"] == "ok" for item in health), "source_total": len(health), "coverage": snapshot["coverage"], "generated_at": snapshot["generated_at"]}
+        write_json(cve_path, projections, compact=True)
+    write_json(ROOT / "site/data/feed.json", snapshot, compact=True)
+    result = {"articles": len(ordered), "source_ok": sum(item["status"] == "ok" for item in health), "source_total": len(health), "coverage": snapshot["coverage"], "mitigations": mitigation_stats, "changed": changed, "generated_at": snapshot["generated_at"]}
+    write_json(STATE / "collection-result.json", result)
+    return result
+
+
+def content_revision(snapshot):
+    # Retrieval clocks alone do not create a new public artifact or reset source freshness.
+    value = {key: item for key, item in snapshot.items() if key not in {"generated_at", "content_revision", "layout_revision"}}
+    value["sources"] = [{key: item for key, item in source.items() if key not in {"last_attempt", "last_success", "sha256"}} for source in snapshot["sources"]]
+    value["mitigations"] = {cve: {key: item for key, item in record.items() if key not in {"retrieved_at", "source_attempted_at"}} for cve, record in snapshot["mitigations"].items()}
+    value["mitigation_coverage"] = {key: item for key, item in snapshot["mitigation_coverage"].items() if key != "attempted_this_run"}
+    return hashlib.sha256(json.dumps(value, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
+def resume_deployed(sources, cache):
+    """Use only this hub's fixed public snapshot as an additional, validated history input."""
+    try:
+        previous = json.loads(fetch(PUBLIC_FEED, 16 * 1024 * 1024), parse_constant=reject_constant)
+        require(isinstance(previous, dict) and previous.get("schema_version") in (1, 2), "Unsupported deployed snapshot.")
+        require(isinstance(previous.get("articles"), list) and len(previous["articles"]) <= MAX_ARTICLES, "Invalid deployed articles.")
+        require(isinstance(previous.get("sources"), list) and len(previous["sources"]) <= 100, "Invalid deployed source ledger.")
+        registry = {source["id"]: source for source in sources}
+        retained = {}
+        for article in previous["articles"]:
+            validate_article(article)
+            source = registry.get(article["source_id"])
+            if article["origin"] == "publisher-feed" and source and article["source_name"] == source["name"] and article["kind"] == source["kind"] and safe_url(article["url"], source["article_hosts"]):
+                retained.setdefault(source["id"], {})[article["url"]] = article
+        proposed = {"sources": dict(cache["sources"]), "kev": cache["kev"]}
+        observations = {}
+        for observation in previous["sources"]:
+            require(isinstance(observation, dict) and isinstance(observation.get("id"), str), "Invalid deployed source identity.")
+            source_id = observation["id"]
+            require(source_id not in observations, "Duplicate deployed source identity.")
+            projected = {key: observation.get(key) for key in ("status", "last_attempt", "last_success", "error", "sha256")}
+            # The initial schema did not publish response hashes; preserve dates without inventing a hash.
+            if projected["status"] == "ok" and projected["sha256"] is None and previous["schema_version"] == 1:
+                projected["status"] = "not_fetched"
+            validate_observation(projected)
+            observations[source_id] = projected
+        for source_id, articles in retained.items():
+            old = cache["sources"].get(source_id, {})
+            remote = observations.get(source_id, {})
+            def observed_at(observation):
+                return published(observation.get("last_attempt") or "") or ""
+            observation = remote if observed_at(remote) > observed_at(old) else old
+            combined = {**articles, **{article["url"]: article for article in old.get("articles", [])}}
+            proposed["sources"][source_id] = {**observation, "articles": sorted(combined.values(), key=article_date, reverse=True)[:600]}
+        validate_cache(proposed, sources)
+        cache.update(proposed)
+        return previous
+    except (OSError, ValueError, TypeError, KeyError, RecursionError):
+        return None
