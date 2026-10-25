@@ -6,8 +6,10 @@
 > **How to read this.** Each item names a primary source wherever one exists. Exploitation labels:
 > 🔴 **CONFIRMED** means a vendor, CISA KEV or the primary research team confirms in-the-wild exploitation or compromise.
 > 🟠 **REPORTED / CLAIMED** means attempts or claims exist but no primary source confirms successful exploitation.
-> 🟢 **NONE KNOWN** means no public report of exploitation as of 2026-10-25.
+> 🟢 **NONE KNOWN** means the sources reviewed on the **2026-10-25 retrieval** did not establish exploitation. That is not proof of absence.
 > X posts are community **claims** unless a linked primary source confirms them.
+>
+> **Dates stay separate.** Compilation is `generated_at` **2026-10-25**, a calendar day with no clock. KEV `date_added` is CISA's catalog-addition date. X `created_at` is the poster's publication time. Exploitation labels, the KEV catalog (version `2026.10.23`, 1,756 entries), and each `likes_at_fetch` count were **retrieved on 2026-10-25**. The retrieval clock for those observations was not retained. The newest cited post was published at `2026-10-25T01:09:29Z`, so the X retrieval was not earlier than that publication. The hub `feed.json` this report cites was generated at `2026-10-25T00:50:51Z`; that is the snapshot's generation time, and the clock at which this report read it was not retained. The machine-readable record is `retrievals` in [`data.json`](data.json).
 
 ---
 
@@ -32,9 +34,9 @@ At the same time, CISA added **8 CVEs to KEV**: Plex ×4, SiteGuard, Siemens Sof
 
 | Metric | Value | Source |
 |---|---|---|
-| CISA KEV additions | **8** (6 on Oct 20, 2 on Oct 23) | [KEV JSON](https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json) v2026.10.23 |
-| KEV catalog size | 1,756 entries | same |
-| KEV adds with known ransomware use | 0 of 8 (all "Unknown") | same |
+| CISA KEV additions | **8** (6 on Oct 20, 2 on Oct 23) | [KEV JSON](https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json) v2026.10.23, retrieved 2026-10-25 |
+| KEV catalog size | 1,756 entries at that retrieval | same retrieval; catalog version is not the retrieval date |
+| KEV adds with known ransomware use | 0 of 8 (all "Unknown") | same retrieval |
 | Highest CNA CVSS this week | 10.0, GitLab CVE-2026-110264 (v3.1) | [CVE record](https://www.cve.org/CVERecord?id=CVE-2026-110264) |
 | Top 10 items with confirmed exploitation/compromise | 7 of 10 | §2 |
 | Government advisories of note | CISA PHP alert (updated Oct 23), AA26-293A SafePay, CISA AI token guidance | §2, §4 |
@@ -240,6 +242,8 @@ flowchart LR
 
 ## 3. CISA KEV additions (Oct 19–25)
 
+The rows below are the additions whose `date_added` falls in this week, taken from the KEV catalog **retrieved on 2026-10-25** (catalog version `2026.10.23`, 1,756 entries at retrieval). `date_added` is the catalog-addition date. The retrieval clock was not retained.
+
 | Date added | CVE | Vendor / Product | Weakness | Fed. due | Ransomware | CNA CVSS |
 |---|---|---|---|---|---|---|
 | 2026-10-20 | [CVE-2026-96652](https://www.cve.org/CVERecord?id=CVE-2026-96652) | Plex Media Server | SSRF (CWE-918) | 2026-11-03 | Unknown | 5.3 v4 / 4.3 v3.1 |
@@ -336,7 +340,7 @@ flowchart TD
 
 ## 6. What the community said on X
 
-From the 671 accounts @WolfenLabs follows, 508 were classed security-relevant by keyword. We read 315 of them directly with `from:` queries, plus the home timeline and four topic searches. Every quote below is a **claim by the poster**. ✅ means a primary source in this report corroborates the substance; ⚠️ means it is unverified. Posts are quoted as of fetch time.
+From the 671 accounts @WolfenLabs follows, 508 were classed security-relevant by keyword. We read 315 of them directly with `from:` queries, plus the home timeline and four topic searches. Every quote below is a **claim by the poster**. ✅ means a primary source in this report corroborates the substance; ⚠️ means it is unverified. Like counts (`likes_at_fetch`) were **retrieved on 2026-10-25**. `created_at` is the poster's publication time. The newest cited post was published at `2026-10-25T01:09:29Z`, so this retrieval was not earlier than that. The exact retrieval clock was not retained, and these counts are not current.
 
 **PHP2Shell**
 - ✅ [@ImposeCost (GreyNoise), Oct 22](https://x.com/ImposeCost/status/2113406222816657561): "An actor is attempting to exploit PHP2SHELL vulnerabilities in order to install patches. Interesting." Follow-up: ["The operative word is 'attempt.' There's a lot of observed attempts."](https://x.com/ImposeCost/status/2113285978219843952) This matches CISA's "no successful exploitation observed."
@@ -406,11 +410,11 @@ From the 671 accounts @WolfenLabs follows, 508 were classed security-relevant by
 - **Sources:**
   - Public web only, no logins. Arista advisory 0199 returned HTTP 406 to our fetcher and Help Net Security returned 403; Arista details come from the CVE record and reviewer confirmation of the advisory.
   - Some items (breaches, APT28, Phantom, Tor) rely on reputable secondary reporting and are labeled as such.
-- **Exploitation labels** reflect public information as of 2026-10-25 and can change quickly, PHP2Shell especially.
+- **Exploitation labels** are the public status **retrieved on 2026-10-25**. That calendar day is also the compilation date, and the two are stored separately. Labels can change quickly, PHP2Shell especially. The retrieval clock was not retained.
 - **CVSS:** scores are CNA scores from cvelistV5. v3.1 and v4.0 are not directly comparable. CVE-2026-115560 had no published record at fetch time.
 - **X coverage:**
   - The search API returned at most 25 posts per relevancy query, clustered on Oct 22. The home timeline covered only about 3 hours.
-  - Coverage of Oct 19–21 and Oct 24–25 is thinner. Like counts are a snapshot, and engagement isn't accuracy.
+  - Coverage of Oct 19–21 and Oct 24–25 is thinner. Like counts are the 2026-10-25 retrieval, and engagement is not accuracy.
 - **Feed sweep:** 34 RSS feeds. Some feeds only expose the most recent N items, so early-week counts may be undercounted. Sunday Oct 25 is partial (compiled early UTC).
 - **ATT&CK:** IDs marked [map] are analyst mappings, not source statements.
 - Nothing in this report means any specific system of the reader's is affected. It is a general threat summary.
@@ -444,4 +448,4 @@ From the 671 accounts @WolfenLabs follows, 508 were classed security-relevant by
 **Secondary:** BleepingComputer, The Hacker News, SecurityWeek, The Register, Ars Technica, Dark Reading, Infosecurity, CyberScoop, TechCrunch, SecurityAffairs, Risky Biz (links inline).
 
 ---
-*Machine-readable companion: [`data.json`](data.json). Charts are in [`charts/`](charts/). Generated on an isolated box from public sources. X was accessed read-only.*
+*Machine-readable companion: [`data.json`](data.json), including `retrievals`. Charts are in [`charts/`](charts/). Compiled on an isolated box from public sources. X was accessed read-only. Compilation date, retrieval dates, publication dates and catalog-addition dates are separate fields.*

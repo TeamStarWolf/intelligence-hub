@@ -7,11 +7,47 @@
     "iso_week": "2026-W43"
   },
   "generated_at": "2026-10-25",
+  "retrievals": {
+    "note": "Retrieval dates record when this report observed a source. They are separate from generated_at (report compilation), from publication dates, from event dates, and from CISA date_added values. A null retrieved_at means the calendar day was retained and the clock time was not.",
+    "kev_catalog": {
+      "url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+      "catalog_version": "2026.10.23",
+      "catalog_count_at_retrieval": 1756,
+      "retrieved_on": "2026-10-25",
+      "retrieved_at": null,
+      "note": "catalog_version is the catalog's own version string. date_added on each kev_additions row is CISA's catalog-addition date. retrieved_on is the calendar day this report read the catalog. The retrieval clock was not retained."
+    },
+    "exploitation_status": {
+      "retrieved_on": "2026-10-25",
+      "retrieved_at": null,
+      "note": "Each top10 exploitation value is the public status observed on retrieved_on from the cited sources. It is not generated_at, not a vulnerability publication date, and not an event date. NONE_KNOWN means the cited sources did not establish exploitation on that retrieval; it is not proof of absence."
+    },
+    "x_posts": {
+      "retrieved_on": "2026-10-25",
+      "retrieved_at": null,
+      "not_before": "2026-10-25T01:09:29Z",
+      "note": "likes_at_fetch is the like count at retrieval. created_at is the poster's publication time. The newest cited created_at is 2026-10-25T01:09:29Z, so retrieval was not earlier than that publication. The exact retrieval clock was not retained."
+    },
+    "hub_snapshot": {
+      "artifact": "feed.json",
+      "snapshot_generated_at": "2026-10-25T00:50:51Z",
+      "read_on": "2026-10-25",
+      "read_at": null,
+      "note": "snapshot_generated_at is the hub file's own generation time, as cited by this report. read_on is the calendar day this report used that file. The clock at which the file was read was not retained."
+    },
+    "feed_sweep": {
+      "feeds": 34,
+      "items_swept": 321,
+      "retrieved_on": "2026-10-25",
+      "retrieved_at": null,
+      "note": "Headline counts from the public RSS sweep observed on this calendar day. The retrieval clock was not retained. Feed item publication dates remain on the source items and are not restated here."
+    }
+  },
   "generator": "Grok Bot",
   "exploitation_labels": {
     "CONFIRMED": "Vendor, CISA KEV or primary research confirms in-the-wild exploitation/compromise",
     "REPORTED": "Attempts or claims; no primary confirmation of successful exploitation",
-    "NONE_KNOWN": "No public exploitation reports as of generation"
+    "NONE_KNOWN": "No public exploitation report in the sources reviewed on the 2026-10-25 retrieval. This is not proof of absence."
   },
   "stats": {
     "kev_additions": 8,
@@ -216,6 +252,7 @@
         "PHP < 8.5.12/8.4.27/8.3.36/8.2.35 (mod_php, PHP-FPM, php-cgi, FrankenPHP, LiteSpeed)"
       ],
       "exploitation": "REPORTED",
+      "exploitation_retrieved_on": "2026-10-25",
       "cvss": [
         {
           "cve": "CVE-2026-109618",
@@ -270,6 +307,7 @@
         "ConnectWise Cloud Backup / SaaS Security / Cloud Management multi-tenant apps; Microsoft Entra tenants"
       ],
       "exploitation": "CONFIRMED",
+      "exploitation_retrieved_on": "2026-10-25",
       "cvss": [],
       "primary_sources": [
         "https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/"
@@ -348,6 +386,7 @@
         "eMudhra emSign G3 intermediates (6 TLS, 2 code-signing); trust stores"
       ],
       "exploitation": "NONE_KNOWN",
+      "exploitation_retrieved_on": "2026-10-25",
       "cvss": [],
       "primary_sources": [
         "https://blog.talosintelligence.com/compromised-intermediate-certificates/",
@@ -379,6 +418,7 @@
         "litellm==1.107.0 (PyPI) and container images"
       ],
       "exploitation": "CONFIRMED",
+      "exploitation_retrieved_on": "2026-10-25",
       "cvss": [],
       "primary_sources": [
         "https://docs.litellm.ai/blog/security-incident-oct-21-2026-attack-chain",
@@ -425,6 +465,7 @@
         "VCO 5.2.0-5.2.3.18, 6.1.0-6.1.3.10, 6.4.0-6.4.2.12 (CVE record ranges)"
       ],
       "exploitation": "CONFIRMED",
+      "exploitation_retrieved_on": "2026-10-25",
       "cvss": [
         {
           "cve": "CVE-2026-114625",
@@ -462,6 +503,7 @@
         "richdocumentscode < 26.4.303"
       ],
       "exploitation": "CONFIRMED",
+      "exploitation_retrieved_on": "2026-10-25",
       "cvss": [
         {
           "cve": "CVE-2026-110447",
@@ -504,6 +546,7 @@
         "Siemens Software Center"
       ],
       "exploitation": "CONFIRMED",
+      "exploitation_retrieved_on": "2026-10-25",
       "cvss": [
         {
           "cve": "CVE-2026-96656",
@@ -539,6 +582,7 @@
         "PAN-OS / Cloud NGFW GlobalProtect"
       ],
       "exploitation": "CONFIRMED",
+      "exploitation_retrieved_on": "2026-10-25",
       "cvss": [
         {
           "cve": "CVE-2026-0257",
@@ -584,6 +628,7 @@
         "Edge VPN and backup products per advisory"
       ],
       "exploitation": "CONFIRMED",
+      "exploitation_retrieved_on": "2026-10-25",
       "cvss": [],
       "primary_sources": [
         "https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-293a"
@@ -624,6 +669,7 @@
         "GitLab self-managed, versions back to 7.0; Ruby Onigmo"
       ],
       "exploitation": "NONE_KNOWN",
+      "exploitation_retrieved_on": "2026-10-25",
       "cvss": [
         {
           "cve": "CVE-2026-110264",
@@ -786,6 +832,7 @@
       "author": "0xdabbad00",
       "created_at": "2026-10-22T16:52:45.000Z",
       "likes_at_fetch": 114,
+      "retrieved_on": "2026-10-25",
       "text": "Things keep happening this week, so just so we're all clear on the rules, no one is allowed to disclose vulns or breaches after Friday morning, until Monday. Them's the rules.",
       "label": "claim"
     },
@@ -794,6 +841,7 @@
       "author": "DailyDarkWeb",
       "created_at": "2026-10-22T23:06:30.000Z",
       "likes_at_fetch": 14,
+      "retrieved_on": "2026-10-25",
       "text": "🇬🇧 🚨 UPDATE: EVEREST STARTS COUNTDOWN ON ALLEGED 590 GB PWC DATA LEAK\n\nFollowing its earlier leak-site claim against PwC, the Everest ransomware and extortion group has updated the listing with a publication countdown timer and a description of the allegedly stolen data.\n\nThe https://t.co/BeuR4VCgPq",
       "label": "claim"
     },
@@ -802,6 +850,7 @@
       "author": "DailyDarkWeb",
       "created_at": "2026-10-25T01:09:29.000Z",
       "likes_at_fetch": 3,
+      "retrieved_on": "2026-10-25",
       "text": "🚨 Keystone hardware wallet confirms customer data breach\n\nKeystone says it detected unauthorized access to its official website on Oct 20. After reviewing API activity with Shopify, it confirmed on Oct 23 that a third party obtained customer shipping information.\n\n* Exposed: https://t.co/gBQLs73Xfs https://t.co/VwUyXWlpsN",
       "label": "claim"
     },
@@ -810,6 +859,7 @@
       "author": "Daily_CyberSec",
       "created_at": "2026-10-22T15:25:27.000Z",
       "likes_at_fetch": 1,
+      "retrieved_on": "2026-10-25",
       "text": "Arista says VeloCloud Orchestrator vulnerability CVE-2026-114625, a CVSS 9.9 SQL injection, is exploited in the wild. Upgrade on-prem VCO now.\n\n#Arista #VeloCloud #CVE2026114625 #SQLInjection #SDWAN #ExploitedInTheWild #ZeroDay #CyberSecurity\nhttps://t.co/o8mnikz1tx",
       "label": "claim"
     },
@@ -818,6 +868,7 @@
       "author": "HunterMapping",
       "created_at": "2026-10-22T01:47:23.000Z",
       "likes_at_fetch": 91,
+      "retrieved_on": "2026-10-25",
       "text": "🚨Alert🚨CVE-2026-109618 &amp; CVE-2026-109619 (CVSS v4.0: 9.2): Two Pre-Auth Remote Code\nExecution (RCE) Flaws in the PHP Core Leaked Online Ahead of Coordinated Disclosure.\n🔥PoC :https://t.co/c4bK9U1CkK\n📊 145M+ Services are found on the https://t.co/bx7tUdqFcC yearly.\n🔗Hunter https://t.co/Ltztf3Vuyl",
       "label": "claim"
     },
@@ -826,6 +877,7 @@
       "author": "ImposeCost",
       "created_at": "2026-10-22T15:06:54.000Z",
       "likes_at_fetch": 46,
+      "retrieved_on": "2026-10-25",
       "text": "The operative word is \"attempt.\" There's a lot of observed attempts.",
       "label": "claim"
     },
@@ -834,6 +886,7 @@
       "author": "ImposeCost",
       "created_at": "2026-10-22T23:04:43.000Z",
       "likes_at_fetch": 295,
+      "retrieved_on": "2026-10-25",
       "text": "An actor is attempting to exploit PHP2SHELL vulnerabilities in order to install patches. Interesting.",
       "label": "claim"
     },
@@ -842,6 +895,7 @@
       "author": "IntCyberDigest",
       "created_at": "2026-10-22T23:00:50.000Z",
       "likes_at_fetch": 4498,
+      "retrieved_on": "2026-10-25",
       "text": "‼️ BREAKING: eMudhra, the Indian certificate authority whose private key was the number 4, is quitting the TLS business.\n\nIt blames social media for scrutiny \"out of proportion\" to a unit worth ~1% of revenue.\n\n8 of its CA keys were numbers below 256, cracked in milliseconds. https://t.co/EEwQ8JboA8 https://t.co/KZKfaHOzDN",
       "label": "claim"
     },
@@ -850,6 +904,7 @@
       "author": "Jhaddix",
       "created_at": "2026-10-24T23:40:04.000Z",
       "likes_at_fetch": 91,
+      "retrieved_on": "2026-10-25",
       "text": "We’ve seen plenty of people try to vibe code the php exploit who have no experience in the domain. Failure. Over and over. Then people who know what they are doing in exploit dev, marginal success. \n\nPeople would say anyone with a frontier LLM can just say “hack this site, make",
       "label": "claim"
     },
@@ -858,6 +913,7 @@
       "author": "Kostastsale",
       "created_at": "2026-10-22T21:14:39.000Z",
       "likes_at_fetch": 242,
+      "retrieved_on": "2026-10-25",
       "text": "Really proud of what we managed to capture and put together at Threat Hunting Labs around PHP2Shell in just a day of non-stop work. I'm tired but wanted to share this quickly with the community.\n\nWe took real exploitation activity and turned it into something the whole community https://t.co/RU4ddLfkIX https://t.co/mwZNGtTISo",
       "label": "claim"
     },
@@ -866,6 +922,7 @@
       "author": "LiveOverflow",
       "created_at": "2026-10-24T23:21:11.000Z",
       "likes_at_fetch": 61,
+      "retrieved_on": "2026-10-25",
       "text": "Step 1: Set up php2shell as a CTF using one of the hardest (or outright unexploitable) configurations. Post it on Hacker News to maximize traffic and make it even harder.\n\nStep 2: Confidently declare that php2shell is practically impossible to exploit.\n\nMeanwhile: some shitty",
       "label": "claim"
     },
@@ -874,6 +931,7 @@
       "author": "LiveOverflow",
       "created_at": "2026-10-25T01:01:30.000Z",
       "likes_at_fetch": 23,
+      "retrieved_on": "2026-10-25",
       "text": "I wanted to see if agent can exploit php2shell behind a reverse proxy. I tried on CloudRun, where the requests have to go through \"Google Frontend\" server.\n\nIt works... https://t.co/SMruLvtO1v",
       "label": "claim"
     },
@@ -882,6 +940,7 @@
       "author": "PyroTek3",
       "created_at": "2026-10-22T15:27:21.000Z",
       "likes_at_fetch": 207,
+      "retrieved_on": "2026-10-25",
       "text": "Starting on November 4th, Entra ID users will be able to create agent identity blueprints unless this capability is disabled. I strongly recommend you disable this capability so you don't have users creating  agent identity blueprints.\n\nThere's  a setting to turn this off in https://t.co/CHeQnh63Cc",
       "label": "claim"
     },
@@ -890,6 +949,7 @@
       "author": "SEKTOR7net",
       "created_at": "2026-10-22T11:37:00.000Z",
       "likes_at_fetch": 185,
+      "retrieved_on": "2026-10-25",
       "text": "EDR evasion with LLM behind a steering wheel.\n\nRun an LLM in a \"while\" loop against Cortex XDR with Binary Ninja attached, and it extracts decrypted YARA rules, thousands of behavioral detections, and even the product's local ML models.\n\nA post by Adam Chester (@_xpn_)\n\nSource:",
       "label": "claim"
     },
@@ -898,6 +958,7 @@
       "author": "TheHackersNews",
       "created_at": "2026-10-21T18:02:10.000Z",
       "likes_at_fetch": 393,
+      "retrieved_on": "2026-10-25",
       "text": "🚨 LiteLLM 1.107.0 compromised in a supply chain attack.\n\nMalicious PyPI packages and Docker images delivered a credential stealer and backdoor.\n\n⚠️ The malware runs at Python startup, targeting cloud credentials, private keys, and AI tool credentials.\n\n🔗 Full story: https://t.co/ANqBuYaGx5",
       "label": "claim"
     },
@@ -906,6 +967,7 @@
       "author": "TheRecord_Media",
       "created_at": "2026-10-22T16:49:41.000Z",
       "likes_at_fetch": 15,
+      "retrieved_on": "2026-10-25",
       "text": "A Chinese government-aligned hacking group used automated tools to carry out the recent supply chain attack on ConnectWise and is using the same techniques to try to compromise hundreds of other organizations around the globe, Microsoft warned https://t.co/sQxNhtwBeX",
       "label": "claim"
     },
@@ -914,6 +976,7 @@
       "author": "The_Cyber_News",
       "created_at": "2026-10-22T09:33:51.000Z",
       "likes_at_fetch": 144,
+      "retrieved_on": "2026-10-25",
       "text": "🏮 China-Linked Hackers Use ARTEX AI to Target 2,250 Microsoft 365 Tenants After ConnectWise Breach\n\nDetails: https://t.co/ynLa0wQGDS\n\nChina-state-aligned hackers used ARTEX, an AI-powered penetration-testing framework, to attempt access to more than 2,250 Microsoft 365 tenants https://t.co/Bcza0o6f6s",
       "label": "claim"
     },
@@ -922,6 +985,7 @@
       "author": "UK_Daniel_Card",
       "created_at": "2026-10-22T20:17:11.000Z",
       "likes_at_fetch": 28,
+      "retrieved_on": "2026-10-25",
       "text": "These patch counters seems to be ignoring backported versions of PHP",
       "label": "claim"
     },
@@ -930,6 +994,7 @@
       "author": "_dirkjan",
       "created_at": "2026-10-22T19:03:48.000Z",
       "likes_at_fetch": 122,
+      "retrieved_on": "2026-10-25",
       "text": "Very cool technique to bypass SMB signing, appears to be patched on recent Windows versions. https://t.co/jq9dNpO38o",
       "label": "claim"
     },
@@ -938,6 +1003,7 @@
       "author": "itsnebulalol",
       "created_at": "2026-10-20T19:34:29.000Z",
       "likes_at_fetch": 3624,
+      "retrieved_on": "2026-10-25",
       "text": "The Indian company eMudhra literally made one of their private keys 0x4... the number 4. And another 0x73. https://t.co/R7yXu3tvnW https://t.co/JDF8j3Vx2c",
       "label": "claim"
     },
@@ -946,6 +1012,7 @@
       "author": "kmkz_security",
       "created_at": "2026-10-22T05:54:17.000Z",
       "likes_at_fetch": 4,
+      "retrieved_on": "2026-10-25",
       "text": "#php2shell the new #log4shell ?\n\nA lot of Noise, a lot of POC but no working payloads outside a dedicated lab and no (or a few?) shell caught in the wild.",
       "label": "claim"
     },
@@ -954,6 +1021,7 @@
       "author": "lopp",
       "created_at": "2026-10-22T19:32:40.000Z",
       "likes_at_fetch": 282,
+      "retrieved_on": "2026-10-25",
       "text": "Just a few of the biggest security incidents in the past week... we're still accelerating:\n\n* PHP2Shell: Two critical RCE bugs in PHP core \n* eMudhra: Eight intermediate certificates had extremely weak private keys due to a key-generation script error that created keys with tiny",
       "label": "claim"
     },
@@ -962,6 +1030,7 @@
       "author": "openbsd",
       "created_at": "2026-10-22T18:51:29.000Z",
       "likes_at_fetch": 70,
+      "retrieved_on": "2026-10-25",
       "text": "Errata patches released to address the eMudhra certificate compromise: https://t.co/yjC1vsBaLQ (More details: https://t.co/OdBh8wgrgL)",
       "label": "claim"
     },
@@ -970,6 +1039,7 @@
       "author": "silascutler",
       "created_at": "2026-10-22T18:59:27.000Z",
       "likes_at_fetch": 90,
+      "retrieved_on": "2026-10-25",
       "text": "New PHP2SHell tracker from the @Censysio ARC team :\n\nhttps://t.co/k6d8zrOJhp",
       "label": "claim"
     },
@@ -978,6 +1048,7 @@
       "author": "troyhunt",
       "created_at": "2026-10-22T23:27:28.000Z",
       "likes_at_fetch": 555,
+      "retrieved_on": "2026-10-25",
       "text": "The \"social media amplification\" is because this is, without doubt, one of the dumbest security flaws we've ever seen in this industry. Frankly, the criticism has been pretty proportionate to the potential impact of this, and I find that statement hugely tone deaf. https://t.co/CVfyjyUqR3",
       "label": "claim"
     },
@@ -986,6 +1057,7 @@
       "author": "wiz_io",
       "created_at": "2026-10-22T14:59:49.000Z",
       "likes_at_fetch": 45,
+      "retrieved_on": "2026-10-25",
       "text": "🚨Wiz Research is tracking Storm-0940, an ARTEX-using actor, as it Expands its targeting of IT and Software Vendors. Learn how the AI agent attacks Okta, Entra, and Cognito, and what it left behind in the logs.\nhttps://t.co/hDg8aJRHDG",
       "label": "claim"
     }
