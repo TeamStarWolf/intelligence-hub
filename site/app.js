@@ -9,6 +9,12 @@
   const pollInterval = 600000;
   const pageSize = 24;
   const maximumFeedBytes = 16 * 1024 * 1024;
+  const workflowApi = "https://api.github.com/repos/TeamStarWolf/intelligence-hub/actions/workflows/395429963/runs";
+  const workflowQueries = { recent: workflowApi + "?branch=main&per_page=10", schedule: workflowApi + "?event=schedule&branch=main&per_page=1" };
+  const maximumWorkflowBytes = 512 * 1024;
+  const workflowEvents = { workflow_dispatch: "Manual dispatch", push: "Push", schedule: "Automatic schedule" };
+  const workflowStatuses = { queued: "Queued", in_progress: "In progress", waiting: "Waiting", requested: "Requested", pending: "Pending", completed: "Completed" };
+  const workflowConclusions = { success: "Success", failure: "Failure", neutral: "Neutral", cancelled: "Cancelled", skipped: "Skipped", timed_out: "Timed out", action_required: "Action required", stale: "Stale", startup_failure: "Startup failure" };
   const cvePattern = /^CVE-\d{4}-\d{4,19}$/;
   const controls = Object.fromEntries(["search", "kind", "source", "exploitation", "mitigation", "year", "month", "preset", "sort"].map(key => [key, $("#" + key)]));
   let snapshot = null;
@@ -19,6 +25,10 @@
   let searchTimer = null;
   let lastAttempt = null;
   let lastRead = null;
+  let lastWorkflowAttempt = null;
+  let lastWorkflowAttemptTick = null;
+  let workflowController = null;
+  const workflowObservations = Object.fromEntries(["recent", "schedule"].map(key => [key, { value: null, read_at: null, attempted_at: null, error: null }]));
 
   function node(tag, className = "", text = "") {
     const element = document.createElement(tag);
@@ -520,6 +530,117 @@
     try { dialog.showModal(); dialog.scrollTop = 0; } catch (_) { showError("The guidance dialog could not open in this document. No external lookup or device action occurred."); }
   }
 
+  function requireWorkflow(condition) {
+    if (!condition) throw new Error("The public workflow response did not match this repository's supported run format.");
+  }
+
+  function workflowTime(value) {
+    requireWorkflow(typeof value === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(value));
+    const parsed = new Date(value);
+    requireWorkflow(Number.isFinite(parsed.getTime()) && parsed.toISOString() === value.replace("Z", ".000Z") && parsed.getTime() <= Date.now() + 300000);
+    return value;
+  }
+
+  function workflowRepository(value) {
+    requireWorkflow(value && typeof value === "object" && value.id === 1432598602 && value.full_name === "TeamStarWolf/intelligence-hub" && value.private === false && value.owner?.login === "TeamStarWolf");
+  }
+
+  function normalizeWorkflow(value, key) {
+    requireWorkflow(value && typeof value === "object" && !Array.isArray(value) && Number.isSafeInteger(value.total_count) && value.total_count >= 0);
+    const maximum = key === "schedule" ? 1 : 10;
+    requireWorkflow(Array.isArray(value.workflow_runs) && value.workflow_runs.length === Math.min(value.total_count, maximum));
+    const ids = new Set();
+    const runs = value.workflow_runs.map(run => {
+      requireWorkflow(run && typeof run === "object" && !Array.isArray(run) && Number.isSafeInteger(run.id) && run.id > 0 && !ids.has(run.id)); ids.add(run.id);
+      requireWorkflow(run.workflow_id === 395429963 && run.path === ".github/workflows/publish.yml" && run.head_branch === "main" && typeof run.head_sha === "string" && /^[a-f0-9]{40}$/.test(run.head_sha));
+      workflowRepository(run.repository); workflowRepository(run.head_repository);
+      requireWorkflow(Object.hasOwn(workflowEvents, run.event) && (key !== "schedule" || run.event === "schedule") && Object.hasOwn(workflowStatuses, run.status));
+      requireWorkflow(run.status === "completed" ? Object.hasOwn(workflowConclusions, run.conclusion) : run.conclusion === null);
+      requireWorkflow(Number.isSafeInteger(run.run_attempt) && run.run_attempt > 0 && run.html_url === "https://github.com/TeamStarWolf/intelligence-hub/actions/runs/" + run.id && run.url === "https://api.github.com/repos/TeamStarWolf/intelligence-hub/actions/runs/" + run.id);
+      const created_at = workflowTime(run.created_at); const updated_at = workflowTime(run.updated_at);
+      const started_at = run.run_started_at === null ? null : workflowTime(run.run_started_at);
+      requireWorkflow(new Date(updated_at).getTime() >= new Date(created_at).getTime() && (started_at === null || new Date(started_at).getTime() >= new Date(created_at).getTime()) && (run.status !== "completed" || started_at !== null));
+      return { id: run.id, event: run.event, status: run.status, conclusion: run.conclusion, attempt: run.run_attempt, created_at, updated_at, started_at };
+    });
+    runs.sort((left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime() || right.id - left.id);
+    return { runs, total_count: value.total_count };
+  }
+
+  function workflowRunBlock(run) {
+    const block = node("div", "workflow-run-detail");
+    const state = run.status === "completed" ? workflowConclusions[run.conclusion] : workflowStatuses[run.status];
+    const tone = run.status !== "completed" ? "pending" : run.conclusion === "success" ? "success" : "attention";
+    block.append(node("p", "workflow-run-result workflow-result-" + tone, state + " · " + workflowEvents[run.event]), node("p", "", "Run started: " + stamp(run.started_at) + " · Workflow updated: " + stamp(run.updated_at)), link("Run " + run.id + " · attempt " + run.attempt + " ↗", "https://github.com/TeamStarWolf/intelligence-hub/actions/runs/" + run.id));
+    return block;
+  }
+
+  function renderWorkflowHealth() {
+    const scroll = { x: window.scrollX, y: window.scrollY };
+    const focusedLink = document.activeElement?.closest("#workflow-health a")?.href;
+    const observations = Object.values(workflowObservations);
+    const failures = observations.filter(item => item.error !== null).length;
+    $("#workflow-health-message").textContent = workflowController ? "Reading public workflow records; the content timestamp stays unchanged." : failures ? "Workflow evidence is partly or wholly unavailable. Any earlier successful observations remain dated below; current health is unknown where a read failed." : lastWorkflowAttempt ? "Public workflow records are separate from the published content date and the browser's snapshot read." : "Public workflow observations pending. No run or schedule result has been established this session.";
+    for (const [key, selector, title] of [["recent", "#workflow-run", "Latest returned workflow run"], ["schedule", "#workflow-schedule", "Automatic schedule evidence"]]) {
+      const observation = workflowObservations[key]; const content = $(selector);
+      content.replaceChildren(node("h3", "", title));
+      if (observation.value) {
+        const runs = observation.value.runs;
+        if (runs.length) content.append(workflowRunBlock(runs[0]));
+        else content.append(node("p", "workflow-run-result", key === "schedule" ? "No scheduled run observed in this API result." : "No workflow run observed in this API result."));
+        if (key === "recent") {
+          content.append(node("p", "workflow-health-scope", "Most recently created of up to 10 returned main-branch runs; later activity on older runs may fall outside this window."));
+          if (runs[0]?.conclusion !== "success") {
+            const success = runs.filter(run => run.status === "completed" && run.conclusion === "success").sort((left, right) => new Date(right.updated_at).getTime() - new Date(left.updated_at).getTime())[0];
+            if (success) { content.append(node("p", "workflow-health-scope", "Most recently updated successful run in this returned window:"), workflowRunBlock(success)); }
+            else content.append(node("p", "workflow-health-scope", "No successful run observed in this returned window; earlier history is not assessed."));
+          }
+        } else content.append(node("p", "workflow-health-scope", "Separate schedule-only query. An empty result does not prove scheduling is disabled or that no news exists."));
+        content.append(node("p", "workflow-observation-clock", (observation.error ? "Retained observation read: " : "API observation read: ") + stamp(observation.read_at)));
+      } else content.append(node("p", "", "Unknown · no successful API read this session."));
+      if (observation.error) content.append(node("p", "workflow-health-error", "Read failed " + stamp(observation.attempted_at) + ". " + observation.error));
+    }
+    const nextEstimate = lastWorkflowAttemptTick === null ? null : new Date(Date.now() + Math.max(0, pollInterval - (performance.now() - lastWorkflowAttemptTick))).toISOString();
+    $("#workflow-health-clocks").textContent = lastWorkflowAttempt ? "API attempt: " + stamp(lastWorkflowAttempt) + " · Next eligible attempt (clock estimate): " + stamp(nextEstimate) + ". Visible-page reads only, at least 10 elapsed minutes apart during this loaded page session. Full browser reload resets this volatile state. Reload snapshot does not bypass this cooldown." : "Workflow API read time is separate from run activity and saved content. No API attempt has started this session.";
+    if (focusedLink) [...$("#workflow-health").querySelectorAll("a")].find(anchor => anchor.href === focusedLink)?.focus({ preventScroll: true });
+    window.scrollTo({ left: scroll.x, top: scroll.y, behavior: "instant" });
+  }
+
+  async function readWorkflow(response) {
+    if (!response.ok) { await response.body?.cancel(); throw new Error(response.status === 403 || response.status === 429 ? "Public API access was refused or rate-limited (HTTP " + response.status + "). No authenticated fallback is used." : "Public API read failed (HTTP " + response.status + ")."); }
+    if (!/^application\/json(?:;|$)/i.test(response.headers.get("content-type") || "")) { await response.body?.cancel(); throw new Error("The public API did not return JSON."); }
+    const length = Number(response.headers.get("content-length"));
+    if (Number.isFinite(length) && length > maximumWorkflowBytes) { await response.body?.cancel(); throw new Error("The public API response exceeds the 512 KiB bound."); }
+    let bytes;
+    if (response.body) {
+      const reader = response.body.getReader(); const chunks = []; let total = 0;
+      while (true) { const { done, value } = await reader.read(); if (done) break; total += value.byteLength; if (total > maximumWorkflowBytes) { await reader.cancel(); throw new Error("The public API response exceeds the 512 KiB bound."); } chunks.push(value); }
+      bytes = new Uint8Array(total); let offset = 0; for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+    } else { bytes = new Uint8Array(await response.arrayBuffer()); if (bytes.byteLength > maximumWorkflowBytes) throw new Error("The public API response exceeds the 512 KiB bound."); }
+    return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+  }
+
+  function workflowDue() { return lastWorkflowAttemptTick === null || performance.now() - lastWorkflowAttemptTick >= pollInterval; }
+
+  async function loadWorkflowHealth() {
+    if (document.hidden || workflowController || !workflowDue()) return;
+    lastWorkflowAttemptTick = performance.now(); lastWorkflowAttempt = new Date().toISOString();
+    const controller = new AbortController(); workflowController = controller;
+    const timeout = setTimeout(() => controller.abort(), 20000);
+    renderWorkflowHealth();
+    try {
+      await Promise.all(Object.entries(workflowQueries).map(async ([key, url]) => {
+        const observation = workflowObservations[key]; observation.attempted_at = lastWorkflowAttempt;
+        try {
+          const response = await fetch(url, { credentials: "omit", cache: "no-store", redirect: "error", referrerPolicy: "no-referrer", headers: { Accept: "application/vnd.github+json" }, signal: controller.signal });
+          const value = normalizeWorkflow(await readWorkflow(response), key);
+          observation.value = value; observation.read_at = new Date().toISOString(); observation.error = null;
+        } catch (error) {
+          observation.error = error.name === "AbortError" ? "The read timed out or was interrupted when the page became hidden." : error instanceof SyntaxError || error instanceof TypeError ? "The public API could not be read or decoded. Current status is unknown." : error.message || "The public API could not be read.";
+        }
+      }));
+    } finally { clearTimeout(timeout); workflowController = null; renderWorkflowHealth(); }
+  }
+
   function renderFreshness() {
     if (!snapshot) return;
     const age = Date.now() - new Date(snapshot.generated_at).getTime(); const stale = age > day;
@@ -529,7 +650,7 @@
 
   function renderSnapshot() {
     renderFreshness();
-    $("#generated-at").textContent = "Generated " + stamp(snapshot.generated_at);
+    $("#generated-at").textContent = "Content as of " + stamp(snapshot.generated_at);
     $("#archive-window").textContent = dateLabel(snapshot.window.start) + " — " + dateLabel(snapshot.window.end);
     const coverage = [["KEV catalog records", snapshot.coverage.kev_records], ["Curated archive events", snapshot.coverage.curated_events], ["Publisher feed articles", snapshot.coverage.feed_articles], ["Linked CVE records", snapshot.mitigations.size], ["URL duplicates removed", snapshot.deduplication.url_duplicates_removed]];
     $("#coverage").replaceChildren(...coverage.map(([label, count]) => { const item = node("div"); item.append(node("dt", "", label), node("dd", "", count.toLocaleString())); return item; }));
@@ -601,7 +722,9 @@
       $("#poll-status").textContent = "Browser check failed " + stamp(lastAttempt) + (lastRead ? " · Last successful read " + stamp(lastRead) : " · No successful snapshot read this session");
       if (!snapshot) { $("#snapshot-status").textContent = "Snapshot unavailable"; $("#snapshot-mark").classList.add("stale"); $("#results-status").textContent = "No snapshot loaded · Counts and source outcomes are unknown"; }
     } finally {
-      clearTimeout(timeout); loading = false; $("#reload").disabled = false; $("#reload").textContent = "Reload snapshot ↻"; $("#loading-cards").hidden = true;
+      clearTimeout(timeout); $("#loading-cards").hidden = true;
+      try { await loadWorkflowHealth(); }
+      finally { loading = false; $("#reload").disabled = false; $("#reload").textContent = "Reload snapshot ↻"; }
     }
   }
 
@@ -627,8 +750,8 @@
   });
   $("#close-sources").addEventListener("click", () => $("#source-dialog").close());
   $("#close-mitigation").addEventListener("click", () => $("#mitigation-dialog").close());
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) { renderFreshness(); if (!lastAttempt || Date.now() - new Date(lastAttempt).getTime() >= pollInterval) load(); } });
-  setInterval(() => { if (!document.hidden && (!lastAttempt || Date.now() - new Date(lastAttempt).getTime() >= pollInterval)) load(); }, pollInterval);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) { workflowController?.abort(); return; } renderFreshness(); if (!lastAttempt || Date.now() - new Date(lastAttempt).getTime() >= pollInterval || workflowDue()) load(); });
+  setInterval(() => { if (!document.hidden && (!lastAttempt || Date.now() - new Date(lastAttempt).getTime() >= pollInterval || workflowDue())) load(); }, pollInterval);
   setInterval(renderFreshness, 60000);
   load();
 })();

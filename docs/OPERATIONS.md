@@ -74,8 +74,9 @@ See [schedule behavior](https://docs.github.com/en/actions/reference/workflows-a
 Check the [workflow history](https://github.com/TeamStarWolf/intelligence-hub/actions/workflows/publish.yml)
 when the desk appears stale; an owner can re-enable a disabled workflow.
 
-The browser fetches only this site's saved snapshot, every ten minutes while
-visible. Refreshing the browser does not start publisher collection. Publisher
+The browser reads this site's saved snapshot every ten minutes while visible,
+and separately observes the fixed public GitHub workflow API as described below.
+Refreshing the browser does not start publisher collection. Publisher
 cadence, the workflow, collection duration, deployment and browser visibility all
 affect arrival time. This is not continuous monitoring or a ten-minute delivery SLA.
 The snapshot badge shows its age in minutes independently of the latest browser
@@ -89,8 +90,47 @@ including its response hash, can. Package/upload/deploy steps run only when
 `changed` is true.
 
 An unchanged successful check therefore keeps the prior deployed snapshot time.
-Use the Actions link for the latest checks; do not relabel old source evidence
-as freshly collected just because the browser polled it.
+The **Content as of** clock remains the saved snapshot's generation time. A browser
+read or successful workflow result never replaces that date or the source dates.
+
+### Read public refresh evidence
+
+**Refresh evidence** distinguishes three observations: saved content time, returned
+workflow run activity and the time this browser successfully read the public API.
+The latest-run panel displays the most recently created of up to ten returned
+`main`-branch runs for this repository's fixed publishing workflow. It labels
+manual dispatch, push and automatic schedule separately, and shows pending,
+successful and other completed outcomes without treating them as new content.
+If the latest returned run is not successful, any separately displayed success is
+limited to that same returned window. Later activity on older runs can fall outside
+the window; the fixed **Workflow history** link is the place to inspect further.
+
+A separate schedule-only query requests one run. **No scheduled run observed in
+this API result** means exactly that; it does not establish that scheduling is
+disabled. A schedule run can itself be queued, running or unsuccessful. Run start
+and workflow update times are GitHub run fields, not the collector-step timestamp.
+These endpoints do not establish whether publication was needed, whether every
+publisher was admitted or whether new unadmitted news exists. They do not expose
+job-level output or prove the last deployment.
+
+The two fixed HTTPS reads omit credentials and referrers, reject redirects and
+use no authenticated fallback. Each response is bounded to 512 KiB and both share
+a 20-second deadline. They share the page's single in-flight load cycle and one
+API-attempt cooldown of at least ten minutes during this loaded page session, run only while visible,
+and are interrupted if the page becomes hidden. **Reload snapshot** does not
+bypass the API cooldown. Eligibility uses a monotonic elapsed-time clock; displayed
+wall-clock dates are observations, and the next eligible date is only an estimate.
+Public GitHub requests can fail or hit the unauthenticated
+60-request/hour allowance, including usage from other tabs or clients. No token
+is requested or stored. Failed reads retain each endpoint's prior successful
+observation and its original API-read date; without one, the status stays unknown.
+Observations live only in page memory and are not a durable collection log. A full
+browser reload resets this volatile observation and cooldown state; the in-page
+**Reload snapshot** button does not bypass the cooldown.
+
+The workflow API's read time is never presented as a successful collection time.
+Use the Actions link for job-level evidence; do not relabel old source evidence
+as freshly collected just because either public file or API was read.
 
 ## Failure and retention behavior
 
@@ -269,6 +309,7 @@ prerequisites; do not bypass a source's access refusal.
 | --- | --- |
 | Site time is old, Actions check succeeded unchanged | Expected when facts/layout did not change; read source dates and the workflow outcome separately. |
 | No recent scheduled run | Check workflow enablement, default branch and GitHub status; schedule delay/inactivity are possible. |
+| Public refresh evidence is unknown or retained | Check its attempt/read dates and fixed workflow history link; API refusal/rate limits do not establish collector failure. |
 | A publisher failed | Inspect Last accepted input and any current report; retained content is historical and a failure is not no news. |
 | A publisher is partial | Inspect rejected/unprocessed counts and reasons; safe admissions do not establish full coverage. |
 | CNA pending or failed | Read any separately available CISA action and original references; do not invent missing fixes. |
