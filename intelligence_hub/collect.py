@@ -22,6 +22,7 @@ MAX_ARTICLES = 8000
 KINDS = {"advisory", "research", "reporting", "incident", "kev", "filing"}
 CVE = re.compile(r"\bCVE-[0-9]{4}-[0-9]{4,8}\b", re.I)
 PUBLIC_FEED = "https://teamstarwolf.github.io/intelligence-hub/data/feed.json"
+RESPONSE_BYTE_LIMIT_REASON = "response_byte_limit_exceeded: source response exceeded its configured byte bound."
 
 
 def require(value, message):
@@ -61,6 +62,10 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         raise ValueError("Publisher redirected; the source needs a reviewed canonical URL.")
 
 
+class ResponseByteLimitExceeded(ValueError):
+    """The existing fetch loop crossed its configured response byte bound."""
+
+
 def fetch(url, maximum=MAX_BYTES):
     require(safe_url(url) == url, "Source URL must be a canonical public HTTPS URL.")
     require(type(maximum) is int and 1 <= maximum <= 16 * 1024 * 1024, "Invalid bounded read size.")
@@ -77,7 +82,8 @@ def fetch(url, maximum=MAX_BYTES):
             if not block:
                 break
             size += len(block)
-            require(size <= maximum, "Source exceeded its bounded read limit.")
+            if size > maximum:
+                raise ResponseByteLimitExceeded("Source exceeded its bounded read limit.")
             chunks.append(block)
     return b"".join(chunks)
 
@@ -213,7 +219,10 @@ def update_source(source, cached):
         return {"status": "partial" if incomplete else "ok", "last_attempt": attempted, "last_success": now(), "error": None,
                 "sha256": intake["response_sha256"], "articles": articles, "intake": intake}
     except (OSError, ValueError, ET.ParseError) as error:
-        reason = ("HTTP " + str(error.code)) if isinstance(error, urllib.error.HTTPError) else type(error).__name__ + ": source unavailable or rejected by intake policy"
+        if isinstance(error, ResponseByteLimitExceeded):
+            reason = RESPONSE_BYTE_LIMIT_REASON
+        else:
+            reason = ("HTTP " + str(error.code)) if isinstance(error, urllib.error.HTTPError) else type(error).__name__ + ": source unavailable or rejected by intake policy"
         return {**cached, "status": "failed", "last_attempt": attempted, "last_success": cached.get("last_success"),
                 "error": reason, "articles": cached.get("articles", []), "intake": None}
 
@@ -227,7 +236,10 @@ def update_kev(cached):
         return {"status": "ok", "last_attempt": attempted, "last_success": now(), "error": None,
                 "sha256": hashlib.sha256(raw).hexdigest(), "catalog": catalog, "intake": None}
     except (OSError, ValueError) as error:
-        reason = ("HTTP " + str(error.code)) if isinstance(error, urllib.error.HTTPError) else type(error).__name__ + ": catalog unavailable or rejected"
+        if isinstance(error, ResponseByteLimitExceeded):
+            reason = RESPONSE_BYTE_LIMIT_REASON
+        else:
+            reason = ("HTTP " + str(error.code)) if isinstance(error, urllib.error.HTTPError) else type(error).__name__ + ": catalog unavailable or rejected"
         return {**cached, "status": "failed", "last_attempt": attempted, "last_success": cached.get("last_success"), "error": reason, "intake": None}
 
 

@@ -106,6 +106,24 @@ The 3 MiB response, read deadline, UTF-8/DTD/entity, 40,000-node/48-depth and
 permission to parse a prefix, raise a bound or bypass publisher access refusal.
 Neither successful nor partial intake guarantees factual accuracy or completeness.
 
+### Response byte-limit failures
+
+The fixed reason `response_byte_limit_exceeded` identifies an attempt that
+crossed its configured response-byte bound before a complete input was accepted.
+The publisher-feed and KEV response cap remains **3 MiB**. A failed read does not
+establish the full response size, a complete-body hash, valid XML or admitted
+entries. The collector does not parse or admit a truncated prefix.
+
+The source remains **Failed**, with no entry-intake report for that attempt.
+Retained articles, the last accepted input hash and its success date remain
+historical; the new attempt date and failure reason do not make them current.
+This diagnostic also applies to KEV reads that exceed their bound. HTTP failures
+and other intake failures keep their existing separate reporting.
+
+Older generic policy errors do not establish a byte-limit cause. The explicit
+reason describes only the attempt that records it; it does not repair intake,
+increase any limit or imply complete publisher coverage.
+
 ## Bookmarks that are not connected feeds
 
 The bookmark repository is a discovery catalog, not a declaration that every listed service is integrated. This expansion reviewed a selected publisher subset. Other bookmarked news sources remain unreviewed unless listed above; they are not labeled unavailable merely because they were not attempted.
