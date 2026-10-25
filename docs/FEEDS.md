@@ -61,24 +61,29 @@ Exact article-host allowlists are recorded per source. Publisher feed and articl
 
 ### Partial intake and entry accounting
 
-New snapshots use schema 3. The collector and site retain compatibility with
-validated prior snapshots; an old source observation without an intake report
-has **unknown entry-window coverage**, even if its recorded status was successful.
-CISA KEV is a separate catalog and does not carry RSS entry accounting.
+New snapshots use schema 4. The site reads validated schemas 2, 3 and 4; the
+collector can resume validated schemas 1 through 4. Legacy observations without
+an intake report have **unknown entry-window coverage**. A legacy report without
+selection metadata has an **unrecorded selection basis**, even if its status was
+successful or it is retained inside a schema 4 snapshot. CISA KEV is a separate
+catalog and does not carry RSS entry accounting or selection policy.
 
 After the whole response passes transport and XML validation, the collector
-counts its RSS items or Atom entries and examines the first **150** in document
-order. This is a processed-entry limit, including rejected and filtered entries;
-it is not a target of 150 accepted articles. The ledger distinguishes:
+counts its RSS items or Atom entries and selects at most **150** entry elements
+under the recorded policy. Document order is the default; only the existing F5
+Labs feed explicitly opts into publisher-date ranking, described below. This is
+a normalization budget, including rejected, filtered and duplicate entries, not
+a target of 150 accepted articles. There is no refill after a rejection, filter
+or duplicate. The ledger distinguishes:
 
 | Count | Meaning |
 | --- | --- |
 | Seen | All entry elements in the accepted bounded XML tree. |
-| Processed | The first 150 entries, or all entries if fewer. |
+| Processed | Up to 150 entry elements selected under the recorded policy, or all if fewer. |
 | Admitted | Entries accepted by the parser before retained-URL deduplication and date-window filtering. |
 | Rejected | Whole entries excluded for an invalid/missing title or allowed HTTPS link, or more than 100 unique CVE mentions. |
 | Filtered | Entries excluded by a configured topic filter, not validation failures. |
-| Unprocessed | Entries beyond that processing window. |
+| Unprocessed | Entries outside that selection window; these may include recent items. |
 
 Processed equals admitted plus rejected plus filtered; seen equals processed plus
 unprocessed. Rejection reasons are counted without persisting rejected bodies or
@@ -105,6 +110,55 @@ The 3 MiB response, read deadline, UTF-8/DTD/entity, 40,000-node/48-depth and
 100-CVE-per-entry gates remain in force. Whole-response rejection is never a
 permission to parse a prefix, raise a bound or bypass publisher access refusal.
 Neither successful nor partial intake guarantees factual accuracy or completeness.
+
+### F5 date ranking and selection provenance
+
+The existing `f5-labs` definition uses `publisher-date-desc-v1` through the
+optional `entry_selection` setting. Other feeds retain `document-order-v1`.
+Before normalizing the selected articles, F5 ranking inspects only the first
+direct date-field occurrences, using `pubDate`, `published`, `date`, then
+`updated`. An empty leaf can fall through; a chosen whitespace-only, nested,
+over-128-character, naive or invalid date ranks as unknown without trying a
+lower-priority field. This bounded rank probe does not inspect every entry's
+title, link, body or CVEs. Normal validation still applies to the selected entries,
+and an unknown-ranked item may later receive a display date from that parser.
+
+Supported dates normalize to UTC where a timezone is supplied. Valid dates whose
+UTC/calendar day is at or before the declared collection window's end rank
+newest first. Ties keep document order. Unknown dates follow, then future dates;
+each of those groups keeps document order. Date-only values use a midnight
+boundary solely for ordering, without asserting an actual publication time.
+The cutoff has calendar-day precision: later hours on the same date are not
+classified as future. A historical window deliberately supplies its historical
+end date. No retrieval, HTTP or current clock becomes a publication date.
+Publisher dates remain claims, so this is not a guarantee of the latest 150 valid
+articles or complete coverage.
+
+Schema 4 separates **configured selection**, **recorded response selection** and
+**last accepted response-window selection**. The typed response metadata records
+its policy version, basis and declared cutoff; an older recorded cutoff need not
+equal the currently viewed window. An accepted-window label requires an accepted
+status and matching response/last-good hash under the normal time/count checks.
+Failed, missing or legacy reports cannot establish that historical basis. Saved
+rows may mix policies; configuration alone does not prove an attempt succeeded.
+Whole-response failures still clear the latest report while preserving last-good
+history. A parsed zero-admission failure's report belongs to that failed attempt,
+alongside any retained last-good history.
+
+On public resume, remote configured-policy metadata is validated but does not set
+local policy: future behavior comes from the local catalog. The full recorded
+intake, selection, attempt and hash are preserved. This intentional local-policy
+projection does not strip or downconvert intake evidence or backfill legacy
+selection metadata.
+
+The catalog, collector, schema 4 producer and compatible readers require a
+coordinated release and rollback. Older collectors can ignore the new catalog
+option and retain document order; older site readers can reject schema 4. Do not
+silently strip selection fields, relabel new data as legacy or mix incompatible
+versions. Existing safeguards remain: 150 normalizations, 100 CVEs per entry,
+600 retained articles per source, 8,000 total articles, 16 MiB public-resume input,
+the 1,200,000-byte compressed artifact estimate guard and one-day artifact
+retention, alongside the whole-response/XML bounds above.
 
 ### Response byte-limit failures
 

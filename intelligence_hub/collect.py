@@ -249,7 +249,62 @@ class BoundedTreeBuilder(ET.TreeBuilder):
         return element
 
 
-def parse_feed(raw, source):
+def source_selection(source):
+    basis = source.get("entry_selection", "document-order-v1")
+    require(type(basis) is str and basis in {"document-order-v1", "publisher-date-desc-v1"}, "Invalid source entry selection.")
+    if basis == "publisher-date-desc-v1":
+        require(source.get("id") == "f5-labs" and source.get("url") == "https://www.f5.com/labs/rss-feeds/all.xml" and
+                source.get("article_hosts") == ["www.f5.com"], "Publisher-date selection requires the exact F5 source definition.")
+    return basis
+
+
+def selection_context(source, selection_cutoff_date):
+    basis = source_selection(source)
+    if basis == "publisher-date-desc-v1":
+        require(type(selection_cutoff_date) is date, "Publisher-date selection requires the declared window end date.")
+    return {"version": 1, "basis": basis,
+            "cutoff_date": selection_cutoff_date.isoformat() if basis == "publisher-date-desc-v1" else None}
+
+
+def ranked_feed_entries(entries, source, *, selection_cutoff_date=None):
+    selection = selection_context(source, selection_cutoff_date)
+    if selection["basis"] == "document-order-v1":
+        return entries[:150], selection
+
+    def rank(candidate):
+        index, element = candidate
+        fields = {}
+        for child in element:
+            key = child.tag.rsplit("}", 1)[-1]
+            if key in {"pubDate", "published", "date", "updated"}:
+                fields.setdefault(key, child)
+        normalized = None
+        for key in ("pubDate", "published", "date", "updated"):
+            child = fields.get(key)
+            if child is None:
+                continue
+            if len(child):
+                break
+            value = child.text or ""
+            if not value:
+                continue
+            if len(value) <= 128:
+                normalized = published(value)
+            break
+        if normalized is None:
+            return (1, 0, 0, 0, 0, 0, 0, index)
+        day = date.fromisoformat(normalized[:10])
+        if day > selection_cutoff_date:
+            return (2, 0, 0, 0, 0, 0, 0, index)
+        # Midnight is only a comparison key for date-only publisher metadata.
+        stamp = datetime.fromisoformat(normalized)
+        return (0, -day.year, -day.month, -day.day, -stamp.hour, -stamp.minute, -stamp.second, index)
+
+    ranked = sorted(enumerate(entries), key=rank)
+    return [element for _, element in ranked[:150]], selection
+
+
+def parse_feed(raw, source, *, selection_cutoff_date=None):
     decoded = raw.decode("utf-8-sig")
     require("\x00" not in decoded and "<!DOCTYPE" not in decoded.upper() and "<!ENTITY" not in decoded.upper(), "DTD/entity/binary XML is not accepted.")
     root = ET.fromstring(decoded, parser=ET.XMLParser(target=BoundedTreeBuilder()))
@@ -261,12 +316,13 @@ def parse_feed(raw, source):
         stack.extend((child, depth + 1) for child in element)
     require(root.tag.rsplit("}", 1)[-1].lower() in {"rss", "feed", "rdf"}, "Response is not RSS or Atom.")
     entries = [element for element in root.iter() if element.tag.rsplit("}", 1)[-1] in {"item", "entry"}]
+    selected, selection = ranked_feed_entries(entries, source, selection_cutoff_date=selection_cutoff_date)
     articles = []
     intake = {"items_seen": len(entries), "items_processed": min(len(entries), 150),
         "items_admitted": 0, "items_rejected": 0, "items_filtered": 0,
         "items_unprocessed": max(0, len(entries) - 150), "entry_limit": 150, "cve_limit": 100,
-        "rejection_reasons": {"invalid_link_or_title": 0, "cve_limit_exceeded": 0}}
-    for element in entries[:150]:
+        "rejection_reasons": {"invalid_link_or_title": 0, "cve_limit_exceeded": 0}, "selection": selection}
+    for element in selected:
         fields, links = {}, []
         for child in element:
             key = child.tag.rsplit("}", 1)[-1]
@@ -302,11 +358,12 @@ def parse_feed(raw, source):
     return {"articles": articles, "intake": intake}
 
 
-def update_source(source, cached):
+def update_source(source, cached, *, selection_cutoff_date=None):
     attempted = now()
     try:
+        selection_context(source, selection_cutoff_date)
         raw = fetch(source["url"])
-        parsed = parse_feed(raw, source)
+        parsed = parse_feed(raw, source, selection_cutoff_date=selection_cutoff_date)
         incoming = parsed["articles"]
         intake = {**parsed["intake"], "attempted_at": attempted, "response_sha256": hashlib.sha256(raw).hexdigest()}
         incomplete = intake["items_rejected"] > 0 or intake["items_unprocessed"] > 0
@@ -390,10 +447,25 @@ def validate_cache(cache, sources):
         validate_catalog(cache["kev"]["catalog"])
 
 
-def validate_intake(intake, observation, source=None):
+def validate_intake(intake, observation, source=None, *, allow_selection=True):
     counts = {"items_seen", "items_processed", "items_admitted", "items_rejected", "items_filtered", "items_unprocessed"}
     expected = counts | {"entry_limit", "cve_limit", "rejection_reasons", "attempted_at", "response_sha256"}
-    require(isinstance(intake, dict) and set(intake) == expected, "Invalid source intake fields.")
+    require(isinstance(intake, dict) and set(intake) in (expected, expected | {"selection"}) and
+            (allow_selection or "selection" not in intake), "Invalid source intake fields.")
+    if "selection" in intake:
+        selection = intake["selection"]
+        require(type(selection) is dict and set(selection) == {"version", "basis", "cutoff_date"} and
+                type(selection["version"]) is int and selection["version"] == 1 and
+                type(selection["basis"]) is str and selection["basis"] in {"document-order-v1", "publisher-date-desc-v1"},
+                "Invalid source selection metadata.")
+        if selection["basis"] == "document-order-v1":
+            require(selection["cutoff_date"] is None, "Document-order selection cannot carry a cutoff date.")
+        else:
+            require(source is not None, "Publisher-date selection requires a known F5 source.")
+            source_selection({**source, "entry_selection": selection["basis"]})
+            cutoff = selection["cutoff_date"]
+            require(type(cutoff) is str and re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", cutoff) and
+                    date.fromisoformat(cutoff).isoformat() == cutoff, "Invalid source selection cutoff date.")
     require(all(type(intake[key]) is int and 0 <= intake[key] <= 40000 for key in counts), "Invalid source intake counts.")
     require(type(intake["entry_limit"]) is int and intake["entry_limit"] == 150 and
             type(intake["cve_limit"]) is int and intake["cve_limit"] == 100, "Invalid source intake limits.")
@@ -433,7 +505,7 @@ def validate_intake(intake, observation, source=None):
             require(incomplete, "Complete filter-empty input is not a source failure.")
 
 
-def validate_observation(observation, source=None, kev=False):
+def validate_observation(observation, source=None, kev=False, *, allow_selection=True):
     require(isinstance(observation, dict), "Invalid source observation.")
     require(observation.get("status", "not_fetched") in {"ok", "partial", "failed", "not_fetched"}, "Invalid source observation status.")
     for field in ("last_attempt", "last_success"):
@@ -449,7 +521,7 @@ def validate_observation(observation, source=None, kev=False):
     if kev:
         require(observation.get("status") != "partial" and intake is None, "KEV cannot carry a partial RSS intake report.")
     elif intake is not None:
-        validate_intake(intake, observation, source)
+        validate_intake(intake, observation, source, allow_selection=allow_selection)
     else:
         require(observation.get("status") != "partial", "Partial source observation requires an intake report.")
 
@@ -465,13 +537,14 @@ def validate_registry(registry):
         require(isinstance(source["article_hosts"], list) and 1 <= len(source["article_hosts"]) <= 8 and all(safe_url("https://" + host + "/") is not None for host in source["article_hosts"]), "Invalid publisher hosts.")
         if "include_terms" in source:
             require(isinstance(source["include_terms"], list) and 1 <= len(source["include_terms"]) <= 12 and all(isinstance(term, str) and 1 <= len(term) <= 80 for term in source["include_terms"]), "Invalid source selection terms.")
+        source_selection(source)
     return registry["sources"]
 
 
 def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=40):
     from .mitigations import build_briefs, merge_retained
 
-    require(start <= end and (end - start).days <= 3661, "History window must be at most ten years.")
+    require(type(start) is date and type(end) is date and start <= end and (end - start).days <= 3661, "History window must be date-only and at most ten years.")
     require(type(enrich_limit) is int and 0 <= enrich_limit <= 2000, "CVE enrichment limit must be0..2000.")
     context = load_mitigation_context(ROOT / "config/mitigation-context.json")
     sources = validate_registry(read_json(ROOT / "config/sources.json", 128 * 1024))
@@ -490,7 +563,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
         require(len(retained) <= 15000, "Merged CVE projections exceed their bound.")
     if refresh:
         with ThreadPoolExecutor(max_workers=4) as pool:
-            futures = {source["id"]: pool.submit(update_source, source, cache["sources"].get(source["id"], {})) for source in sources}
+            futures = {source["id"]: pool.submit(update_source, source, cache["sources"].get(source["id"], {}), selection_cutoff_date=end) for source in sources}
             kev_future = pool.submit(update_kev, cache["kev"])
             cache = {"sources": {key: future.result() for key, future in futures.items()}, "kev": kev_future.result()}
         validate_cache(cache, sources)
@@ -501,7 +574,8 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
         health.append({"id": source["id"], "name": source["name"], "kind": source["kind"], "url": source["home"],
             "status": observation.get("status", "not_fetched"), "last_attempt": observation.get("last_attempt"),
             "last_success": observation.get("last_success"), "error": observation.get("error"), "sha256": observation.get("sha256"),
-            "intake": observation.get("intake"), "articles": len(observation.get("articles", []))})
+            "intake": observation.get("intake"), "configured_selection": source_selection(source),
+            "articles": len(observation.get("articles", []))})
         articles.extend(observation.get("articles", []))
     kev = cache["kev"]
     for item in kev.get("catalog", {}).get("vulnerabilities", []):
@@ -522,7 +596,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
             "exploitation": "known", "references": [{"label": "CVE record", "url": "https://www.cve.org/CVERecord?id=" + ident}], "origin": "cisa-kev"})
     health.append({"id": "cisa-kev", "name": "CISA KEV", "kind": "advisory", "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
         "status": kev.get("status", "not_fetched"), "last_attempt": kev.get("last_attempt"), "last_success": kev.get("last_success"),
-        "error": kev.get("error"), "sha256": kev.get("sha256"), "intake": None,
+        "error": kev.get("error"), "sha256": kev.get("sha256"), "intake": None, "configured_selection": None,
         "articles": sum(article["origin"] == "cisa-kev" for article in articles)})
     history_path = ROOT / "config/history.json"
     history = read_json(history_path, 2 * 1024 * 1024) if history_path.exists() else {"entries": []}
@@ -557,13 +631,13 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     prepared_at = now()
     briefs, projections, mitigation_stats = build_briefs(ordered, kev.get("catalog", {}), retained, refresh, enrich_limit, fetch, text, safe_url, published, prepared_at)
     briefs = apply_mitigation_context(briefs, context)
-    snapshot = {"schema_version": 3, "generated_at": now(), "window": {"start": start.isoformat(), "end": end.isoformat()},
+    snapshot = {"schema_version": 4, "generated_at": now(), "window": {"start": start.isoformat(), "end": end.isoformat()},
         "articles": ordered, "sources": health, "history_reviewed_at": history.get("curated_at"),
         "mitigations": briefs, "mitigation_coverage": mitigation_stats, "deduplication": {"url_duplicates_removed": duplicates},
         "refresh": {"requested_minutes": 10, "mode": "scheduled-check", "status_url": "https://github.com/TeamStarWolf/intelligence-hub/actions/workflows/publish.yml",
             "notes": ["GitHub requests collection every ten minutes; scheduling can be delayed, dropped or disabled after repository inactivity.", "The visible page checks the saved snapshot every ten minutes. This is not a guaranteed ten-minute news delivery service.", "Snapshot and source dates describe the last published collection; unchanged checks can complete without republishing. Latest workflow outcomes are linked separately."]},
         "coverage": {"kev_records": counts["cisa-kev"], "curated_events": counts["library-curation"], "feed_articles": counts["publisher-feed"],
-            "notes": ["This is a growing decade selection, not every cyber incident, article or vulnerability.", "KEV dates indicate catalog addition, not first disclosure or first exploitation.", "RSS usually exposes recent posts; historical curation and legacy feeds do not form a complete decade archive.", "Unknown dates remain explicit. Failed sources retain last-good input when available; public snapshot resume helps retain prior publisher items.", "Per-feed retained history is bounded to600articles. Missing, evicted or changed inputs can leave coverage gaps.", "Publisher intake reports describe only the latest bounded response window. Entries rejected or outside its first150processed items are not newly admitted; older retained versions may remain.", "Last accepted input is not exhaustive publisher coverage. Legacy observations without intake reports have unknown window completeness.", "Canonical article URLs are deduplicated; distinct publishers covering one CVE remain separate evidence.", "CVE mentions can come from RSS metadata/body text; they do not mean every mentioned CVE was exploited.", "Headlines link to publishers; full article bodies are not copied. No environment exposure is inferred.", "Threatpost is a legacy archive with observed August2022 items; a successful fetch does not imply current reporting.", "SEC direct filing access is pending after HTTP403; news reporting about filings is not complete Item1.05/8.01 coverage."]},
+            "notes": ["This is a growing decade selection, not every cyber incident, article or vulnerability.", "KEV dates indicate catalog addition, not first disclosure or first exploitation.", "RSS usually exposes recent posts; historical curation and legacy feeds do not form a complete decade archive.", "Unknown dates remain explicit. Failed sources retain last-good input when available; public snapshot resume helps retain prior publisher items.", "Per-feed retained history is bounded to600articles. Missing, evicted or changed inputs can leave coverage gaps.", "Publisher intake reports describe only the latest bounded response selection window of at most150processed entries. Rejected or unprocessed entries are not newly admitted; unprocessed entries may include recent items, and older retained versions may remain.", "Last accepted input is not exhaustive publisher coverage. Legacy observations without intake reports have unknown window completeness.", "Canonical article URLs are deduplicated; distinct publishers covering one CVE remain separate evidence.", "CVE mentions can come from RSS metadata/body text; they do not mean every mentioned CVE was exploited.", "Headlines link to publishers; full article bodies are not copied. No environment exposure is inferred.", "Threatpost is a legacy archive with observed August2022 items; a successful fetch does not imply current reporting.", "SEC direct filing access is pending after HTTP403; news reporting about filings is not complete Item1.05/8.01 coverage."]},
         "integrations": {"xai": {"status": "not_connected", "message": "Grok X Search is a separate supported API route; access and zero-additional-spend eligibility are not established. No model calls are enabled."},
                          "x": {"status": "not_connected", "message": "Personal X timeline/bookmarks are not connected or published. Future article sharing is recorded for owner review; no automatic posts are enabled."},
                          "sec": {"status": "not_connected", "message": "Direct SEC filing-feed intake returned HTTP403. Operational contact and accepted access/schema remain prerequisites; no direct filings are claimed."}}}
@@ -604,7 +678,7 @@ def resume_deployed(sources, cache):
     """Use only this hub's fixed public snapshot as an additional, validated history input."""
     try:
         previous = json.loads(fetch(PUBLIC_FEED, 16 * 1024 * 1024), parse_constant=reject_constant)
-        require(isinstance(previous, dict) and previous.get("schema_version") in (1, 2, 3), "Unsupported deployed snapshot.")
+        require(isinstance(previous, dict) and type(previous.get("schema_version")) is int and previous["schema_version"] in (1, 2, 3, 4), "Unsupported deployed snapshot.")
         require(isinstance(previous.get("articles"), list) and len(previous["articles"]) <= MAX_ARTICLES, "Invalid deployed articles.")
         require(isinstance(previous.get("sources"), list) and len(previous["sources"]) <= 100, "Invalid deployed source ledger.")
         registry = {source["id"]: source for source in sources}
@@ -620,11 +694,23 @@ def resume_deployed(sources, cache):
             require(isinstance(observation, dict) and isinstance(observation.get("id"), str), "Invalid deployed source identity.")
             source_id = observation["id"]
             require(source_id not in observations, "Duplicate deployed source identity.")
+            if previous["schema_version"] == 4:
+                require("configured_selection" in observation, "Missing deployed selection configuration.")
+                configured = observation["configured_selection"]
+                if source_id == "cisa-kev":
+                    require(configured is None, "KEV cannot carry RSS selection configuration.")
+                else:
+                    require(type(configured) is str and configured in {"document-order-v1", "publisher-date-desc-v1"}, "Invalid deployed selection configuration.")
+                    if configured == "publisher-date-desc-v1":
+                        require(source_id in registry, "Publisher-date configuration requires a known F5 source.")
+                        source_selection({**registry[source_id], "entry_selection": configured})
+            else:
+                require("configured_selection" not in observation, "Legacy deployed sources cannot carry selection configuration.")
             projected = {key: observation.get(key) for key in ("status", "last_attempt", "last_success", "error", "sha256", "intake")}
             # The initial schema did not publish response hashes; preserve dates without inventing a hash.
             if projected["status"] == "ok" and projected["sha256"] is None and previous["schema_version"] == 1:
                 projected["status"] = "not_fetched"
-            validate_observation(projected, source=registry.get(source_id), kev=source_id == "cisa-kev")
+            validate_observation(projected, source=registry.get(source_id), kev=source_id == "cisa-kev", allow_selection=previous["schema_version"] == 4)
             observations[source_id] = projected
         for source_id, articles in retained.items():
             old = cache["sources"].get(source_id, {})

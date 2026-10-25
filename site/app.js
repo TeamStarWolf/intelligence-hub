@@ -69,11 +69,39 @@
 
   function intakeCount(value, maximum) { nonnegative(value); requireValue(value <= maximum); return value; }
 
-  function normalizeIntake(value, source) {
+  function selectionDate(value) {
+    requireValue(typeof value === "string" && /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value) && value.slice(0, 4) !== "0000");
+    const calendar = new Date(value + "T00:00:00Z");
+    requireValue(Number.isFinite(calendar.getTime()) && calendar.toISOString().slice(0, 10) === value);
+    return value;
+  }
+
+  function normalizeSelection(value, sourceId) {
+    exactKeys(value, ["version", "basis", "cutoff_date"]);
+    requireValue(Number.isSafeInteger(value.version) && value.version === 1 && ["document-order-v1", "publisher-date-desc-v1"].includes(value.basis));
+    if (value.basis === "document-order-v1") requireValue(value.cutoff_date === null);
+    else { requireValue(sourceId === "f5-labs"); selectionDate(value.cutoff_date); }
+    return { version: 1, basis: value.basis, cutoff_date: value.cutoff_date };
+  }
+
+  function normalizeConfiguredSelection(value, sourceId, schemaVersion) {
+    if (schemaVersion !== 4) { requireValue(!Object.hasOwn(value, "configured_selection")); return null; }
+    requireValue(Object.hasOwn(value, "configured_selection"));
+    const basis = value.configured_selection;
+    if (sourceId === "cisa-kev") { requireValue(basis === null); return null; }
+    requireValue(["document-order-v1", "publisher-date-desc-v1"].includes(basis));
+    requireValue(basis !== "publisher-date-desc-v1" || sourceId === "f5-labs");
+    return basis;
+  }
+
+  function normalizeIntake(value, source, schemaVersion) {
     if (source.id === "cisa-kev") { requireValue(value == null && source.status !== "partial"); return null; }
     if (value == null) { requireValue(source.status !== "partial"); return null; }
     requireValue(source.status !== "not_fetched");
-    exactKeys(value, ["items_seen", "items_processed", "items_admitted", "items_rejected", "items_filtered", "items_unprocessed", "entry_limit", "cve_limit", "rejection_reasons", "attempted_at", "response_sha256"]);
+    const hasSelection = Object.hasOwn(value, "selection");
+    requireValue(schemaVersion === 4 || !hasSelection);
+    const keys = ["items_seen", "items_processed", "items_admitted", "items_rejected", "items_filtered", "items_unprocessed", "entry_limit", "cve_limit", "rejection_reasons", "attempted_at", "response_sha256"];
+    exactKeys(value, hasSelection ? [...keys, "selection"] : keys);
     exactKeys(value.rejection_reasons, ["invalid_link_or_title", "cve_limit_exceeded"]);
     requireValue(value.entry_limit === 150 && value.cve_limit === 100);
     const report = {
@@ -82,7 +110,8 @@
       items_filtered: intakeCount(value.items_filtered, 150), items_unprocessed: intakeCount(value.items_unprocessed, 40000),
       entry_limit: 150, cve_limit: 100,
       rejection_reasons: { invalid_link_or_title: intakeCount(value.rejection_reasons.invalid_link_or_title, 150), cve_limit_exceeded: intakeCount(value.rejection_reasons.cve_limit_exceeded, 150) },
-      attempted_at: timestamp(value.attempted_at, false), response_sha256: boundedText(value.response_sha256, 64)
+      attempted_at: timestamp(value.attempted_at, false), response_sha256: boundedText(value.response_sha256, 64),
+      selection: hasSelection ? normalizeSelection(value.selection, source.id) : null
     };
     requireValue(/^[a-f0-9]{64}$/.test(report.response_sha256) && report.attempted_at.includes("T") && report.attempted_at.length <= 40 && report.attempted_at === source.last_attempt);
     requireValue(report.items_processed === Math.min(report.items_seen, report.entry_limit) && report.items_seen === report.items_processed + report.items_unprocessed);
@@ -137,7 +166,7 @@
   }
 
   function normalize(raw) {
-    requireValue(raw && [2, 3].includes(raw.schema_version) && Array.isArray(raw.articles) && raw.articles.length <= 8000 && Array.isArray(raw.sources) && raw.sources.length <= 200);
+    requireValue(raw && [2, 3, 4].includes(raw.schema_version) && Array.isArray(raw.articles) && raw.articles.length <= 8000 && Array.isArray(raw.sources) && raw.sources.length <= 200);
     timestamp(raw.generated_at, false);
     requireValue(raw.window && raw.coverage && raw.integrations && raw.refresh && raw.deduplication && raw.mitigations && typeof raw.mitigations === "object" && !Array.isArray(raw.mitigations));
     timestamp(raw.window.start, false);
@@ -178,7 +207,8 @@
       const item = { id: boundedText(source.id, 160), name: boundedText(source.name, 240), url: boundedText(source.url, 4000), kind: boundedText(source.kind, 160), status: source.status, last_success: timestamp(source.last_success), last_attempt: timestamp(source.last_attempt), error: source.error === null ? null : boundedText(source.error, 4000, true), articles: nonnegative(source.articles) };
       item.sha256 = source.sha256 == null ? null : boundedText(source.sha256, 64);
       requireValue(item.sha256 === null || /^[a-f0-9]{64}$/.test(item.sha256));
-      item.intake = normalizeIntake(source.intake, item);
+      item.configured_selection = normalizeConfiguredSelection(source, item.id, raw.schema_version);
+      item.intake = normalizeIntake(source.intake, item, raw.schema_version);
       requireValue(!sourceIds.has(item.id)); sourceIds.add(item.id); return item;
     });
     const coverage = { kev_records: nonnegative(raw.coverage.kev_records), curated_events: nonnegative(raw.coverage.curated_events), feed_articles: nonnegative(raw.coverage.feed_articles), notes: textList(raw.coverage.notes, 100, 4000) };
@@ -444,8 +474,17 @@
     if (focusedKey) [...document.querySelectorAll("[data-focus-key]")].find(element => element.dataset.focusKey === focusedKey)?.focus({ preventScroll: true });
   }
 
+  function selectionName(basis) {
+    return basis === "document-order-v1" ? "Document order" : "Publisher date ranking (F5)";
+  }
+
+  function selectionDescription(selection) {
+    if (selection === null) return "Not recorded";
+    return selectionName(selection.basis) + (selection.cutoff_date === null ? "" : " · Declared cutoff: " + selection.cutoff_date);
+  }
+
   function renderSources() {
-    $("#source-dialog-stamp").textContent = "Snapshot generated " + stamp(snapshot.generated_at) + ". Attempt dates, last accepted input and current-response entry windows are separate. None establishes exhaustive publisher coverage.";
+    $("#source-dialog-stamp").textContent = "Snapshot generated " + stamp(snapshot.generated_at) + ". Attempt dates, last accepted input and recorded response entry windows are separate. None establishes exhaustive publisher coverage.";
     $("#source-ledger").replaceChildren(...snapshot.sources.map(source => {
       const card = node("article", "ledger-source"); const heading = node("div", "ledger-source-heading");
       const title = node("h3"); title.append(link(source.name, source.url));
@@ -453,6 +492,13 @@
       const statusClass = { ok: "", partial: " partial", failed: " failed", not_fetched: " not-fetched" }[source.status];
       heading.append(title, node("span", "source-status" + statusClass, states[source.status]));
       card.append(heading, node("p", "", source.kind + " · Saved entry count: " + source.articles.toLocaleString() + " (separate from this response's admissions)"), node("p", "", "Last accepted input: " + stamp(source.last_success)), node("p", "", "Last attempt: " + stamp(source.last_attempt)));
+      if (source.id !== "cisa-kev") {
+        const recorded = source.intake?.selection ?? null;
+        const accepted = ["ok", "partial"].includes(source.status) && recorded !== null && source.sha256 === source.intake.response_sha256 ? recorded : null;
+        card.append(node("p", "", "Configured selection: " + (source.configured_selection === null ? "Not recorded" : selectionName(source.configured_selection))),
+          node("p", "", "Recorded response selection: " + selectionDescription(recorded)),
+          node("p", "", "Last accepted response-window selection: " + (accepted === null ? "Unknown" : selectionDescription(accepted))));
+      }
       if (source.intake) card.append(renderIntake(source));
       else card.append(node("p", "source-window-unknown", source.id === "cisa-kev" ? "Separate KEV catalog input; RSS entry-window counts are not applicable." : "Item-window counts were not supplied for this observation. Missing or legacy reports do not establish complete intake."));
       if (source.error) card.append(node("p", "source-error", source.error)); return card;
@@ -463,17 +509,18 @@
   function renderIntake(source) {
     const report = source.intake;
     const block = node("section", "source-intake");
-    block.append(node("h4", "", "Current-response entry window"));
+    block.append(node("h4", "", "Recorded response entry window"));
     const counts = node("dl", "intake-counts");
     for (const [label, key] of [["Seen", "items_seen"], ["Processed", "items_processed"], ["Admitted", "items_admitted"], ["Rejected", "items_rejected"], ["Filtered", "items_filtered"], ["Unprocessed", "items_unprocessed"]]) {
       const item = node("div"); item.append(node("dt", "", label), node("dd", "", report[key].toLocaleString())); counts.append(item);
     }
     block.append(counts, node("p", "", "Window attempted: " + stamp(report.attempted_at) + " · Entry limit: " + report.entry_limit + " · CVE limit per article: " + report.cve_limit));
+    if (report.selection?.basis === "publisher-date-desc-v1") block.append(node("p", "", "Supported publisher dates through the declared cutoff rank first; unknown dates, then future dates, use document order. The calendar cutoff is not a confirmed publication time or a freshness guarantee."));
     const reasons = node("ul", "intake-reasons");
     reasons.append(node("li", "", "Invalid / missing HTTPS publisher link or title: " + report.rejection_reasons.invalid_link_or_title.toLocaleString()), node("li", "", "More than " + report.cve_limit + " unique CVE mentions: " + report.rejection_reasons.cve_limit_exceeded.toLocaleString()));
     block.append(reasons, node("p", "intake-hash", "Current response SHA-256: " + report.response_sha256));
     const outcome = source.status === "partial" ? "Some entries were admitted from this response; rejected or unprocessed entries make this intake partial." : source.status === "failed" ? "No entries were admitted from this response; its report hash is separate from any retained last-good input." : "No rejected or unprocessed entries are reported in this response window.";
-    block.append(node("p", "intake-boundary", outcome + " Counts describe the received window, not unique saved URLs or the publisher's archive. Filtered entries are intentional exclusions, not errors. Entire rejected entries are excluded without clipping CVEs; older versions may remain in saved history. The hash identifies response bytes, not a publisher signature."));
+    block.append(node("p", "intake-boundary", outcome + " Unprocessed entries are outside this selection window and may include recent items. Counts describe the received window, not unique saved URLs or the publisher's archive. Selection does not guarantee the latest 150 valid articles. Filtered entries are intentional exclusions, not errors. Entire rejected entries are excluded without clipping CVEs; older versions may remain in saved history under different policies. The hash identifies response bytes, not a publisher signature."));
     return block;
   }
 

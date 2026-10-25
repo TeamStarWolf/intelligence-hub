@@ -44,7 +44,7 @@
     {"id":"paloalto-psirt","name":"Palo Alto Networks Security Advisories","kind":"advisory","url":"https://security.paloaltonetworks.com/rss.xml","home":"https://security.paloaltonetworks.com/","article_hosts":["security.paloaltonetworks.com"]},
     {"id":"splunk-advisories","name":"Splunk Security Advisories","kind":"advisory","url":"https://advisory.splunk.com/feed.xml","home":"https://advisory.splunk.com/","article_hosts":["advisory.splunk.com"]},
     {"id":"portswigger-research","name":"PortSwigger Research","kind":"research","url":"https://portswigger.net/research/rss","home":"https://portswigger.net/research","article_hosts":["portswigger.net"]},
-    {"id":"f5-labs","name":"F5 Labs","kind":"research","url":"https://www.f5.com/labs/rss-feeds/all.xml","home":"https://www.f5.com/labs","article_hosts":["www.f5.com"]},
+    {"id":"f5-labs","name":"F5 Labs","kind":"research","url":"https://www.f5.com/labs/rss-feeds/all.xml","home":"https://www.f5.com/labs","article_hosts":["www.f5.com"],"entry_selection":"publisher-date-desc-v1"},
     {"id":"cyberscoop","name":"CyberScoop","kind":"reporting","url":"https://cyberscoop.com/feed/","home":"https://cyberscoop.com/","article_hosts":["cyberscoop.com"]},
     {"id":"graham-cluley","name":"Graham Cluley","kind":"reporting","url":"https://grahamcluley.com/feed/","home":"https://grahamcluley.com/","article_hosts":["grahamcluley.com"]},
     {"id":"troy-hunt","name":"Troy Hunt","kind":"research","url":"https://www.troyhunt.com/rss/","home":"https://www.troyhunt.com/","article_hosts":["www.troyhunt.com"]},
