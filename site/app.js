@@ -401,7 +401,7 @@
       if (row.record.record_state !== "PUBLISHED") identity.append(node("span", "record-state", row.record.record_state + " record"));
       const status = node("td"); status.append(node("span", "guidance-badge guidance-" + guidanceStatus(row.record), guidanceLabels[guidanceStatus(row.record)]));
       if (row.record.source_status !== "ok") status.append(node("span", "row-secondary", "CNA lookup: " + row.record.source_status));
-      if (row.record.analysis.priority === "known-exploited") status.append(node("span", "row-secondary", "Known exploited"));
+      if (row.record.kev) status.append(node("span", "row-secondary", "CISA KEV catalog match"));
       const score = node("td", "cve-score", scoreLabel(row.record));
       const context = node("td"); context.append(node("span", "", row.count + " matching entr" + (row.count === 1 ? "y" : "ies")), node("span", "row-secondary", row.source_name), node("span", "row-secondary", row.date ? "Entry date: " + dateLabel(row.date.toISOString()) : "Entry date unknown"));
       tr.append(identity, status, score, context); body.append(tr);
@@ -487,13 +487,50 @@
     return item;
   }
 
+  function linkedCoverage(cve, savedSnapshot) {
+    const item = section("Linked coverage in this snapshot");
+    item.append(node("p", "muted", "Saved entries mentioning this exact CVE, across all entries in this dialog's snapshot and independently of stream filters. A shared identifier does not establish independent confirmation, separate incidents or exploitation of every mentioned CVE."));
+    const entries = savedSnapshot.articles.filter(article => article.cves.includes(cve)).sort((a, b) =>
+      compareNullable(a.date?.getTime() ?? null, b.date?.getTime() ?? null, -1, true) || a.id.localeCompare(b.id));
+    const sourceCount = new Set(entries.map(article => article.source_id)).size;
+    const count = node("p", "linked-coverage-count");
+    count.setAttribute("role", "status"); count.setAttribute("aria-live", "polite");
+    const list = node("ol", "linked-coverage-list");
+    const more = node("button", "linked-coverage-more"); more.type = "button";
+    let shown = 0;
+    function appendEntries() {
+      const moveFocus = document.activeElement === more;
+      const fragment = document.createDocumentFragment();
+      let firstNew = null;
+      for (const article of entries.slice(shown, shown + 10)) {
+        const entry = node("li", "linked-coverage-entry"); entry.tabIndex = -1;
+        entry.append(link(article.title, article.url, "linked-coverage-title"), node("p", "linked-coverage-meta", article.source_name + " · " + kinds[article.kind] + " · " + origins[article.origin]));
+        const basis = article.date_basis === "event" ? "Event date" : article.kind === "filing" ? "Filing date" : article.kind === "kev" ? "CISA catalog added" : article.date_basis === "publisher update" ? "Publisher updated" : "Publisher date";
+        entry.append(node("p", "linked-coverage-date", article.date ? basis + ": " + dateLabel(article.primary_date) + " UTC" : "Primary date unknown"));
+        if (article.kind === "kev") entry.append(node("p", "linked-coverage-meta", "Catalog entry; addition is separate from disclosure and exploitation dates."));
+        if (!firstNew) firstNew = entry;
+        fragment.append(entry);
+      }
+      shown = Math.min(shown + 10, entries.length); list.append(fragment);
+      count.textContent = "Showing " + shown.toLocaleString() + " of " + entries.length.toLocaleString() + " saved entries from " + sourceCount.toLocaleString() + " recorded source" + (sourceCount === 1 ? "" : "s") + ". Latest primary entry dates first; unknown dates last.";
+      more.hidden = shown >= entries.length;
+      more.textContent = "Load " + Math.min(10, entries.length - shown) + " more saved entries";
+      if (moveFocus && firstNew) (firstNew.querySelector("a") || firstNew).focus({ preventScroll: true });
+    }
+    more.addEventListener("click", appendEntries);
+    item.append(count, list, more); appendEntries();
+    if (!entries.length) item.append(node("p", "muted", "No linked entries are available in this saved snapshot. This does not establish that reporting or exploitation is absent."));
+    return item;
+  }
+
   function openMitigation(cve) {
-    const record = snapshot?.mitigations.get(cve);
+    const savedSnapshot = snapshot;
+    const record = savedSnapshot?.mitigations.get(cve);
     if (!record) { showError("This CVE is not present in the current saved snapshot. No external lookup was made."); return; }
     const dialog = $("#mitigation-dialog");
     if ($("#source-dialog").open || dialog.open) return;
     $("#mitigation-title").textContent = cve;
-    $("#mitigation-stamp").textContent = "Snapshot generated " + stamp(snapshot.generated_at) + " · CNA source updated " + stamp(record.source_updated_at) + " · Retrieved " + stamp(record.retrieved_at) + " · Last CNA attempt " + stamp(record.source_attempted_at) + ". This open detail stays on that snapshot; close and reopen for newer data.";
+    $("#mitigation-stamp").textContent = "Snapshot generated " + stamp(savedSnapshot.generated_at) + " · CNA source updated " + stamp(record.source_updated_at) + " · Retrieved " + stamp(record.retrieved_at) + " · Last CNA attempt " + stamp(record.source_attempted_at) + ". This open detail stays on that snapshot; close and reopen for newer data.";
     const content = $("#mitigation-content"); const overview = section(record.title || "Source record title not supplied");
     const badges = node("div", "mitigation-badges"); badges.append(node("span", "guidance-badge guidance-" + guidanceStatus(record), guidanceLabels[guidanceStatus(record)]), node("span", "record-state", record.record_state + " · CNA " + record.source_status.toUpperCase()), node("span", "cve-score", scoreLabel(record)));
     overview.append(badges);
@@ -526,7 +563,7 @@
     const referenceList = node("ul");
     for (const reference of record.references) { const item = node("li"); item.append(link((reference.label || "Original reference") + (reference.kind ? " · " + reference.kind : "") + " ↗", reference.url)); referenceList.append(item); }
     if (referenceList.children.length) references.append(referenceList); else references.append(node("p", "muted", "No original reference links supplied."));
-    content.replaceChildren(overview, assessment, guidanceItems("Solutions", record.solutions), guidanceItems("Workarounds", record.workarounds), action, products, references);
+    content.replaceChildren(overview, assessment, guidanceItems("Solutions", record.solutions), guidanceItems("Workarounds", record.workarounds), action, products, linkedCoverage(cve, savedSnapshot), references);
     try { dialog.showModal(); dialog.scrollTop = 0; } catch (_) { showError("The guidance dialog could not open in this document. No external lookup or device action occurred."); }
   }
 

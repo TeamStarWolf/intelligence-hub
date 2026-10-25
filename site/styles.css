@@ -334,3 +334,13 @@ dialog{background:#1a2226;border-color:#8b785a;border-top-color:#edac7c;border-r
 .reports-links{display:flex;flex-wrap:wrap;gap:8px 22px;margin:10px 0 0;padding-top:10px;border-top:1px solid var(--line)}
 .reports-links a{font-size:10px}
 @media(max-width:600px){.reports-strip{padding:14px}.reports-note,.reports-links a{font-size:11px}.reports-links a{display:inline-flex;align-items:center;min-height:32px}.site-header nav{flex-wrap:wrap}}
+
+/* CVE coverage uses saved source entries without merging incident claims. */
+.linked-coverage-list{margin:15px 0;padding-left:24px}
+.linked-coverage-list .linked-coverage-entry{margin:0;padding:13px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
+.linked-coverage-entry:focus-visible{outline:2px solid var(--orange);outline-offset:4px}
+.mitigation-section .linked-coverage-title{font-size:13px;line-height:1.8}
+.mitigation-section .linked-coverage-meta,.mitigation-section .linked-coverage-date{font-size:10px;line-height:1.85;margin:5px 0 0;color:var(--muted)}
+.mitigation-section .linked-coverage-count{font:10px/1.9 var(--mono);color:#d4bea3}
+.linked-coverage-more{min-height:42px;margin-top:8px;font-size:11px}
+@media(max-width:600px){.mitigation-section .linked-coverage-meta,.mitigation-section .linked-coverage-date,.mitigation-section .linked-coverage-count{font-size:11px}.linked-coverage-more{width:100%;min-height:44px}}
