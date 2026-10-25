@@ -326,3 +326,11 @@ dialog{background:#1a2226;border-color:#8b785a;border-top-color:#edac7c;border-r
 .workflow-health-clocks{padding-top:10px;border-top:1px solid var(--line);font:9px/1.9 var(--mono);overflow-wrap:anywhere}
 .workflow-health-boundary{color:#bdb4a6}
 @media(max-width:600px){.workflow-health{padding:14px}.workflow-health-grid{grid-template-columns:1fr;gap:12px}.workflow-health-heading{align-items:start}.workflow-health-heading>a{min-height:30px}.workflow-health-message,.workflow-health-item p,.workflow-health-item .workflow-health-scope,.workflow-health-item .workflow-observation-clock,.workflow-health-boundary{font-size:11px}.workflow-run-detail>a{font-size:11px;min-height:32px}.workflow-health-clocks{font-size:10px}}
+
+/* Written reports are rendered on GitHub and linked from this strip. */
+.reports-strip{margin-top:13px;padding:14px 17px;background:var(--panel-deep);border:1px solid var(--line);border-radius:3px}
+.reports-heading h2{margin:0;font:11px/1.7 var(--mono);font-weight:500;color:var(--orange);letter-spacing:.8px;text-transform:uppercase}
+.reports-note{margin:8px 0 0;font-size:10px;line-height:1.85;color:var(--muted)}
+.reports-links{display:flex;flex-wrap:wrap;gap:8px 22px;margin:10px 0 0;padding-top:10px;border-top:1px solid var(--line)}
+.reports-links a{font-size:10px}
+@media(max-width:600px){.reports-strip{padding:14px}.reports-note,.reports-links a{font-size:11px}.reports-links a{display:inline-flex;align-items:center;min-height:32px}.site-header nav{flex-wrap:wrap}}
