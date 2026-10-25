@@ -399,9 +399,10 @@ From the 671 accounts @WolfenLabs follows, 508 were classed security-relevant by
 ## 8. Notes for the Intelligence Hub (carried from SW-GROK-001)
 
 - `feed.json` (schema 3, 3,620 articles, generated 2026-10-25T00:50:51Z) shows the `cisa-advisories` source as **failed**.
-  - *Inference:* `collect.py` caps downloads at `MAX_BYTES = 3 MB` and the CISA feed is about 5.7 MB, so the cap is the likely cause. This is unconfirmed.
-- Hub articles show exploitation as "unknown" even when the CVE is in KEV. Joining `data.json` → `kev_additions` (or the KEV JSON) would fix this.
-- `publish.yml` declares a cron of `2,12,22,32,42,52 * * * *`. We have **not verified** that the workflow actually runs on that schedule.
+  - *Inference at compilation:* `collect.py` caps downloads at `MAX_BYTES = 3 MB` and the CISA feed is about 5.7 MB, so the cap is the likely cause. This was unconfirmed for that snapshot.
+  - *Later public snapshot, not part of the original compilation.* The Pages file `Last-Modified` `Sun, 25 Oct 2026 19:55:20 GMT` was read on `2026-10-25` at `20:56:18 GMT` (3:56 PM CT). That snapshot is schema 4, generated `2026-10-25T19:55:05+00:00`, with 3,735 articles. Its `cisa-advisories` row is **failed** with `response_byte_limit_exceeded: source response exceeded its configured byte bound.` The 3 MiB cap was not raised, and no truncated feed was admitted. The separately scoped category source `cisa-cybersecurity-advisories` was **ok** on that same snapshot (10 entries admitted). That category read does not repair the all-advisories failure.
+- Hub publisher-feed rows still record exploitation as `unknown` when the feed did not assert it, including rows whose mentioned CVE is in KEV. On the later snapshot above, 109 publisher-feed articles mentioned a CVE that had KEV brief metadata, and all 109 kept `exploitation: unknown`. KEV catalog rows stay `known` (1,756 on that snapshot). Copying catalog membership onto the entry label would treat a mention as proof that the entry's event exploited that CVE, which this hub does not do. The reader now states the catalog match beside the entry label, including the catalog-added date when the entry links exactly one such CVE. The two facts stay separate.
+- `publish.yml` declares a cron of `2,12,22,32,42,52 * * * *`. At original compilation this schedule had not been verified. Public Actions history read on `2026-10-25` between 3:50 PM and 3:56 PM CT shows completed `schedule` runs of this workflow on `main`, including runs created `2026-10-25T09:38:34Z`, `2026-10-25T13:55:14Z`, `2026-10-25T17:30:59Z` and `2026-10-25T19:54:49Z`. Those created times are GitHub run fields in UTC. The records are workflow observations, not proof that every publisher was admitted.
 
 ---
 
