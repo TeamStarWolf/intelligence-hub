@@ -29,8 +29,11 @@ The [CISA Cybersecurity Advisories category subset](docs/FEEDS.md#cisa-cybersecu
 is also a separate input. It preserves the original all-advisories source and its
 recorded failure; a category response does not establish complete CISA coverage.
 
-RSS/Atom collection examines the first **150 entries** of each accepted bounded
-response. An invalid article link/title or more than **100 unique CVE mentions**
+RSS/Atom collection processes at most **150 entries** from each accepted bounded
+response. Document order is the default. The F5 Labs feed instead ranks supported
+publisher dates through the declared window end, then unknown dates, then future
+dates; see [F5 selection](docs/FEEDS.md#f5-date-ranking-and-selection-provenance).
+An invalid article link/title or more than **100 unique CVE mentions**
 rejects that whole entry while other safe entries can be retained. The source
 ledger reports admitted, rejected, filtered and unprocessed counts; **partial**
 means some safe input was accepted with a gap. It does not mean the publisher's

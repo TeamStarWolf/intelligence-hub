@@ -2,7 +2,8 @@
 
 ## What a brief represents
 
-The generated **schema 2** snapshot has one `mitigations` entry for each unique CVE
+The collector writes a **schema 4** snapshot. The site still reads schemas 2, 3
+and 4. Each of those snapshots has one `mitigations` entry for each unique CVE
 in its loaded articles' `cves` arrays, including KEV, feed and curated articles.
 This is not every CVE ever published, nor every identifier in full linked articles.
 The projection is deterministic; it makes no model call or device assessment.

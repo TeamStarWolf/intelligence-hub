@@ -147,7 +147,13 @@ Legacy observations without that report have unknown window coverage.
 
 Open the source's ledger entry to inspect seen, processed, admitted, rejected,
 topic-filtered and unprocessed counts, rejection reasons and report clock/hash.
-Only the first 150 entries are processed. An unsafe/missing title or link, or
+At most 150 entries are processed under the recorded selection policy. Document
+order is the default. F5 Labs ranks supported publisher dates first; unknown
+dates follow, then future dates. Schema 4 publisher rows also separate configured
+selection, the selection recorded for that response, and the last accepted
+response-window selection. A missing, failed or legacy report leaves the accepted
+window's basis unknown. See [selection provenance](FEEDS.md#f5-date-ranking-and-selection-provenance).
+An unsafe/missing title or link, or
 more than 100 unique CVE mentions, excludes the entire article; CVEs are not
 clipped. Other safe articles can be admitted with a partial status. Counts
 precede date filtering and retained-URL deduplication, so they need not equal
