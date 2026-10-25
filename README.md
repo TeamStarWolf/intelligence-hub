@@ -12,7 +12,7 @@ advisories, known exploited vulnerabilities and a sourced decade timeline.
 - Provides year/month navigation, date presets, source/kind/exploitation/guidance filters, and ten date, title, source, CVE and CVSS sort choices.
 - Provides a CVE register and source-led briefs with CISA required actions, available CNA product/version information, guidance excerpts and original references.
 - Shows source health, partial article intake and dates separately from guidance availability. Missing enrichment remains unknown; a CVE mention does not prove exploitation or device exposure.
-- Requests collection every **five minutes** through GitHub Actions and publishes when articles, guidance, source outcomes or layout change. A visible browser checks the saved public snapshot every five minutes.
+- Requests collection every **ten minutes** through GitHub Actions and publishes when articles, guidance, source outcomes or layout change. A visible browser checks the saved public snapshot every ten minutes, with the saved snapshot's age shown separately from browser reads.
 - Runs on GitHub Pages independently of the owner's laptop, with a responsive interface and original SVG artwork.
 
 The curated history covers **2016-10-24 through 2026-10-24**. The collector's default
@@ -93,7 +93,7 @@ public site.
 
 ## Deployment and limits
 
-The workflow runs on pushes to `main`, manual dispatch and a five-minute schedule
+The workflow runs on pushes to `main`, manual dispatch and a ten-minute schedule
 offset from the hour. The latest checks are visible in
 [Actions](https://github.com/TeamStarWolf/intelligence-hub/actions/workflows/publish.yml).
 An unchanged check can succeed without a new Pages artifact or a newer displayed
@@ -102,8 +102,8 @@ dropped jobs and inactivity disabling still apply. This is not a delivery SLA.
 
 Only five allowlisted public files enter Pages. A changed publication must fit
 both **21 MiB of input** and a **1,200,000-byte level-6 compressed-size estimate**.
-The artifact retains for one day. At 288 scheduled publications/day, that estimate
-is at most **345.6 MB (about 330 MiB)** for those publications. This limits this
+The artifact retains for one day. At 144 scheduled publications/day, that estimate
+is at most **172.8 MB (about 165 MiB)** for those publications. This limits this
 project's estimated footprint, not account-wide billing or actual artifact size;
 push/manual runs and other account usage are separate. No billing setting or quota is
 changed. [GitHub documents separate runner and storage allowances](https://docs.github.com/en/billing/concepts/product-billing/github-actions).

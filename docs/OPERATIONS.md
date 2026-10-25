@@ -54,9 +54,9 @@ not scan an environment, patch a device, execute commands or verify remediation.
 After any separately authorized change, verify the installed product/configuration
 against current vendor guidance and retain evidence.
 
-## Five-minute checks and publication
+## Ten-minute checks and publication
 
-GitHub Actions requests collection at minutes **2, 7, 12, …, 57** of every UTC hour,
+GitHub Actions requests collection at minutes **2, 12, 22, 32, 42 and 52** of every UTC hour,
 as well as on pushes to `main` and manual dispatch. Manual action:
 repository **Actions → Refresh and publish Intelligence Hub → Run workflow**.
 
@@ -67,10 +67,12 @@ See [schedule behavior](https://docs.github.com/en/actions/reference/workflows-a
 Check the [workflow history](https://github.com/TeamStarWolf/intelligence-hub/actions/workflows/publish.yml)
 when the desk appears stale; an owner can re-enable a disabled workflow.
 
-The browser fetches only this site's saved snapshot, every five minutes while
+The browser fetches only this site's saved snapshot, every ten minutes while
 visible. Refreshing the browser does not start publisher collection. Publisher
 cadence, the workflow, collection duration, deployment and browser visibility all
-affect arrival time. This is not continuous monitoring or a five-minute delivery SLA.
+affect arrival time. This is not continuous monitoring or a ten-minute delivery SLA.
+The snapshot badge shows its age in minutes independently of the latest browser
+read; reading the same saved file never claims a new publisher collection.
 
 The collector records a typed Boolean `changed` decision. Article, guidance,
 source-outcome, intake-count/reason and layout changes can trigger publication.
@@ -210,8 +212,8 @@ tar/ZIP metadata or proof of actual billed storage. The
 [pinned official upload action](https://github.com/actions/upload-pages-artifact/blob/7b1f4a764d45c48632c6b24a0339c27f5614fb0b/action.yml)
 creates the real artifact, retained for **one day**.
 
-At 288 scheduled publications/day, the estimate budget corresponds to
-**345.6 MB (about 330 MiB)** for those artifacts. Manual/push runs, existing artifacts, other
+At 144 scheduled publications/day, the estimate budget corresponds to
+**172.8 MB (about 165 MiB)** for those artifacts. Manual/push runs, existing artifacts, other
 repositories/Packages usage, actual compression and retention processing remain
 separate. GitHub documents a **500 MB** Free-plan artifact allowance shared with
 Packages; public standard-runner minutes being free does not remove storage limits.

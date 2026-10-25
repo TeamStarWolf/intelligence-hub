@@ -6,7 +6,7 @@
   const origins = { "publisher-feed": "PUBLISHER FEED", "cisa-kev": "CATALOG RECORD", "library-curation": "CURATED ARCHIVE" };
   const guidanceLabels = { "publisher-guidance": "Publisher guidance", "cisa-action": "CISA action", "needs-review": "Needs review", unavailable: "Source failed / pending" };
   const day = 86400000;
-  const pollInterval = 300000;
+  const pollInterval = 600000;
   const pageSize = 24;
   const maximumFeedBytes = 16 * 1024 * 1024;
   const cvePattern = /^CVE-\d{4}-\d{4,19}$/;
@@ -523,7 +523,7 @@
   function renderFreshness() {
     if (!snapshot) return;
     const age = Date.now() - new Date(snapshot.generated_at).getTime(); const stale = age > day;
-    $("#snapshot-status").textContent = age < -300000 ? "Snapshot clock differs" : stale ? "Snapshot older than 24 hours" : "Saved snapshot";
+    $("#snapshot-status").textContent = age < -300000 ? "Snapshot clock differs" : stale ? "Snapshot older than 24 hours" : "Saved snapshot · " + Math.max(0, Math.floor(age / 60000)) + " min old";
     $("#snapshot-mark").classList.toggle("stale", stale || age < -300000);
   }
 
@@ -595,7 +595,7 @@
         }
         window.scrollTo({ left: scroll.x, top: scroll.y, behavior: "instant" });
       } else renderFreshness();
-      $("#poll-status").textContent = "Browser read " + stamp(lastRead) + " · " + (changed ? "snapshot updated" : "same saved snapshot") + " · Checks every 5 minutes while visible; publishers are not contacted by this browser.";
+      $("#poll-status").textContent = "Browser read " + stamp(lastRead) + " · " + (changed ? "snapshot updated" : "same saved snapshot") + " · Checks every 10 minutes while visible; publishers are not contacted by this browser.";
     } catch (error) {
       showError((error.name === "AbortError" ? "The snapshot read timed out." : error instanceof SyntaxError ? "The saved feed is not valid JSON." : error.message || "The saved feed could not load.") + (snapshot ? " The prior snapshot generated " + stamp(snapshot.generated_at) + " remains displayed with its original dates." : " No feed data is displayed. Read a later valid snapshot."));
       $("#poll-status").textContent = "Browser check failed " + stamp(lastAttempt) + (lastRead ? " · Last successful read " + stamp(lastRead) : " · No successful snapshot read this session");
