@@ -308,6 +308,38 @@ that filings have been connected, and reporting about a filing is not complete
 Item 1.05/8.01 coverage. Accepted access and an operational contact policy remain
 prerequisites; do not bypass a source's access refusal.
 
+### Supplemental publisher context
+
+The optional local `config/mitigation-context.json` catalog adds reviewed publisher
+context to existing CVE detail steps and limitations. Its absence or an empty
+catalog preserves the baseline. It does not add articles, sources or CVE records,
+change CNA fields, CVSS, KEV data or guidance classifications, or establish device
+exposure. Rejected records and identifiers absent from the current briefs receive
+no appended note. The initial catalog concerns only the two original PHP CVEs;
+its separately qualified follow-up text does not create a third CVE brief.
+
+The exact version-1 object has `schema_version` and `entries`. Each unique uppercase
+CVE entry has `cve`, `steps` and `limitations`; each step has only `title`,
+`detail` and canonical public HTTPS `evidence_url`. Publisher publication/revision
+dates are identified in the note, separately from snapshot and CNA retrieval
+clocks. Quotes of publisher plans are not proof of a later shipped fix, registry
+history or an installed vendor backport. Public curation needs source/privacy
+review; visitors cannot configure it through the site.
+
+The loader rejects duplicate JSON keys, extra fields, malformed types/IDs/links
+and exceeded bounds before source requests: at most 64 KiB, 20 entries, six steps
+and four limitations per entry. Each entry is limited to 4,000 Unicode codepoints
+across **all** string values, including its ID and URLs. Title/detail/limitation
+caps are 160/2,000/1,000 codepoints, with canonical ASCII URLs at most 4,000
+characters. No invalid content is silently shortened or promoted.
+
+Before appending, all matching briefs are copied and checked against the existing
+100-step/100-limitation detail caps and JavaScript UTF-16 field limits. A later
+failure leaves original briefs, CNA projections and cache evidence untouched.
+Context changes participate in the existing content revision. Original intake,
+retention and the 1,200,000-byte artifact/one-day storage guards remain unchanged;
+an oversized publication stays blocked rather than widening those guards.
+
 ## Evidence and troubleshooting
 
 | Observation | Interpret and act |

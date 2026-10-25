@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "cve": "CVE-2026-109618",
+      "steps": [
+        {
+          "title": "PHP initial-pair fixes - notice published 2026-10-21",
+          "detail": "PHP lists upstream releases 8.5.12, 8.4.27, 8.3.36 and 8.2.35 for CVE-2026-109618 and CVE-2026-109619. PHP also describes distribution/LTS fixes and minimal backports for 7.4, 8.0 and 8.1. A lower displayed version alone does not establish that a vendor package lacks the patch; its package/backport evidence remains necessary.",
+          "evidence_url": "https://www.php.net/archive/2026.php"
+        },
+        {
+          "title": "PHP susceptibility advisory - published 2026-10-21",
+          "detail": "PHP documents an unauthenticated pre-application mod_php demonstration and discusses other SAPIs with susceptibility qualifications. Broad web-serving risk attribution is not proof of equal demonstrated exploitability for every SAPI, configuration, version or patched installation.",
+          "evidence_url": "https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w"
+        },
+        {
+          "title": "PHP request-state advisory - published 2026-10-21",
+          "detail": "The request-state advisory separates concrete demonstrations from candidate cases and configuration-dependent, same-worker request-state paths. Compare the cited SAPI and request prerequisites; this hub has not established them for any deployment.",
+          "evidence_url": "https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp"
+        },
+        {
+          "title": "CISA conditional guidance - alert revised 2026-10-23",
+          "detail": "CISA advises temporary offline status when organizations cannot update immediately or continue using unsupported PHP 8.1 or earlier, until patched or updated. This is attributed guidance under those conditions, not a finding that every numerically older build is unpatched or unpatchable. The retained page does not establish its initial publication time.",
+          "evidence_url": "https://www.cisa.gov/news-events/alerts/2026/10/21/critical-vulnerabilities-php-require-immediate-patching"
+        },
+        {
+          "title": "Separate PHP follow-up - notice published 2026-10-23",
+          "detail": "The initial-pair release list does not establish a fix for the later CVE-2026-115560. PHP described a next-regular-release plan and session.upload_progress.enabled=0 as an interim setting for an unusual path: php_binary or php_serialize switched to php through ini_set() before session_start(), with upload progress still enabled. That conditional measure is not complete mitigation of the initial pair. These sources do not establish a shipped third fix or historical CVE-registry absence.",
+          "evidence_url": "https://www.php.net/archive/2026.php"
+        }
+      ],
+      "limitations": [
+        "Supplementary publisher context is separate from the loaded CNA fields. It does not change CVE record state, CVSS, KEV status, guidance classification or establish exposure on a device.",
+        "Dates above belong to publisher notices/advisories or the CISA revision. They are not this snapshot generation, retrieval or last-check dates; later release/registry history and actual vendor packages were not established here."
+      ]
+    },
+    {
+      "cve": "CVE-2026-109619",
+      "steps": [
+        {
+          "title": "PHP initial-pair fixes - notice published 2026-10-21",
+          "detail": "PHP lists upstream releases 8.5.12, 8.4.27, 8.3.36 and 8.2.35 for CVE-2026-109618 and CVE-2026-109619. PHP also describes distribution/LTS fixes and minimal backports for 7.4, 8.0 and 8.1. A lower displayed version alone does not establish that a vendor package lacks the patch; its package/backport evidence remains necessary.",
+          "evidence_url": "https://www.php.net/archive/2026.php"
+        },
+        {
+          "title": "PHP susceptibility advisory - published 2026-10-21",
+          "detail": "PHP documents an unauthenticated pre-application mod_php demonstration and discusses other SAPIs with susceptibility qualifications. Broad web-serving risk attribution is not proof of equal demonstrated exploitability for every SAPI, configuration, version or patched installation.",
+          "evidence_url": "https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w"
+        },
+        {
+          "title": "PHP request-state advisory - published 2026-10-21",
+          "detail": "The request-state advisory separates concrete demonstrations from candidate cases and configuration-dependent, same-worker request-state paths. Compare the cited SAPI and request prerequisites; this hub has not established them for any deployment.",
+          "evidence_url": "https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp"
+        },
+        {
+          "title": "CISA conditional guidance - alert revised 2026-10-23",
+          "detail": "CISA advises temporary offline status when organizations cannot update immediately or continue using unsupported PHP 8.1 or earlier, until patched or updated. This is attributed guidance under those conditions, not a finding that every numerically older build is unpatched or unpatchable. The retained page does not establish its initial publication time.",
+          "evidence_url": "https://www.cisa.gov/news-events/alerts/2026/10/21/critical-vulnerabilities-php-require-immediate-patching"
+        },
+        {
+          "title": "Separate PHP follow-up - notice published 2026-10-23",
+          "detail": "The initial-pair release list does not establish a fix for the later CVE-2026-115560. PHP described a next-regular-release plan and session.upload_progress.enabled=0 as an interim setting for an unusual path: php_binary or php_serialize switched to php through ini_set() before session_start(), with upload progress still enabled. That conditional measure is not complete mitigation of the initial pair. These sources do not establish a shipped third fix or historical CVE-registry absence.",
+          "evidence_url": "https://www.php.net/archive/2026.php"
+        }
+      ],
+      "limitations": [
+        "Supplementary publisher context is separate from the loaded CNA fields. It does not change CVE record state, CVSS, KEV status, guidance classification or establish exposure on a device.",
+        "Dates above belong to publisher notices/advisories or the CISA revision. They are not this snapshot generation, retrieval or last-check dates; later release/registry history and actual vendor packages were not established here."
+      ]
+    }
+  ]
+}

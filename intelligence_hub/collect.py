@@ -1,5 +1,6 @@
 """Bounded public-feed collection. No article bodies, account access or model calls."""
 from concurrent.futures import ThreadPoolExecutor
+from copy import deepcopy
 from datetime import date, datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 import hashlib
@@ -97,6 +98,106 @@ def read_json(path, limit=16 * 1024 * 1024):
         raw = stream.read(limit + 1)
     require(len(raw) <= limit, "Local JSON input exceeds its limit.")
     return json.loads(raw, parse_constant=reject_constant)
+
+
+def _context_string(value, maximum):
+    require(type(value) is str and value.strip() and len(value) <= maximum, "Invalid mitigation context text.")
+    require(not any(ord(char) < 32 or ord(char) == 127 or
+                    0xD800 <= ord(char) <= 0xDFFF for char in value), "Invalid mitigation context characters.")
+    return value
+
+
+def _context_pairs(pairs):
+    value = {}
+    for key, item in pairs:
+        require(key not in value, "Duplicate mitigation context JSON key.")
+        value[key] = item
+    return value
+
+
+def load_mitigation_context(path):
+    """Read optional local curation before any public-source request or write."""
+    try:
+        path.lstat()
+    except FileNotFoundError:
+        return []
+    require(path.is_file() and not path.is_symlink(), "Mitigation context must be an ordinary file.")
+    with path.open("rb") as stream:
+        raw = stream.read(64 * 1024 + 1)
+    require(len(raw) <= 64 * 1024, "Mitigation context exceeds its byte limit.")
+    value = json.loads(raw.decode("utf-8"), object_pairs_hook=_context_pairs, parse_constant=reject_constant)
+    require(type(value) is dict and set(value) == {"schema_version", "entries"} and
+            type(value["schema_version"]) is int and value["schema_version"] == 1, "Invalid mitigation context format.")
+    entries = value["entries"]
+    require(type(entries) is list and len(entries) <= 20, "Mitigation context exceeds its entry limit.")
+    seen = set()
+    for entry in entries:
+        require(type(entry) is dict and set(entry) == {"cve", "steps", "limitations"}, "Invalid mitigation context entry.")
+        cve = entry["cve"]
+        require(type(cve) is str and cve.isascii() and cve == cve.upper() and
+                CVE.fullmatch(cve) and cve not in seen, "Invalid or duplicate mitigation context CVE.")
+        seen.add(cve)
+        require(type(entry["steps"]) is list and 1 <= len(entry["steps"]) <= 6 and
+                type(entry["limitations"]) is list and len(entry["limitations"]) <= 4, "Invalid mitigation context lists.")
+        total = len(cve)
+        for step in entry["steps"]:
+            require(type(step) is dict and set(step) == {"title", "detail", "evidence_url"}, "Invalid mitigation context step.")
+            _context_string(step["title"], 160)
+            _context_string(step["detail"], 2000)
+            url = _context_string(step["evidence_url"], 4000)
+            require(url.isascii() and safe_url(url) == url, "Invalid mitigation context evidence URL.")
+            total += sum(len(item) for item in step.values())
+        for item in entry["limitations"]:
+            total += len(_context_string(item, 1000))
+        require(total <= 4000, "Mitigation context exceeds its total text limit.")
+    return entries
+
+
+def _context_ui_text(value, maximum, nullable=False, empty=True):
+    if value is None:
+        return nullable
+    if type(value) is not str or sum(2 if ord(char) > 0xFFFF else 1 for char in value) > maximum:
+        return False
+    # Match JavaScript String.trim for the existing nonempty limitation field.
+    whitespace = "\t\n\v\f\r \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff"
+    return empty or bool(value.strip(whitespace))
+
+
+def _context_ui_limits(analysis):
+    require(type(analysis) is dict and type(analysis.get("steps")) is list and
+            type(analysis.get("limitations")) is list and len(analysis["steps"]) <= 100 and
+            len(analysis["limitations"]) <= 100, "Mitigation context exceeds the existing detail list limits.")
+    for step in analysis["steps"]:
+        require(type(step) is dict and _context_ui_text(step.get("title"), 2000) and
+                _context_ui_text(step.get("detail"), 20000) and
+                _context_ui_text(step.get("evidence_url"), 4000, nullable=True), "Mitigation context exceeds the existing detail field limits.")
+    require(all(_context_ui_text(item, 20000, empty=False) for item in analysis["limitations"]),
+            "Mitigation context exceeds the existing limitation limits.")
+
+
+def apply_mitigation_context(briefs, entries):
+    """Append only to isolated copies of existing briefs after all matches fit."""
+    planned = {}
+    for entry in entries:
+        cve = entry["cve"]
+        if cve not in briefs:
+            continue
+        record = briefs[cve]
+        require(type(record) is dict and record.get("cve") == cve, "Mitigation context brief identity differs.")
+        if record.get("record_state") == "REJECTED":
+            continue
+        candidate = deepcopy(record)
+        analysis = candidate.get("analysis")
+        _context_ui_limits(analysis)
+        for step in analysis["steps"]:
+            if (step["title"] == "Vendor guidance needs review" and step["detail"] ==
+                    "No patch version or workaround is established in the loaded structured inputs. Follow the CVE/vendor references; this hub will not invent a fix."):
+                step["detail"] = "No solution/workaround was supplied by the loaded CNA fields. Supplementary publisher context below is separate; verify its dated product and deployment scope."
+        analysis["steps"].extend(deepcopy(entry["steps"]))
+        analysis["limitations"].extend(deepcopy(entry["limitations"]))
+        _context_ui_limits(analysis)
+        planned[cve] = candidate
+    return {**briefs, **planned} if planned else briefs
 
 
 def write_json(path, value, compact=False):
@@ -372,6 +473,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
 
     require(start <= end and (end - start).days <= 3661, "History window must be at most ten years.")
     require(type(enrich_limit) is int and 0 <= enrich_limit <= 2000, "CVE enrichment limit must be0..2000.")
+    context = load_mitigation_context(ROOT / "config/mitigation-context.json")
     sources = validate_registry(read_json(ROOT / "config/sources.json", 128 * 1024))
     cache_path = STATE / "public-cache.json"
     cache = read_json(cache_path) if cache_path.exists() else {"sources": {}, "kev": {}}
@@ -454,6 +556,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     counts = {origin: sum(article["origin"] == origin for article in ordered) for origin in ("cisa-kev", "library-curation", "publisher-feed")}
     prepared_at = now()
     briefs, projections, mitigation_stats = build_briefs(ordered, kev.get("catalog", {}), retained, refresh, enrich_limit, fetch, text, safe_url, published, prepared_at)
+    briefs = apply_mitigation_context(briefs, context)
     snapshot = {"schema_version": 3, "generated_at": now(), "window": {"start": start.isoformat(), "end": end.isoformat()},
         "articles": ordered, "sources": health, "history_reviewed_at": history.get("curated_at"),
         "mitigations": briefs, "mitigation_coverage": mitigation_stats, "deduplication": {"url_duplicates_removed": duplicates},
