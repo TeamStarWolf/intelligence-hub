@@ -346,6 +346,18 @@
     return typeof record.cvss?.score === "number" ? record.cvss.score.toFixed(1) + " · CVSS " + (record.cvss.version || "version unknown") : "CVSS unknown";
   }
 
+  function kevCatalogNote(article) {
+    if (article.origin === "cisa-kev") return "";
+    const matches = article.cves.flatMap(cve => {
+      const kev = snapshot.mitigations.get(cve)?.kev;
+      return kev ? [{ cve, kev }] : [];
+    });
+    if (!matches.length) return "";
+    const shown = matches.slice(0, 3).map(item => item.cve + (matches.length === 1 && item.kev.date_added ? " (catalog added " + dateLabel(item.kev.date_added) + ")" : ""));
+    const extra = matches.length > 3 ? " +" + (matches.length - 3).toLocaleString() + " more" : "";
+    return "CISA KEV catalog includes " + shown.join(", ") + extra + ". That match is separate from this entry's exploitation label.";
+  }
+
   function articleCard(article, openDetails) {
     const card = node("article", "article-card card-kind-" + article.kind + (article.exploitation === "known" ? " card-known-exploitation" : "")); card.dataset.entryId = article.id;
     const top = node("div", "article-topline");
@@ -374,6 +386,8 @@
     const source = node("div", "article-source"); source.append(node("span", "", article.source_name), node("span", "article-origin", origins[article.origin]));
     const exploitation = { known: "Known exploitation recorded by the source", reported: "Exploitation reported; read the source context", unknown: "Exploitation status unknown in this entry" }[article.exploitation];
     bottom.append(source, node("p", "exploitation exploitation-" + article.exploitation, exploitation));
+    const catalogNote = kevCatalogNote(article);
+    if (catalogNote) bottom.append(node("p", "kev-catalog-note", catalogNote));
     const detail = node("details", "article-detail"); detail.open = openDetails.has(article.id);
     const summary = node("summary", "", "Sources & date context" + (article.cves.length > 6 ? " · all " + article.cves.length + " CVEs" : "")); summary.dataset.focusKey = article.id + "-details";
     detail.append(summary, node("p", "", "Date basis: " + (article.date_basis || "Not specified.")), node("p", "", (article.date_basis === "filing" ? "SEC filing date: " : article.kind === "kev" ? "Catalog addition date: " : article.date_basis === "publisher update" ? "Publisher update date: " : "Publisher date: ") + dateLabel(article.published_at)), node("p", "", "Event date: " + dateLabel(article.event_date)));
