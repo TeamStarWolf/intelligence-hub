@@ -4,7 +4,7 @@
 
 The catalog contains **59 publisher RSS/Atom sources**, counting feed definitions rather than unique publishers. The first 29 comprise ten retained sources, sixteen additions from the repository owner's public [cybersecurity-resources bookmarks](https://github.com/TeamStarWolf/cybersecurity-resources/blob/f95fb4a3fae14acfa172c22507a1554339cb3655/LINKS.md), and three further requested publishers: watchTowr Labs, Dark Reading and the legacy Threatpost archive. A further 29 advisory, research and reporting feeds and one separately scoped Talos category feed are listed below. The fixed configuration is [sources.json](../config/sources.json). CISA KEV is a separate JSON catalog and is not included in this RSS count. Curated historical publications are also a separate input. SEC filings are not connected by this feed intake.
 
-Configured does not mean every source is currently healthy. The site records each collection attempt and last successful collection. The retained CISA advisory feed failed the initial production intake; its configured address is preserved and its failure remains visible. No replacement CISA advisory URL was established by this expansion. A failed source is not evidence that its publisher has no new advisories.
+Configured does not mean every source is currently healthy. The site records each collection attempt and last accepted input. The retained CISA advisory feed failed the initial production intake; its configured address is preserved and its failure remains visible. No replacement CISA advisory URL was established by this expansion. A failed source is not evidence that its publisher has no new advisories.
 
 The nineteen additions returned direct HTTPS 200 responses with bounded, parseable RSS/Atom and usable HTTPS article links during intake on **24 October 2026**. Threatpost's returned publication dates stop in August 2022: its live transport does not make its reporting current. These are dated transport and structure observations, not promises of continued availability, complete archives, publisher authenticity beyond the observed HTTPS endpoint, factual correctness or permission to reproduce full articles. Scheduled collection and browser behavior are separate evidence.
 
@@ -58,6 +58,53 @@ Each addition has a retained private receipt with the exact URL, retrieval inter
 Admission used a 3 MiB uncompressed response cap, strict UTF-8 and pre-parse NUL/DOCTYPE/ENTITY rejection, with post-parse node/depth bounds. The post-parse checks do not establish a parser memory/CPU bound. Socket/read deadlines are best effort. No adversarial parser test or full source-security audit is claimed by admission. The production collector has its own validation and can reject a feed that changes later.
 
 Exact article-host allowlists are recorded per source. Publisher feed and article hosts can differ, as with CERT/CC and Debian. No wildcard or arbitrary-source endpoint is enabled. No feed text or publisher markup becomes executable page content. The hub publishes headlines, dates and links, with separately curated short summaries where available; it does not republish full RSS article bodies. RSS retention and future failures remain limits on historical coverage.
+
+### Partial intake and entry accounting
+
+New snapshots use schema 3. The collector and site retain compatibility with
+validated prior snapshots; an old source observation without an intake report
+has **unknown entry-window coverage**, even if its recorded status was successful.
+CISA KEV is a separate catalog and does not carry RSS entry accounting.
+
+After the whole response passes transport and XML validation, the collector
+counts its RSS items or Atom entries and examines the first **150** in document
+order. This is a processed-entry limit, including rejected and filtered entries;
+it is not a target of 150 accepted articles. The ledger distinguishes:
+
+| Count | Meaning |
+| --- | --- |
+| Seen | All entry elements in the accepted bounded XML tree. |
+| Processed | The first 150 entries, or all entries if fewer. |
+| Admitted | Entries accepted by the parser before retained-URL deduplication and date-window filtering. |
+| Rejected | Whole entries excluded for an invalid/missing title or allowed HTTPS link, or more than 100 unique CVE mentions. |
+| Filtered | Entries excluded by a configured topic filter, not validation failures. |
+| Unprocessed | Entries beyond that processing window. |
+
+Processed equals admitted plus rejected plus filtered; seen equals processed plus
+unprocessed. Rejection reasons are counted without persisting rejected bodies or
+titles. CVEs are counted from the full extracted title and content fields before
+display-title shortening. A rejected article's CVE list is never clipped to fit.
+This does not identify CVEs in linked articles that the feed did not include.
+
+**OK** means no entries were rejected or left unprocessed in that response, not
+complete publisher history. **Partial** requires at least one admitted entry and
+at least one rejected or unprocessed entry. Safe admissions merge with retained
+history under the existing 600-item source bound. **Failed** retains last-good
+history when the whole response is rejected or no safe admission is possible.
+Only a fully processed, rejection-free configured topic filter may normally
+admit zero entries without failing. A zero-admission partial window fails.
+
+The report belongs to the latest attempt and carries that response's hash. A
+whole fetch/XML failure clears the latest report rather than presenting old
+counts as current. A parsed zero-admission failure can retain its own report
+and hash while the source's last accepted input and digest remain historical.
+A rejected current article can coexist with its older retained version; the
+counts describe the latest response window, not the archive's saved-row count.
+
+The 3 MiB response, read deadline, UTF-8/DTD/entity, 40,000-node/48-depth and
+100-CVE-per-entry gates remain in force. Whole-response rejection is never a
+permission to parse a prefix, raise a bound or bypass publisher access refusal.
+Neither successful nor partial intake guarantees factual accuracy or completeness.
 
 ## Bookmarks that are not connected feeds
 
@@ -153,9 +200,10 @@ category title and exact RSS self URL. This establishes an observed
 publisher-served route; it is not an explicitly linked category RSS advertisement
 in that HTML or a verified platform-documentation rule.
 
-The original `talos` all-posts source remains configured and separate. Its
-24 October observation was rejected because one item exceeded 100 CVE mentions;
-that source's failure and retained historical entries are not relabeled as a
-successful category fetch. No CVEs were clipped and no reader limit was relaxed
-to admit this subset. Future category entries can still fail normal validation.
-This addition establishes no replacement CISA advisory route.
+The original `talos` all-posts source remains configured and separate. Its earlier
+24 October whole-feed observation failed because one item exceeded 100 CVE
+mentions. The newer partial-intake policy can reject that whole article while
+admitting other safe all-posts entries; only a new recorded attempt establishes
+that outcome. Its historical failure is not relabeled as a successful category
+fetch. No CVEs are clipped and no reader limit is relaxed. Category entries remain
+subject to the same validation. This establishes no replacement CISA advisory route.

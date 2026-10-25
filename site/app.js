@@ -53,6 +53,42 @@
   function nonnegative(value) { requireValue(Number.isSafeInteger(value) && value >= 0); return value; }
   function normalized(value) { return value.normalize("NFKC").toLocaleLowerCase(); }
 
+  function exactKeys(value, keys) {
+    requireValue(value && typeof value === "object" && !Array.isArray(value) && Object.keys(value).length === keys.length && keys.every(key => Object.hasOwn(value, key)));
+  }
+
+  function intakeCount(value, maximum) { nonnegative(value); requireValue(value <= maximum); return value; }
+
+  function normalizeIntake(value, source) {
+    if (source.id === "cisa-kev") { requireValue(value == null && source.status !== "partial"); return null; }
+    if (value == null) { requireValue(source.status !== "partial"); return null; }
+    requireValue(source.status !== "not_fetched");
+    exactKeys(value, ["items_seen", "items_processed", "items_admitted", "items_rejected", "items_filtered", "items_unprocessed", "entry_limit", "cve_limit", "rejection_reasons", "attempted_at", "response_sha256"]);
+    exactKeys(value.rejection_reasons, ["invalid_link_or_title", "cve_limit_exceeded"]);
+    requireValue(value.entry_limit === 150 && value.cve_limit === 100);
+    const report = {
+      items_seen: intakeCount(value.items_seen, 40000), items_processed: intakeCount(value.items_processed, 150),
+      items_admitted: intakeCount(value.items_admitted, 150), items_rejected: intakeCount(value.items_rejected, 150),
+      items_filtered: intakeCount(value.items_filtered, 150), items_unprocessed: intakeCount(value.items_unprocessed, 40000),
+      entry_limit: 150, cve_limit: 100,
+      rejection_reasons: { invalid_link_or_title: intakeCount(value.rejection_reasons.invalid_link_or_title, 150), cve_limit_exceeded: intakeCount(value.rejection_reasons.cve_limit_exceeded, 150) },
+      attempted_at: timestamp(value.attempted_at, false), response_sha256: boundedText(value.response_sha256, 64)
+    };
+    requireValue(/^[a-f0-9]{64}$/.test(report.response_sha256) && report.attempted_at.includes("T") && report.attempted_at.length <= 40 && report.attempted_at === source.last_attempt);
+    requireValue(report.items_processed === Math.min(report.items_seen, report.entry_limit) && report.items_seen === report.items_processed + report.items_unprocessed);
+    requireValue(report.items_processed === report.items_admitted + report.items_rejected + report.items_filtered);
+    requireValue(report.rejection_reasons.invalid_link_or_title + report.rejection_reasons.cve_limit_exceeded === report.items_rejected);
+    if (source.status === "ok" || source.status === "partial") {
+      requireValue(source.error === null && source.last_success !== null && source.last_success.includes("T") && source.last_success.length <= 40 && source.sha256 === report.response_sha256 && new Date(source.last_success).getTime() >= new Date(report.attempted_at).getTime());
+      if (source.status === "partial") requireValue(report.items_admitted > 0 && (report.items_rejected > 0 || report.items_unprocessed > 0));
+      else requireValue(report.items_rejected === 0 && report.items_unprocessed === 0);
+    } else {
+      // A failed window's hash belongs to this attempt, not retained last-good input.
+      requireValue(source.status === "failed" && report.items_admitted === 0 && source.error !== null && source.error.trim().length > 0);
+    }
+    return report;
+  }
+
   function normalizeMitigation(value, key) {
     requireValue(value && cvePattern.test(key) && value.cve === key && ["ok", "failed", "pending"].includes(value.source_status) && ["PUBLISHED", "REJECTED", "UNKNOWN"].includes(value.record_state));
     requireValue(value.analysis && ["known-exploited", "review"].includes(value.analysis.priority) && ["publisher-guidance", "cisa-action", "needs-review"].includes(value.analysis.guidance_status));
@@ -91,7 +127,7 @@
   }
 
   function normalize(raw) {
-    requireValue(raw && raw.schema_version === 2 && Array.isArray(raw.articles) && raw.articles.length <= 8000 && Array.isArray(raw.sources) && raw.sources.length <= 200);
+    requireValue(raw && [2, 3].includes(raw.schema_version) && Array.isArray(raw.articles) && raw.articles.length <= 8000 && Array.isArray(raw.sources) && raw.sources.length <= 200);
     timestamp(raw.generated_at, false);
     requireValue(raw.window && raw.coverage && raw.integrations && raw.refresh && raw.deduplication && raw.mitigations && typeof raw.mitigations === "object" && !Array.isArray(raw.mitigations));
     timestamp(raw.window.start, false);
@@ -128,8 +164,11 @@
     });
     const sourceIds = new Set();
     const sources = raw.sources.map(source => {
-      requireValue(source && ["ok", "failed", "not_fetched"].includes(source.status));
+      requireValue(source && ["ok", "partial", "failed", "not_fetched"].includes(source.status));
       const item = { id: boundedText(source.id, 160), name: boundedText(source.name, 240), url: boundedText(source.url, 4000), kind: boundedText(source.kind, 160), status: source.status, last_success: timestamp(source.last_success), last_attempt: timestamp(source.last_attempt), error: source.error === null ? null : boundedText(source.error, 4000, true), articles: nonnegative(source.articles) };
+      item.sha256 = source.sha256 == null ? null : boundedText(source.sha256, 64);
+      requireValue(item.sha256 === null || /^[a-f0-9]{64}$/.test(item.sha256));
+      item.intake = normalizeIntake(source.intake, item);
       requireValue(!sourceIds.has(item.id)); sourceIds.add(item.id); return item;
     });
     const coverage = { kev_records: nonnegative(raw.coverage.kev_records), curated_events: nonnegative(raw.coverage.curated_events), feed_articles: nonnegative(raw.coverage.feed_articles), notes: textList(raw.coverage.notes, 100, 4000) };
@@ -396,16 +435,36 @@
   }
 
   function renderSources() {
-    $("#source-dialog-stamp").textContent = "Snapshot generated " + stamp(snapshot.generated_at) + ". Source collection dates are separate.";
+    $("#source-dialog-stamp").textContent = "Snapshot generated " + stamp(snapshot.generated_at) + ". Attempt dates, last accepted input and current-response entry windows are separate. None establishes exhaustive publisher coverage.";
     $("#source-ledger").replaceChildren(...snapshot.sources.map(source => {
       const card = node("article", "ledger-source"); const heading = node("div", "ledger-source-heading");
       const title = node("h3"); title.append(link(source.name, source.url));
-      const states = { ok: "FETCH SUCCEEDED", failed: "FETCH FAILED", not_fetched: "NOT FETCHED" };
-      heading.append(title, node("span", "source-status" + (source.status === "failed" ? " failed" : source.status === "not_fetched" ? " not-fetched" : ""), states[source.status]));
-      card.append(heading, node("p", "", source.kind + " · Reported entry count: " + source.articles.toLocaleString()), node("p", "", "Last successful collection: " + stamp(source.last_success)), node("p", "", "Last attempt: " + stamp(source.last_attempt)));
+      const states = { ok: "INPUT ACCEPTED", partial: "PARTIAL INPUT", failed: "FETCH / INTAKE FAILED", not_fetched: "NOT FETCHED" };
+      const statusClass = { ok: "", partial: " partial", failed: " failed", not_fetched: " not-fetched" }[source.status];
+      heading.append(title, node("span", "source-status" + statusClass, states[source.status]));
+      card.append(heading, node("p", "", source.kind + " · Saved entry count: " + source.articles.toLocaleString() + " (separate from this response's admissions)"), node("p", "", "Last accepted input: " + stamp(source.last_success)), node("p", "", "Last attempt: " + stamp(source.last_attempt)));
+      if (source.intake) card.append(renderIntake(source));
+      else card.append(node("p", "source-window-unknown", source.id === "cisa-kev" ? "Separate KEV catalog input; RSS entry-window counts are not applicable." : "Item-window counts were not supplied for this observation. Missing or legacy reports do not establish complete intake."));
       if (source.error) card.append(node("p", "source-error", source.error)); return card;
     }));
     if (!snapshot.sources.length) $("#source-ledger").append(node("p", "ledger-empty", "No source-fetch records were supplied. Publisher labels do not establish collection health."));
+  }
+
+  function renderIntake(source) {
+    const report = source.intake;
+    const block = node("section", "source-intake");
+    block.append(node("h4", "", "Current-response entry window"));
+    const counts = node("dl", "intake-counts");
+    for (const [label, key] of [["Seen", "items_seen"], ["Processed", "items_processed"], ["Admitted", "items_admitted"], ["Rejected", "items_rejected"], ["Filtered", "items_filtered"], ["Unprocessed", "items_unprocessed"]]) {
+      const item = node("div"); item.append(node("dt", "", label), node("dd", "", report[key].toLocaleString())); counts.append(item);
+    }
+    block.append(counts, node("p", "", "Window attempted: " + stamp(report.attempted_at) + " · Entry limit: " + report.entry_limit + " · CVE limit per article: " + report.cve_limit));
+    const reasons = node("ul", "intake-reasons");
+    reasons.append(node("li", "", "Invalid / missing HTTPS publisher link or title: " + report.rejection_reasons.invalid_link_or_title.toLocaleString()), node("li", "", "More than " + report.cve_limit + " unique CVE mentions: " + report.rejection_reasons.cve_limit_exceeded.toLocaleString()));
+    block.append(reasons, node("p", "intake-hash", "Current response SHA-256: " + report.response_sha256));
+    const outcome = source.status === "partial" ? "Some entries were admitted from this response; rejected or unprocessed entries make this intake partial." : source.status === "failed" ? "No entries were admitted from this response; its report hash is separate from any retained last-good input." : "No rejected or unprocessed entries are reported in this response window.";
+    block.append(node("p", "intake-boundary", outcome + " Counts describe the received window, not unique saved URLs or the publisher's archive. Filtered entries are intentional exclusions, not errors. Entire rejected entries are excluded without clipping CVEs; older versions may remain in saved history. The hash identifies response bytes, not a publisher signature."));
+    return block;
   }
 
   function section(title) { const item = node("section", "mitigation-section"); item.append(node("h3", "", title)); return item; }
@@ -475,9 +534,11 @@
     const coverage = [["KEV catalog records", snapshot.coverage.kev_records], ["Curated archive events", snapshot.coverage.curated_events], ["Publisher feed articles", snapshot.coverage.feed_articles], ["Linked CVE records", snapshot.mitigations.size], ["URL duplicates removed", snapshot.deduplication.url_duplicates_removed]];
     $("#coverage").replaceChildren(...coverage.map(([label, count]) => { const item = node("div"); item.append(node("dt", "", label), node("dd", "", count.toLocaleString())); return item; }));
     const ok = snapshot.sources.filter(source => source.status === "ok").length;
+    const partial = snapshot.sources.filter(source => source.status === "partial").length;
     const failed = snapshot.sources.filter(source => source.status === "failed").length;
     const unfetched = snapshot.sources.filter(source => source.status === "not_fetched").length;
-    $("#source-health-summary").textContent = snapshot.sources.length ? "Recorded source outcomes: " + ok + " successful / " + failed + " failed / " + unfetched + " not fetched." : "Source collection outcomes were not supplied.";
+    const uncounted = snapshot.sources.filter(source => source.id !== "cisa-kev" && source.intake === null).length;
+    $("#source-health-summary").textContent = snapshot.sources.length ? "Recorded source outcomes: " + ok + " input accepted / " + partial + " partial / " + failed + " failed / " + unfetched + " not fetched. " + uncounted + " publisher observations have no item-window report; completeness is unknown." : "Source collection outcomes were not supplied.";
     $("#coverage-notes").replaceChildren(...[...snapshot.coverage.notes, ...snapshot.refresh.notes].map(note => node("li", "", note)));
     if (!$("#coverage-notes").children.length) $("#coverage-notes").append(node("li", "", "No additional notes supplied."));
     $("#integrations").replaceChildren(...[["xai", "Grok / xAI"], ["x", "X"], ["sec", "SEC cyber filings"]].map(([key, name]) => { const item = node("div", "integration-row"); const heading = node("div", "integration-heading"); heading.append(node("span", "", name), node("span", "integration-state", "NOT CONNECTED")); item.append(heading, node("p", "", snapshot.integrations[key].message)); return item; }));

@@ -11,7 +11,7 @@ advisories, known exploited vulnerabilities and a sourced decade timeline.
 - Retains **63 curated primary publications**, including 41 decade additions and the original 22 recent-year entries. This is selective coverage, not a complete incident archive.
 - Provides year/month navigation, date presets, source/kind/exploitation/guidance filters, and ten date, title, source, CVE and CVSS sort choices.
 - Provides a CVE register and source-led briefs with CISA required actions, available CNA product/version information, guidance excerpts and original references.
-- Shows source health and dates separately from guidance availability. Missing enrichment remains unknown; a CVE mention does not prove exploitation or device exposure.
+- Shows source health, partial article intake and dates separately from guidance availability. Missing enrichment remains unknown; a CVE mention does not prove exploitation or device exposure.
 - Requests collection every **five minutes** through GitHub Actions and publishes when articles, guidance, source outcomes or layout change. A visible browser checks the saved public snapshot every five minutes.
 - Runs on GitHub Pages independently of the owner's laptop, with a responsive interface and original SVG artwork.
 
@@ -24,6 +24,13 @@ successful fetch does not make those stories current news.
 The separately named [Talos Threat Advisory category subset](docs/FEEDS.md#talos-threat-advisory-category-subset)
 adds a narrower publisher stream. It does not replace the original Talos feed,
 erase its recorded failure or establish complete Talos coverage.
+
+RSS/Atom collection examines the first **150 entries** of each accepted bounded
+response. An invalid article link/title or more than **100 unique CVE mentions**
+rejects that whole entry while other safe entries can be retained. The source
+ledger reports admitted, rejected, filtered and unprocessed counts; **partial**
+means some safe input was accepted with a gap. It does not mean the publisher's
+archive is complete. See [intake accounting](docs/FEEDS.md#partial-intake-and-entry-accounting).
 
 Publication, update, incident and CISA catalog-addition dates are distinct.
 Affected version ranges are not automatically fixed versions, and CVSS versions

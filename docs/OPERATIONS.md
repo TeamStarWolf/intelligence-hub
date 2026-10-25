@@ -32,8 +32,8 @@ See [feed evidence](FEEDS.md) and [history coverage](SOURCES.md).
 
 The count is feed definitions, not unique publishers. **Cisco Talos Threat Advisory
 (category subset)** is a separate, narrower source with its own dates and outcomes.
-It does not make the original all-Talos feed healthy or supply a complete archive;
-see its [dated intake scope](FEEDS.md#talos-threat-advisory-category-subset).
+It does not establish the original all-Talos source's outcome or supply a complete
+archive; see its [dated intake scope](FEEDS.md#talos-threat-advisory-category-subset).
 
 Publication dates, publisher update dates, separate event dates and KEV catalog
 addition dates have different meanings. Unknown dates are not replaced with
@@ -73,8 +73,9 @@ cadence, the workflow, collection duration, deployment and browser visibility al
 affect arrival time. This is not continuous monitoring or a five-minute delivery SLA.
 
 The collector records a typed Boolean `changed` decision. Article, guidance,
-source-outcome and layout changes can trigger publication. Publisher-feed response
-hashes and collection attempt clocks alone do not; changes to retained CVE evidence,
+source-outcome, intake-count/reason and layout changes can trigger publication.
+Publisher-feed response hashes and collection attempt clocks alone do not;
+changes to retained CVE evidence,
 including its response hash, can. Package/upload/deploy steps run only when
 `changed` is true.
 
@@ -84,10 +85,28 @@ as freshly collected just because the browser polled it.
 
 ## Failure and retention behavior
 
-Each source records its attempt/result/last success independently. Partial failure
-can publish with retained last-good source data. If all fresh feed and KEV reads
-fail, collection fails before publication. A newly generated file does not make a
-failed source fresh. Missing data never becomes a claim of zero incidents.
+Each source records its attempt, result and **Last accepted input** independently.
+That last date can describe a partially accepted response; it never establishes
+exhaustive publisher history. The ledger distinguishes **OK**, **partial**,
+**failed** and **not fetched**, and shows the latest available entry report.
+Legacy observations without that report have unknown window coverage.
+
+Open the source's ledger entry to inspect seen, processed, admitted, rejected,
+topic-filtered and unprocessed counts, rejection reasons and report clock/hash.
+Only the first 150 entries are processed. An unsafe/missing title or link, or
+more than 100 unique CVE mentions, excludes the entire article; CVEs are not
+clipped. Other safe articles can be admitted with a partial status. Counts
+precede date filtering and retained-URL deduplication, so they need not equal
+saved article totals. See [entry accounting](FEEDS.md#partial-intake-and-entry-accounting).
+
+Whole fetch/XML failure clears the latest intake report and retains last-good
+history. A parsed zero-admission failure may show its own current report while
+the last accepted input remains older. A currently rejected URL can still have
+an older saved version. Neither case makes that retained article fresh.
+
+A mixture of failed, partial and successful sources can publish. If no fresh
+feed or KEV input is accepted, collection fails before publication. A new file
+does not make a failed source fresh. Missing data is never a zero-incident claim.
 
 CI caches exactly two public-data files: the feed cache and CNA projections. The
 key is tied to collector/source configuration and UTC day. GitHub caches are
@@ -241,7 +260,8 @@ prerequisites; do not bypass a source's access refusal.
 | --- | --- |
 | Site time is old, Actions check succeeded unchanged | Expected when facts/layout did not change; read source dates and the workflow outcome separately. |
 | No recent scheduled run | Check workflow enablement, default branch and GitHub status; schedule delay/inactivity are possible. |
-| A publisher failed | Inspect its last-success date; retained content is historical and a failure is not no news. |
+| A publisher failed | Inspect Last accepted input and any current report; retained content is historical and a failure is not no news. |
+| A publisher is partial | Inspect rejected/unprocessed counts and reasons; safe admissions do not establish full coverage. |
 | CNA pending or failed | Read any separately available CISA action and original references; do not invent missing fixes. |
 | Package exceeds its budget | Update was blocked; review scope before changing limits. |
 | SEC filter has no filings | Direct intake is pending, not a zero-incident finding. |

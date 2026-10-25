@@ -291,3 +291,18 @@ dialog{background:#1a2226;border-color:#8b785a;border-top-color:#edac7c;border-r
 .hero-wolf{width:91%;height:auto;filter:drop-shadow(0 0 11px #ff9e7018)}
 .footer-brand img{width:57px;height:31px}
 @media(max-width:600px){.brand-mark,.brand-mark img{width:69px;height:39px}.hero-wolf{width:94%}.footer-brand img{width:54px;height:29px}}
+
+/* Publisher intake reports cover the current response, not retained history. */
+.source-status.partial{color:#ffd0ad;border-color:#bc865b;background:#392e22}
+.source-intake{margin-top:15px;padding-top:15px;border-top:1px solid #536052;min-width:0}
+.source-intake h4{margin:0 0 12px;color:#e2c8a7;font:11px/1.8 var(--mono);font-weight:500}
+.intake-counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:0 0 12px}
+.intake-counts>div{padding:9px 11px;background:#151f22;border:1px solid #465348;border-radius:2px;min-width:0}
+.intake-counts dt{font:8px/1.8 var(--mono);color:#b4c2b8;text-transform:uppercase;letter-spacing:.5px}
+.intake-counts dd{margin:4px 0 0;color:#ffba8b;font:17px/1.4 var(--mono);overflow-wrap:anywhere}
+.ledger-source .source-intake p{font-size:10px;line-height:1.9}
+.intake-reasons{margin:11px 0;padding-left:18px;color:#ccbba4;font-size:10px;line-height:1.9}
+.intake-reasons li{margin:5px 0;overflow-wrap:anywhere}
+.ledger-source .intake-hash{font:9px/1.9 var(--mono);color:#a7b8bf;overflow-wrap:anywhere}
+.ledger-source .intake-boundary,.ledger-source .source-window-unknown{color:#c2b29e;line-height:1.95}
+@media(max-width:600px){.intake-counts{grid-template-columns:repeat(2,minmax(0,1fr))}.intake-counts dt{font-size:9px}.ledger-source .source-intake p,.intake-reasons{font-size:11px}.ledger-source .intake-hash{font-size:9px}}

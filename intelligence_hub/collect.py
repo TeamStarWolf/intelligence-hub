@@ -153,12 +153,13 @@ def parse_feed(raw, source):
         require(count <= 40000 and depth <= 48, "XML structure exceeds its bounds.")
         stack.extend((child, depth + 1) for child in element)
     require(root.tag.rsplit("}", 1)[-1].lower() in {"rss", "feed", "rdf"}, "Response is not RSS or Atom.")
+    entries = [element for element in root.iter() if element.tag.rsplit("}", 1)[-1] in {"item", "entry"}]
     articles = []
-    for element in root.iter():
-        if element.tag.rsplit("}", 1)[-1] not in {"item", "entry"}:
-            continue
-        if len(articles) >= 150:
-            break
+    intake = {"items_seen": len(entries), "items_processed": min(len(entries), 150),
+        "items_admitted": 0, "items_rejected": 0, "items_filtered": 0,
+        "items_unprocessed": max(0, len(entries) - 150), "entry_limit": 150, "cve_limit": 100,
+        "rejection_reasons": {"invalid_link_or_title": 0, "cve_limit_exceeded": 0}}
+    for element in entries[:150]:
         fields, links = {}, []
         for child in element:
             key = child.tag.rsplit("}", 1)[-1]
@@ -171,35 +172,50 @@ def parse_feed(raw, source):
         url = next((safe_url(link, source["article_hosts"]) for link in links if safe_url(link, source["article_hosts"])), None)
         title = text(fields.get("title"))
         if not url or not title:
+            intake["items_rejected"] += 1
+            intake["rejection_reasons"]["invalid_link_or_title"] += 1
             continue
         stamp = published(fields.get("pubDate") or fields.get("published") or fields.get("date") or fields.get("updated") or "")
         basis = "publication" if (fields.get("pubDate") or fields.get("published") or fields.get("date")) else "publisher update" if fields.get("updated") else "unknown"
-        mention_text = title + " " + " ".join(fields.get(key, "") for key in ("description", "summary", "content", "encoded"))
+        # Display titles stay bounded; mention counting uses the complete source fields.
+        mention_text = fields.get("title", "") + " " + " ".join(fields.get(key, "") for key in ("description", "summary", "content", "encoded"))
         if source.get("include_terms") and not any(term.casefold() in text(mention_text, MAX_BYTES).casefold() for term in source["include_terms"]):
+            intake["items_filtered"] += 1
             continue
         cves = sorted(set(CVE.findall(mention_text.upper())))
-        require(len(cves) <= 100, "An article exceeds the CVE mention bound; source review is required.")
+        if len(cves) > 100:
+            intake["items_rejected"] += 1
+            intake["rejection_reasons"]["cve_limit_exceeded"] += 1
+            continue
         articles.append({"id": "feed-" + hashlib.sha256(url.encode()).hexdigest()[:20], "title": title, "url": url,
             "source_id": source["id"], "source_name": source["name"], "kind": source["kind"], "published_at": stamp,
             "event_date": None, "date_basis": "filing" if source["kind"] == "filing" else basis, "summary": "", "cves": cves,
             "tags": [], "exploitation": "unknown", "references": [], "origin": "publisher-feed"})
-    require(articles or source.get("include_terms"), "No safe article links were available in the publisher feed.")
-    return articles
+    intake["items_admitted"] = len(articles)
+    return {"articles": articles, "intake": intake}
 
 
 def update_source(source, cached):
     attempted = now()
     try:
         raw = fetch(source["url"])
-        incoming = parse_feed(raw, source)
+        parsed = parse_feed(raw, source)
+        incoming = parsed["articles"]
+        intake = {**parsed["intake"], "attempted_at": attempted, "response_sha256": hashlib.sha256(raw).hexdigest()}
+        incomplete = intake["items_rejected"] > 0 or intake["items_unprocessed"] > 0
+        if not incoming and (incomplete or not source.get("include_terms")):
+            return {**cached, "status": "failed", "last_attempt": attempted,
+                "last_success": cached.get("last_success"), "error": "No acceptable entries were admitted in the bounded response window.",
+                "articles": cached.get("articles", []), "intake": intake}
         combined = {article["url"]: article for article in cached.get("articles", [])}
         combined.update({article["url"]: article for article in incoming})
         articles = sorted(combined.values(), key=lambda article: article.get("published_at") or "", reverse=True)[:600]
-        return {"status": "ok", "last_attempt": attempted, "last_success": now(), "error": None,
-                "sha256": hashlib.sha256(raw).hexdigest(), "articles": articles}
+        return {"status": "partial" if incomplete else "ok", "last_attempt": attempted, "last_success": now(), "error": None,
+                "sha256": intake["response_sha256"], "articles": articles, "intake": intake}
     except (OSError, ValueError, ET.ParseError) as error:
         reason = ("HTTP " + str(error.code)) if isinstance(error, urllib.error.HTTPError) else type(error).__name__ + ": source unavailable or rejected by intake policy"
-        return {**cached, "status": "failed", "last_attempt": attempted, "last_success": cached.get("last_success"), "error": reason, "articles": cached.get("articles", [])}
+        return {**cached, "status": "failed", "last_attempt": attempted, "last_success": cached.get("last_success"),
+                "error": reason, "articles": cached.get("articles", []), "intake": None}
 
 
 def update_kev(cached):
@@ -209,10 +225,10 @@ def update_kev(cached):
         catalog = json.loads(raw, parse_constant=reject_constant)
         validate_catalog(catalog)
         return {"status": "ok", "last_attempt": attempted, "last_success": now(), "error": None,
-                "sha256": hashlib.sha256(raw).hexdigest(), "catalog": catalog}
+                "sha256": hashlib.sha256(raw).hexdigest(), "catalog": catalog, "intake": None}
     except (OSError, ValueError) as error:
         reason = ("HTTP " + str(error.code)) if isinstance(error, urllib.error.HTTPError) else type(error).__name__ + ": catalog unavailable or rejected"
-        return {**cached, "status": "failed", "last_attempt": attempted, "last_success": cached.get("last_success"), "error": reason}
+        return {**cached, "status": "failed", "last_attempt": attempted, "last_success": cached.get("last_success"), "error": reason, "intake": None}
 
 
 def validate_catalog(catalog):
@@ -252,17 +268,61 @@ def validate_cache(cache, sources):
     for source in sources:
         observation = cache["sources"].get(source["id"], {})
         require(isinstance(observation, dict) and isinstance(observation.get("articles", []), list) and len(observation.get("articles", [])) <= 600, "Invalid retained source cache.")
-        validate_observation(observation)
+        validate_observation(observation, source=source)
         for article in observation.get("articles", []):
             validate_article(article)
             require(article["source_id"] == source["id"] and article["source_name"] == source["name"] and article["kind"] == source["kind"] and article["origin"] == "publisher-feed" and safe_url(article["url"], source["article_hosts"]), "Retained article source mismatch.")
-    validate_observation(cache["kev"])
+    validate_observation(cache["kev"], kev=True)
     if "catalog" in cache["kev"]:
         validate_catalog(cache["kev"]["catalog"])
 
 
-def validate_observation(observation):
-    require(observation.get("status", "not_fetched") in {"ok", "failed", "not_fetched"}, "Invalid source observation status.")
+def validate_intake(intake, observation, source=None):
+    counts = {"items_seen", "items_processed", "items_admitted", "items_rejected", "items_filtered", "items_unprocessed"}
+    expected = counts | {"entry_limit", "cve_limit", "rejection_reasons", "attempted_at", "response_sha256"}
+    require(isinstance(intake, dict) and set(intake) == expected, "Invalid source intake fields.")
+    require(all(type(intake[key]) is int and 0 <= intake[key] <= 40000 for key in counts), "Invalid source intake counts.")
+    require(type(intake["entry_limit"]) is int and intake["entry_limit"] == 150 and
+            type(intake["cve_limit"]) is int and intake["cve_limit"] == 100, "Invalid source intake limits.")
+    require(intake["items_processed"] == min(intake["items_seen"], 150) and
+            intake["items_seen"] == intake["items_processed"] + intake["items_unprocessed"] and
+            intake["items_processed"] == intake["items_admitted"] + intake["items_rejected"] + intake["items_filtered"],
+            "Source intake counts do not reconcile.")
+    reasons = intake["rejection_reasons"]
+    require(isinstance(reasons, dict) and set(reasons) == {"invalid_link_or_title", "cve_limit_exceeded"} and
+            all(type(value) is int and 0 <= value <= 150 for value in reasons.values()) and
+            sum(reasons.values()) == intake["items_rejected"], "Invalid source intake rejection counts.")
+    attempted = intake["attempted_at"]
+    normalized_attempt = published(attempted) if isinstance(attempted, str) else None
+    require(isinstance(attempted, str) and len(attempted) <= 40 and "T" in attempted and normalized_attempt and
+            "T" in normalized_attempt and attempted == observation.get("last_attempt"), "Invalid source intake attempt date.")
+    digest = intake["response_sha256"]
+    require(isinstance(digest, str) and re.fullmatch(r"[a-f0-9]{64}", digest), "Invalid source intake digest.")
+    status = observation.get("status")
+    incomplete = intake["items_rejected"] > 0 or intake["items_unprocessed"] > 0
+    require(status in {"ok", "partial", "failed"}, "Source intake has no matching attempt status.")
+    if status in {"ok", "partial"}:
+        accepted = datetime.fromisoformat((observation.get("last_success") or "").replace("Z", "+00:00"))
+        attempt_time = datetime.fromisoformat(attempted.replace("Z", "+00:00"))
+        require(accepted.tzinfo is not None and attempt_time.tzinfo is not None and accepted >= attempt_time and
+                digest == observation.get("sha256"),
+                "Accepted source intake provenance differs.")
+        require(incomplete if status == "partial" else not incomplete, "Source intake status differs from its coverage.")
+        if status == "partial":
+            require(intake["items_admitted"] > 0, "Partial source intake requires accepted entries.")
+        elif source is not None and intake["items_admitted"] == 0:
+            require(bool(source.get("include_terms")), "An empty accepted source requires a configured filter.")
+    else:
+        # A current rejected response has its own hash, distinct from older accepted input.
+        require(intake["items_admitted"] == 0 and isinstance(observation.get("error"), str) and observation["error"].strip(),
+                "Failed source intake must have zero accepted entries and a reason.")
+        if source is not None and source.get("include_terms"):
+            require(incomplete, "Complete filter-empty input is not a source failure.")
+
+
+def validate_observation(observation, source=None, kev=False):
+    require(isinstance(observation, dict), "Invalid source observation.")
+    require(observation.get("status", "not_fetched") in {"ok", "partial", "failed", "not_fetched"}, "Invalid source observation status.")
     for field in ("last_attempt", "last_success"):
         value = observation.get(field)
         require(value is None or isinstance(value, str) and len(value) <= 40 and published(value) is not None, "Invalid source observation date.")
@@ -270,8 +330,15 @@ def validate_observation(observation):
     require(reason is None or isinstance(reason, str) and len(reason) <= 500, "Invalid source observation error.")
     digest = observation.get("sha256")
     require(digest is None or isinstance(digest, str) and re.fullmatch(r"[a-f0-9]{64}", digest), "Invalid source digest.")
-    if observation.get("status") == "ok":
+    if observation.get("status") in {"ok", "partial"}:
         require(observation.get("last_success") and observation.get("last_attempt") and digest and reason is None, "Incomplete successful source observation.")
+    intake = observation.get("intake")
+    if kev:
+        require(observation.get("status") != "partial" and intake is None, "KEV cannot carry a partial RSS intake report.")
+    elif intake is not None:
+        validate_intake(intake, observation, source)
+    else:
+        require(observation.get("status") != "partial", "Partial source observation requires an intake report.")
 
 
 def validate_registry(registry):
@@ -313,13 +380,14 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
             kev_future = pool.submit(update_kev, cache["kev"])
             cache = {"sources": {key: future.result() for key, future in futures.items()}, "kev": kev_future.result()}
         validate_cache(cache, sources)
-        require(any(item.get("status") == "ok" for item in [*cache["sources"].values(), cache["kev"]]), "No live source succeeded; the previously deployed snapshot must remain available.")
+        require(any(item.get("status") in {"ok", "partial"} for item in [*cache["sources"].values(), cache["kev"]]), "No live source succeeded; the previously deployed snapshot must remain available.")
     health, articles = [], []
     for source in sources:
         observation = cache["sources"].get(source["id"], {})
         health.append({"id": source["id"], "name": source["name"], "kind": source["kind"], "url": source["home"],
             "status": observation.get("status", "not_fetched"), "last_attempt": observation.get("last_attempt"),
-            "last_success": observation.get("last_success"), "error": observation.get("error"), "sha256": observation.get("sha256"), "articles": len(observation.get("articles", []))})
+            "last_success": observation.get("last_success"), "error": observation.get("error"), "sha256": observation.get("sha256"),
+            "intake": observation.get("intake"), "articles": len(observation.get("articles", []))})
         articles.extend(observation.get("articles", []))
     kev = cache["kev"]
     for item in kev.get("catalog", {}).get("vulnerabilities", []):
@@ -339,7 +407,9 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
             "cves": [ident], "tags": [value for value in (text(item.get("vendorProject"), 80), text(item.get("product"), 100)) if value],
             "exploitation": "known", "references": [{"label": "CVE record", "url": "https://www.cve.org/CVERecord?id=" + ident}], "origin": "cisa-kev"})
     health.append({"id": "cisa-kev", "name": "CISA KEV", "kind": "advisory", "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
-        "status": kev.get("status", "not_fetched"), "last_attempt": kev.get("last_attempt"), "last_success": kev.get("last_success"), "error": kev.get("error"), "sha256": kev.get("sha256"), "articles": sum(article["origin"] == "cisa-kev" for article in articles)})
+        "status": kev.get("status", "not_fetched"), "last_attempt": kev.get("last_attempt"), "last_success": kev.get("last_success"),
+        "error": kev.get("error"), "sha256": kev.get("sha256"), "intake": None,
+        "articles": sum(article["origin"] == "cisa-kev" for article in articles)})
     history_path = ROOT / "config/history.json"
     history = read_json(history_path, 2 * 1024 * 1024) if history_path.exists() else {"entries": []}
     require(isinstance(history.get("entries"), list) and len(history["entries"]) <= 500, "Invalid history collection.")
@@ -372,13 +442,13 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     counts = {origin: sum(article["origin"] == origin for article in ordered) for origin in ("cisa-kev", "library-curation", "publisher-feed")}
     prepared_at = now()
     briefs, projections, mitigation_stats = build_briefs(ordered, kev.get("catalog", {}), retained, refresh, enrich_limit, fetch, text, safe_url, published, prepared_at)
-    snapshot = {"schema_version": 2, "generated_at": now(), "window": {"start": start.isoformat(), "end": end.isoformat()},
+    snapshot = {"schema_version": 3, "generated_at": now(), "window": {"start": start.isoformat(), "end": end.isoformat()},
         "articles": ordered, "sources": health, "history_reviewed_at": history.get("curated_at"),
         "mitigations": briefs, "mitigation_coverage": mitigation_stats, "deduplication": {"url_duplicates_removed": duplicates},
         "refresh": {"requested_minutes": 5, "mode": "scheduled-check", "status_url": "https://github.com/TeamStarWolf/intelligence-hub/actions/workflows/publish.yml",
             "notes": ["GitHub requests collection every five minutes; scheduling can be delayed, dropped or disabled after repository inactivity.", "The visible page checks the saved snapshot every five minutes. This is not a guaranteed five-minute news delivery service.", "Snapshot and source dates describe the last published collection; unchanged checks can complete without republishing. Latest workflow outcomes are linked separately."]},
         "coverage": {"kev_records": counts["cisa-kev"], "curated_events": counts["library-curation"], "feed_articles": counts["publisher-feed"],
-            "notes": ["This is a growing decade selection, not every cyber incident, article or vulnerability.", "KEV dates indicate catalog addition, not first disclosure or first exploitation.", "RSS usually exposes recent posts; historical curation and legacy feeds do not form a complete decade archive.", "Unknown dates remain explicit. Failed sources retain last-good input when available; public snapshot resume helps retain prior publisher items.", "Per-feed retained history is bounded to600articles. Missing, evicted or changed inputs can leave coverage gaps.", "Canonical article URLs are deduplicated; distinct publishers covering one CVE remain separate evidence.", "CVE mentions can come from RSS metadata/body text; they do not mean every mentioned CVE was exploited.", "Headlines link to publishers; full article bodies are not copied. No environment exposure is inferred.", "Threatpost is a legacy archive with observed August2022 items; a successful fetch does not imply current reporting.", "SEC direct filing access is pending after HTTP403; news reporting about filings is not complete Item1.05/8.01 coverage."]},
+            "notes": ["This is a growing decade selection, not every cyber incident, article or vulnerability.", "KEV dates indicate catalog addition, not first disclosure or first exploitation.", "RSS usually exposes recent posts; historical curation and legacy feeds do not form a complete decade archive.", "Unknown dates remain explicit. Failed sources retain last-good input when available; public snapshot resume helps retain prior publisher items.", "Per-feed retained history is bounded to600articles. Missing, evicted or changed inputs can leave coverage gaps.", "Publisher intake reports describe only the latest bounded response window. Entries rejected or outside its first150processed items are not newly admitted; older retained versions may remain.", "Last accepted input is not exhaustive publisher coverage. Legacy observations without intake reports have unknown window completeness.", "Canonical article URLs are deduplicated; distinct publishers covering one CVE remain separate evidence.", "CVE mentions can come from RSS metadata/body text; they do not mean every mentioned CVE was exploited.", "Headlines link to publishers; full article bodies are not copied. No environment exposure is inferred.", "Threatpost is a legacy archive with observed August2022 items; a successful fetch does not imply current reporting.", "SEC direct filing access is pending after HTTP403; news reporting about filings is not complete Item1.05/8.01 coverage."]},
         "integrations": {"xai": {"status": "not_connected", "message": "Grok X Search is a separate supported API route; access and zero-additional-spend eligibility are not established. No model calls are enabled."},
                          "x": {"status": "not_connected", "message": "Personal X timeline/bookmarks are not connected or published. Future article sharing is recorded for owner review; no automatic posts are enabled."},
                          "sec": {"status": "not_connected", "message": "Direct SEC filing-feed intake returned HTTP403. Operational contact and accepted access/schema remain prerequisites; no direct filings are claimed."}}}
@@ -393,7 +463,9 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
         " ".join(product.get("vendor", "") + " " + product.get("product", "")
                  for product in item[1]["products"]).casefold(), item[0])))
     write_json(ROOT / "site/data/feed.json", snapshot, compact=True)
-    result = {"articles": len(ordered), "source_ok": sum(item["status"] == "ok" for item in health), "source_total": len(health), "coverage": snapshot["coverage"], "mitigations": mitigation_stats, "changed": changed, "generated_at": snapshot["generated_at"]}
+    result = {"articles": len(ordered), "source_ok": sum(item["status"] == "ok" for item in health),
+        "source_partial": sum(item["status"] == "partial" for item in health), "source_total": len(health),
+        "coverage": snapshot["coverage"], "mitigations": mitigation_stats, "changed": changed, "generated_at": snapshot["generated_at"]}
     write_json(STATE / "collection-result.json", result)
     return result
 
@@ -401,7 +473,13 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
 def content_revision(snapshot):
     # Retrieval clocks alone do not create a new public artifact or reset source freshness.
     value = {key: item for key, item in snapshot.items() if key not in {"generated_at", "content_revision", "layout_revision"}}
-    value["sources"] = [{key: item for key, item in source.items() if key not in {"last_attempt", "last_success", "sha256"}} for source in snapshot["sources"]]
+    source_values = []
+    for source in snapshot["sources"]:
+        item = {key: value for key, value in source.items() if key not in {"last_attempt", "last_success", "sha256"}}
+        if source.get("intake") is not None:
+            item["intake"] = {key: value for key, value in source["intake"].items() if key not in {"attempted_at", "response_sha256"}}
+        source_values.append(item)
+    value["sources"] = source_values
     value["mitigations"] = {cve: {key: item for key, item in record.items() if key not in {"retrieved_at", "source_attempted_at"}} for cve, record in snapshot["mitigations"].items()}
     value["mitigation_coverage"] = {key: item for key, item in snapshot["mitigation_coverage"].items() if key != "attempted_this_run"}
     return hashlib.sha256(json.dumps(value, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
@@ -411,7 +489,7 @@ def resume_deployed(sources, cache):
     """Use only this hub's fixed public snapshot as an additional, validated history input."""
     try:
         previous = json.loads(fetch(PUBLIC_FEED, 16 * 1024 * 1024), parse_constant=reject_constant)
-        require(isinstance(previous, dict) and previous.get("schema_version") in (1, 2), "Unsupported deployed snapshot.")
+        require(isinstance(previous, dict) and previous.get("schema_version") in (1, 2, 3), "Unsupported deployed snapshot.")
         require(isinstance(previous.get("articles"), list) and len(previous["articles"]) <= MAX_ARTICLES, "Invalid deployed articles.")
         require(isinstance(previous.get("sources"), list) and len(previous["sources"]) <= 100, "Invalid deployed source ledger.")
         registry = {source["id"]: source for source in sources}
@@ -427,11 +505,11 @@ def resume_deployed(sources, cache):
             require(isinstance(observation, dict) and isinstance(observation.get("id"), str), "Invalid deployed source identity.")
             source_id = observation["id"]
             require(source_id not in observations, "Duplicate deployed source identity.")
-            projected = {key: observation.get(key) for key in ("status", "last_attempt", "last_success", "error", "sha256")}
+            projected = {key: observation.get(key) for key in ("status", "last_attempt", "last_success", "error", "sha256", "intake")}
             # The initial schema did not publish response hashes; preserve dates without inventing a hash.
             if projected["status"] == "ok" and projected["sha256"] is None and previous["schema_version"] == 1:
                 projected["status"] = "not_fetched"
-            validate_observation(projected)
+            validate_observation(projected, source=registry.get(source_id), kev=source_id == "cisa-kev")
             observations[source_id] = projected
         for source_id, articles in retained.items():
             old = cache["sources"].get(source_id, {})
