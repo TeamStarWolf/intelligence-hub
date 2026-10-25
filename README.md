@@ -7,7 +7,7 @@ advisories, known exploited vulnerabilities and a sourced decade timeline.
 
 ## What it does
 
-- Collects **60 configured publisher RSS/Atom feeds**, plus CISA's separate KEV catalog. This counts feed definitions, not unique publishers. Configured sources can fail; their outcomes remain visible.
+- Collects **61 configured publisher RSS/Atom feeds**, plus CISA's separate KEV catalog. This counts feed definitions, not unique publishers. Configured sources can fail; their outcomes remain visible.
 - Retains **63 curated primary publications**, including 41 decade additions and the original 22 recent-year entries. This is selective coverage, not a complete incident archive.
 - Provides year/month navigation, date presets, source/kind/exploitation/guidance filters, and ten date, title, source, CVE and CVSS sort choices.
 - Provides a CVE register and source-led briefs with CISA required actions, available CNA product/version information, guidance excerpts and original references.
@@ -24,6 +24,10 @@ successful fetch does not make those stories current news.
 The separately named [Talos Threat Advisory category subset](docs/FEEDS.md#talos-threat-advisory-category-subset)
 adds a narrower publisher stream. It does not replace the original Talos feed,
 erase its recorded failure or establish complete Talos coverage.
+
+The [CISA Cybersecurity Advisories category subset](docs/FEEDS.md#cisa-cybersecurity-advisories-category-subset)
+is also a separate input. It preserves the original all-advisories source and its
+recorded failure; a category response does not establish complete CISA coverage.
 
 RSS/Atom collection examines the first **150 entries** of each accepted bounded
 response. An invalid article link/title or more than **100 unique CVE mentions**

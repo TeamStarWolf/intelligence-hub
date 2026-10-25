@@ -2,7 +2,7 @@
 
 ## What is configured
 
-The catalog contains **60 publisher RSS/Atom sources**, counting feed definitions rather than unique publishers. The first 29 comprise ten retained sources, sixteen additions from the repository owner's public [cybersecurity-resources bookmarks](https://github.com/TeamStarWolf/cybersecurity-resources/blob/f95fb4a3fae14acfa172c22507a1554339cb3655/LINKS.md), and three further requested publishers: watchTowr Labs, Dark Reading and the legacy Threatpost archive. A further 29 advisory, research and reporting feeds, one separately scoped Talos category feed and the Qualys Security Blog are listed below. The fixed configuration is [sources.json](../config/sources.json). CISA KEV is a separate JSON catalog and is not included in this RSS count. Curated historical publications are also a separate input. SEC filings are not connected by this feed intake.
+The catalog contains **61 publisher RSS/Atom sources**, counting feed definitions rather than unique publishers. The first 29 comprise ten retained sources, sixteen additions from the repository owner's public [cybersecurity-resources bookmarks](https://github.com/TeamStarWolf/cybersecurity-resources/blob/f95fb4a3fae14acfa172c22507a1554339cb3655/LINKS.md), and three further requested publishers: watchTowr Labs, Dark Reading and the legacy Threatpost archive. A further 29 advisory, research and reporting feeds, one separately scoped Talos category feed, the Qualys Security Blog and a separately scoped CISA category feed are listed below. The fixed configuration is [sources.json](../config/sources.json). CISA KEV is a separate JSON catalog and is not included in this RSS count. Curated historical publications are also a separate input. SEC filings are not connected by this feed intake.
 
 Configured does not mean every source is currently healthy. The site records each collection attempt and last accepted input. The retained CISA advisory feed failed the initial production intake; its configured address is preserved and its failure remains visible. No replacement CISA advisory URL was established by this expansion. A failed source is not evidence that its publisher has no new advisories.
 
@@ -156,7 +156,7 @@ Source expansion authorizes no automatic remediation, network/device inspection,
 
 ## Further source expansion
 
-The owner requested broader coverage after the first 29-source intake. A further **29 feeds** passed bounded public HTTPS intake, bringing that checkpoint to **58 configured feeds**. The separately scoped Talos category brought the next checkpoint to **59**; the later Qualys admission below brings the current total to **60**, plus the separate CISA KEV catalog. These are configured inputs, not a guarantee that all remain healthy or that their items are distinct incidents.
+The owner requested broader coverage after the first 29-source intake. A further **29 feeds** passed bounded public HTTPS intake, bringing that checkpoint to **58 configured feeds**. The separately scoped Talos category brought the next checkpoint to **59**; Qualys brought it to **60**, and the separately scoped CISA category below brings the current total to **61**, plus the separate CISA KEV catalog. These are configured inputs, not a guarantee that all remain healthy or that their items are distinct incidents.
 
 | Publisher | Feed | Role |
 | --- | --- | --- |
@@ -258,3 +258,32 @@ with retained history under the 600-item source limit and normal decade date
 filter; a rolling ten-entry response is not a complete Qualys archive. Admission
 does not establish live deployment, a later scheduled collection outcome,
 independent factual verification, exploitation or exposure of the reader's devices.
+
+## CISA Cybersecurity Advisories category subset
+
+The distinct source **CISA Cybersecurity Advisories (category subset)** uses the
+official [category RSS](https://www.cisa.gov/cybersecurity-advisories/cybersecurity-advisories.xml).
+The returned channel identifies itself as **CISA Cybersecurity Advisories** and
+links to [CISA](https://www.cisa.gov/). Its source ID is
+`cisa-cybersecurity-advisories`, its role is advisory and article links are
+restricted to `www.cisa.gov`.
+
+One direct request on **25 October 2026 at 05:35:06 UTC** returned HTTPS 200 and a
+complete **1,370,400-byte** response within the unchanged 3 MiB bound. All ten
+entries were seen, processed and admitted, with no rejected, filtered or
+unprocessed entries. Their publisher-provided publication dates ranged from
+**6 April through 19 October 2026 UTC**, with 18 distinct CVE mentions across the
+accepted input. Those are dated intake facts, not net new article counts,
+incident dates, confirmed exploitation or a fresh check on each page view.
+
+The original `cisa-advisories` all-advisories feed remains configured with its own
+outcomes. Its byte-bound failure is not relabeled as a successful category read.
+This category is not every CISA advisory, topic, alert or historical publication;
+the retained response does not establish current news or a complete archive.
+CISA KEV remains a separate catalog. Canonical article URLs are deduplicated and
+their CVE mentions combined, while source-ledger outcomes remain separate.
+
+The same response, XML, 150-processed-entry, 100-CVE-per-entry and 600-retained-item
+limits apply. No response prefix is parsed, redirect followed or bound relaxed.
+Admission does not establish a later production outcome, punctual scheduling or
+the reader's device exposure. Those need their own dated evidence.

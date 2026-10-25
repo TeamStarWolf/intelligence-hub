@@ -2,6 +2,7 @@
   "schema_version": 1,
   "sources": [
     {"id":"cisa-advisories","name":"CISA Advisories","kind":"advisory","url":"https://www.cisa.gov/cybersecurity-advisories/all.xml","home":"https://www.cisa.gov/cybersecurity-advisories","article_hosts":["www.cisa.gov","cisa.gov"]},
+    {"id":"cisa-cybersecurity-advisories","name":"CISA Cybersecurity Advisories (category subset)","kind":"advisory","url":"https://www.cisa.gov/cybersecurity-advisories/cybersecurity-advisories.xml","home":"https://www.cisa.gov/","article_hosts":["www.cisa.gov"]},
     {"id":"cert-eu","name":"CERT-EU","kind":"advisory","url":"https://cert.europa.eu/publications/security-advisories-rss","home":"https://cert.europa.eu/publications/security-advisories/","article_hosts":["cert.europa.eu"]},
     {"id":"microsoft-security","name":"Microsoft Security","kind":"research","url":"https://www.microsoft.com/en-us/security/blog/feed/","home":"https://www.microsoft.com/en-us/security/blog/","article_hosts":["www.microsoft.com"]},
     {"id":"google-threat-intelligence","name":"Google Threat Intelligence","kind":"research","url":"https://feeds.feedburner.com/threatintelligence/pvexyqv7v0v","home":"https://cloud.google.com/blog/topics/threat-intelligence","article_hosts":["cloud.google.com","blog.google","security.googleblog.com"]},
