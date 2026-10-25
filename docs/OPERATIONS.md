@@ -25,7 +25,7 @@ are retained during background snapshot updates.
 
 ## Interpret evidence before action
 
-The configured inputs are **59 RSS/Atom publisher feeds**, CISA KEV and **63 curated
+The configured inputs are **60 RSS/Atom publisher feeds**, CISA KEV and **63 curated
 primary publications**. A configured feed is not necessarily healthy. Recent RSS,
 bounded retained items and manual curation do not form a complete decade archive.
 See [feed evidence](FEEDS.md) and [history coverage](SOURCES.md).
@@ -34,6 +34,13 @@ The count is feed definitions, not unique publishers. **Cisco Talos Threat Advis
 (category subset)** is a separate, narrower source with its own dates and outcomes.
 It does not establish the original all-Talos source's outcome or supply a complete
 archive; see its [dated intake scope](FEEDS.md#talos-threat-advisory-category-subset).
+
+**Qualys Security Blog** mixes vendor research and product posts. A previous
+whole-feed rejection is retained as historical evidence; the newer entry policy
+can admit safe articles while rejecting an entire article with too many CVE
+mentions. Its source ledger can therefore show **partial** with retained history.
+See [Qualys admission scope](FEEDS.md#qualys-security-blog-dated-partial-admission); neither that status
+nor a successful transport establishes a complete advisory archive.
 
 Publication dates, publisher update dates, separate event dates and KEV catalog
 addition dates have different meanings. Unknown dates are not replaced with

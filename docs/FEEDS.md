@@ -2,7 +2,7 @@
 
 ## What is configured
 
-The catalog contains **59 publisher RSS/Atom sources**, counting feed definitions rather than unique publishers. The first 29 comprise ten retained sources, sixteen additions from the repository owner's public [cybersecurity-resources bookmarks](https://github.com/TeamStarWolf/cybersecurity-resources/blob/f95fb4a3fae14acfa172c22507a1554339cb3655/LINKS.md), and three further requested publishers: watchTowr Labs, Dark Reading and the legacy Threatpost archive. A further 29 advisory, research and reporting feeds and one separately scoped Talos category feed are listed below. The fixed configuration is [sources.json](../config/sources.json). CISA KEV is a separate JSON catalog and is not included in this RSS count. Curated historical publications are also a separate input. SEC filings are not connected by this feed intake.
+The catalog contains **60 publisher RSS/Atom sources**, counting feed definitions rather than unique publishers. The first 29 comprise ten retained sources, sixteen additions from the repository owner's public [cybersecurity-resources bookmarks](https://github.com/TeamStarWolf/cybersecurity-resources/blob/f95fb4a3fae14acfa172c22507a1554339cb3655/LINKS.md), and three further requested publishers: watchTowr Labs, Dark Reading and the legacy Threatpost archive. A further 29 advisory, research and reporting feeds, one separately scoped Talos category feed and the Qualys Security Blog are listed below. The fixed configuration is [sources.json](../config/sources.json). CISA KEV is a separate JSON catalog and is not included in this RSS count. Curated historical publications are also a separate input. SEC filings are not connected by this feed intake.
 
 Configured does not mean every source is currently healthy. The site records each collection attempt and last accepted input. The retained CISA advisory feed failed the initial production intake; its configured address is preserved and its failure remains visible. No replacement CISA advisory URL was established by this expansion. A failed source is not evidence that its publisher has no new advisories.
 
@@ -138,7 +138,7 @@ Source expansion authorizes no automatic remediation, network/device inspection,
 
 ## Further source expansion
 
-The owner requested broader coverage after the first 29-source intake. A further **29 feeds** passed bounded public HTTPS intake, bringing that checkpoint to **58 configured feeds**. The separately scoped Talos category below brings the current total to **59**, plus the separate CISA KEV catalog. These are configured inputs, not a guarantee that all remain healthy or that their items are distinct incidents.
+The owner requested broader coverage after the first 29-source intake. A further **29 feeds** passed bounded public HTTPS intake, bringing that checkpoint to **58 configured feeds**. The separately scoped Talos category brought the next checkpoint to **59**; the later Qualys admission below brings the current total to **60**, plus the separate CISA KEV catalog. These are configured inputs, not a guarantee that all remain healthy or that their items are distinct incidents.
 
 | Publisher | Feed | Role |
 | --- | --- | --- |
@@ -176,7 +176,7 @@ Discovery used the publishers’ own sites or advertised endpoints and the same 
 
 Cisco PSIRT’s 50 admitted items had unknown dates under this parser, so they may appear as undated records without calendar-year matches. Snyk, F5 and Infosecurity reached the 150-item intake ceiling. F5 also returned publications before the decade boundary; the normal date filter still applies. Graham Cluley’s first observed response yielded six accepted same-publisher links; no extra article hosts were silently admitted. Counts in discovery receipts are neither net new articles nor evidence of complete archives.
 
-This further intake rejected or held other attempts: Rapid7’s advertised feed was malformed XML; Qualys exceeded the per-item CVE mention bound; Fortinet yielded no accepted HTTPS article links; Elastic and Wordfence exceeded the response cap; ZDI contained rejected DTD/entity syntax. Some alternate news endpoints redirected, failed access or produced no accepted entries. Last Watchdog’s mixed press-release material and BankInfoSecurity’s undated results were held for editorial/date review. Those attempts are not configured sources, and the collector’s safeguards were not loosened to accept them. Other sources not attempted remain unreviewed.
+This further intake rejected or held other attempts: Rapid7’s advertised feed was malformed XML; Fortinet yielded no accepted HTTPS article links; Elastic and Wordfence exceeded the response cap; ZDI contained rejected DTD/entity syntax. Some alternate news endpoints redirected, failed access or produced no accepted entries. Last Watchdog’s mixed press-release material and BankInfoSecurity’s undated results were held for editorial/date review. Those attempts are not configured sources, and the collector’s safeguards were not loosened to accept them. Qualys also failed the earlier **24 October 2026 UTC** whole-feed intake because one item exceeded the per-item CVE mention bound; its later admission under explicit partial accounting is documented below. Other sources not attempted remain unreviewed.
 
 ## Talos Threat Advisory category subset
 
@@ -207,3 +207,36 @@ admitting other safe all-posts entries; only a new recorded attempt establishes
 that outcome. Its historical failure is not relabeled as a successful category
 fetch. No CVEs are clipped and no reader limit is relaxed. Category entries remain
 subject to the same validation. This establishes no replacement CISA advisory route.
+
+## Qualys Security Blog: dated partial admission
+
+The source **Qualys Security Blog** uses the official blog's advertised
+[RSS endpoint](https://blog.qualys.com/feed) and
+[home page](https://blog.qualys.com/). Its source ID is `qualys`, its role is
+research and its article-host allowlist is exactly `blog.qualys.com`. The blog
+mixes vulnerability research, product guidance and vendor announcements; it is
+not exclusively a vulnerability-advisory stream.
+
+A separate bounded request on **25 October 2026 at 00:40:44 UTC** returned HTTPS
+200 and a valid response with **10 entries seen and processed, nine admitted and
+one rejected whole** for exceeding 100 unique CVE mentions. No entries were
+filtered or left unprocessed. The resulting observation is **partial**, not a
+complete-input success. The admitted entries' publisher-provided publication
+dates range from **29 September through 24 October 2026 UTC**; those dates are
+separate from retrieval and do not establish incident occurrence. Accepted
+entries contained at most ten CVE mentions each.
+
+The **24 October UTC** rejection remains a historical observation under the
+earlier whole-feed policy. The new attempt used the same canonical URL and
+received the same response bytes; schema 3's whole-entry rejection permits the
+other safe entries without clipping the rejected item's CVEs. No redirect,
+alternate host, response-prefix parsing or access workaround was used. Response
+hashes and exact intake provenance remain in private receipts.
+
+The unchanged 3 MiB response, strict UTF-8, DTD/entity rejection, XML node/depth,
+150-processed-entry and 100-CVE-per-entry gates still apply. Later responses can
+fail these whole-response gates or yield no safe admission. Accepted items merge
+with retained history under the 600-item source limit and normal decade date
+filter; a rolling ten-entry response is not a complete Qualys archive. Admission
+does not establish live deployment, a later scheduled collection outcome,
+independent factual verification, exploitation or exposure of the reader's devices.

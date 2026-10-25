@@ -59,6 +59,7 @@
     {"id":"security-affairs","name":"Security Affairs","kind":"reporting","url":"https://securityaffairs.com/feed","home":"https://securityaffairs.com/","article_hosts":["securityaffairs.com"]},
     {"id":"risky-business-news","name":"Risky Business Newsletters","kind":"reporting","url":"https://risky.biz/feeds/newsletters/","home":"https://risky.biz/feeds/","article_hosts":["risky.biz"]},
     {"id":"register-security","name":"The Register Security","kind":"reporting","url":"https://www.theregister.com/security/?lab_viewport=rss","home":"https://www.theregister.com/security/","article_hosts":["www.theregister.com"]},
-    {"id":"talos-threat-advisories","name":"Cisco Talos Threat Advisory (category subset)","kind":"research","url":"https://blog.talosintelligence.com/category/threat-advisory/rss/","home":"https://blog.talosintelligence.com/category/threat-advisory/","article_hosts":["blog.talosintelligence.com"]}
+    {"id":"talos-threat-advisories","name":"Cisco Talos Threat Advisory (category subset)","kind":"research","url":"https://blog.talosintelligence.com/category/threat-advisory/rss/","home":"https://blog.talosintelligence.com/category/threat-advisory/","article_hosts":["blog.talosintelligence.com"]},
+    {"id":"qualys","name":"Qualys Security Blog","kind":"research","url":"https://blog.qualys.com/feed","home":"https://blog.qualys.com/","article_hosts":["blog.qualys.com"]}
   ]
 }

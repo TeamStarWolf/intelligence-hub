@@ -7,7 +7,7 @@ advisories, known exploited vulnerabilities and a sourced decade timeline.
 
 ## What it does
 
-- Collects **59 configured publisher RSS/Atom feeds**, plus CISA's separate KEV catalog. This counts feed definitions, not unique publishers. Configured sources can fail; their outcomes remain visible.
+- Collects **60 configured publisher RSS/Atom feeds**, plus CISA's separate KEV catalog. This counts feed definitions, not unique publishers. Configured sources can fail; their outcomes remain visible.
 - Retains **63 curated primary publications**, including 41 decade additions and the original 22 recent-year entries. This is selective coverage, not a complete incident archive.
 - Provides year/month navigation, date presets, source/kind/exploitation/guidance filters, and ten date, title, source, CVE and CVSS sort choices.
 - Provides a CVE register and source-led briefs with CISA required actions, available CNA product/version information, guidance excerpts and original references.
@@ -31,6 +31,11 @@ rejects that whole entry while other safe entries can be retained. The source
 ledger reports admitted, rejected, filtered and unprocessed counts; **partial**
 means some safe input was accepted with a gap. It does not mean the publisher's
 archive is complete. See [intake accounting](docs/FEEDS.md#partial-intake-and-entry-accounting).
+
+The [Qualys Security Blog](docs/FEEDS.md#qualys-security-blog-dated-partial-admission) adds vendor research
+and product posts. Its admission uses the same whole-entry CVE rejection policy;
+an accepted subset does not establish complete Qualys coverage or a healthy
+future response. Source outcomes and publication dates remain visible.
 
 Publication, update, incident and CISA catalog-addition dates are distinct.
 Affected version ranges are not automatically fixed versions, and CVSS versions
