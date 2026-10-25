@@ -245,6 +245,7 @@ input[type=search]{font-size:12px;min-height:39px}
 .article-date>span{font-size:7px;color:#97aaa3;letter-spacing:.3px}
 .kind-badge{font-size:7px;border-radius:2px;letter-spacing:.6px;padding:3px 6px}
 .article-bottom{border-top-color:#42504a;padding-top:11px}
+.kev-catalog-note{margin:6px 0 0;font-size:9px;line-height:1.6;color:#d7b08a}
 .article-source{font-size:10px;color:#d4bb9c}
 .article-tag{border-color:#4b5551;background:#1b2326;color:#b8c9ca;border-radius:2px}
 button.cve-tag{border-color:#786346;background:#302c23;color:#e7c29a}
