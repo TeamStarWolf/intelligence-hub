@@ -35,6 +35,7 @@ TOP = {"schema_version", "generated_at", "window", "articles", "sources", "histo
 ARTICLE = {"id", "title", "url", "source_id", "source_name", "kind", "published_at", "event_date",
            "date_basis", "summary", "cves", "tags", "exploitation", "references", "origin"}
 SOURCE = {"id", "name", "kind", "url", "status", "last_attempt", "last_success", "error", "sha256", "intake", "articles"}
+SOURCE_V4 = SOURCE | {"configured_selection"}
 BRIEF = {"cve", "title", "description", "source_status", "record_state", "source_updated_at", "retrieved_at",
          "source_attempted_at", "source_sha256", "products", "solutions", "workarounds", "cvss", "references",
          "required_action", "required_action_source_url", "kev", "analysis"}
@@ -125,10 +126,30 @@ def stamp(value, nullable=False):
     require(datetime.fromisoformat(value.replace("Z", "+00:00")).tzinfo is not None, "Snapshot timestamp needs a timezone.")
 
 
+def validate_archive_source(source, snapshot_version):
+    require(type(snapshot_version) is int and snapshot_version in (3, 4), "Unsupported archive source snapshot version.")
+    context = None
+    if snapshot_version == 4:
+        configured = source["configured_selection"]
+        if source["id"] == "cisa-kev":
+            require(configured is None, "KEV cannot carry RSS selection configuration.")
+        else:
+            require(type(configured) is str and configured in {"document-order-v1", "publisher-date-desc-v1"}, "Invalid archived selection configuration.")
+            if source["id"] == "f5-labs":
+                require(source["name"] == "F5 Labs" and source["kind"] == "research" and
+                        source["url"] == "https://www.f5.com/labs", "Unsupported archived F5 ledger identity.")
+                # Validate a supported producer contract, never adopt or store configuration.
+                context = {"id": "f5-labs", "url": "https://www.f5.com/labs/rss-feeds/all.xml",
+                           "article_hosts": ["www.f5.com"]}
+            else:
+                require(configured == "document-order-v1", "Publisher-date configuration requires the supported F5 ledger.")
+    validate_observation(source, source=context, kev=source["id"] == "cisa-kev", allow_selection=snapshot_version == 4)
+
+
 def validate_snapshot(value):
     tree(value)
     keys(value, TOP)
-    require(type(value["schema_version"]) is int and value["schema_version"] == 3, "Archive requires snapshot schema3.")
+    require(type(value["schema_version"]) is int and value["schema_version"] in (3, 4), "Archive requires snapshot schema3 or4.")
     stamp(value["generated_at"])
     reviewed = value["history_reviewed_at"]
     if isinstance(reviewed, str) and "T" not in reviewed:
@@ -146,7 +167,7 @@ def validate_snapshot(value):
     source_ids, identities, urls, wanted = set(), set(), set(), set()
     source_by_id = {}
     for source in value["sources"]:
-        keys(source, SOURCE)
+        keys(source, SOURCE if value["schema_version"] == 3 else SOURCE_V4)
         require(isinstance(source["id"], str) and re.fullmatch(r"[a-z0-9-]{1,80}", source["id"]) and source["id"] not in source_ids, "Invalid or duplicate source.")
         source_ids.add(source["id"])
         source_by_id[source["id"]] = source
@@ -155,7 +176,7 @@ def validate_snapshot(value):
         if source["id"] == "cisa-kev":
             require(source["name"] == "CISA KEV" and source["kind"] == "advisory", "Invalid KEV ledger identity.")
         require(type(source["articles"]) is int and 0 <= source["articles"] <= 8000, "Invalid retained source count.")
-        validate_observation(source, kev=source["id"] == "cisa-kev")
+        validate_archive_source(source, value["schema_version"])
     for article in value["articles"]:
         keys(article, ARTICLE)
         validate_article(article)

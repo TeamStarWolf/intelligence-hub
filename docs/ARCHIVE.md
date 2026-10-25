@@ -48,13 +48,50 @@ metadata activity remain possible even for read-only connections.
 
 ## Snapshot and version model
 
-Only the bounded, current public **schema 3** snapshot is admitted. Unknown
-top-level/source/article/CVE fields are rejected; header types, dates, source
+The reader admits bounded public **schema 3 and 4** snapshots. Unknown versions
+or top-level/source/article/CVE fields are rejected; header types, dates, source
 observations, partial-intake accounting, article provenance, structured guidance
 and the exact article-mentioned CVE union are checked. Existing pure collector
 and CVE validators are reused, without calling their fetch/build functions.
 Successful validation does not corroborate a publisher claim or sanitize every
-supplied string.
+supplied string. The archive retains its narrower record and guidance bounds;
+support for a version does not mean every otherwise valid public snapshot fits.
+
+| Snapshot version | Source ledger | Intake report |
+| --- | --- | --- |
+| 3 | The original eleven fields; no `configured_selection` | A genuine eleven-field legacy report or `null`, under the existing status rules; selection basis is not recorded |
+| 4 | Those fields plus required `configured_selection`; an RSS policy enum or explicit `null` for KEV | A legacy report with unknown basis, a typed twelve-field report including `selection`, or `null` under the existing status rules |
+
+Configured selection describes the producer's reported configuration, not proof
+of execution. A recorded response can have a different selection basis or cutoff
+from the current configuration and snapshot window. A last accepted response
+window has a known basis only when a successful or partial typed report satisfies
+the existing counts, attempt/acceptance times and response/source hash binding.
+A failed, missing or legacy report leaves that basis unknown, even if a failed
+response hash happens to equal an older accepted hash. No policy is assigned to
+every retained article, and no missing metadata is backfilled.
+
+For schema 4, the supported F5 ledger identity is exactly `f5-labs`,
+`F5 Labs`, `research`, and home URL `https://www.f5.com/labs`. After that check,
+a fixed feed URL and host descriptor validate the original, complete report.
+This descriptor is not fetched publisher evidence, a new saved observation or
+local configuration. The reader does not load the current source catalog or
+strip `selection` to make a report fit an older shape. Unknown identity variants
+are refused rather than silently normalized.
+
+That fixed F5 descriptor omits `include_terms`, preserving the imported
+validator's refusal of a successful zero-admission report without a known
+filter. It does **not** require all filtered counts to be zero. Positive filtered
+counts neither prove nor disprove hidden historical or future configuration;
+portable ledger metadata cannot detect every filtering variant or authenticate
+the producer's settings.
+
+The original snapshot version and complete source JSON remain in the existing
+content-addressed records. The archive database schema and export receipt schema
+remain version 1; those are separate from the public snapshot version. No database
+migration, row rewrite or relabeling is performed. A source update does not verify
+an existing archive's contents or export compatibility: unsupported stored shapes
+are refused intact for review rather than repaired or silently downconverted.
 
 One transaction records a snapshot's received-byte digest, canonical structured
 digest, input size, generated/import dates, supplied revisions and complete
