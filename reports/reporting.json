@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "timezone": "America/Chicago",
+  "daily_hours": [
+    6,
+    14,
+    22
+  ],
+  "weekday_lookback_hours": 24,
+  "weekend_lookback_hours": 48,
+  "weekend_iso_days": [
+    6,
+    7
+  ],
+  "periodic_hour": 6,
+  "weekly_iso_day": 1,
+  "fortnight_anchor_start": "2026-10-19",
+  "fortnight_days": 14,
+  "rolling_months": 6,
+  "cadences": [
+    "daily",
+    "weekly",
+    "weekend",
+    "fortnightly",
+    "monthly",
+    "quarterly",
+    "six-month"
+  ],
+  "schedule_state": "configured",
+  "schedule_observed_at": "2026-10-25T22:28:19.728230+00:00",
+  "notes": [
+    "The three-daily report automation was observed configured for 06:00,14:00,22:00 in the current Central-time environment. Configuration is not an actual execution or punctual-publication guarantee.",
+    "Weekday daily editions cover 24 elapsed hours; Saturday and Sunday daily editions cover 48 elapsed hours.",
+    "Calendar weekly and weekend editions close Monday at 00:00 and publish at 06:00 Chicago; fortnightly editions use the October 19, 2026 anchor and first close November 2.",
+    "Monthly and quarterly editions publish at 06:00 after the calendar period closes. Rolling six-month editions use the latest six completed calendar months and refresh monthly.",
+    "Planned slots and actual retrieval, compilation, publication and source clocks remain separate. Missed slots do not trigger an unbounded backfill burst."
+  ]
+}

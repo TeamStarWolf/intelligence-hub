@@ -6,6 +6,8 @@ import json
 import math
 import re
 
+from .intelligence import CWE, plain, validate_weaknesses
+
 CVE_ID = re.compile(r"CVE-[0-9]{4}-[0-9]{4,8}")
 MAX_RECORDS = 15000
 
@@ -31,6 +33,45 @@ def english_values(values, clean, limit=2):
     return [clean(item["value"], 600) for item in values[:100]
             if isinstance(item, dict) and isinstance(item.get("value"), str)
             and str(item.get("lang", "en")).lower().startswith("en") and item["value"].strip()][:limit]
+
+
+def project_weaknesses(cna, cve, clean):
+    """Only explicit CNA cweId fields establish a direct CVE/weakness association."""
+    types = cna.get("problemTypes", [])
+    if not isinstance(types, list):
+        raise ValueError("Invalid CNA problemTypes.")
+    result, seen, bounded = [], set(), len(types) > 20
+    for item in types[:20]:
+        if not isinstance(item, dict) or not isinstance(item.get("descriptions", []), list):
+            raise ValueError("Invalid CNA problem type descriptions.")
+        descriptions = item.get("descriptions", [])
+        bounded = bounded or len(descriptions) > 20
+        for descriptor in descriptions[:20]:
+            if not isinstance(descriptor, dict):
+                raise ValueError("Invalid CNA weakness descriptor.")
+            description = descriptor.get("description", "")
+            if not isinstance(description, str):
+                raise ValueError("Invalid CNA weakness description.")
+            if "cweId" not in descriptor:
+                continue
+            ident = descriptor["cweId"]
+            if not isinstance(ident, str):
+                raise ValueError("Invalid CNA cweId type.")
+            if not CWE.fullmatch(ident) or ident in seen:
+                continue
+            seen.add(ident)
+            if len(result) == 8:
+                bounded = True
+                continue
+            description = clean(description, 200)
+            plain(description, 200, empty=True)
+            result.append({"id": ident, "description": description, "source_url": brief_url(cve)})
+    return result, "bounded" if bounded else "supplied" if result else "not_supplied"
+
+
+def normalize_weaknesses(value, cve):
+    items, status = validate_weaknesses(value, cve, brief_url, legacy=True)
+    return {**value, "weaknesses": items, "weaknesses_status": status}
 
 
 def project_record(raw, cve, clean, safe_url, normalize_date, stamp):
@@ -95,6 +136,7 @@ def project_record(raw, cve, clean, safe_url, normalize_date, stamp):
                 break
     descriptions = english_values(cna.get("descriptions"), clean, 1)
     rejected = english_values(cna.get("rejectedReasons"), clean, 1)
+    weaknesses, weakness_status = project_weaknesses(cna, cve, clean)
     return {"cve": cve, "title": clean(str(cna.get("title") or cve), 300),
         "description": (rejected or descriptions or [""])[0],
         "record_state": meta["state"], "source_status": "ok", "retrieved_at": stamp,
@@ -102,7 +144,7 @@ def project_record(raw, cve, clean, safe_url, normalize_date, stamp):
         "source_sha256": hashlib.sha256(raw).hexdigest(), "products": products,
         "solutions": [{"text": text, "source_url": url} for text in english_values(cna.get("solutions"), clean)],
         "workarounds": [{"text": text, "source_url": url} for text in english_values(cna.get("workarounds"), clean)],
-        "cvss": cvss, "references": references,
+        "cvss": cvss, "references": references, "weaknesses": weaknesses, "weaknesses_status": weakness_status,
         "projection_notes": ["CNA fields are bounded excerpts; consult the original record and vendor advisories for complete product/version conditions.",
             "Product statements can include unaffected versions. An affected version range is not a fixed-version claim.",
             "The displayed metric is the first supplied metric of the highest available CVSS version, not a product-specific applicability assessment."]}
@@ -111,6 +153,10 @@ def project_record(raw, cve, clean, safe_url, normalize_date, stamp):
 def valid_projection(value, cve, safe_url, normalize_date):
     """Validate retained public projections before reusing their facts or URLs."""
     if not isinstance(value, dict) or value.get("cve") != cve or not CVE_ID.fullmatch(cve):
+        return False
+    try:
+        validate_weaknesses(value, cve, brief_url, legacy=True)
+    except (ValueError, TypeError, KeyError):
         return False
     if value.get("source_status") not in {"ok", "failed", "pending"} or value.get("record_state") not in {"PUBLISHED", "REJECTED", "UNKNOWN"}:
         return False
@@ -157,7 +203,7 @@ def valid_projection(value, cve, safe_url, normalize_date):
 def blank(cve):
     return {"cve": cve, "title": cve, "description": "", "source_status": "pending", "record_state": "UNKNOWN",
         "source_updated_at": None, "retrieved_at": None, "source_attempted_at": None, "source_sha256": None,
-        "products": [], "solutions": [], "workarounds": [], "cvss": None,
+        "products": [], "solutions": [], "workarounds": [], "cvss": None, "weaknesses": [], "weaknesses_status": "not_projected",
         "references": [{"label": "Official CVE record", "url": brief_url(cve), "kind": "record"}], "projection_notes": []}
 
 
@@ -169,7 +215,7 @@ def merge_retained(local, remote, cve, safe_url, normalize_date):
     def clock(item, field):
         return normalize_date(item.get(field) or "") or ""
     successful = [item for item in values if item.get("retrieved_at") and item.get("source_sha256")]
-    facts = max(successful, key=lambda item: clock(item, "retrieved_at")) if successful else blank(cve)
+    facts = normalize_weaknesses(max(successful, key=lambda item: clock(item, "retrieved_at")), cve) if successful else blank(cve)
     result = {key: facts[key] for key in blank(cve) if key != "projection_notes"}
     result["projection_notes"] = []
     latest = max(values, key=lambda item: clock(item, "source_attempted_at"))
@@ -181,11 +227,13 @@ def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, saf
     wanted = sorted({cve for article in articles for cve in article["cves"]}, reverse=True)
     if len(wanted) > MAX_RECORDS or not isinstance(retained, dict):
         raise ValueError("CVE projection count exceeds its bound.")
-    records = {cve: retained[cve] if cve in retained and valid_projection(retained[cve], cve, safe_url, normalize_date) else blank(cve) for cve in wanted}
+    records = {cve: normalize_weaknesses(retained[cve], cve) if cve in retained and valid_projection(retained[cve], cve, safe_url, normalize_date) else blank(cve) for cve in wanted}
     current = datetime.fromisoformat(stamp)
 
     def due(cve):
         record = records[cve]
+        if record["source_status"] == "ok" and record["weaknesses_status"] == "not_projected":
+            return True
         previous = record.get("source_attempted_at")
         if previous is None:
             return True
@@ -213,7 +261,7 @@ def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, saf
     kev_by_id = {item["cveID"]: item for item in catalog.get("vulnerabilities", [])}
     result = {}
     for cve, projection in records.items():
-        record = {key: projection[key] for key in ("cve", "title", "description", "source_status", "record_state", "source_updated_at", "retrieved_at", "source_attempted_at", "source_sha256", "products", "solutions", "workarounds", "cvss", "references")}
+        record = {key: projection[key] for key in ("cve", "title", "description", "source_status", "record_state", "source_updated_at", "retrieved_at", "source_attempted_at", "source_sha256", "products", "solutions", "workarounds", "cvss", "references", "weaknesses", "weaknesses_status")}
         item = kev_by_id.get(cve)
         cisa_url = "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=" + cve
         action = clean(item.get("requiredAction", ""), 1200) if item else ""

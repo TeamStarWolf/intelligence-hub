@@ -2,8 +2,8 @@
 
 ## What a brief represents
 
-The collector writes a **schema 4** snapshot. The site still reads schemas 2, 3
-and 4. Each of those snapshots has one `mitigations` entry for each unique CVE
+The collector writes a **schema 5** snapshot. The site still reads schemas 2, 3,
+4 and 5. Each of those snapshots has one `mitigations` entry for each unique CVE
 in its loaded articles' `cves` arrays, including KEV, feed and curated articles.
 This is not every CVE ever published, nor every identifier in full linked articles.
 The projection is deterministic; it makes no model call or device assessment.
@@ -31,6 +31,7 @@ The implementation reads structured fields, not an entire advisory as instructio
 | Version statements per product | First twelve, retaining status, bounds and version type |
 | References | Official record link plus up to fifteen accepted CNA references |
 | CVSS | First supplied valid metric at the highest available supported metric version |
+| CNA weaknesses (schema 5) | Explicit `cna.problemTypes[].descriptions[].cweId` only; at most twenty types, twenty descriptions per type and eight unique canonical CWE IDs |
 
 Version text/bounds are bounded to 160 characters each; version status and type are
 also bounded. These excerpts can omit additional products, conditions and guidance.
@@ -41,6 +42,44 @@ CVSS preference is **4.0, then 3.1, 3.0 and 2.0**, checking a bounded metric lis
 The displayed score, version, vector and source stay together. The choice is not
 the highest score across every product, a normalized cross-version comparison,
 or an organization-specific risk ranking. Missing metrics stay unknown.
+
+## CWE, CAPEC and source-attributed context
+
+Schema 5 adds exact `weaknesses` and `weaknesses_status` fields to each brief.
+Every weakness has its CNA-supplied canonical ID, a bounded description and the
+exact CVE-record source URL. No ID is inferred from prose, product names,
+references or ADP containers. New descriptions use Unicode code-point limits;
+unpaired surrogates, control, bidi-format and U+FEFF byte-order-mark characters are rejected.
+
+`not_projected` means the retained projection did not contain this field;
+`not_supplied` means a fully inspected bounded CNA selection supplied no usable
+canonical ID; `supplied` means at least one ID was projected; `bounded` means a
+type, description or unique-ID limit was exceeded and the projection may be
+incomplete. None establishes the absence of a weakness. Malformed supplied
+containers refuse that projection under the existing last-good/failure policy.
+
+Old raw projection-cache entries normalize missing pairs to empty/
+`not_projected` without advancing source clocks. An otherwise successful old
+projection becomes due for a real CWE re-projection within the existing
+2,000-record push / 40-record scheduled budget and four-worker bound. Failed
+attempts keep their existing one-hour cooldown. Other successful projections
+keep the existing 24-hour interval. A newly projected field on identical source
+bytes is a local projection change, not a publisher revision.
+
+The separate, bounded public context catalog can describe CWE/CAPEC definitions,
+actors, campaigns, products and mitigations with explicit evidence, source
+versions, source-byte digests and separate publisher/event/observation clocks.
+CWE-to-CAPEC mappings require official MITRE evidence and mean **taxonomy only**.
+They do not establish observed attacks or connect an actor to an article.
+Campaign/actor attribution and other relationships remain explicit, cited
+publisher claims; no transitive association or new CVE admission is inferred.
+A generated CWE definition link is labeled Definition, not a captured source.
+Empty or unreviewed context remains unknown, not a fabricated entity inventory.
+
+Legacy schema 2/3/4 snapshots retain their old shape. Known schema-5-only context
+or weakness fields on a legacy-labeled snapshot are rejected rather than
+silently stripped. Raw unversioned CNA-cache compatibility is a distinct input
+policy. The read-only views do not run models, scans, commands or device actions.
 
 ## Guidance state is separate from lookup state
 

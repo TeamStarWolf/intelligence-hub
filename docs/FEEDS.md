@@ -1,5 +1,32 @@
 # Publisher feeds and bookmark intake
 
+## Schema 5 context and unchanged source intake
+
+The current producer writes schema 5; its publisher ledgers and partial-intake
+contract retain schema 4's exact selection/configuration/hash/time/count
+semantics. Other sources still use document order and F5 alone uses the reviewed
+bounded date ranking below. Rejected, filtered and duplicate entries consume
+the same 150 processed slots, without refill. The older dated schema 3/4 intake
+observations in this document remain historical observations, not new captures.
+
+Schema 5 adds bounded, local source-attributed intelligence/reporting metadata
+and CNA-only CWE projections. These do not fetch linked source bodies, manufacture
+article/CVE admission or adopt remote catalog configuration. An article without
+an admitted CVE remains without a linked brief; matching a CVE in CISA KEV remains
+separate from the article's own exploitation label. See
+[CWE and context semantics](MITIGATIONS.md#cwe-capec-and-source-attributed-context)
+and the [reporting desk](OPERATIONS.md#reporting-desk-and-prior-source-revisions).
+
+The new date-only window is limited to 7,306 days for a selected twenty-year
+collection. Legacy snapshot readers retain their version-specific 3,661-day
+profile. The existing 3 MiB publisher response, strict UTF-8, DTD/entity rejection,
+40,000-node/depth-48 XML, 100-CVE whole-entry rejection, 150 normalization,
+600 retained articles per source, 500 curation entries, 8,000 total articles,
+16 MiB resume, 1,200,000-byte package and one-day artifact-retention guards remain.
+Neither the broader window nor a source's accepted input proves complete history
+or timely reporting. Known schema-5-only fields on legacy labels are refused;
+there is no metadata stripping or silent downconversion.
+
 ## What is configured
 
 The catalog contains **61 publisher RSS/Atom sources**, counting feed definitions rather than unique publishers. The first 29 comprise ten retained sources, sixteen additions from the repository owner's public [cybersecurity-resources bookmarks](https://github.com/TeamStarWolf/cybersecurity-resources/blob/f95fb4a3fae14acfa172c22507a1554339cb3655/LINKS.md), and three further requested publishers: watchTowr Labs, Dark Reading and the legacy Threatpost archive. A further 29 advisory, research and reporting feeds, one separately scoped Talos category feed, the Qualys Security Blog and a separately scoped CISA category feed are listed below. The fixed configuration is [sources.json](../config/sources.json). CISA KEV is a separate JSON catalog and is not included in this RSS count. Curated historical publications are also a separate input. SEC filings are not connected by this feed intake.
@@ -61,11 +88,11 @@ Exact article-host allowlists are recorded per source. Publisher feed and articl
 
 ### Partial intake and entry accounting
 
-New snapshots use schema 4. The site reads validated schemas 2, 3 and 4; the
-collector can resume validated schemas 1 through 4. Legacy observations without
+New snapshots use schema 5. The site reads validated schemas 2, 3, 4 and 5; the
+collector can resume validated schemas 1 through 5. Legacy observations without
 an intake report have **unknown entry-window coverage**. A legacy report without
 selection metadata has an **unrecorded selection basis**, even if its status was
-successful or it is retained inside a schema 4 snapshot. CISA KEV is a separate
+successful or it is retained inside a schema 4/5 snapshot. CISA KEV is a separate
 catalog and does not carry RSS entry accounting or selection policy.
 
 After the whole response passes transport and XML validation, the collector
@@ -151,7 +178,7 @@ intake, selection, attempt and hash are preserved. This intentional local-policy
 projection does not strip or downconvert intake evidence or backfill legacy
 selection metadata.
 
-The catalog, collector, schema 4 producer and compatible readers require a
+The catalog, collector, schema 4/5 producer and compatible readers require a
 coordinated release and rollback. Older collectors can ignore the new catalog
 option and retain document order; older site readers can reject schema 4. Do not
 silently strip selection fields, relabel new data as legacy or mix incompatible

@@ -1,24 +1,25 @@
 # Team Star Wolf · Intelligence Hub
 
 A public security intelligence desk with current headlines, primary research,
-advisories, known exploited vulnerabilities and a sourced decade timeline.
+advisories, known exploited vulnerabilities, source-linked threat context and reports over time.
 
 **Site:** <https://teamstarwolf.github.io/intelligence-hub/>
 
 ## What it does
 
 - Collects **61 configured publisher RSS/Atom feeds**, plus CISA's separate KEV catalog. This counts feed definitions, not unique publishers. Configured sources can fail; their outcomes remain visible.
-- Retains **63 curated primary publications**, including 41 decade additions and the original 22 recent-year entries. This is selective coverage, not a complete incident archive.
+- Retains selected curated primary publications. The original 63-row historical collection is preserved; source-qualified additions and honest gaps are listed in the archive. This is selective coverage, not a complete incident archive.
 - Provides year/month navigation, date presets, source/kind/exploitation/guidance filters, and ten date, title, source, CVE and CVSS sort choices.
 - Provides a CVE register and source-led briefs with CISA required actions, available CNA product/version information, guidance excerpts and original references.
 - Shows source health, partial article intake and dates separately from guidance availability. Missing enrichment remains unknown; a CVE mention does not prove exploitation or device exposure.
 - Requests collection every **ten minutes** through GitHub Actions and publishes when articles, guidance, source outcomes or layout change. A visible browser checks the saved public snapshot every ten minutes, with the saved snapshot's age shown separately from browser reads.
 - Runs on GitHub Pages independently of the owner's laptop, with a responsive interface and original SVG artwork.
 
-The curated history covers **2016-10-24 through 2026-10-24**. The collector's default
-window rolls forward ten calendar years from the UTC run date. There are gaps in
-every year; selected history and recent RSS cannot reconstruct every publisher's
-archive. Threatpost is a **legacy archive with observed August 2022 items**; a
+The collector's schema5 default window rolls forward **twenty calendar years**
+from the UTC run date, with explicit date bounds. A window is not a coverage
+claim: there are gaps in every year, and selected history and recent RSS cannot
+reconstruct every publisher's archive. Legacy schema2/3/4 windows retain their
+original ten-year limit. Threatpost is a **legacy archive with observed August 2022 items**; a
 successful fetch does not make those stories current news.
 
 The separately named [Talos Threat Advisory category subset](docs/FEEDS.md#talos-threat-advisory-category-subset)
@@ -48,6 +49,30 @@ Publication, update, incident and CISA catalog-addition dates are distinct.
 Affected version ranges are not automatically fixed versions, and CVSS versions
 are not normalized into an environment-specific risk score.
 
+## Reports and connected threat context
+
+The [reports archive](reports/README.md) keeps immutable narrative/data/chart
+editions. Requested daily slots are **06:00,14:00,22:00 America/Chicago** with
+24-hour weekday or48-hour weekend lookbacks. Weekly, weekend, fortnightly,
+monthly, quarterly and rolling six-completed-month editions use the explicit
+[calendar method](reports/REPORTING.md). The recorded activation state and
+latest report/revision outcomes are separate from the next nominal opportunity.
+
+Schema5 adds bounded source-led context for CWE weaknesses, CAPEC taxonomy,
+actors/campaigns, products and mitigations. CVE-to-CWE comes only from the CNA's
+structured problemTypes; official CWE-to-CAPEC links are taxonomy rather than
+observed attacks. Curated attribution and mitigation relationships need their
+own dated evidence. Missing or unreviewed fields stay unknown. No CVE is guessed
+from an article headline, and a KEV catalog match does not rewrite an entry's
+exploitation label.
+
+The dedicated48–96-hour citation review records semantic, raw-hash-only,
+timestamp, no-baseline, incompatible, refusal, failure and unchecked outcomes.
+It is explicitly not_run until a separately recorded pass; ordinary feed refresh
+is not a systematic prior-article review. Reports, source clocks, source health
+and per-URL eligibility remain distinct. The browser executes no publisher or
+model requests.
+
 ## Run the collector locally
 
 Python 3.10 or newer; standard library only. From the repository folder:
@@ -59,7 +84,7 @@ python -m intelligence_hub
 An explicit historical window:
 
 ```sh
-python -m intelligence_hub --start 2016-10-24 --end 2026-10-24
+python -m intelligence_hub --start 2006-10-25 --end 2026-10-25
 ```
 
 These commands perform bounded public HTTPS reads and write the generated snapshot.

@@ -1,15 +1,25 @@
 {
   "schema_version": 1,
   "window": {
-    "start": "2016-10-24",
-    "end": "2026-10-24"
+    "start": "2006-10-25",
+    "end": "2026-10-25"
   },
-  "curated_at": "2026-10-24",
+  "curated_at": "2026-10-25",
   "coverage": {
     "complete": false,
-    "selection": "63 individually reviewed primary publications: the original 22 retained unchanged, plus 41 earlier publications selected for decade context. This is a reading selection, not an exhaustive incident database.",
+    "selection": "73 selected primary publications: the original 63 retained without a new source-body review, plus 10 individually qualified publications from 2006–2015. This is a reading selection, not an exhaustive incident database.",
     "date_policy": "All curated entries use actual supported publication dates for their window and chronology. Exact supported event days remain separate; null event dates do not assert an incident's start. Later page updates are described without replacing original publication dates.",
     "year_counts": {
+      "2006": 1,
+      "2007": 1,
+      "2008": 1,
+      "2009": 1,
+      "2010": 1,
+      "2011": 1,
+      "2012": 1,
+      "2013": 1,
+      "2014": 1,
+      "2015": 1,
       "2016": 1,
       "2017": 4,
       "2018": 4,
@@ -23,6 +33,46 @@
       "2026": 16
     },
     "quarter_counts": {
+      "2006-Q4": 1,
+      "2007-Q1": 0,
+      "2007-Q2": 1,
+      "2007-Q3": 0,
+      "2007-Q4": 0,
+      "2008-Q1": 0,
+      "2008-Q2": 0,
+      "2008-Q3": 0,
+      "2008-Q4": 1,
+      "2009-Q1": 1,
+      "2009-Q2": 0,
+      "2009-Q3": 0,
+      "2009-Q4": 0,
+      "2010-Q1": 0,
+      "2010-Q2": 0,
+      "2010-Q3": 1,
+      "2010-Q4": 0,
+      "2011-Q1": 0,
+      "2011-Q2": 1,
+      "2011-Q3": 0,
+      "2011-Q4": 0,
+      "2012-Q1": 0,
+      "2012-Q2": 1,
+      "2012-Q3": 0,
+      "2012-Q4": 0,
+      "2013-Q1": 0,
+      "2013-Q2": 0,
+      "2013-Q3": 0,
+      "2013-Q4": 1,
+      "2014-Q1": 0,
+      "2014-Q2": 1,
+      "2014-Q3": 0,
+      "2014-Q4": 0,
+      "2015-Q1": 1,
+      "2015-Q2": 0,
+      "2015-Q3": 0,
+      "2015-Q4": 0,
+      "2016-Q1": 0,
+      "2016-Q2": 0,
+      "2016-Q3": 0,
       "2016-Q4": 1,
       "2017-Q1": 1,
       "2017-Q2": 2,
@@ -67,6 +117,116 @@
     },
     "years_without_selected_publications": [],
     "months_without_selected_publications": [
+      "2006-10",
+      "2006-12",
+      "2007-01",
+      "2007-02",
+      "2007-03",
+      "2007-05",
+      "2007-06",
+      "2007-07",
+      "2007-08",
+      "2007-09",
+      "2007-10",
+      "2007-11",
+      "2007-12",
+      "2008-01",
+      "2008-02",
+      "2008-03",
+      "2008-04",
+      "2008-05",
+      "2008-06",
+      "2008-07",
+      "2008-08",
+      "2008-09",
+      "2008-11",
+      "2008-12",
+      "2009-02",
+      "2009-03",
+      "2009-04",
+      "2009-05",
+      "2009-06",
+      "2009-07",
+      "2009-08",
+      "2009-09",
+      "2009-10",
+      "2009-11",
+      "2009-12",
+      "2010-01",
+      "2010-02",
+      "2010-03",
+      "2010-04",
+      "2010-05",
+      "2010-06",
+      "2010-08",
+      "2010-09",
+      "2010-10",
+      "2010-11",
+      "2010-12",
+      "2011-01",
+      "2011-02",
+      "2011-03",
+      "2011-04",
+      "2011-05",
+      "2011-07",
+      "2011-08",
+      "2011-09",
+      "2011-10",
+      "2011-11",
+      "2011-12",
+      "2012-01",
+      "2012-02",
+      "2012-03",
+      "2012-04",
+      "2012-05",
+      "2012-07",
+      "2012-08",
+      "2012-09",
+      "2012-10",
+      "2012-11",
+      "2012-12",
+      "2013-01",
+      "2013-02",
+      "2013-03",
+      "2013-04",
+      "2013-05",
+      "2013-06",
+      "2013-07",
+      "2013-08",
+      "2013-09",
+      "2013-11",
+      "2013-12",
+      "2014-01",
+      "2014-02",
+      "2014-03",
+      "2014-05",
+      "2014-06",
+      "2014-07",
+      "2014-08",
+      "2014-09",
+      "2014-10",
+      "2014-11",
+      "2014-12",
+      "2015-01",
+      "2015-02",
+      "2015-04",
+      "2015-05",
+      "2015-06",
+      "2015-07",
+      "2015-08",
+      "2015-09",
+      "2015-10",
+      "2015-11",
+      "2015-12",
+      "2016-01",
+      "2016-02",
+      "2016-03",
+      "2016-04",
+      "2016-05",
+      "2016-06",
+      "2016-07",
+      "2016-08",
+      "2016-09",
       "2016-10",
       "2016-12",
       "2017-01",
@@ -143,15 +303,16 @@
       "2025-09"
     ],
     "limitations": [
-      "At least one selected publication falls in every calendar year touched by the decade window; many months and some quarters have no selected publication. Absence never means absence of incidents.",
+      "At least one selected publication falls in every calendar year touched by the twenty-year window; many months and quarters have no selected publication. Absence of a selection never means absence of incidents.",
       "Counts describe publications, not unique attacks, victims, campaigns or vulnerabilities. Different first-party reports can concern related activity.",
-      "The 2016 and 2026 boundary years are partial. The earliest selected publication is 2016-11-01, not the window's 2016-10-24 start.",
+      "The 2006 and 2026 boundary years are partial. The earliest selected publication is 2006-11-14, not the window start 2006-10-25.",
       "Some disclosures describe attacks from earlier months or years. The incident day, detection day, initial disclosure, subsequent updates and retrieval date are distinct.",
       "Known/reported/unknown describe evidence in the cited material reviewed at curation time. Unknown is not a current safety verdict; historical patch instructions can be superseded.",
       "The selected CrowdStrike 2024 postmortem concerns a defective update and availability failure, not a documented malicious intrusion.",
       "Current publisher pages can contain corrections or later findings; dates are supported by explicit original publication statements or dated advisory histories.",
       "The separate CISA KEV collection uses catalog-addition dates, not original disclosure, first exploitation or a personal remediation deadline.",
-      "This selection does not establish exposure or compromise of the reader's devices and does not authorize scanning or remediation."
+      "This selection does not establish exposure or compromise of the reader's devices and does not authorize scanning or remediation.",
+      "The ten 2006–2015 primary pages were captured on 2026-10-25; retained archived pages may contain later edits and do not reconstruct their original publication-day bytes. The original 63 rows remain unchanged without a new source-body review."
     ]
   },
   "entries": [
@@ -1884,7 +2045,281 @@
         }
       ],
       "origin": "library-curation"
+    },
+    {
+      "id": "hist-ms06-070-20061114",
+      "title": "Microsoft publishes Workstation Service memory-corruption bulletin",
+      "url": "https://learn.microsoft.com/en-us/security-updates/securitybulletins/2006/ms06-070",
+      "source_id": "microsoft-msrc",
+      "source_name": "Microsoft Security Response Center",
+      "kind": "advisory",
+      "published_at": "2006-11-14",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Microsoft's archived bulletin identifies memory corruption in the Workstation Service. Its FAQ states what Microsoft knew at original publication; the retained historical account does not assess current devices.",
+      "cves": [
+        "CVE-2006-4691"
+      ],
+      "tags": [
+        "windows",
+        "remote-code-execution",
+        "legacy-advisory"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://learn.microsoft.com/en-us/security-updates/securitybulletins/2006/ms06-070"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-dns-rpc-20070412",
+      "title": "Microsoft documents DNS RPC vulnerability and bulletin follow-up",
+      "url": "https://learn.microsoft.com/en-us/security-updates/securityadvisories/2007/935964",
+      "source_id": "microsoft-msrc",
+      "source_name": "Microsoft Security Response Center",
+      "kind": "advisory",
+      "published_at": "2007-04-12",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "The advisory retains its April publication and May update, which links MS07-029 for the DNS RPC vulnerability. Initial publication, the later bulletin follow-up and current platform metadata are separate clocks.",
+      "cves": [
+        "CVE-2007-1748"
+      ],
+      "tags": [
+        "dns",
+        "rpc",
+        "legacy-advisory"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://learn.microsoft.com/en-us/security-updates/securityadvisories/2007/935964"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-ms08-067-20081023",
+      "title": "Microsoft reports targeted exploitation attempts against Server Service flaw",
+      "url": "https://learn.microsoft.com/en-us/security-updates/securitybulletins/2008/ms08-067",
+      "source_id": "microsoft-msrc",
+      "source_name": "Microsoft Security Response Center",
+      "kind": "advisory",
+      "published_at": "2008-10-23",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "The archived bulletin documents the Server Service flaw and reports limited, targeted attempts to exploit it at publication. Its RPC and operating-system conditions remain source-specific; this dated observation does not establish current device exposure.",
+      "cves": [
+        "CVE-2008-4250"
+      ],
+      "tags": [
+        "windows",
+        "rpc",
+        "targeted-attacks"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://learn.microsoft.com/en-us/security-updates/securitybulletins/2008/ms08-067"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-ms09-001-20090113",
+      "title": "Microsoft publishes SMB vulnerability bulletin MS09-001",
+      "url": "https://learn.microsoft.com/en-us/security-updates/securitybulletins/2009/ms09-001",
+      "source_id": "microsoft-msrc",
+      "source_name": "Microsoft Security Response Center",
+      "kind": "advisory",
+      "published_at": "2009-01-13",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Microsoft documents three SMB vulnerabilities, distinguishing two remote-code-execution flaws from a denial-of-service issue. Its disclosure and exploitation statements describe the information available at publication.",
+      "cves": [
+        "CVE-2008-4114",
+        "CVE-2008-4834",
+        "CVE-2008-4835"
+      ],
+      "tags": [
+        "windows",
+        "smb",
+        "legacy-advisory"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://learn.microsoft.com/en-us/security-updates/securitybulletins/2009/ms09-001"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-shell-shortcut-20100716",
+      "title": "Microsoft records Windows Shell shortcut-icon vulnerability",
+      "url": "https://learn.microsoft.com/en-us/security-updates/securityadvisories/2010/2286198",
+      "source_id": "microsoft-msrc",
+      "source_name": "Microsoft Security Response Center",
+      "kind": "advisory",
+      "published_at": "2010-07-16",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "The Windows Shell advisory identifies the Shortcut Icon Loading vulnerability. Its July publication and August update linking MS10-046 are separate dates. The retained notice provides dated vulnerability context without establishing present deployment applicability.",
+      "cves": [
+        "CVE-2010-2568"
+      ],
+      "tags": [
+        "windows",
+        "shortcuts",
+        "legacy-advisory"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://learn.microsoft.com/en-us/security-updates/securityadvisories/2010/2286198"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-google-phishing-20110601",
+      "title": "Google discloses targeted password theft and email-account hijacking",
+      "url": "https://googleblog.blogspot.com/2011/06/ensuring-your-information-is-safe.html",
+      "source_id": "google-security",
+      "source_name": "Google Official Blog",
+      "kind": "incident",
+      "published_at": "2011-06-01",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Google reports a password-theft campaign, likely through phishing, and an apparent effort to monitor email through forwarding and delegation settings. It reports disruption and account protection and says Google's internal systems were not affected.",
+      "cves": [],
+      "tags": [
+        "phishing",
+        "identity",
+        "email"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://googleblog.blogspot.com/2011/06/ensuring-your-information-is-safe.html"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-ms12-037-20120612",
+      "title": "Microsoft publishes Internet Explorer bulletin MS12-037",
+      "url": "https://learn.microsoft.com/en-us/security-updates/securitybulletins/2012/ms12-037",
+      "source_id": "microsoft-msrc",
+      "source_name": "Microsoft Security Response Center",
+      "kind": "advisory",
+      "published_at": "2012-06-12",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "The cumulative Internet Explorer bulletin addresses thirteen vulnerabilities. It reports limited attempts against the Same ID Property flaw; that specific dated statement should not be generalized to every vulnerability in the bulletin.",
+      "cves": [
+        "CVE-2012-1875"
+      ],
+      "tags": [
+        "browser",
+        "remote-code-execution",
+        "legacy-advisory"
+      ],
+      "exploitation": "reported",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://learn.microsoft.com/en-us/security-updates/securitybulletins/2012/ms12-037"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-adobe-20131003",
+      "title": "Adobe discloses attacks involving customer information and source code",
+      "url": "https://blog.adobe.com/en/publish/2013/10/03/important-customer-security-announcement",
+      "source_id": "adobe-security",
+      "source_name": "Adobe",
+      "kind": "incident",
+      "published_at": "2013-10-03",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "Adobe's initial disclosure reports unauthorized access to customer information and product source code. It presents then-current investigative assessments, including uncertainty about the relationship between the attacks; this dated first-party account is not a final incident tally.",
+      "cves": [],
+      "tags": [
+        "breach",
+        "credentials",
+        "source-code"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://blog.adobe.com/en/publish/2013/10/03/important-customer-security-announcement"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-heartbleed-20140407",
+      "title": "OpenSSL records Heartbleed TLS heartbeat memory disclosure",
+      "url": "https://openssl-library.org/news/vulnerabilities/index.html",
+      "source_id": "openssl",
+      "source_name": "OpenSSL Project",
+      "kind": "advisory",
+      "published_at": "2014-04-07",
+      "event_date": null,
+      "date_basis": "publication",
+      "summary": "OpenSSL's vulnerability entry dates CVE-2014-0160 to April 2014 and describes a missing bounds check in the TLS heartbeat extension that can disclose memory. It lists an affected 1.0.1 range before 1.0.1g; the current index entry is not a byte-preserved copy of the original advisory.",
+      "cves": [
+        "CVE-2014-0160"
+      ],
+      "tags": [
+        "tls",
+        "memory-disclosure",
+        "heartbleed"
+      ],
+      "exploitation": "unknown",
+      "references": [
+        {
+          "label": "Primary vulnerability entry (CVE-2014-0160)",
+          "url": "https://openssl-library.org/news/vulnerabilities/index.html#CVE-2014-0160"
+        }
+      ],
+      "origin": "library-curation"
+    },
+    {
+      "id": "hist-github-ddos-20150327",
+      "title": "GitHub reports a large distributed denial-of-service attack",
+      "url": "https://github.blog/news-insights/company-news/large-scale-ddos-attack-on-github-com/",
+      "source_id": "github",
+      "source_name": "GitHub",
+      "kind": "incident",
+      "published_at": "2015-03-27",
+      "event_date": "2015-03-26",
+      "date_basis": "publication",
+      "summary": "GitHub's first-party post describes a DDoS attack beginning in March 2015, combining several traffic vectors and use of browsers belonging to uninvolved people. The original publication and its 2019 page update are separate clocks; the account's assessed motive remains attributed to GitHub.",
+      "cves": [],
+      "tags": [
+        "ddos",
+        "availability"
+      ],
+      "exploitation": "known",
+      "references": [
+        {
+          "label": "Primary publication",
+          "url": "https://github.blog/news-insights/company-news/large-scale-ddos-attack-on-github-com/"
+        }
+      ],
+      "origin": "library-curation"
     }
   ]
 }
-

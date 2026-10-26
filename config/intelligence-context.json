@@ -1,0 +1,1729 @@
+{
+  "schema_version": 1,
+  "catalog_version": "sw-selected-cti-context-1",
+  "reviewed_at": "2026-10-25T23:53:02.873Z",
+  "entities": [
+    {
+      "id": "CWE-79",
+      "type": "cwe",
+      "label": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+      "aliases": [],
+      "summary": "User-controlled input reaches generated web-page output without adequate neutralization, so other users receive the resulting page.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/79.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.868874+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6f47a9f0c46442a2320325d929ffc3856986216bbf517399d77fcde3b511302b",
+          "claim": "The captured official CWE page defines CWE-79: User-controlled input reaches generated web-page output without adequate neutralization, so other users receive the resulting page."
+        }
+      ]
+    },
+    {
+      "id": "CWE-89",
+      "type": "cwe",
+      "label": "Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
+      "aliases": [],
+      "summary": "External input is incorporated into an SQL command without correctly neutralizing SQL-significant characters, allowing data to change the command interpreted downstream.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/89.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2025-12-11",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.730180+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "3cf28df2d89ea0d81a009fd7b4a0ba197495c560d001fbed8640b9adb66bc5e9",
+          "claim": "The captured official CWE page defines CWE-89: External input is incorporated into an SQL command without correctly neutralizing SQL-significant characters, allowing data to change the command interpreted downstream."
+        }
+      ]
+    },
+    {
+      "id": "CWE-22",
+      "type": "cwe",
+      "label": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+      "aliases": [],
+      "summary": "An externally supplied pathname is not sufficiently constrained to its intended parent directory, allowing special path elements to select locations outside that directory.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/22.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.735286+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "086e50c451eafbbdfe20809de41061f6e3eb9a7474ddcc1a8dff2e6ce4be4743",
+          "claim": "The captured official CWE page defines CWE-22: An externally supplied pathname is not sufficiently constrained to its intended parent directory, allowing special path elements to select locations outside that directory."
+        }
+      ]
+    },
+    {
+      "id": "CWE-78",
+      "type": "cwe",
+      "label": "Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')",
+      "aliases": [],
+      "summary": "External input is incorporated into an operating-system command without correctly neutralizing command-significant elements, allowing the input to alter the downstream command.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.384527+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "2bf804fe43b5d80c46e7bab8ff383939c3cc30880cf51ef8a200e24c18974440",
+          "claim": "The captured official CWE page defines CWE-78: External input is incorporated into an operating-system command without correctly neutralizing command-significant elements, allowing the input to alter the downstream command."
+        }
+      ]
+    },
+    {
+      "id": "CWE-287",
+      "type": "cwe",
+      "label": "Improper Authentication",
+      "aliases": [],
+      "summary": "A claimed identity is accepted without adequate verification that it belongs to the claimant.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/287.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.293567+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6973390e812f5ad50f02d9c7f8ac7eaa57c01804c16e6f631e058390c4e2415b",
+          "claim": "The captured official CWE page defines CWE-287: A claimed identity is accepted without adequate verification that it belongs to the claimant."
+        }
+      ]
+    },
+    {
+      "id": "CWE-416",
+      "type": "cwe",
+      "label": "Use After Free",
+      "aliases": [],
+      "summary": "Code accesses memory after it has been freed. If that storage is reallocated, an old pointer can refer into a new allocation where its original use is no longer valid.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/416.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.314845+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "f2c9ef5eb1d4c608883a07ed2dd25bb677f60225b82890a6894fc9e898e717f8",
+          "claim": "The captured official CWE page defines CWE-416: Code accesses memory after it has been freed. If that storage is reallocated, an old pointer can refer into a new allocation where its original use is no longer valid."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-209",
+      "type": "capec",
+      "label": "XSS Using MIME Type Mismatch",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/79.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.868874+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6f47a9f0c46442a2320325d929ffc3856986216bbf517399d77fcde3b511302b",
+          "claim": "The Related Attack Patterns table lists CAPEC-209 under CWE-79 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-588",
+      "type": "capec",
+      "label": "DOM-Based XSS",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/79.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.868874+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6f47a9f0c46442a2320325d929ffc3856986216bbf517399d77fcde3b511302b",
+          "claim": "The Related Attack Patterns table lists CAPEC-588 under CWE-79 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-591",
+      "type": "capec",
+      "label": "Reflected XSS",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/79.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.868874+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6f47a9f0c46442a2320325d929ffc3856986216bbf517399d77fcde3b511302b",
+          "claim": "The Related Attack Patterns table lists CAPEC-591 under CWE-79 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-592",
+      "type": "capec",
+      "label": "Stored XSS",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/79.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.868874+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6f47a9f0c46442a2320325d929ffc3856986216bbf517399d77fcde3b511302b",
+          "claim": "The Related Attack Patterns table lists CAPEC-592 under CWE-79 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-63",
+      "type": "capec",
+      "label": "Cross-Site Scripting (XSS)",
+      "aliases": [],
+      "summary": "MITRE describes an attack in which malicious script is placed in content delivered to a browser, seeking execution with the user's privileges. This is a pattern definition, not evidence that an attack occurred.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/79.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.868874+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6f47a9f0c46442a2320325d929ffc3856986216bbf517399d77fcde3b511302b",
+          "claim": "The Related Attack Patterns table lists CAPEC-63 under CWE-79 and explicitly supplies its displayed pattern name."
+        },
+        {
+          "source_url": "https://capec.mitre.org/data/definitions/63.html",
+          "publisher": "MITRE",
+          "published_at": null,
+          "updated_at": "2022-09-29",
+          "event_at": null,
+          "observed_at": "2026-10-25T23:33:57.007529+00:00",
+          "source_version": "CAPEC 3.9",
+          "source_sha256": "6c9b41d71885fed964c3040c4ce386b54dc02ea37e418eadbe02e2e5819e0d56",
+          "claim": "The CAPEC 3.9 page identifies CAPEC-63 as Cross-Site Scripting (XSS) and its Description supports the pattern-definition summary. updated_at is the most recent listed content modification, not an incident or retrieval date."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-85",
+      "type": "capec",
+      "label": "AJAX Footprinting",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/79.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.868874+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6f47a9f0c46442a2320325d929ffc3856986216bbf517399d77fcde3b511302b",
+          "claim": "The Related Attack Patterns table lists CAPEC-85 under CWE-79 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-108",
+      "type": "capec",
+      "label": "Command Line Execution through SQL Injection",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/89.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2025-12-11",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.730180+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "3cf28df2d89ea0d81a009fd7b4a0ba197495c560d001fbed8640b9adb66bc5e9",
+          "claim": "The Related Attack Patterns table lists CAPEC-108 under CWE-89 and explicitly supplies its displayed pattern name."
+        },
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.384527+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "2bf804fe43b5d80c46e7bab8ff383939c3cc30880cf51ef8a200e24c18974440",
+          "claim": "The Related Attack Patterns table lists CAPEC-108 under CWE-78 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-109",
+      "type": "capec",
+      "label": "Object Relational Mapping Injection",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/89.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2025-12-11",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.730180+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "3cf28df2d89ea0d81a009fd7b4a0ba197495c560d001fbed8640b9adb66bc5e9",
+          "claim": "The Related Attack Patterns table lists CAPEC-109 under CWE-89 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-110",
+      "type": "capec",
+      "label": "SQL Injection through SOAP Parameter Tampering",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/89.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2025-12-11",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.730180+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "3cf28df2d89ea0d81a009fd7b4a0ba197495c560d001fbed8640b9adb66bc5e9",
+          "claim": "The Related Attack Patterns table lists CAPEC-110 under CWE-89 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-470",
+      "type": "capec",
+      "label": "Expanding Control over the Operating System from the Database",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/89.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2025-12-11",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.730180+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "3cf28df2d89ea0d81a009fd7b4a0ba197495c560d001fbed8640b9adb66bc5e9",
+          "claim": "The Related Attack Patterns table lists CAPEC-470 under CWE-89 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-66",
+      "type": "capec",
+      "label": "SQL Injection",
+      "aliases": [],
+      "summary": "MITRE describes manipulation of user input used to construct SQL statements, so the resulting database command performs actions the application did not intend. This is a pattern definition, not a report of exploitation.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/89.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2025-12-11",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.730180+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "3cf28df2d89ea0d81a009fd7b4a0ba197495c560d001fbed8640b9adb66bc5e9",
+          "claim": "The Related Attack Patterns table lists CAPEC-66 under CWE-89 and explicitly supplies its displayed pattern name."
+        },
+        {
+          "source_url": "https://capec.mitre.org/data/definitions/66.html",
+          "publisher": "MITRE",
+          "published_at": null,
+          "updated_at": "2022-02-22",
+          "event_at": null,
+          "observed_at": "2026-10-25T23:33:57.009594+00:00",
+          "source_version": "CAPEC 3.9",
+          "source_sha256": "2afcedacf060247d0fa7b512fc8740e854cc4e421494bfa6ccdcdaa10390f6f1",
+          "claim": "The CAPEC 3.9 page identifies CAPEC-66 as SQL Injection and its Description supports the pattern-definition summary. updated_at is the most recent listed content modification, not an incident or retrieval date."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-7",
+      "type": "capec",
+      "label": "Blind SQL Injection",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/89.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2025-12-11",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.730180+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "3cf28df2d89ea0d81a009fd7b4a0ba197495c560d001fbed8640b9adb66bc5e9",
+          "claim": "The Related Attack Patterns table lists CAPEC-7 under CWE-89 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-126",
+      "type": "capec",
+      "label": "Path Traversal",
+      "aliases": [],
+      "summary": "MITRE describes manipulation of pathname input to reach files or directories outside the area intended by the application. The pattern concerns insufficient path validation; it does not establish exposure of any particular system.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/22.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.735286+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "086e50c451eafbbdfe20809de41061f6e3eb9a7474ddcc1a8dff2e6ce4be4743",
+          "claim": "The Related Attack Patterns table lists CAPEC-126 under CWE-22 and explicitly supplies its displayed pattern name."
+        },
+        {
+          "source_url": "https://capec.mitre.org/data/definitions/126.html",
+          "publisher": "MITRE",
+          "published_at": null,
+          "updated_at": "2022-09-29",
+          "event_at": null,
+          "observed_at": "2026-10-25T23:33:57.009925+00:00",
+          "source_version": "CAPEC 3.9",
+          "source_sha256": "26ccf9e91f5f6ab46ade88f975f916b1c32bd6b21777b1fcde15856bb7897091",
+          "claim": "The CAPEC 3.9 page identifies CAPEC-126 as Path Traversal and its Description supports the pattern-definition summary. updated_at is the most recent listed content modification, not an incident or retrieval date."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-64",
+      "type": "capec",
+      "label": "Using Slashes and URL Encoding Combined to Bypass Validation Logic",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/22.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.735286+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "086e50c451eafbbdfe20809de41061f6e3eb9a7474ddcc1a8dff2e6ce4be4743",
+          "claim": "The Related Attack Patterns table lists CAPEC-64 under CWE-22 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-76",
+      "type": "capec",
+      "label": "Manipulating Web Input to File System Calls",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/22.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.735286+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "086e50c451eafbbdfe20809de41061f6e3eb9a7474ddcc1a8dff2e6ce4be4743",
+          "claim": "The Related Attack Patterns table lists CAPEC-76 under CWE-22 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-78",
+      "type": "capec",
+      "label": "Using Escaped Slashes in Alternate Encoding",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/22.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.735286+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "086e50c451eafbbdfe20809de41061f6e3eb9a7474ddcc1a8dff2e6ce4be4743",
+          "claim": "The Related Attack Patterns table lists CAPEC-78 under CWE-22 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-79",
+      "type": "capec",
+      "label": "Using Slashes in Alternate Encoding",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/22.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.735286+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "086e50c451eafbbdfe20809de41061f6e3eb9a7474ddcc1a8dff2e6ce4be4743",
+          "claim": "The Related Attack Patterns table lists CAPEC-79 under CWE-22 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-15",
+      "type": "capec",
+      "label": "Command Delimiters",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.384527+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "2bf804fe43b5d80c46e7bab8ff383939c3cc30880cf51ef8a200e24c18974440",
+          "claim": "The Related Attack Patterns table lists CAPEC-15 under CWE-78 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-43",
+      "type": "capec",
+      "label": "Exploiting Multiple Input Interpretation Layers",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.384527+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "2bf804fe43b5d80c46e7bab8ff383939c3cc30880cf51ef8a200e24c18974440",
+          "claim": "The Related Attack Patterns table lists CAPEC-43 under CWE-78 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-6",
+      "type": "capec",
+      "label": "Argument Injection",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.384527+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "2bf804fe43b5d80c46e7bab8ff383939c3cc30880cf51ef8a200e24c18974440",
+          "claim": "The Related Attack Patterns table lists CAPEC-6 under CWE-78 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-88",
+      "type": "capec",
+      "label": "OS Command Injection",
+      "aliases": [],
+      "summary": "MITRE describes injection of operating-system commands through untrusted input used by an application to build command strings. The described consequences can include command execution and greater privileges; they are pattern capabilities, not observed activity.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.384527+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "2bf804fe43b5d80c46e7bab8ff383939c3cc30880cf51ef8a200e24c18974440",
+          "claim": "The Related Attack Patterns table lists CAPEC-88 under CWE-78 and explicitly supplies its displayed pattern name."
+        },
+        {
+          "source_url": "https://capec.mitre.org/data/definitions/88.html",
+          "publisher": "MITRE",
+          "published_at": null,
+          "updated_at": "2021-06-24",
+          "event_at": null,
+          "observed_at": "2026-10-25T23:34:00.367821+00:00",
+          "source_version": "CAPEC 3.9",
+          "source_sha256": "7bef9858c798692e47dfbfc7d46ddf93b6df6961b5dade0f842ada2e5d04f23e",
+          "claim": "The CAPEC 3.9 page identifies CAPEC-88 as OS Command Injection and its Description supports the pattern-definition summary. updated_at is the most recent listed content modification, not an incident or retrieval date."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-114",
+      "type": "capec",
+      "label": "Authentication Abuse",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/287.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.293567+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6973390e812f5ad50f02d9c7f8ac7eaa57c01804c16e6f631e058390c4e2415b",
+          "claim": "The Related Attack Patterns table lists CAPEC-114 under CWE-287 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-115",
+      "type": "capec",
+      "label": "Authentication Bypass",
+      "aliases": [],
+      "summary": "MITRE describes obtaining the privileges of an authorized user by circumventing an authentication mechanism, permitting access to protected data without the required authentication. This definition does not establish a bypass in any particular product.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/287.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.293567+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6973390e812f5ad50f02d9c7f8ac7eaa57c01804c16e6f631e058390c4e2415b",
+          "claim": "The Related Attack Patterns table lists CAPEC-115 under CWE-287 and explicitly supplies its displayed pattern name."
+        },
+        {
+          "source_url": "https://capec.mitre.org/data/definitions/115.html",
+          "publisher": "MITRE",
+          "published_at": null,
+          "updated_at": "2022-02-22",
+          "event_at": null,
+          "observed_at": "2026-10-25T23:34:00.362833+00:00",
+          "source_version": "CAPEC 3.9",
+          "source_sha256": "ed8071dd7647b4a1b29cec3a963346be3b3820182c6a2fcffb7eb31345f66365",
+          "claim": "The CAPEC 3.9 page identifies CAPEC-115 as Authentication Bypass and its Description supports the pattern-definition summary. updated_at is the most recent listed content modification, not an incident or retrieval date."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-151",
+      "type": "capec",
+      "label": "Identity Spoofing",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/287.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.293567+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6973390e812f5ad50f02d9c7f8ac7eaa57c01804c16e6f631e058390c4e2415b",
+          "claim": "The Related Attack Patterns table lists CAPEC-151 under CWE-287 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-194",
+      "type": "capec",
+      "label": "Fake the Source of Data",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/287.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.293567+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6973390e812f5ad50f02d9c7f8ac7eaa57c01804c16e6f631e058390c4e2415b",
+          "claim": "The Related Attack Patterns table lists CAPEC-194 under CWE-287 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-22",
+      "type": "capec",
+      "label": "Exploiting Trust in Client",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/287.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.293567+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6973390e812f5ad50f02d9c7f8ac7eaa57c01804c16e6f631e058390c4e2415b",
+          "claim": "The Related Attack Patterns table lists CAPEC-22 under CWE-287 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-57",
+      "type": "capec",
+      "label": "Utilizing REST's Trust in the System Resource to Obtain Sensitive Data",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/287.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.293567+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6973390e812f5ad50f02d9c7f8ac7eaa57c01804c16e6f631e058390c4e2415b",
+          "claim": "The Related Attack Patterns table lists CAPEC-57 under CWE-287 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-593",
+      "type": "capec",
+      "label": "Session Hijacking",
+      "aliases": [],
+      "summary": "MITRE describes exploiting an application's session-based authentication by taking or manipulating an active session to gain unauthorized application access. This is a pattern definition, not evidence of a stolen session.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/287.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.293567+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6973390e812f5ad50f02d9c7f8ac7eaa57c01804c16e6f631e058390c4e2415b",
+          "claim": "The Related Attack Patterns table lists CAPEC-593 under CWE-287 and explicitly supplies its displayed pattern name."
+        },
+        {
+          "source_url": "https://capec.mitre.org/data/definitions/593.html",
+          "publisher": "MITRE",
+          "published_at": null,
+          "updated_at": "2022-09-29",
+          "event_at": null,
+          "observed_at": "2026-10-25T23:34:00.369837+00:00",
+          "source_version": "CAPEC 3.9",
+          "source_sha256": "032d507fba8e4a4b9dd280dc49171230a477362715865168ef54e0463a050e7b",
+          "claim": "The CAPEC 3.9 page identifies CAPEC-593 as Session Hijacking and its Description supports the pattern-definition summary. updated_at is the most recent listed content modification, not an incident or retrieval date."
+        }
+      ]
+    },
+    {
+      "id": "CAPEC-633",
+      "type": "capec",
+      "label": "Token Impersonation",
+      "aliases": [],
+      "summary": "A related attack pattern named on a captured CWE page. Its CAPEC definition was not captured; this is taxonomy context only.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/287.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.293567+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6973390e812f5ad50f02d9c7f8ac7eaa57c01804c16e6f631e058390c4e2415b",
+          "claim": "The Related Attack Patterns table lists CAPEC-633 under CWE-287 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "ACTOR-storm-0940",
+      "type": "actor",
+      "label": "Storm-0940",
+      "aliases": [],
+      "summary": "Microsoft describes Storm-0940 as China-state aligned and attributes the reported ConnectWise-linked cloud application abuse to it. This is publisher attribution, not independently established actor identity.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/",
+          "publisher": "Microsoft Security Blog",
+          "published_at": "2026-10-21T18:23:55+00:00",
+          "updated_at": "2026-10-23T19:16:23+00:00",
+          "event_at": null,
+          "observed_at": "2026-10-25T17:49:09.094155+00:00",
+          "source_version": null,
+          "source_sha256": "ed6ecfc7ca7805eb219e496ae0cd68dd07fc684df0bc615b96a30e35ca57640a",
+          "claim": "Microsoft names Storm-0940 and describes its alignment and reported application-abuse activity."
+        }
+      ]
+    },
+    {
+      "id": "CAMPAIGN-connectwise-application-abuse-2026",
+      "type": "campaign",
+      "label": "ConnectWise-linked application abuse \u00b7 2026",
+      "aliases": [],
+      "summary": "A descriptive grouping of activity in the captured Microsoft account, not an authenticated campaign name. Microsoft reports compromised application credentials and follow-on activity in some customer environments; authentication alone does not establish data theft.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/",
+          "publisher": "Microsoft Security Blog",
+          "published_at": "2026-10-21T18:23:55+00:00",
+          "updated_at": "2026-10-23T19:16:23+00:00",
+          "event_at": null,
+          "observed_at": "2026-10-25T17:49:09.094155+00:00",
+          "source_version": null,
+          "source_sha256": "ed6ecfc7ca7805eb219e496ae0cd68dd07fc684df0bc615b96a30e35ca57640a",
+          "claim": "Microsoft reports ConnectWise-linked application credential abuse and qualified downstream activity; affected application presence does not establish exfiltration."
+        }
+      ]
+    },
+    {
+      "id": "PRODUCT-connectwise-cloud-backup",
+      "type": "product",
+      "label": "ConnectWise Cloud Backup",
+      "aliases": [],
+      "summary": "Product context identified in Microsoft\u2019s captured account. Application compromise and customer exposure are separate questions; no CVE or installed-version assessment is inferred.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/",
+          "publisher": "Microsoft Security Blog",
+          "published_at": "2026-10-21T18:23:55+00:00",
+          "updated_at": "2026-10-23T19:16:23+00:00",
+          "event_at": null,
+          "observed_at": "2026-10-25T17:49:09.094155+00:00",
+          "source_version": null,
+          "source_sha256": "ed6ecfc7ca7805eb219e496ae0cd68dd07fc684df0bc615b96a30e35ca57640a",
+          "claim": "The article identifies ConnectWise Cloud Backup and discusses compromised cloud application access."
+        }
+      ]
+    },
+    {
+      "id": "PRODUCT-microsoft-365-customer-context",
+      "type": "product",
+      "label": "Microsoft 365 customer environments",
+      "aliases": [],
+      "summary": "Reported customer environments accessed through previously authorized applications. Microsoft states that the activity did not result from compromise or a vulnerability in Microsoft corporate systems, products or services.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/",
+          "publisher": "Microsoft Security Blog",
+          "published_at": "2026-10-21T18:23:55+00:00",
+          "updated_at": "2026-10-23T19:16:23+00:00",
+          "event_at": null,
+          "observed_at": "2026-10-25T17:49:09.094155+00:00",
+          "source_version": null,
+          "source_sha256": "ed6ecfc7ca7805eb219e496ae0cd68dd07fc684df0bc615b96a30e35ca57640a",
+          "claim": "Microsoft describes app-based access to customer environments and explicitly limits claims about its own corporate systems and products."
+        }
+      ]
+    },
+    {
+      "id": "MITIGATION-review-app-access",
+      "type": "mitigation",
+      "label": "Review application access and preserve evidence",
+      "aliases": [],
+      "summary": "Microsoft recommends reviewing service-principal and audit activity. Credential rotation or removal of unauthorized access is conditional on confirmed suspicious activity and appropriately authorized response.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/",
+          "publisher": "Microsoft Security Blog",
+          "published_at": "2026-10-21T18:23:55+00:00",
+          "updated_at": "2026-10-23T19:16:23+00:00",
+          "event_at": null,
+          "observed_at": "2026-10-25T17:49:09.094155+00:00",
+          "source_version": null,
+          "source_sha256": "ed6ecfc7ca7805eb219e496ae0cd68dd07fc684df0bc615b96a30e35ca57640a",
+          "claim": "Microsoft recommends evidence preservation and investigation of credential, consent and privilege changes, with conditional remediation."
+        }
+      ]
+    },
+    {
+      "id": "MITIGATION-least-privilege-app-consent",
+      "type": "mitigation",
+      "label": "Least privilege for application consent",
+      "aliases": [],
+      "summary": "Microsoft recommends least privilege for multi-tenant application permissions and consent grants, and monitoring credential additions and privileged app-only activity. Applicability requires an authorized environment review.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/",
+          "publisher": "Microsoft Security Blog",
+          "published_at": "2026-10-21T18:23:55+00:00",
+          "updated_at": "2026-10-23T19:16:23+00:00",
+          "event_at": null,
+          "observed_at": "2026-10-25T17:49:09.094155+00:00",
+          "source_version": null,
+          "source_sha256": "ed6ecfc7ca7805eb219e496ae0cd68dd07fc684df0bc615b96a30e35ca57640a",
+          "claim": "Microsoft recommends least privilege for application permissions and consent grants and monitoring suspicious privileged activity."
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "id": "REL-cwe-79-capec-209",
+      "source_id": "CWE-79",
+      "target_id": "CAPEC-209",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-79 lists CAPEC-209 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/79.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.868874+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6f47a9f0c46442a2320325d929ffc3856986216bbf517399d77fcde3b511302b",
+          "claim": "The Related Attack Patterns table lists CAPEC-209 under CWE-79 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-79-capec-588",
+      "source_id": "CWE-79",
+      "target_id": "CAPEC-588",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-79 lists CAPEC-588 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/79.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.868874+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6f47a9f0c46442a2320325d929ffc3856986216bbf517399d77fcde3b511302b",
+          "claim": "The Related Attack Patterns table lists CAPEC-588 under CWE-79 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-79-capec-591",
+      "source_id": "CWE-79",
+      "target_id": "CAPEC-591",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-79 lists CAPEC-591 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/79.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.868874+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6f47a9f0c46442a2320325d929ffc3856986216bbf517399d77fcde3b511302b",
+          "claim": "The Related Attack Patterns table lists CAPEC-591 under CWE-79 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-79-capec-592",
+      "source_id": "CWE-79",
+      "target_id": "CAPEC-592",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-79 lists CAPEC-592 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/79.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.868874+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6f47a9f0c46442a2320325d929ffc3856986216bbf517399d77fcde3b511302b",
+          "claim": "The Related Attack Patterns table lists CAPEC-592 under CWE-79 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-79-capec-63",
+      "source_id": "CWE-79",
+      "target_id": "CAPEC-63",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-79 lists CAPEC-63 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/79.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.868874+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6f47a9f0c46442a2320325d929ffc3856986216bbf517399d77fcde3b511302b",
+          "claim": "The Related Attack Patterns table lists CAPEC-63 under CWE-79 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-79-capec-85",
+      "source_id": "CWE-79",
+      "target_id": "CAPEC-85",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-79 lists CAPEC-85 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/79.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.868874+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6f47a9f0c46442a2320325d929ffc3856986216bbf517399d77fcde3b511302b",
+          "claim": "The Related Attack Patterns table lists CAPEC-85 under CWE-79 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-89-capec-108",
+      "source_id": "CWE-89",
+      "target_id": "CAPEC-108",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-89 lists CAPEC-108 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/89.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2025-12-11",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.730180+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "3cf28df2d89ea0d81a009fd7b4a0ba197495c560d001fbed8640b9adb66bc5e9",
+          "claim": "The Related Attack Patterns table lists CAPEC-108 under CWE-89 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-89-capec-109",
+      "source_id": "CWE-89",
+      "target_id": "CAPEC-109",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-89 lists CAPEC-109 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/89.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2025-12-11",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.730180+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "3cf28df2d89ea0d81a009fd7b4a0ba197495c560d001fbed8640b9adb66bc5e9",
+          "claim": "The Related Attack Patterns table lists CAPEC-109 under CWE-89 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-89-capec-110",
+      "source_id": "CWE-89",
+      "target_id": "CAPEC-110",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-89 lists CAPEC-110 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/89.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2025-12-11",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.730180+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "3cf28df2d89ea0d81a009fd7b4a0ba197495c560d001fbed8640b9adb66bc5e9",
+          "claim": "The Related Attack Patterns table lists CAPEC-110 under CWE-89 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-89-capec-470",
+      "source_id": "CWE-89",
+      "target_id": "CAPEC-470",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-89 lists CAPEC-470 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/89.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2025-12-11",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.730180+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "3cf28df2d89ea0d81a009fd7b4a0ba197495c560d001fbed8640b9adb66bc5e9",
+          "claim": "The Related Attack Patterns table lists CAPEC-470 under CWE-89 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-89-capec-66",
+      "source_id": "CWE-89",
+      "target_id": "CAPEC-66",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-89 lists CAPEC-66 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/89.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2025-12-11",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.730180+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "3cf28df2d89ea0d81a009fd7b4a0ba197495c560d001fbed8640b9adb66bc5e9",
+          "claim": "The Related Attack Patterns table lists CAPEC-66 under CWE-89 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-89-capec-7",
+      "source_id": "CWE-89",
+      "target_id": "CAPEC-7",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-89 lists CAPEC-7 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/89.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2025-12-11",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.730180+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "3cf28df2d89ea0d81a009fd7b4a0ba197495c560d001fbed8640b9adb66bc5e9",
+          "claim": "The Related Attack Patterns table lists CAPEC-7 under CWE-89 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-22-capec-126",
+      "source_id": "CWE-22",
+      "target_id": "CAPEC-126",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-22 lists CAPEC-126 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/22.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.735286+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "086e50c451eafbbdfe20809de41061f6e3eb9a7474ddcc1a8dff2e6ce4be4743",
+          "claim": "The Related Attack Patterns table lists CAPEC-126 under CWE-22 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-22-capec-64",
+      "source_id": "CWE-22",
+      "target_id": "CAPEC-64",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-22 lists CAPEC-64 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/22.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.735286+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "086e50c451eafbbdfe20809de41061f6e3eb9a7474ddcc1a8dff2e6ce4be4743",
+          "claim": "The Related Attack Patterns table lists CAPEC-64 under CWE-22 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-22-capec-76",
+      "source_id": "CWE-22",
+      "target_id": "CAPEC-76",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-22 lists CAPEC-76 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/22.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.735286+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "086e50c451eafbbdfe20809de41061f6e3eb9a7474ddcc1a8dff2e6ce4be4743",
+          "claim": "The Related Attack Patterns table lists CAPEC-76 under CWE-22 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-22-capec-78",
+      "source_id": "CWE-22",
+      "target_id": "CAPEC-78",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-22 lists CAPEC-78 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/22.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.735286+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "086e50c451eafbbdfe20809de41061f6e3eb9a7474ddcc1a8dff2e6ce4be4743",
+          "claim": "The Related Attack Patterns table lists CAPEC-78 under CWE-22 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-22-capec-79",
+      "source_id": "CWE-22",
+      "target_id": "CAPEC-79",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-22 lists CAPEC-79 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/22.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:44.735286+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "086e50c451eafbbdfe20809de41061f6e3eb9a7474ddcc1a8dff2e6ce4be4743",
+          "claim": "The Related Attack Patterns table lists CAPEC-79 under CWE-22 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-78-capec-108",
+      "source_id": "CWE-78",
+      "target_id": "CAPEC-108",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-78 lists CAPEC-108 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.384527+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "2bf804fe43b5d80c46e7bab8ff383939c3cc30880cf51ef8a200e24c18974440",
+          "claim": "The Related Attack Patterns table lists CAPEC-108 under CWE-78 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-78-capec-15",
+      "source_id": "CWE-78",
+      "target_id": "CAPEC-15",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-78 lists CAPEC-15 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.384527+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "2bf804fe43b5d80c46e7bab8ff383939c3cc30880cf51ef8a200e24c18974440",
+          "claim": "The Related Attack Patterns table lists CAPEC-15 under CWE-78 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-78-capec-43",
+      "source_id": "CWE-78",
+      "target_id": "CAPEC-43",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-78 lists CAPEC-43 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.384527+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "2bf804fe43b5d80c46e7bab8ff383939c3cc30880cf51ef8a200e24c18974440",
+          "claim": "The Related Attack Patterns table lists CAPEC-43 under CWE-78 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-78-capec-6",
+      "source_id": "CWE-78",
+      "target_id": "CAPEC-6",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-78 lists CAPEC-6 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.384527+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "2bf804fe43b5d80c46e7bab8ff383939c3cc30880cf51ef8a200e24c18974440",
+          "claim": "The Related Attack Patterns table lists CAPEC-6 under CWE-78 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-78-capec-88",
+      "source_id": "CWE-78",
+      "target_id": "CAPEC-88",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-78 lists CAPEC-88 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.384527+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "2bf804fe43b5d80c46e7bab8ff383939c3cc30880cf51ef8a200e24c18974440",
+          "claim": "The Related Attack Patterns table lists CAPEC-88 under CWE-78 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-287-capec-114",
+      "source_id": "CWE-287",
+      "target_id": "CAPEC-114",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-287 lists CAPEC-114 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/287.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.293567+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6973390e812f5ad50f02d9c7f8ac7eaa57c01804c16e6f631e058390c4e2415b",
+          "claim": "The Related Attack Patterns table lists CAPEC-114 under CWE-287 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-287-capec-115",
+      "source_id": "CWE-287",
+      "target_id": "CAPEC-115",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-287 lists CAPEC-115 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/287.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.293567+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6973390e812f5ad50f02d9c7f8ac7eaa57c01804c16e6f631e058390c4e2415b",
+          "claim": "The Related Attack Patterns table lists CAPEC-115 under CWE-287 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-287-capec-151",
+      "source_id": "CWE-287",
+      "target_id": "CAPEC-151",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-287 lists CAPEC-151 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/287.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.293567+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6973390e812f5ad50f02d9c7f8ac7eaa57c01804c16e6f631e058390c4e2415b",
+          "claim": "The Related Attack Patterns table lists CAPEC-151 under CWE-287 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-287-capec-194",
+      "source_id": "CWE-287",
+      "target_id": "CAPEC-194",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-287 lists CAPEC-194 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/287.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.293567+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6973390e812f5ad50f02d9c7f8ac7eaa57c01804c16e6f631e058390c4e2415b",
+          "claim": "The Related Attack Patterns table lists CAPEC-194 under CWE-287 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-287-capec-22",
+      "source_id": "CWE-287",
+      "target_id": "CAPEC-22",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-287 lists CAPEC-22 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/287.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.293567+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6973390e812f5ad50f02d9c7f8ac7eaa57c01804c16e6f631e058390c4e2415b",
+          "claim": "The Related Attack Patterns table lists CAPEC-22 under CWE-287 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-287-capec-57",
+      "source_id": "CWE-287",
+      "target_id": "CAPEC-57",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-287 lists CAPEC-57 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/287.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.293567+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6973390e812f5ad50f02d9c7f8ac7eaa57c01804c16e6f631e058390c4e2415b",
+          "claim": "The Related Attack Patterns table lists CAPEC-57 under CWE-287 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-287-capec-593",
+      "source_id": "CWE-287",
+      "target_id": "CAPEC-593",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-287 lists CAPEC-593 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/287.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.293567+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6973390e812f5ad50f02d9c7f8ac7eaa57c01804c16e6f631e058390c4e2415b",
+          "claim": "The Related Attack Patterns table lists CAPEC-593 under CWE-287 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-cwe-287-capec-633",
+      "source_id": "CWE-287",
+      "target_id": "CAPEC-633",
+      "relation": "taxonomy_mapping",
+      "basis": "catalogue",
+      "summary": "CWE-287 lists CAPEC-633 as a related attack pattern. This catalogue mapping is not evidence of an observed attack.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://cwe.mitre.org/data/definitions/287.html",
+          "publisher": "The MITRE Corporation",
+          "published_at": null,
+          "updated_at": "2026-04-30",
+          "event_at": null,
+          "observed_at": "2026-10-25T22:34:48.293567+00:00",
+          "source_version": "CWE 4.20",
+          "source_sha256": "6973390e812f5ad50f02d9c7f8ac7eaa57c01804c16e6f631e058390c4e2415b",
+          "claim": "The Related Attack Patterns table lists CAPEC-633 under CWE-287 and explicitly supplies its displayed pattern name."
+        }
+      ]
+    },
+    {
+      "id": "REL-connectwise-2026-storm-0940",
+      "source_id": "CAMPAIGN-connectwise-application-abuse-2026",
+      "target_id": "ACTOR-storm-0940",
+      "relation": "attributed_to",
+      "basis": "publisher_claim",
+      "summary": "Microsoft attributes the reported activity to Storm-0940; this is not independent identity verification.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/",
+          "publisher": "Microsoft Security Blog",
+          "published_at": "2026-10-21T18:23:55+00:00",
+          "updated_at": "2026-10-23T19:16:23+00:00",
+          "event_at": null,
+          "observed_at": "2026-10-25T17:49:09.094155+00:00",
+          "source_version": null,
+          "source_sha256": "ed6ecfc7ca7805eb219e496ae0cd68dd07fc684df0bc615b96a30e35ca57640a",
+          "claim": "Microsoft names Storm-0940 in its account of the ConnectWise-linked activity."
+        }
+      ]
+    },
+    {
+      "id": "REL-connectwise-2026-cloud-backup",
+      "source_id": "CAMPAIGN-connectwise-application-abuse-2026",
+      "target_id": "PRODUCT-connectwise-cloud-backup",
+      "relation": "affects_product",
+      "basis": "publisher_claim",
+      "summary": "Reported ConnectWise Cloud Backup application-compromise context; no universal customer compromise or vulnerability is established.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/",
+          "publisher": "Microsoft Security Blog",
+          "published_at": "2026-10-21T18:23:55+00:00",
+          "updated_at": "2026-10-23T19:16:23+00:00",
+          "event_at": null,
+          "observed_at": "2026-10-25T17:49:09.094155+00:00",
+          "source_version": null,
+          "source_sha256": "ed6ecfc7ca7805eb219e496ae0cd68dd07fc684df0bc615b96a30e35ca57640a",
+          "claim": "Microsoft identifies Cloud Backup in the reported application-compromise context."
+        }
+      ]
+    },
+    {
+      "id": "REL-connectwise-2026-m365-context",
+      "source_id": "CAMPAIGN-connectwise-application-abuse-2026",
+      "target_id": "PRODUCT-microsoft-365-customer-context",
+      "relation": "affects_product",
+      "basis": "publisher_claim",
+      "summary": "Reported customer application-access context, not an asserted vulnerability or compromise of Microsoft corporate products.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/",
+          "publisher": "Microsoft Security Blog",
+          "published_at": "2026-10-21T18:23:55+00:00",
+          "updated_at": "2026-10-23T19:16:23+00:00",
+          "event_at": null,
+          "observed_at": "2026-10-25T17:49:09.094155+00:00",
+          "source_version": null,
+          "source_sha256": "ed6ecfc7ca7805eb219e496ae0cd68dd07fc684df0bc615b96a30e35ca57640a",
+          "claim": "Microsoft describes app-based customer-environment access and limits conclusions about affected customers and its corporate systems."
+        }
+      ]
+    },
+    {
+      "id": "REL-connectwise-2026-review-app-access",
+      "source_id": "CAMPAIGN-connectwise-application-abuse-2026",
+      "target_id": "MITIGATION-review-app-access",
+      "relation": "recommended_mitigation",
+      "basis": "publisher_claim",
+      "summary": "Source-recommended investigation, evidence preservation and conditional authorized response for the reported activity.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/",
+          "publisher": "Microsoft Security Blog",
+          "published_at": "2026-10-21T18:23:55+00:00",
+          "updated_at": "2026-10-23T19:16:23+00:00",
+          "event_at": null,
+          "observed_at": "2026-10-25T17:49:09.094155+00:00",
+          "source_version": null,
+          "source_sha256": "ed6ecfc7ca7805eb219e496ae0cd68dd07fc684df0bc615b96a30e35ca57640a",
+          "claim": "Microsoft recommends reviewing application access and conditional remediation supported by confirmed suspicious activity."
+        }
+      ]
+    },
+    {
+      "id": "REL-connectwise-2026-least-privilege",
+      "source_id": "CAMPAIGN-connectwise-application-abuse-2026",
+      "target_id": "MITIGATION-least-privilege-app-consent",
+      "relation": "recommended_mitigation",
+      "basis": "publisher_claim",
+      "summary": "Publisher-recommended least privilege and monitoring for the reported multi-tenant application-abuse context.",
+      "confidence": "source_stated",
+      "evidence": [
+        {
+          "source_url": "https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/",
+          "publisher": "Microsoft Security Blog",
+          "published_at": "2026-10-21T18:23:55+00:00",
+          "updated_at": "2026-10-23T19:16:23+00:00",
+          "event_at": null,
+          "observed_at": "2026-10-25T17:49:09.094155+00:00",
+          "source_version": null,
+          "source_sha256": "ed6ecfc7ca7805eb219e496ae0cd68dd07fc684df0bc615b96a30e35ca57640a",
+          "claim": "Microsoft recommends least privilege for multi-tenant application consent and permission grants."
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "A selected compilation of six captured CWE pages, 29 named CAPEC patterns and 30 direct taxonomy mappings, plus one publisher-attributed actor/campaign context. It is not a full catalogue or incident census.",
+    "Official taxonomy associations are not observed exploitation, actor participation, per-CVE applicability or evidence of an installed environment. CNA-provided weakness membership remains separate.",
+    "CAPEC names are supplied by the CWE Related Attack Patterns tables. Six selected CAPEC definition pages were separately captured and qualified as CAPEC 3.9; the other 23 named patterns have no qualified definition page in this compilation.",
+    "CWE-287 lists ten patterns; the first eight in source order are retained. CAPEC-650 and CAPEC-94 are omitted by that declared subset limit.",
+    "The captured CWE-416 page lacks a Related Attack Patterns section. Its definition is included; no direct mapping is asserted and no global absence is claimed.",
+    "CWE evidence versions and modification dates describe the captured CWE pages, not CAPEC releases, incident dates or HTTP capture time.",
+    "The Microsoft actor, product and mitigation context is attributed to the captured article. It is not independent identity verification, incident forensics or a current publisher-state observation.",
+    "The campaign label is a local descriptive grouping. Empty aliases do not establish global absence. Mitigation statements retain confirmed-suspicion and authorized-response conditions.",
+    "Publication, event, source modification, capture and compilation/review clocks remain distinct. Unknown source dates remain null; current retrospective context is not historical as-of proof.",
+    "The local catalog version identifies this compilation. It grants no account, device, runtime, remediation or publication permission."
+  ]
+}

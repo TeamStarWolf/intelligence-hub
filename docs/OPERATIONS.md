@@ -9,7 +9,7 @@ and assistive-technology behavior still require owner review.
 Use **Intelligence explorer** to search; all entered words must match. Filter by
 Kind, Source, Exploitation or CVE guidance, then navigate calendar years/months or
 a date preset. Presets use the snapshot window's end, not a promise that its data
-is current to the device's clock. The decade boundary years and months can be
+is current to the device's clock. The selected archive's boundary years and months can be
 partial.
 
 Ten sort choices cover newest/oldest date, title, source, CVE and CVSS direction.
@@ -27,7 +27,7 @@ are retained during background snapshot updates.
 
 The configured inputs are **61 RSS/Atom publisher feeds**, CISA KEV and **63 curated
 primary publications**. A configured feed is not necessarily healthy. Recent RSS,
-bounded retained items and manual curation do not form a complete decade archive.
+bounded retained items and manual curation do not form a complete twenty-year archive.
 See [feed evidence](FEEDS.md) and [history coverage](SOURCES.md).
 
 The count is feed definitions, not unique publishers. **Cisco Talos Threat Advisory
@@ -365,3 +365,67 @@ privately. Distinguish source review, collection, packaging, deployment and brow
 behavior. A static scan proves neither vulnerability-free software nor exhaustive
 or accurate intelligence; a successful deployment does not prove every device
 was exercised.
+
+## Reporting desk and prior-source revisions
+
+Schema 5 carries reviewed local `reports/reporting.json`, `reports/catalog.json`
+and `config/intelligence-context.json` projections, with whole-file digests.
+Missing, unknown, malformed or oversized input refuses the candidate; no remote
+resume metadata becomes local configuration. The public report files remain
+GitHub-linked outside the unchanged five-file Pages artifact.
+
+The reporting policy has daily slots at **06:00, 14:00 and 22:00 America/Chicago**,
+covering the prior 24 elapsed hours on weekdays and 48 on weekends. It also
+defines weekly, end-weekend, every-two-weeks, monthly, quarterly and latest-six-
+completed-month editions. See the [reporting protocol](../reports/REPORTING.md)
+for calendar boundaries, corrections and evidence coverage. Closed calendar
+periods do not imply complete evidence. Future planned editions contain no
+future facts. Legacy reports retain their actual date precision and are labeled
+not reassessed, without invented midnight clocks.
+
+The desk shows a next **scheduled** report/revision-review cycle only when the
+recorded configuration says configured. It computes Chicago slots using the
+platform time-zone database, including daylight-saving changes; planned,
+paused or unavailable time-zone calculation is displayed explicitly. The
+configuration's observation time is not live scheduler or delivery proof.
+Browser polling and the separate requested ten-minute feed schedule remain
+distinct from reporting slots and source freshness.
+
+New intelligence-context URLs use the same conservative raw syntax in producer
+and client: lowercase ASCII DNS hosts with an alphabetic final label and no
+`xn--` label; slash/unreserved-character paths without dot segments or escapes;
+and optional nonempty, unique unreserved `key=value` query pairs. Private/tracking
+parameters refuse. Citation fragments are unreserved tokens; request identities
+and report URLs forbid them. Unsupported syntax is refused without normalizing,
+re-encoding or rerouting an approved source. Existing article URL rules remain.
+The browser's nominal ten-minute polling is not an eligibility guarantee:
+visibility, workflow freshness and manual reloads can request earlier checks.
+
+Revision-review records concern sources cited in precise report observations
+within the prior 96 hours, prioritizing 48 hours, with at most twelve selected
+sources. A `not_run` catalog means no qualified run is recorded. First baselines,
+identical response bytes, unqualified byte changes, qualified timestamp changes
+and material tracked-field changes are separate outcomes. Material or timestamp
+comparisons require a real prior qualified scope and equal known extraction
+profile versions; exposing a new CWE field on unchanged bytes is not a
+publisher change. Refused, failed and uncompleted reads never become fact changes.
+
+Each item's next eligible time is a cooldown boundary, separate from the global
+cycle: successful checks wait at least eight hours, failed/uncertain attempts at
+least 24; refusal deactivates the source pending separate review. The public
+wire records outcomes and limits; this collector does not fetch article bodies
+or execute the reporting/revision process. Missing or capped review work is
+unknown, rather than an assertion that all earlier articles are unchanged.
+
+The read-only knowledge catalog shows direct cited actor, campaign, product and
+mitigation relationships plus taxonomy-only CWE/CAPEC mappings. CVE details add
+CNA-provided weakness IDs, while existing CNA/KEV classifications and PHP notes
+remain separate. No taxonomy path proves an attack or an actor's involvement.
+No view scans, patches, modifies a trust store, runs models or assesses a device.
+
+New schema 5 windows permit at most 7,306 days, with a twenty-year CLI default
+and the existing February-29 clamp. Legacy schema 2/3/4 views retain their
+3,661-day bound. All other publisher, XML, entry, CVE, history, article, resume,
+archive, package and retention guards remain unchanged. Full source acceptance,
+necessary exact static analysis, production collection, packaging, deployment
+and fixed HTTPS observation are separate gates; source code is not runtime proof.

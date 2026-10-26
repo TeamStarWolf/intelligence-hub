@@ -2,15 +2,25 @@
 
 ## What the collection represents
 
-The historical selection now contains **63 primary publications** within **24 October 2016 through 24 October 2026**, inclusive. The original **22 publications** from the most recent year are retained unchanged; **41 earlier publications** add decade context. The selection covers ransomware, breaches, supply-chain compromises, cloud and identity campaigns, container and application vulnerabilities, hardware research, disruption and recovery.
+The historical selection contains **73 primary publications** within **25 October 2006 through 25 October 2026**, inclusive. The original **63 rows** remain unchanged; **10 newly qualified primary publications** add selected 2006–2015 context. The collection includes advisories, phishing and identity abuse, first-party breach accounts, memory disclosure and availability attacks alongside the retained later history.
 
-This is a reading and investigation aid, not an exhaustive incident archive or a device-exposure assessment. Counts represent **publications**, not unique attacks, victims or vulnerabilities. Reports from different organizations can concern related activity. A vulnerability disclosure, a blocked phishing attempt and a first-party breach report carry different evidence.
+This is a reading and investigation aid, not an exhaustive incident archive or a device-exposure assessment. Counts represent **publications**, not unique attacks, victims or vulnerabilities. Related publications can describe the same activity.
 
-There is at least one selected publication in every calendar year touched by the window. The earliest selected publication is **1 November 2016**, after the requested window begins. There are **74 calendar-month buckets** and **13 calendar-quarter buckets** with no selected publication. Those gaps are explicit in `config/history.json`; they do not mean no incidents occurred.
+At least one selected publication falls in each calendar year touched by the window. The earliest is **14 November 2006**, after the window begins. There are **184 calendar-month buckets** and **43 calendar-quarter buckets** with no selection. These are explicit selection gaps, not evidence that no incidents occurred.
 
 | Publication year | Selected publications |
 | --- | --- |
-| 2016 (partial window) | 1 |
+| 2006 (partial window) | 1 |
+| 2007 | 1 |
+| 2008 | 1 |
+| 2009 | 1 |
+| 2010 | 1 |
+| 2011 | 1 |
+| 2012 | 1 |
+| 2013 | 1 |
+| 2014 | 1 |
+| 2015 | 1 |
+| 2016 | 1 |
 | 2017 | 4 |
 | 2018 | 4 |
 | 2019 | 4 |
@@ -22,9 +32,9 @@ There is at least one selected publication in every calendar year touched by the
 | 2025 | 11 |
 | 2026 (partial window) | 16 |
 
-The boundary years are partial. Coverage within every year remains uneven, including years with several selections. The retained recent-year selection reaches every calendar-month bucket from October 2025 through October 2026; that narrower property must not be generalized to the decade.
+The boundary years are partial, and coverage within every year remains uneven. A twenty-year date window does not establish twenty years of complete source coverage. The original 63 rows were retained from the accepted earlier curation without a new source-body review; the ten additions were checked against the exact primary pages captured on October 25, 2026.
 
-Live publisher feeds, curated history and CISA KEV are separate inputs. RSS commonly retains only recent posts, so a successful refresh cannot reconstruct a publisher's decade archive. Source failures, retrieval dates and retained old data must remain visible. Reporting outlets provide leads; curated claims here were checked against readable government advisories, original research or first-party incident accounts.
+Live feeds, curated history and CISA KEV remain separate inputs. RSS usually contains only recent posts, so a successful refresh cannot reconstruct a publisher's archive. Source failures, retrieval dates and retained old data stay visible. Current archived pages can contain later edits; original publication, later update, incident and capture clocks are distinct.
 
 ## Dates and evidence
 
@@ -45,6 +55,25 @@ Published corrections take priority over preliminary theories. The retained Octo
 The CVE arrays are selective source-supported indexes, not exhaustive lists or one-to-one incident mappings. An empty array can mean that no specific identifier was indexed, rather than that no vulnerability was involved.
 
 Historical mitigation text is not a current patch plan. Check supported vendor guidance, exact versions, enabled features and deployment context before action. A successful update does not by itself prove that prior access, stolen sessions or credentials were removed.
+
+## Selected 2006–2015 primary publications
+
+These ten additions use the same historical row interface and source-attributed evidence labels. Dates come from explicit publication statements or qualified same-page metadata, not search estimates. Microsoft platform-migration dates are not substituted for original bulletins. The OpenSSL item uses only the associated CVE-2014-0160 entry in the captured index. Google’s literal article fallback was read without executing its template. Later changes to these pages remain possible.
+
+| Publication day | Primary publication selected | Publisher |
+| --- | --- | --- |
+| 2006-11-14 | [Microsoft publishes Workstation Service memory-corruption bulletin](https://learn.microsoft.com/en-us/security-updates/securitybulletins/2006/ms06-070) | Microsoft Security Response Center |
+| 2007-04-12 | [Microsoft documents DNS RPC vulnerability and bulletin follow-up](https://learn.microsoft.com/en-us/security-updates/securityadvisories/2007/935964) | Microsoft Security Response Center |
+| 2008-10-23 | [Microsoft reports targeted exploitation attempts against Server Service flaw](https://learn.microsoft.com/en-us/security-updates/securitybulletins/2008/ms08-067) | Microsoft Security Response Center |
+| 2009-01-13 | [Microsoft publishes SMB vulnerability bulletin MS09-001](https://learn.microsoft.com/en-us/security-updates/securitybulletins/2009/ms09-001) | Microsoft Security Response Center |
+| 2010-07-16 | [Microsoft records Windows Shell shortcut-icon vulnerability](https://learn.microsoft.com/en-us/security-updates/securityadvisories/2010/2286198) | Microsoft Security Response Center |
+| 2011-06-01 | [Google discloses targeted password theft and email-account hijacking](https://googleblog.blogspot.com/2011/06/ensuring-your-information-is-safe.html) | Google Official Blog |
+| 2012-06-12 | [Microsoft publishes Internet Explorer bulletin MS12-037](https://learn.microsoft.com/en-us/security-updates/securitybulletins/2012/ms12-037) | Microsoft Security Response Center |
+| 2013-10-03 | [Adobe discloses attacks involving customer information and source code](https://blog.adobe.com/en/publish/2013/10/03/important-customer-security-announcement) | Adobe |
+| 2014-04-07 | [OpenSSL records Heartbleed TLS heartbeat memory disclosure](https://openssl-library.org/news/vulnerabilities/index.html) | OpenSSL Project |
+| 2015-03-27 | [GitHub reports a large distributed denial-of-service attack](https://github.blog/news-insights/company-news/large-scale-ddos-attack-on-github-com/) | GitHub |
+
+The CVE lists are selected indexes, not every vulnerability mentioned in a cumulative bulletin. Historical negative exploitation statements are not current safety verdicts. Google and Adobe describe dated first-party incidents; the source does not establish every subsequent victim or actor claim. GitHub’s March 27, 2015 publication, March 26 event and 2019 page update remain separate.
 
 ## Earlier decade reading list
 

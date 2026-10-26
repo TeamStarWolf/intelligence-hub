@@ -5,7 +5,7 @@
 This is a standalone, offline archive foundation in `intelligence_hub/archive.py`.
 Its first source is an explicitly selected, retained public Intelligence Hub
 snapshot. Source implementation and review do not establish a successful import,
-recovery, scheduled ingestion or a complete decade archive. Record actual operator
+recovery, scheduled ingestion or a complete twenty-year archive. Record actual operator
 results separately. No archive operation is added to the collector or workflow.
 
 The archive has **no listener, public API, network call, provider, login or new
@@ -48,7 +48,7 @@ metadata activity remain possible even for read-only connections.
 
 ## Snapshot and version model
 
-The reader admits bounded public **schema 3 and 4** snapshots. Unknown versions
+The reader admits bounded public **schema 3, 4 and 5** snapshots. Unknown versions
 or top-level/source/article/CVE fields are rejected; header types, dates, source
 observations, partial-intake accounting, article provenance, structured guidance
 and the exact article-mentioned CVE union are checked. Existing pure collector
@@ -61,6 +61,25 @@ support for a version does not mean every otherwise valid public snapshot fits.
 | --- | --- | --- |
 | 3 | The original eleven fields; no `configured_selection` | A genuine eleven-field legacy report or `null`, under the existing status rules; selection basis is not recorded |
 | 4 | Those fields plus required `configured_selection`; an RSS policy enum or explicit `null` for KEV | A legacy report with unknown basis, a typed twelve-field report including `selection`, or `null` under the existing status rules |
+| 5 | The same source ledger and intake semantics as 4 | Full selection evidence is retained unchanged; the snapshot additionally requires typed `intelligence` and both CNA weakness fields |
+
+Schema 5 permits a date-only window of at most **7,306 days** for the selected
+twenty-year collection. Schema 3/4 keep their **3,661-day** profile; wider data
+cannot be relabeled as a legacy snapshot. Schema 5 preserves the entire validated
+intelligence object in the existing snapshot header JSON and weakness fields in
+the existing CVE-version payload. No SQL table, schema version, application ID,
+membership, transaction, digest, storage path or export mechanism changes.
+
+The full intelligence section is limited to **128 KiB**. The existing whole-input
+16 MiB, 500,000-node/depth-32 tree and **256 KiB header** limits remain. A valid
+public snapshot can still exceed an archive bound and be refused. Supporting
+schema 5 does not establish that arbitrary stored historical rows reconstruct or
+export successfully, nor prove an actual import, backup or restoration.
+
+Legacy snapshots containing known schema-5-only fields are rejected. There is no
+metadata stripping, schema relabeling, backfill or silent downconversion. A
+coherent rollback requires separately reviewed matching code, snapshot and
+compatible retained data; old producer/client code cannot safely resume schema 5.
 
 Configured selection describes the producer's reported configuration, not proof
 of execution. A recorded response can have a different selection basis or cutoff
@@ -71,7 +90,7 @@ A failed, missing or legacy report leaves that basis unknown, even if a failed
 response hash happens to equal an older accepted hash. No policy is assigned to
 every retained article, and no missing metadata is backfilled.
 
-For schema 4, the supported F5 ledger identity is exactly `f5-labs`,
+For schema 4/5, the supported F5 ledger identity is exactly `f5-labs`,
 `F5 Labs`, `research`, and home URL `https://www.f5.com/labs`. After that check,
 a fixed feed URL and host descriptor validate the original, complete report.
 This descriptor is not fetched publisher evidence, a new saved observation or
