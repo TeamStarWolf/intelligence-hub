@@ -1,15 +1,15 @@
 # Publisher feeds and bookmark intake
 
-## Schema 5 context and unchanged source intake
+## Schema 6 since 1998 window and unchanged source intake
 
-The current producer writes schema 5; its publisher ledgers and partial-intake
+The current producer writes schema 6; its publisher ledgers and partial-intake
 contract retain schema 4's exact selection/configuration/hash/time/count
 semantics. Other sources still use document order and F5 alone uses the reviewed
 bounded date ranking below. Rejected, filtered and duplicate entries consume
 the same 150 processed slots, without refill. The older dated schema 3/4 intake
 observations in this document remain historical observations, not new captures.
 
-Schema 5 adds bounded, local source-attributed intelligence/reporting metadata
+Schema 5 introduced the bounded, local source-attributed intelligence/reporting metadata
 and CNA-only CWE projections. These do not fetch linked source bodies, manufacture
 article/CVE admission or adopt remote catalog configuration. An article without
 an admitted CVE remains without a linked brief; matching a CVE in CISA KEV remains
@@ -17,14 +17,15 @@ separate from the article's own exploitation label. See
 [CWE and context semantics](MITIGATIONS.md#cwe-capec-and-source-attributed-context)
 and the [reporting desk](OPERATIONS.md#reporting-desk-and-prior-source-revisions).
 
-The new date-only window is limited to 7,306 days for a selected twenty-year
-collection. Legacy snapshot readers retain their version-specific 3,661-day
-profile. The existing 3 MiB publisher response, strict UTF-8, DTD/entity rejection,
+Schema 6 retains the exact schema 5 modern fields, requires a window starting
+on or after 1998-01-01 and limits the date difference to 14,610 days. Its default
+is fixed since 1998; the limit is a technical review horizon, not full coverage.
+Schema 5 keeps 7,306 days and older readers keep their 3,661-day profile. The existing 3 MiB publisher response, strict UTF-8, DTD/entity rejection,
 40,000-node/depth-48 XML, 100-CVE whole-entry rejection, 150 normalization,
 600 retained articles per source, 500 curation entries, 8,000 total articles,
 16 MiB resume, 1,200,000-byte package and one-day artifact-retention guards remain.
 Neither the broader window nor a source's accepted input proves complete history
-or timely reporting. Known schema-5-only fields on legacy labels are refused;
+or timely reporting. Known modern schema 5/6 fields on legacy labels are refused;
 there is no metadata stripping or silent downconversion.
 
 ## What is configured
@@ -88,11 +89,11 @@ Exact article-host allowlists are recorded per source. Publisher feed and articl
 
 ### Partial intake and entry accounting
 
-New snapshots use schema 5. The site reads validated schemas 2, 3, 4 and 5; the
-collector can resume validated schemas 1 through 5. Legacy observations without
+New snapshots use schema 6. The site reads validated schemas 2, 3, 4, 5 and 6; the
+collector can resume validated schemas 1 through 6. Legacy observations without
 an intake report have **unknown entry-window coverage**. A legacy report without
 selection metadata has an **unrecorded selection basis**, even if its status was
-successful or it is retained inside a schema 4/5 snapshot. CISA KEV is a separate
+successful or it is retained inside a schema 4/5/6 snapshot. CISA KEV is a separate
 catalog and does not carry RSS entry accounting or selection policy.
 
 After the whole response passes transport and XML validation, the collector

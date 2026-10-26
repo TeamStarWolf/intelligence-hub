@@ -20,6 +20,7 @@ STATE = ROOT / ".state"
 CATALOG_URL = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
 MAX_BYTES = 3 * 1024 * 1024
 MAX_ARTICLES = 8000
+HISTORY_START = date(1998, 1, 1)
 KINDS = {"advisory", "research", "reporting", "incident", "kev", "filing"}
 CVE = re.compile(r"\bCVE-[0-9]{4}-[0-9]{4,8}\b", re.I)
 PUBLIC_FEED = "https://teamstarwolf.github.io/intelligence-hub/data/feed.json"
@@ -29,6 +30,14 @@ RESPONSE_BYTE_LIMIT_REASON = "response_byte_limit_exceeded: source response exce
 def require(value, message):
     if not value:
         raise ValueError(message)
+
+
+def validate_window(start, end, snapshot_version):
+    require(type(snapshot_version) is int and snapshot_version in (1, 2, 3, 4, 5, 6), "Unsupported snapshot coverage version.")
+    maximum = {1: 3661, 2: 3661, 3: 3661, 4: 3661, 5: 7306, 6: 14610}[snapshot_version]
+    require(type(start) is date and type(end) is date and start <= end and (end - start).days <= maximum,
+            "History window must be date-only and within its schema's span.")
+    require(snapshot_version != 6 or start >= HISTORY_START, "Schema6 coverage must start on or after 1998-01-01.")
 
 
 def now():
@@ -546,7 +555,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     from .intelligence import compose, load_inputs
     from .archive import validate_snapshot
 
-    require(type(start) is date and type(end) is date and start <= end and (end - start).days <= 7306, "History window must be date-only and at most twenty years.")
+    validate_window(start, end, 6)
     intelligence_inputs = load_inputs(ROOT)
     require(type(enrich_limit) is int and 0 <= enrich_limit <= 2000, "CVE enrichment limit must be0..2000.")
     context = load_mitigation_context(ROOT / "config/mitigation-context.json")
@@ -634,13 +643,13 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     prepared_at = now()
     briefs, projections, mitigation_stats = build_briefs(ordered, kev.get("catalog", {}), retained, refresh, enrich_limit, fetch, text, safe_url, published, prepared_at)
     briefs = apply_mitigation_context(briefs, context)
-    snapshot = {"schema_version": 5, "generated_at": now(), "window": {"start": start.isoformat(), "end": end.isoformat()},
+    snapshot = {"schema_version": 6, "generated_at": now(), "window": {"start": start.isoformat(), "end": end.isoformat()},
         "articles": ordered, "sources": health, "history_reviewed_at": history.get("curated_at"),
         "mitigations": briefs, "mitigation_coverage": mitigation_stats, "deduplication": {"url_duplicates_removed": duplicates},
         "refresh": {"requested_minutes": 10, "mode": "scheduled-check", "status_url": "https://github.com/TeamStarWolf/intelligence-hub/actions/workflows/publish.yml",
             "notes": ["GitHub requests collection every ten minutes; scheduling can be delayed, dropped or disabled after repository inactivity.", "The visible page checks the saved snapshot every ten minutes. This is not a guaranteed ten-minute news delivery service.", "Snapshot and source dates describe the last published collection; unchanged checks can complete without republishing. Latest workflow outcomes are linked separately."]},
         "coverage": {"kev_records": counts["cisa-kev"], "curated_events": counts["library-curation"], "feed_articles": counts["publisher-feed"],
-            "notes": ["This is a selected twenty-year collection, not every cyber incident, article or vulnerability.", "KEV dates indicate catalog addition, not first disclosure or first exploitation.", "RSS usually exposes recent posts; historical curation and legacy feeds do not form a complete twenty-year archive.", "Unknown dates remain explicit. Failed sources retain last-good input when available; public snapshot resume helps retain prior publisher items.", "Per-feed retained history is bounded to600articles. Missing, evicted or changed inputs can leave coverage gaps.", "Publisher intake reports describe only the latest bounded response selection window of at most150processed entries. Rejected or unprocessed entries are not newly admitted; unprocessed entries may include recent items, and older retained versions may remain.", "Last accepted input is not exhaustive publisher coverage. Legacy observations without intake reports have unknown window completeness.", "Canonical article URLs are deduplicated; distinct publishers covering one CVE remain separate evidence.", "CVE mentions can come from RSS metadata/body text; they do not mean every mentioned CVE was exploited.", "Headlines link to publishers; full article bodies are not copied. No environment exposure is inferred.", "Threatpost is a legacy archive with observed August2022 items; a successful fetch does not imply current reporting.", "SEC direct filing access is pending after HTTP403; news reporting about filings is not complete Item1.05/8.01 coverage."]},
+            "notes": ["This is a selected collection within the declared date window, not every cyber incident, article or vulnerability.", "KEV dates indicate catalog addition, not first disclosure or first exploitation.", "RSS usually exposes recent posts; historical curation and legacy feeds do not form a complete historical archive.", "Unknown dates remain explicit. Failed sources retain last-good input when available; public snapshot resume helps retain prior publisher items.", "Per-feed retained history is bounded to600articles. Missing, evicted or changed inputs can leave coverage gaps.", "Publisher intake reports describe only the latest bounded response selection window of at most150processed entries. Rejected or unprocessed entries are not newly admitted; unprocessed entries may include recent items, and older retained versions may remain.", "Last accepted input is not exhaustive publisher coverage. Legacy observations without intake reports have unknown window completeness.", "Canonical article URLs are deduplicated; distinct publishers covering one CVE remain separate evidence.", "CVE mentions can come from RSS metadata/body text; they do not mean every mentioned CVE was exploited.", "Headlines link to publishers; full article bodies are not copied. No environment exposure is inferred.", "Threatpost is a legacy archive with observed August2022 items; a successful fetch does not imply current reporting.", "SEC direct filing access is pending after HTTP403; news reporting about filings is not complete Item1.05/8.01 coverage."]},
         "integrations": {"xai": {"status": "not_connected", "message": "Grok X Search is a separate supported API route; access and zero-additional-spend eligibility are not established. No model calls are enabled."},
                          "x": {"status": "not_connected", "message": "Personal X timeline/bookmarks are not connected or published. Future article sharing is recorded for owner review; no automatic posts are enabled."},
                          "sec": {"status": "not_connected", "message": "Direct SEC filing-feed intake returned HTTP403. Operational contact and accepted access/schema remain prerequisites; no direct filings are claimed."}}}
@@ -686,8 +695,8 @@ def resume_deployed(sources, cache):
     """Use only this hub's fixed public snapshot as an additional, validated history input."""
     try:
         previous = json.loads(fetch(PUBLIC_FEED, 16 * 1024 * 1024), parse_constant=reject_constant)
-        require(isinstance(previous, dict) and type(previous.get("schema_version")) is int and previous["schema_version"] in (1, 2, 3, 4, 5), "Unsupported deployed snapshot.")
-        if previous["schema_version"] == 5:
+        require(isinstance(previous, dict) and type(previous.get("schema_version")) is int and previous["schema_version"] in (1, 2, 3, 4, 5, 6), "Unsupported deployed snapshot.")
+        if previous["schema_version"] in (5, 6):
             from .archive import validate_snapshot
             validate_snapshot(previous)
         else:
@@ -698,7 +707,7 @@ def resume_deployed(sources, cache):
             window = previous.get("window", {})
             require(isinstance(window, dict) and set(window) == {"start", "end"}, "Missing legacy coverage window.")
             begin, finish = (date.fromisoformat(window[key]) for key in ("start", "end"))
-            require(begin <= finish and (finish - begin).days <= 3661, "Legacy coverage exceeds its date profile.")
+            validate_window(begin, finish, previous["schema_version"])
         require(isinstance(previous.get("articles"), list) and len(previous["articles"]) <= MAX_ARTICLES, "Invalid deployed articles.")
         require(isinstance(previous.get("sources"), list) and len(previous["sources"]) <= 100, "Invalid deployed source ledger.")
         registry = {source["id"]: source for source in sources}
@@ -714,7 +723,7 @@ def resume_deployed(sources, cache):
             require(isinstance(observation, dict) and isinstance(observation.get("id"), str), "Invalid deployed source identity.")
             source_id = observation["id"]
             require(source_id not in observations, "Duplicate deployed source identity.")
-            if previous["schema_version"] in (4, 5):
+            if previous["schema_version"] in (4, 5, 6):
                 require("configured_selection" in observation, "Missing deployed selection configuration.")
                 configured = observation["configured_selection"]
                 if source_id == "cisa-kev":
@@ -730,7 +739,7 @@ def resume_deployed(sources, cache):
             # The initial schema did not publish response hashes; preserve dates without inventing a hash.
             if projected["status"] == "ok" and projected["sha256"] is None and previous["schema_version"] == 1:
                 projected["status"] = "not_fetched"
-            validate_observation(projected, source=registry.get(source_id), kev=source_id == "cisa-kev", allow_selection=previous["schema_version"] in (4, 5))
+            validate_observation(projected, source=registry.get(source_id), kev=source_id == "cisa-kev", allow_selection=previous["schema_version"] in (4, 5, 6))
             observations[source_id] = projected
         for source_id, articles in retained.items():
             old = cache["sources"].get(source_id, {})

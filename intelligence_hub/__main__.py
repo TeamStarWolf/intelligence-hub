@@ -2,13 +2,13 @@
 import argparse
 from datetime import date, datetime, timezone
 import json
-from .collect import build_snapshot
+from .collect import HISTORY_START, build_snapshot
 
 
 def main():
     today = datetime.now(timezone.utc).date()
     parser = argparse.ArgumentParser(description="Build attributed Team Star Wolf Intelligence Hub snapshots.")
-    parser.add_argument("--start", type=date.fromisoformat, default=today.replace(year=today.year - 20) if (today.month, today.day) != (2, 29) else date(today.year - 20, 2, 28))
+    parser.add_argument("--start", type=date.fromisoformat, default=HISTORY_START)
     parser.add_argument("--end", type=date.fromisoformat, default=today)
     parser.add_argument("--cached", action="store_true", help="Build from retained public data without network access.")
     parser.add_argument("--resume-public", action="store_true", help="Retain additional history from this hub's fixed public snapshot.")

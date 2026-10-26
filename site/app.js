@@ -280,7 +280,7 @@
   }
 
   function normalizeConfiguredSelection(value, sourceId, schemaVersion) {
-    if (![4, 5].includes(schemaVersion)) { requireValue(!Object.hasOwn(value, "configured_selection")); return null; }
+    if (![4, 5, 6].includes(schemaVersion)) { requireValue(!Object.hasOwn(value, "configured_selection")); return null; }
     requireValue(Object.hasOwn(value, "configured_selection"));
     const basis = value.configured_selection;
     if (sourceId === "cisa-kev") { requireValue(basis === null); return null; }
@@ -294,7 +294,7 @@
     if (value == null) { requireValue(source.status !== "partial"); return null; }
     requireValue(source.status !== "not_fetched");
     const hasSelection = Object.hasOwn(value, "selection");
-    requireValue([4, 5].includes(schemaVersion) || !hasSelection);
+    requireValue([4, 5, 6].includes(schemaVersion) || !hasSelection);
     const keys = ["items_seen", "items_processed", "items_admitted", "items_rejected", "items_filtered", "items_unprocessed", "entry_limit", "cve_limit", "rejection_reasons", "attempted_at", "response_sha256"];
     exactKeys(value, hasSelection ? [...keys, "selection"] : keys);
     exactKeys(value.rejection_reasons, ["invalid_link_or_title", "cve_limit_exceeded"]);
@@ -357,7 +357,7 @@
       requireValue(value.cvss && (value.cvss.score === null || (typeof value.cvss.score === "number" && Number.isFinite(value.cvss.score) && value.cvss.score >= 0 && value.cvss.score <= 10)));
       record.cvss = { score: value.cvss.score, version: optionalText(value.cvss.version, 100), vector: optionalText(value.cvss.vector, 2000), source_url: optionalText(value.cvss.source_url, 4000) };
     }
-    if (schemaVersion === 5) {
+    if ([5, 6].includes(schemaVersion)) {
       requireValue(/^CVE-[0-9]{4}-[0-9]{4,8}$/.test(key));
       exactKeys(value, ["cve", "title", "description", "source_status", "record_state", "source_updated_at", "retrieved_at", "source_attempted_at", "source_sha256", "products", "solutions", "workarounds", "cvss", "references", "required_action", "required_action_source_url", "kev", "analysis", "weaknesses", "weaknesses_status"]);
       intelligenceHash(value.source_sha256, true);
@@ -381,8 +381,8 @@
   }
 
   function normalize(raw) {
-    requireValue(raw && [2, 3, 4, 5].includes(raw.schema_version) && Array.isArray(raw.articles) && raw.articles.length <= 8000 && Array.isArray(raw.sources) && raw.sources.length <= 200);
-    if (raw.schema_version === 5) exactKeys(raw, ["schema_version", "generated_at", "window", "articles", "sources", "history_reviewed_at", "mitigations", "mitigation_coverage", "deduplication", "refresh", "coverage", "integrations", "content_revision", "layout_revision", "intelligence"]);
+    requireValue(raw && [2, 3, 4, 5, 6].includes(raw.schema_version) && Array.isArray(raw.articles) && raw.articles.length <= 8000 && Array.isArray(raw.sources) && raw.sources.length <= 200);
+    if ([5, 6].includes(raw.schema_version)) exactKeys(raw, ["schema_version", "generated_at", "window", "articles", "sources", "history_reviewed_at", "mitigations", "mitigation_coverage", "deduplication", "refresh", "coverage", "integrations", "content_revision", "layout_revision", "intelligence"]);
     else requireValue(!Object.hasOwn(raw, "intelligence"));
     timestamp(raw.generated_at, false);
     requireValue(raw.window && raw.coverage && raw.integrations && raw.refresh && raw.deduplication && raw.mitigations && typeof raw.mitigations === "object" && !Array.isArray(raw.mitigations));
@@ -390,15 +390,16 @@
     timestamp(raw.window.end, false);
     const start = new Date(raw.window.start).getTime();
     const end = new Date(raw.window.end).getTime();
-    requireValue(end >= start && end - start <= (raw.schema_version === 5 ? 7306 : 3661) * day);
-    if (raw.schema_version === 5) { selectionDate(raw.window.start); selectionDate(raw.window.end); }
+    requireValue(end >= start && end - start <= (raw.schema_version === 6 ? 14610 : raw.schema_version === 5 ? 7306 : 3661) * day);
+    if ([5, 6].includes(raw.schema_version)) { selectionDate(raw.window.start); selectionDate(raw.window.end); }
+    if (raw.schema_version === 6) requireValue(raw.window.start >= "1998-01-01");
     const mitigationEntries = Object.entries(raw.mitigations);
     requireValue(mitigationEntries.length <= 15000);
     const mitigations = new Map(mitigationEntries.map(([key, value]) => [key, normalizeMitigation(value, key, raw.schema_version)]));
-    const intelligence = raw.schema_version === 5 ? normalizeIntelligence(raw.intelligence, new Set(mitigations.keys())) : null;
+    const intelligence = [5, 6].includes(raw.schema_version) ? normalizeIntelligence(raw.intelligence, new Set(mitigations.keys())) : null;
     const ids = new Set();
     const articles = raw.articles.map(article => {
-      if (raw.schema_version === 5) exactKeys(article, ["id", "title", "url", "source_id", "source_name", "kind", "published_at", "event_date", "date_basis", "summary", "cves", "tags", "exploitation", "references", "origin"]);
+      if ([5, 6].includes(raw.schema_version)) exactKeys(article, ["id", "title", "url", "source_id", "source_name", "kind", "published_at", "event_date", "date_basis", "summary", "cves", "tags", "exploitation", "references", "origin"]);
       requireValue(article && Object.hasOwn(kinds, article.kind) && Object.hasOwn(origins, article.origin) && ["known", "reported", "unknown"].includes(article.exploitation));
       const item = {
         id: boundedText(article.id, 160), title: boundedText(article.title, 1000), url: boundedText(article.url, 4000),
@@ -410,7 +411,7 @@
       requireValue(!ids.has(item.id) && item.cves.every(cve => cvePattern.test(cve) && mitigations.has(cve)));
       ids.add(item.id);
       item.references = list(article.references, 50).map(reference => {
-        if (raw.schema_version === 5) exactKeys(reference, ["label", "url"]);
+        if ([5, 6].includes(raw.schema_version)) exactKeys(reference, ["label", "url"]);
         return { label: boundedText(reference.label, 300), url: boundedText(reference.url, 4000) };
       });
       item.primary_date = item.date_basis === "event" ? item.event_date : item.published_at;
@@ -427,7 +428,7 @@
     });
     const sourceIds = new Set();
     const sources = raw.sources.map(source => {
-      if (raw.schema_version === 5) exactKeys(source, ["id", "name", "kind", "url", "status", "last_attempt", "last_success", "error", "sha256", "intake", "articles", "configured_selection"]);
+      if ([5, 6].includes(raw.schema_version)) exactKeys(source, ["id", "name", "kind", "url", "status", "last_attempt", "last_success", "error", "sha256", "intake", "articles", "configured_selection"]);
       requireValue(source && ["ok", "partial", "failed", "not_fetched"].includes(source.status));
       const item = { id: boundedText(source.id, 160), name: boundedText(source.name, 240), url: boundedText(source.url, 4000), kind: boundedText(source.kind, 160), status: source.status, last_success: timestamp(source.last_success), last_attempt: timestamp(source.last_attempt), error: source.error === null ? null : boundedText(source.error, 4000, true), articles: nonnegative(source.articles) };
       item.sha256 = source.sha256 == null ? null : boundedText(source.sha256, 64);
@@ -444,7 +445,7 @@
     }
     requireValue(Number.isSafeInteger(raw.refresh.requested_minutes) && raw.refresh.requested_minutes > 0 && raw.refresh.requested_minutes <= 1440 && raw.refresh.mode === "scheduled-check");
     const refresh = { requested_minutes: raw.refresh.requested_minutes, mode: raw.refresh.mode, status_url: boundedText(raw.refresh.status_url, 4000), notes: textList(raw.refresh.notes, 100, 4000) };
-    if (raw.schema_version === 5) requireValue(new Set(articles.flatMap(article => article.cves)).size === mitigations.size);
+    if ([5, 6].includes(raw.schema_version)) requireValue(new Set(articles.flatMap(article => article.cves)).size === mitigations.size);
     return { generated_at: raw.generated_at, window: { start: raw.window.start, end: raw.window.end }, articles, sources, coverage, integrations, mitigations, refresh, intelligence, deduplication: { url_duplicates_removed: nonnegative(raw.deduplication.url_duplicates_removed) } };
   }
 

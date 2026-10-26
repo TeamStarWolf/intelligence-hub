@@ -14,7 +14,7 @@ import stat
 import sys
 import time
 
-from .collect import published, safe_url, validate_article, validate_observation
+from .collect import published, safe_url, validate_article, validate_observation, validate_window
 from .mitigations import valid_projection
 from .intelligence import validate_intelligence, validate_weaknesses
 from .mitigations import brief_url
@@ -129,9 +129,9 @@ def stamp(value, nullable=False):
 
 
 def validate_archive_source(source, snapshot_version):
-    require(type(snapshot_version) is int and snapshot_version in (3, 4, 5), "Unsupported archive source snapshot version.")
+    require(type(snapshot_version) is int and snapshot_version in (3, 4, 5, 6), "Unsupported archive source snapshot version.")
     context = None
-    if snapshot_version in (4, 5):
+    if snapshot_version in (4, 5, 6):
         configured = source["configured_selection"]
         if source["id"] == "cisa-kev":
             require(configured is None, "KEV cannot carry RSS selection configuration.")
@@ -145,13 +145,13 @@ def validate_archive_source(source, snapshot_version):
                            "article_hosts": ["www.f5.com"]}
             else:
                 require(configured == "document-order-v1", "Publisher-date configuration requires the supported F5 ledger.")
-    validate_observation(source, source=context, kev=source["id"] == "cisa-kev", allow_selection=snapshot_version in (4, 5))
+    validate_observation(source, source=context, kev=source["id"] == "cisa-kev", allow_selection=snapshot_version in (4, 5, 6))
 
 
 def validate_snapshot(value):
     tree(value)
-    require(type(value) is dict and type(value.get("schema_version")) is int and value["schema_version"] in (3, 4, 5), "Archive requires snapshot schema3,4 or5.")
-    modern = value["schema_version"] == 5
+    require(type(value) is dict and type(value.get("schema_version")) is int and value["schema_version"] in (3, 4, 5, 6), "Archive requires snapshot schema3,4,5 or6.")
+    modern = value["schema_version"] in (5, 6)
     keys(value, TOP | {"intelligence"} if modern else TOP)
     stamp(value["generated_at"])
     reviewed = value["history_reviewed_at"]
@@ -161,9 +161,9 @@ def validate_snapshot(value):
         stamp(reviewed, nullable=True)
     keys(value["window"], {"start", "end"})
     start, end = (date.fromisoformat(value["window"][key]) for key in ("start", "end"))
-    require(start <= end and (end - start).days <= (7306 if modern else 3661), "Invalid archive coverage window.")
+    validate_window(start, end, value["schema_version"])
     if modern:
-        require(start.isoformat() == value["window"]["start"] and end.isoformat() == value["window"]["end"], "Schema5 coverage needs canonical dates.")
+        require(start.isoformat() == value["window"]["start"] and end.isoformat() == value["window"]["end"], "Schema5/6 coverage needs canonical dates.")
     for field in ("content_revision", "layout_revision"):
         require(isinstance(value[field], str) and DIGEST.fullmatch(value[field]), "Invalid supplied revision.")
     require(isinstance(value["articles"], list) and 1 <= len(value["articles"]) <= 8000, "Invalid archive article count.")

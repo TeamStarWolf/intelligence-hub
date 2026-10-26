@@ -15,11 +15,12 @@ advisories, known exploited vulnerabilities, source-linked threat context and re
 - Requests collection every **ten minutes** through GitHub Actions and publishes when articles, guidance, source outcomes or layout change. A visible browser checks the saved public snapshot every ten minutes, with the saved snapshot's age shown separately from browser reads.
 - Runs on GitHub Pages independently of the owner's laptop, with a responsive interface and original SVG artwork.
 
-The collector's schema5 default window rolls forward **twenty calendar years**
-from the UTC run date, with explicit date bounds. A window is not a coverage
-claim: there are gaps in every year, and selected history and recent RSS cannot
-reconstruct every publisher's archive. Legacy schema2/3/4 windows retain their
-original ten-year limit. Threatpost is a **legacy archive with observed August 2022 items**; a
+The schema 6 collector defaults to **1 January 1998 through the UTC run date**.
+This is selected historical context, not a complete archive: the earliest
+qualified anchor is the 1 June 1998 MS98-001 bulletin, with explicit gaps. Schema 6
+requires a start on or after 1998-01-01 and a bounded 14,610-day span; this is a
+technical review horizon, not forty years of coverage. Schema 5 keeps its
+7,306-day profile and legacy schema 2/3/4 keep 3,661 days. Threatpost is a **legacy archive with observed August 2022 items**; a
 successful fetch does not make those stories current news.
 
 The separately named [Talos Threat Advisory category subset](docs/FEEDS.md#talos-threat-advisory-category-subset)
@@ -58,7 +59,7 @@ monthly, quarterly and rolling six-completed-month editions use the explicit
 [calendar method](reports/REPORTING.md). The recorded activation state and
 latest report/revision outcomes are separate from the next nominal opportunity.
 
-Schema5 adds bounded source-led context for CWE weaknesses, CAPEC taxonomy,
+Schemas 5 and 6 carry bounded source-led context for CWE weaknesses, CAPEC taxonomy,
 actors/campaigns, products and mitigations. CVE-to-CWE comes only from the CNA's
 structured problemTypes; official CWE-to-CAPEC links are taxonomy rather than
 observed attacks. Curated attribution and mitigation relationships need their
@@ -84,7 +85,7 @@ python -m intelligence_hub
 An explicit historical window:
 
 ```sh
-python -m intelligence_hub --start 2006-10-25 --end 2026-10-25
+python -m intelligence_hub --start 1998-01-01 --end 2026-10-26
 ```
 
 These commands perform bounded public HTTPS reads and write the generated snapshot.

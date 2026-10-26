@@ -2,8 +2,8 @@
 
 ## What a brief represents
 
-The collector writes a **schema 5** snapshot. The site still reads schemas 2, 3,
-4 and 5. Each of those snapshots has one `mitigations` entry for each unique CVE
+The collector writes a **schema 6** snapshot. The site reads schemas 2, 3, 4, 5
+and 6. Each of those snapshots has one `mitigations` entry for each unique CVE
 in its loaded articles' `cves` arrays, including KEV, feed and curated articles.
 This is not every CVE ever published, nor every identifier in full linked articles.
 The projection is deterministic; it makes no model call or device assessment.
@@ -31,7 +31,7 @@ The implementation reads structured fields, not an entire advisory as instructio
 | Version statements per product | First twelve, retaining status, bounds and version type |
 | References | Official record link plus up to fifteen accepted CNA references |
 | CVSS | First supplied valid metric at the highest available supported metric version |
-| CNA weaknesses (schema 5) | Explicit `cna.problemTypes[].descriptions[].cweId` only; at most twenty types, twenty descriptions per type and eight unique canonical CWE IDs |
+| CNA weaknesses (schemas 5/6) | Explicit `cna.problemTypes[].descriptions[].cweId` only; at most twenty types, twenty descriptions per type and eight unique canonical CWE IDs |
 
 Version text/bounds are bounded to 160 characters each; version status and type are
 also bounded. These excerpts can omit additional products, conditions and guidance.
@@ -45,7 +45,7 @@ or an organization-specific risk ranking. Missing metrics stay unknown.
 
 ## CWE, CAPEC and source-attributed context
 
-Schema 5 adds exact `weaknesses` and `weaknesses_status` fields to each brief.
+Schema 5 introduced exact `weaknesses` and `weaknesses_status` fields to each brief.
 Every weakness has its CNA-supplied canonical ID, a bounded description and the
 exact CVE-record source URL. No ID is inferred from prose, product names,
 references or ADP containers. New descriptions use Unicode code-point limits;
@@ -76,7 +76,7 @@ publisher claims; no transitive association or new CVE admission is inferred.
 A generated CWE definition link is labeled Definition, not a captured source.
 Empty or unreviewed context remains unknown, not a fabricated entity inventory.
 
-Legacy schema 2/3/4 snapshots retain their old shape. Known schema-5-only context
+Legacy schema 2/3/4 snapshots retain their old shape. Known modern schema 5/6 context
 or weakness fields on a legacy-labeled snapshot are rejected rather than
 silently stripped. Raw unversioned CNA-cache compatibility is a distinct input
 policy. The read-only views do not run models, scans, commands or device actions.

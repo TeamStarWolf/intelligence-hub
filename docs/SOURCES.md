@@ -2,15 +2,23 @@
 
 ## What the collection represents
 
-The historical selection contains **73 primary publications** within **25 October 2006 through 25 October 2026**, inclusive. The original **63 rows** remain unchanged; **10 newly qualified primary publications** add selected 2006–2015 context. The collection includes advisories, phishing and identity abuse, first-party breach accounts, memory disclosure and availability attacks alongside the retained later history.
+The historical selection contains **74 primary publications** within **1 January 1998 through 26 October 2026**, inclusive. All 73 previously retained rows remain unchanged; one qualified Microsoft MS98-001 bulletin extends the selected chronology to **1 June 1998**. The January 1 floor is collection policy, not that bulletin’s publication date.
 
-This is a reading and investigation aid, not an exhaustive incident archive or a device-exposure assessment. Counts represent **publications**, not unique attacks, victims or vulnerabilities. Related publications can describe the same activity.
+This is a reading and investigation aid, not an exhaustive incident archive, a complete bulletin collection or a device-exposure assessment. Counts represent **publications**, not unique attacks, victims or vulnerabilities. Related publications can describe the same activity.
 
-At least one selected publication falls in each calendar year touched by the window. The earliest is **14 November 2006**, after the window begins. There are **184 calendar-month buckets** and **43 calendar-quarter buckets** with no selection. These are explicit selection gaps, not evidence that no incidents occurred.
+Years **1999-2005** have no selected publication in this subset. There are **288 calendar-month buckets** and **77 calendar-quarter buckets** with no selection. These are explicit selection gaps, not evidence that no incidents or advisories occurred.
 
 | Publication year | Selected publications |
 | --- | --- |
-| 2006 (partial window) | 1 |
+| 1998 | 1 |
+| 1999 | 0 |
+| 2000 | 0 |
+| 2001 | 0 |
+| 2002 | 0 |
+| 2003 | 0 |
+| 2004 | 0 |
+| 2005 | 0 |
+| 2006 | 1 |
 | 2007 | 1 |
 | 2008 | 1 |
 | 2009 | 1 |
@@ -32,9 +40,9 @@ At least one selected publication falls in each calendar year touched by the win
 | 2025 | 11 |
 | 2026 (partial window) | 16 |
 
-The boundary years are partial, and coverage within every year remains uneven. A twenty-year date window does not establish twenty years of complete source coverage. The original 63 rows were retained from the accepted earlier curation without a new source-body review; the ten additions were checked against the exact primary pages captured on October 25, 2026.
+The 2026 boundary year is partial. Coverage within all years remains uneven; 1998 has one selected bulletin. The original 63 rows were retained without a new source-body review, the ten 2006–2015 additions were qualified from October 25, 2026 captures, and MS98-001 was qualified from one October 26, 2026 capture. Current archived pages do not reproduce their original publication-day bytes.
 
-Live feeds, curated history and CISA KEV remain separate inputs. RSS usually contains only recent posts, so a successful refresh cannot reconstruct a publisher's archive. Source failures, retrieval dates and retained old data stay visible. Current archived pages can contain later edits; original publication, later update, incident and capture clocks are distinct.
+Live feeds, curated history and CISA KEV remain separate inputs. RSS usually contains only recent posts. A wider date window cannot reconstruct a publisher’s archive or establish complete source coverage.
 
 ## Dates and evidence
 
@@ -55,6 +63,10 @@ Published corrections take priority over preliminary theories. The retained Octo
 The CVE arrays are selective source-supported indexes, not exhaustive lists or one-to-one incident mappings. An empty array can mean that no specific identifier was indexed, rather than that no vulnerability was involved.
 
 Historical mitigation text is not a current patch plan. Check supported vendor guidance, exact versions, enabled features and deployment context before action. A successful update does not by itself prove that prior access, stolen sessions or credentials were removed.
+
+## Earliest selected bulletin: MS98-001
+
+[Microsoft MS98-001](https://learn.microsoft.com/en-us/security-updates/securitybulletins/1998/ms98-001) explicitly records publication on **1 June 1998**, a **24 March 1999** revision and bulletin version 1.1. It discusses potential Windows NT Server domain-local-group creation and availability/replication impacts. No event date, observed exploitation or CVE association is asserted by this addition. Its dated publisher severity and historical instructions are not current CVSS, exposure or patch advice. Later 2017/2023 page metadata and 2026 HTTP/capture clocks are separate.
 
 ## Selected 2006–2015 primary publications
 

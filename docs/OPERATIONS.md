@@ -25,9 +25,9 @@ are retained during background snapshot updates.
 
 ## Interpret evidence before action
 
-The configured inputs are **61 RSS/Atom publisher feeds**, CISA KEV and **63 curated
+The configured inputs are **61 RSS/Atom publisher feeds**, CISA KEV and **74 curated
 primary publications**. A configured feed is not necessarily healthy. Recent RSS,
-bounded retained items and manual curation do not form a complete twenty-year archive.
+bounded retained items and manual curation do not form a complete historical archive.
 See [feed evidence](FEEDS.md) and [history coverage](SOURCES.md).
 
 The count is feed definitions, not unique publishers. **Cisco Talos Threat Advisory
@@ -368,7 +368,7 @@ was exercised.
 
 ## Reporting desk and prior-source revisions
 
-Schema 5 carries reviewed local `reports/reporting.json`, `reports/catalog.json`
+Schemas 5 and 6 carry reviewed local `reports/reporting.json`, `reports/catalog.json`
 and `config/intelligence-context.json` projections, with whole-file digests.
 Missing, unknown, malformed or oversized input refuses the candidate; no remote
 resume metadata becomes local configuration. The public report files remain
@@ -423,9 +423,12 @@ CNA-provided weakness IDs, while existing CNA/KEV classifications and PHP notes
 remain separate. No taxonomy path proves an attack or an actor's involvement.
 No view scans, patches, modifies a trust store, runs models or assesses a device.
 
-New schema 5 windows permit at most 7,306 days, with a twenty-year CLI default
-and the existing February-29 clamp. Legacy schema 2/3/4 views retain their
-3,661-day bound. All other publisher, XML, entry, CVE, history, article, resume,
+Schema 6 defaults to 1998-01-01 through the UTC run date and requires a start
+on or after that floor plus a maximum 14,610-day difference. The fixed-floor
+default reaches its technical review boundary on 2038-01-01; this is not a
+coverage promise. Schema 5 retains 7,306 days and legacy 2/3/4 retain 3,661.
+Producer/client/resume/archive and deployment must roll forward coherently;
+older code must refuse 6 rather than strip or relabel its metadata. All other publisher, XML, entry, CVE, history, article, resume,
 archive, package and retention guards remain unchanged. Full source acceptance,
 necessary exact static analysis, production collection, packaging, deployment
 and fixed HTTPS observation are separate gates; source code is not runtime proof.
