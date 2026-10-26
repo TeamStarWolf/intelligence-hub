@@ -10,6 +10,8 @@ Daily editions are requested at **06:00, 14:00 and 22:00 America/Chicago**, cove
 
 ## Daily
 
+- [October 26, 2026 · 14:00 Chicago · 24-hour edition](daily/2026-10-26/1400-CDT/README.md) · [data](daily/2026-10-26/1400-CDT/data.json) · 148 explicitly timestamped source entries mentioning 17 unique CVEs; partial coverage, compiled late at 21:04:31 UTC. The fixed window ends at 19:00 UTC; input generation at 17:27:38 UTC leaves a 92-minute 22-second unobserved tail. No new article-body comparisons were completed. **Next nominal report/revision opportunity: October 26 at 22:00 America/Chicago (October 27 at 03:00 UTC)**, subject to app/computer availability.
+
 - [October 26, 2026 · 06:00 Chicago · 24-hour edition](daily/2026-10-26/0600-CDT/README.md) · [data](daily/2026-10-26/0600-CDT/data.json) · 75 explicitly timestamped source entries mentioning 7 unique CVEs; partial, retrospective coverage, compiled late at 13:36:45 UTC. The fixed window ends at 11:00 UTC; the retained input was generated later at 11:16:36 UTC. **Next nominal report/revision opportunity: October 26 at 14:00 America/Chicago (19:00 UTC)**, subject to app/computer availability.
 
 - [October 25, 2026 · 22:00 Chicago · 48-hour edition](daily/2026-10-25/2200-CDT/README.md) · [data](daily/2026-10-25/2200-CDT/data.json) · partial source coverage, compiled late on October 26 at 07:21:59 UTC. The fixed period is October 24 at 03:00 UTC through October 26 at 03:00 UTC; the retained input ends 25 minutes 43 seconds before that cutoff. One prior-citation request was refused (HTTP 301); no qualified article comparison was completed. That edition recorded its next nominal reporting opportunity as **October 26 at 06:00 America/Chicago (11:00 UTC)**, subject to app/computer availability.
