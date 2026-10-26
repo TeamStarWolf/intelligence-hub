@@ -16,7 +16,7 @@
   <a class="skip-link" href="#briefing">Skip to intelligence</a>
   <header class="site-header">
     <a class="brand" href="#top" aria-label="Intelligence Hub home"><span class="brand-mark"><img src="./icon.svg" width="40" height="40" alt=""></span><span>INTELLIGENCE<span class="brand-second">HUB <span class="brand-owner">/ TEAM STAR WOLF</span></span></span></a>
-    <nav aria-label="Main navigation"><a class="nav-current" href="#briefing">Intelligence</a><a href="#timeline">Archive</a><a href="#method">Method</a><a href="#reports">Reports</a><button class="nav-button" type="button" data-open-sources disabled>Source ledger ↗</button></nav>
+    <nav aria-label="Main navigation"><a class="nav-library" href="#briefing">Intelligence</a><a class="nav-knowledge" href="#knowledge">Threat context</a><a href="#timeline">Archive</a><a href="#method">Method</a><a href="#reports">Reports</a><button class="nav-button" type="button" data-open-sources disabled>Source ledger ↗</button></nav>
   </header>
   <main id="top">
     <section class="hero" aria-labelledby="hero-title">
@@ -25,14 +25,21 @@
     </section>
     <div class="snapshot-bar"><div><span id="snapshot-mark" class="snapshot-mark" aria-hidden="true"></span><strong id="snapshot-status">Reading snapshot</strong><span id="generated-at">Content date pending</span></div><p id="archive-window">Archive window loading…</p><button id="reload" type="button">Reload snapshot ↻</button></div>
     <div class="poll-bar"><p id="poll-status" role="status">Browser snapshot check pending.</p><p id="refresh-policy">Scheduled collection and browser checks are separate.</p></div>
-    <section id="workflow-health" class="workflow-health" aria-labelledby="workflow-health-title">
+    <section id="knowledge" class="reports-strip" aria-labelledby="knowledge-title" tabindex="-1">
+      <div class="reports-heading"><h2 id="knowledge-title">Threat context &amp; relationships</h2></div>
+      <p class="reports-links"><a href="#briefing">&larr; Intelligence library</a></p>
+      <p class="reports-note">Explore sourced CWE weaknesses, CAPEC attack patterns, actors, campaigns, products and mitigations. Taxonomy links are definitions, not proof that an attack occurred. CVE-specific guidance stays in the CVE register.</p>
+      <div class="filter-selects"><label><span class="field-label">Search context · all words must match</span><input id="knowledge-filter" type="search" maxlength="200" placeholder="Weakness, pattern, actor, product or mitigation…" autocomplete="off"></label><label><span class="field-label">Context type</span><select id="knowledge-kind"><option value="">All context</option><option value="cwe">CWE weaknesses</option><option value="capec">CAPEC patterns</option><option value="actor">Threat actors</option><option value="campaign">Campaigns</option><option value="product">Products</option><option value="mitigation">Mitigations</option></select></label></div>
+      <p id="knowledge-status" class="reports-note" role="status">Source-backed context has not loaded. Missing data means unknown coverage.</p><div id="knowledge-results" class="article-grid"></div>
+    </section>
+    <section id="workflow-health" class="workflow-health library-view" aria-labelledby="workflow-health-title">
       <div class="workflow-health-heading"><h2 id="workflow-health-title">Refresh evidence</h2><a href="https://github.com/TeamStarWolf/intelligence-hub/actions/workflows/publish.yml" target="_blank" rel="noopener noreferrer nofollow" referrerpolicy="no-referrer">Workflow history ↗</a></div>
       <p id="workflow-health-message" class="workflow-health-message" role="status">Public workflow observations pending. The snapshot date above is the content date.</p>
       <div class="workflow-health-grid"><div id="workflow-run" class="workflow-health-item"><h3>Latest returned workflow run</h3><p>Unknown · no successful API read this session.</p></div><div id="workflow-schedule" class="workflow-health-item"><h3>Automatic schedule evidence</h3><p>Unknown · no successful API read this session.</p></div></div>
       <p id="workflow-health-clocks" class="workflow-health-clocks">Workflow API read time is separate from run activity and saved content.</p>
       <p class="workflow-health-boundary">A successful workflow can leave the published snapshot unchanged. These public run records do not expose the collector-step timestamp or prove that every publisher was admitted. Scheduled jobs may be delayed or dropped.</p>
     </section>
-    <section id="reports" class="reports-strip" aria-labelledby="reports-title">
+    <section id="reports" class="reports-strip library-view" aria-labelledby="reports-title">
       <div class="reports-heading"><h2 id="reports-title">Reports &amp; changes over time</h2></div>
       <p class="reports-note">Three daily editions plus weekly, weekend, fortnightly, monthly, quarterly and rolling six-month reports. Every edition keeps its period, sources, data and coverage limits.</p>
       <p id="report-status" class="reports-note" role="status">Report catalog and recorded schedule state load with the saved snapshot.</p>
@@ -41,16 +48,10 @@
       <div id="report-list" class="reports-links"></div>
       <details class="coverage-details"><summary>Previous-source revision review · 48–96 hours</summary><p id="revision-watch-summary" role="status">Dedicated citation review state is unavailable until its saved record loads. Feed refresh alone does not prove that previous articles were checked.</p><div id="revision-watch-list"></div></details>
     </section>
-    <section id="knowledge" class="reports-strip" aria-labelledby="knowledge-title">
-      <div class="reports-heading"><h2 id="knowledge-title">Threat context &amp; relationships</h2></div>
-      <p class="reports-note">Explore sourced CWE weaknesses, CAPEC attack patterns, actors, campaigns, products and mitigations. Taxonomy links are definitions, not proof that an attack occurred. CVE-specific guidance stays in the CVE register.</p>
-      <div class="filter-selects"><label><span class="field-label">Search context · all words must match</span><input id="knowledge-filter" type="search" maxlength="200" placeholder="Weakness, pattern, actor, product or mitigation…" autocomplete="off"></label><label><span class="field-label">Context type</span><select id="knowledge-kind"><option value="">All context</option><option value="cwe">CWE weaknesses</option><option value="capec">CAPEC patterns</option><option value="actor">Threat actors</option><option value="campaign">Campaigns</option><option value="product">Products</option><option value="mitigation">Mitigations</option></select></label></div>
-      <p id="knowledge-status" class="reports-note" role="status">Source-backed context has not loaded. Missing data means unknown coverage.</p><div id="knowledge-results" class="article-grid"></div>
-    </section>
     <div id="feed-error" class="notice notice-error" role="alert" hidden><strong>Feed notice.</strong><span id="feed-error-message"></span></div>
     <noscript><p class="notice">JavaScript is needed to read and filter the saved snapshot. Your browser does not fetch publishers or contact a model.</p></noscript>
-    <section id="timeline" class="timeline-section" aria-labelledby="timeline-title"><div class="compact-heading"><div><p class="eyebrow">ARCHIVE INDEX</p><h2 id="timeline-title">The long view.</h2></div><p>Calendar-year counts follow non-date filters.<br>Partial boundary years · primary dates in UTC</p></div><div id="year-timeline" class="year-timeline" role="group" aria-label="Filter by calendar year"><p class="muted">Years appear with the snapshot.</p></div><details class="month-drawer"><summary><span id="month-context">Month shortcuts</span><span class="drawer-action">MONTH INDEX <span aria-hidden="true">+</span></span></summary><div class="month-strip-heading"><span>Boundary months may cover only part of the month.</span><button id="clear-dates" type="button">Clear dates ×</button></div><div id="month-timeline" class="month-timeline" role="group" aria-label="Filter by primary date month"></div></details></section>
-    <section id="briefing" class="briefing" aria-labelledby="briefing-title">
+    <section id="timeline" class="timeline-section library-view" aria-labelledby="timeline-title"><div class="compact-heading"><div><p class="eyebrow">ARCHIVE INDEX</p><h2 id="timeline-title">The long view.</h2></div><p>Calendar-year counts follow non-date filters.<br>Partial boundary years · primary dates in UTC</p></div><div id="year-timeline" class="year-timeline" role="group" aria-label="Filter by calendar year"><p class="muted">Years appear with the snapshot.</p></div><details class="month-drawer"><summary><span id="month-context">Month shortcuts</span><span class="drawer-action">MONTH INDEX <span aria-hidden="true">+</span></span></summary><div class="month-strip-heading"><span>Boundary months may cover only part of the month.</span><button id="clear-dates" type="button">Clear dates ×</button></div><div id="month-timeline" class="month-timeline" role="group" aria-label="Filter by primary date month"></div></details></section>
+    <section id="briefing" class="briefing library-view" aria-labelledby="briefing-title">
       <div class="section-heading"><div><p class="eyebrow">THE BRIEFING</p><h2 id="briefing-title">Intelligence explorer<span class="heading-dot" aria-hidden="true">.</span></h2></div><span class="section-kicker"><span aria-hidden="true">✦</span> SOURCE FIRST / CONTEXT ALWAYS</span></div>
       <form id="filters" class="filters" role="search">
         <label class="search-label"><span class="field-label">Search intelligence · all words must match</span><span class="search-field"><span aria-hidden="true">⌕</span><input id="search" type="search" maxlength="200" placeholder="CVE, vendor, keyword or source…" autocomplete="off"></span></label>

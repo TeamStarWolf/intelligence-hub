@@ -345,3 +345,10 @@ dialog{background:#1a2226;border-color:#8b785a;border-top-color:#edac7c;border-r
 .mitigation-section .linked-coverage-count{font:10px/1.9 var(--mono);color:#d4bea3}
 .linked-coverage-more{min-height:42px;margin-top:8px;font-size:11px}
 @media(max-width:600px){.mitigation-section .linked-coverage-meta,.mitigation-section .linked-coverage-date,.mitigation-section .linked-coverage-count{font-size:11px}.linked-coverage-more{width:100%;min-height:44px}}
+
+/* Separate context from the library while retaining shared snapshot status. */
+#knowledge{display:none;scroll-margin-top:20px}
+#knowledge:target{display:block}
+#knowledge:target~.library-view{display:none}
+.site-header nav{flex-wrap:wrap}
+@supports selector(body:has(#knowledge:target)){body:not(:has(#knowledge:target)) .site-header .nav-library,body:has(#knowledge:target) .site-header .nav-knowledge{color:var(--orange)}}
