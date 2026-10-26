@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-26T13:36:45.448Z",
+  "updated_at": "2026-10-26T14:51:04.584Z",
   "reports": [
     {
       "id": "SW-MONTHLY-2026-01-RETRO",
@@ -254,8 +254,8 @@
       "compilation_precision": "timestamp",
       "status": "partial",
       "coverage": "source_subset",
-      "report_url": "https://teamstarwolf.github.io/intelligence-hub/reports/daily/2026-10-26/0600-CDT/",
-      "data_url": "https://teamstarwolf.github.io/intelligence-hub/reports/daily/2026-10-26/0600-CDT/data.json",
+      "report_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-26/0600-CDT/README.md",
+      "data_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-26/0600-CDT/data.json",
       "prior_report_id": "SW-DAILY-2026-10-25-2200-CDT"
     },
     {
@@ -270,8 +270,8 @@
       "compilation_precision": "timestamp",
       "status": "partial",
       "coverage": "source_subset",
-      "report_url": "https://teamstarwolf.github.io/intelligence-hub/reports/weekly/2026-W43-CLOSE-20261026/",
-      "data_url": "https://teamstarwolf.github.io/intelligence-hub/reports/weekly/2026-W43-CLOSE-20261026/data.json",
+      "report_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/weekly/2026-W43-CLOSE-20261026/README.md",
+      "data_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/weekly/2026-W43-CLOSE-20261026/data.json",
       "prior_report_id": "SW-WEEKLY-2026-W43"
     },
     {
@@ -286,8 +286,8 @@
       "compilation_precision": "timestamp",
       "status": "partial",
       "coverage": "source_subset",
-      "report_url": "https://teamstarwolf.github.io/intelligence-hub/reports/weekend/2026-10-24_2026-10-26/",
-      "data_url": "https://teamstarwolf.github.io/intelligence-hub/reports/weekend/2026-10-24_2026-10-26/data.json",
+      "report_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/weekend/2026-10-24_2026-10-26/README.md",
+      "data_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/weekend/2026-10-24_2026-10-26/data.json",
       "prior_report_id": null
     }
   ],
