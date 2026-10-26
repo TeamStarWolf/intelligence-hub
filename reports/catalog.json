@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-25T22:25:36.925Z",
+  "updated_at": "2026-10-26T07:27:30.984Z",
   "reports": [
     {
       "id": "SW-MONTHLY-2026-01-RETRO",
@@ -225,6 +225,22 @@
       "report_url": null,
       "data_url": null,
       "prior_report_id": null
+    },
+    {
+      "id": "SW-DAILY-2026-10-25-2200-CDT",
+      "origin": "generated_report",
+      "cadence": "daily",
+      "title": "October 25, 2026 · 22:00 Chicago · 48-hour edition",
+      "period_start": "2026-10-24T03:00:00Z",
+      "period_end": "2026-10-26T03:00:00Z",
+      "period_kind": "rolling_elapsed",
+      "compiled_at": "2026-10-26T07:21:59.704713+00:00",
+      "compilation_precision": "timestamp",
+      "status": "partial",
+      "coverage": "source_subset",
+      "report_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-25/2200-CDT/README.md",
+      "data_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-25/2200-CDT/data.json",
+      "prior_report_id": null
     }
   ],
   "indexes": [
@@ -238,19 +254,47 @@
     }
   ],
   "revision_review": {
-    "state": "not_run",
-    "report_id": null,
-    "recorded_at": null,
-    "nominal_cutoff": null,
+    "state": "partial",
+    "report_id": "SW-DAILY-2026-10-25-2200-CDT",
+    "recorded_at": "2026-10-26T07:05:05.253Z",
+    "nominal_cutoff": "2026-10-26T03:00:00Z",
     "lookback_hours": 96,
     "priority_hours": 48,
     "max_sources": 12,
     "min_success_interval_hours": 8,
     "min_failure_interval_hours": 24,
-    "records": [],
+    "records": [
+      {
+        "id": "REV-daily-20261025-2200-aws107",
+        "source_url": "https://aws.amazon.com/security/security-bulletins/rss/2026-107-aws/",
+        "status": "refused",
+        "recorded_at": "2026-10-26T07:05:05.253Z",
+        "last_cited_at": "2026-10-25T21:55:23.373Z",
+        "last_attempt_at": "2026-10-26T06:55:10.419927+00:00",
+        "checked_at": null,
+        "prior_checked_at": null,
+        "old_sha256": null,
+        "new_sha256": null,
+        "source_published_at": null,
+        "source_updated_at": null,
+        "eligibility_state": "deactivated",
+        "next_eligible_at": null,
+        "summary": "One initial baseline request for this previously cited locator returned HTTP 301. Redirects were disabled and no target was followed. No article body, qualified baseline or content comparison was established. The route is held pending separate review.",
+        "previous_report_id": "SW-MONTHLY-2026-10-MTD-20261025T211341Z",
+        "previous_report_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/monthly/2026-10/README.md",
+        "evidence_urls": [],
+        "comparison_scope": null,
+        "comparison_versions": {
+          "prior": null,
+          "current": null
+        }
+      }
+    ],
     "notes": [
-      "The dedicated prior-report citation review has not run. Existing feed and CNA refreshes do not establish a systematic article revision check.",
-      "Successful comparisons need a qualified compatible baseline; a changed response hash alone is not a changed security claim."
+      "Candidate metadata covered 333 citation occurrences and 273 exact URLs from 11 prior reports. All were cited within the recent 48 hours relative to the nominal cutoff. This was metadata assessment, not 273 primary-page checks. The date-only legacy weekly report was omitted without manufacturing a citation timestamp.",
+      "The conservative metadata plan selected zero requests because prior request history and compatible field baselines were not established for these exact locators. One initial baseline attempt followed a separate scope review. It returned HTTP 301; no redirect was followed. The earlier unknown-history assessment remains unchanged.",
+      "Actual outcomes: 1 requested locator, 0 qualified article checks, 0 semantic comparisons, 0 established changes and 0 established unchanged results. The remaining 272 URLs were not requested. Missing evidence does not prove unchanged content or absent exploitation.",
+      "The requested source route is deactivated pending separate review, with no automatic next-check time. The next report opportunity is 26 October at 06:00 America/Chicago (11:00Z); it does not reactivate held sources or guarantee delivery."
     ]
   },
   "notes": [

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="750" viewBox="0 0 1000 750" role="img" aria-labelledby="title desc">
+<title id="title">Selected publisher row distribution</title>
+<desc id="desc">48 source-declared timestamp rows / 15 source IDs. Saved source outcomes: 54 OK / 7 partial / 1 failed of 62. Counts show selected publications, not publisher-intake growth.</desc>
+<rect width="1000" height="750" rx="14" fill="#202327"/>
+<rect x="28" y="25" width="6" height="30" fill="#F28C28"/>
+<text x="48" y="49" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="25" font-weight="700">Selected publisher row distribution</text>
+<text x="48" y="78" fill="#B8BEC5" font-family="Arial,sans-serif" font-size="15">48 source-declared timestamp rows / 15 source IDs</text>
+<text x="48" y="123" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">AWS Security Bulletins</text>
+<rect x="360" y="104" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="104" width="520.000" height="25" rx="3" fill="#F28C28"/>
+<text x="901" y="123" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">11</text>
+<text x="48" y="160" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">Security Affairs</text>
+<rect x="360" y="141" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="141" width="425.455" height="25" rx="3" fill="#69727D"/>
+<text x="901" y="160" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">9</text>
+<text x="48" y="197" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">The Hacker News</text>
+<rect x="360" y="178" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="178" width="378.182" height="25" rx="3" fill="#F28C28"/>
+<text x="901" y="197" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">8</text>
+<text x="48" y="234" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">Red Hat Security Advisories</text>
+<rect x="360" y="215" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="215" width="236.364" height="25" rx="3" fill="#69727D"/>
+<text x="901" y="234" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">5</text>
+<text x="48" y="271" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">BleepingComputer</text>
+<rect x="360" y="252" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="252" width="94.545" height="25" rx="3" fill="#F28C28"/>
+<text x="901" y="271" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">2</text>
+<text x="48" y="308" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">CyberInsider</text>
+<rect x="360" y="289" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="289" width="94.545" height="25" rx="3" fill="#69727D"/>
+<text x="901" y="308" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">2</text>
+<text x="48" y="345" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">Help Net Security</text>
+<rect x="360" y="326" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="326" width="94.545" height="25" rx="3" fill="#F28C28"/>
+<text x="901" y="345" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">2</text>
+<text x="48" y="382" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">TechCrunch Security</text>
+<rect x="360" y="363" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="363" width="94.545" height="25" rx="3" fill="#69727D"/>
+<text x="901" y="382" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">2</text>
+<text x="48" y="419" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">Hackread</text>
+<rect x="360" y="400" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="400" width="47.273" height="25" rx="3" fill="#F28C28"/>
+<text x="901" y="419" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">1</text>
+<text x="48" y="456" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">Palo Alto Networks Security Advisories</text>
+<rect x="360" y="437" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="437" width="47.273" height="25" rx="3" fill="#69727D"/>
+<text x="901" y="456" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">1</text>
+<text x="48" y="493" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">Risky Business Newsletters</text>
+<rect x="360" y="474" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="474" width="47.273" height="25" rx="3" fill="#F28C28"/>
+<text x="901" y="493" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">1</text>
+<text x="48" y="530" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">SANS Internet Storm Center</text>
+<rect x="360" y="511" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="511" width="47.273" height="25" rx="3" fill="#69727D"/>
+<text x="901" y="530" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">1</text>
+<text x="48" y="567" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">SecurityWeek</text>
+<rect x="360" y="548" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="548" width="47.273" height="25" rx="3" fill="#F28C28"/>
+<text x="901" y="567" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">1</text>
+<text x="48" y="604" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">The Register Security</text>
+<rect x="360" y="585" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="585" width="47.273" height="25" rx="3" fill="#69727D"/>
+<text x="901" y="604" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">1</text>
+<text x="48" y="641" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">WIRED Security</text>
+<rect x="360" y="622" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="622" width="47.273" height="25" rx="3" fill="#F28C28"/>
+<text x="901" y="641" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">1</text>
+<text x="48" y="706" fill="#B8BEC5" font-family="Arial,sans-serif" font-size="13">Saved source outcomes: 54 OK / 7 partial / 1 failed of 62. Counts show selected publications, not</text>
+<text x="48" y="726" fill="#B8BEC5" font-family="Arial,sans-serif" font-size="13">publisher-intake growth.</text>
+</svg>

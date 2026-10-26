@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="463" viewBox="0 0 1000 463" role="img" aria-labelledby="title desc">
+<title id="title">Retained row coverage</title>
+<desc id="desc">Six date cohorts partition 3,754 saved rows; the nominal window is 48h. Row counts only; source clocks and UTC-calendar convention do not prove 48h events. 25m43s nominal tail is unobserved.</desc>
+<rect width="1000" height="463" rx="14" fill="#202327"/>
+<rect x="28" y="25" width="6" height="30" fill="#F28C28"/>
+<text x="48" y="49" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="25" font-weight="700">Retained row coverage</text>
+<text x="48" y="78" fill="#B8BEC5" font-family="Arial,sans-serif" font-size="15">Six date cohorts partition 3,754 saved rows; the nominal window is 48h</text>
+<text x="48" y="118" fill="#F28C28" font-family="Arial,sans-serif" font-size="18" font-weight="700">48 timestamp rows | 20 CVE mentions | 0 selected KEV additions | 1 uncertain date</text>
+<text x="48" y="169" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">Declared timestamp cohort</text>
+<rect x="360" y="150" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="150" width="6.848" height="25" rx="3" fill="#F28C28"/>
+<text x="901" y="169" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">48</text>
+<text x="48" y="206" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">Selected UTC-calendar dates</text>
+<rect x="360" y="187" width="520" height="25" rx="3" fill="#2B3036"/>
+<text x="901" y="206" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">0</text>
+<text x="48" y="243" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">Boundary-uncertain date</text>
+<rect x="360" y="224" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="224" width="0.143" height="25" rx="3" fill="#F28C28"/>
+<text x="901" y="243" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">1</text>
+<text x="48" y="280" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">Undated, excluded</text>
+<rect x="360" y="261" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="261" width="8.560" height="25" rx="3" fill="#69727D"/>
+<text x="901" y="280" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">60</text>
+<text x="48" y="317" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">Outside window, excluded</text>
+<rect x="360" y="298" width="520" height="25" rx="3" fill="#2B3036"/>
+<rect x="360" y="298" width="520.000" height="25" rx="3" fill="#F28C28"/>
+<text x="901" y="317" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">3,645</text>
+<text x="48" y="354" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="14">After generation, excluded</text>
+<rect x="360" y="335" width="520" height="25" rx="3" fill="#2B3036"/>
+<text x="901" y="354" fill="#F3F4F5" font-family="Arial,sans-serif" font-size="16" font-weight="700">0</text>
+<text x="48" y="419" fill="#B8BEC5" font-family="Arial,sans-serif" font-size="13">Row counts only; source clocks and UTC-calendar convention do not prove 48h events. 25m43s nominal tail is</text>
+<text x="48" y="439" fill="#B8BEC5" font-family="Arial,sans-serif" font-size="13">unobserved.</text>
+</svg>

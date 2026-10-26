@@ -10,7 +10,7 @@ Daily editions are requested at **06:00, 14:00 and 22:00 America/Chicago**, cove
 
 ## Daily
 
-No daily edition is published yet. The first scheduled edition will have an immutable period and actual compilation time; a planned slot is not a completed report.
+- [October 25, 2026 · 22:00 Chicago · 48-hour edition](daily/2026-10-25/2200-CDT/README.md) · [data](daily/2026-10-25/2200-CDT/data.json) · partial source coverage, compiled late on October 26 at 07:21:59 UTC. The fixed period is October 24 at 03:00 UTC through October 26 at 03:00 UTC; the retained input ends 25 minutes 43 seconds before that cutoff. One prior-citation request was refused (HTTP 301); no qualified article comparison was completed. The next nominal reporting opportunity is **October 26 at 06:00 America/Chicago (11:00 UTC)**, subject to app/computer availability.
 
 ## Weekly
 
