@@ -10,11 +10,19 @@ Daily editions are requested at **06:00, 14:00 and 22:00 America/Chicago**, cove
 
 ## Daily
 
-- [October 25, 2026 · 22:00 Chicago · 48-hour edition](daily/2026-10-25/2200-CDT/README.md) · [data](daily/2026-10-25/2200-CDT/data.json) · partial source coverage, compiled late on October 26 at 07:21:59 UTC. The fixed period is October 24 at 03:00 UTC through October 26 at 03:00 UTC; the retained input ends 25 minutes 43 seconds before that cutoff. One prior-citation request was refused (HTTP 301); no qualified article comparison was completed. The next nominal reporting opportunity is **October 26 at 06:00 America/Chicago (11:00 UTC)**, subject to app/computer availability.
+- [October 26, 2026 · 06:00 Chicago · 24-hour edition](daily/2026-10-26/0600-CDT/README.md) · [data](daily/2026-10-26/0600-CDT/data.json) · 75 explicitly timestamped source entries mentioning 7 unique CVEs; partial, retrospective coverage, compiled late at 13:36:45 UTC. The fixed window ends at 11:00 UTC; the retained input was generated later at 11:16:36 UTC. **Next nominal report/revision opportunity: October 26 at 14:00 America/Chicago (19:00 UTC)**, subject to app/computer availability.
+
+- [October 25, 2026 · 22:00 Chicago · 48-hour edition](daily/2026-10-25/2200-CDT/README.md) · [data](daily/2026-10-25/2200-CDT/data.json) · partial source coverage, compiled late on October 26 at 07:21:59 UTC. The fixed period is October 24 at 03:00 UTC through October 26 at 03:00 UTC; the retained input ends 25 minutes 43 seconds before that cutoff. One prior-citation request was refused (HTTP 301); no qualified article comparison was completed. That edition recorded its next nominal reporting opportunity as **October 26 at 06:00 America/Chicago (11:00 UTC)**, subject to app/computer availability.
 
 ## Weekly
 
+- [2026-W43 · closing edition](weekly/2026-W43-CLOSE-20261026/README.md) · [data](weekly/2026-W43-CLOSE-20261026/data.json) · October 19 at 00:00 through October 26 at 00:00 Chicago. The source subset has 539 timestamped rows plus 22 rows selected under an explicit UTC date-only calendar convention, mentioning 127 unique CVEs. Compiled retrospectively at 13:36:45 UTC; this separate closing edition preserves the legacy W43 report below.
+
 - [2026-W43 · October19–25,2026](weekly/2026-W43/README.md), with [data](weekly/2026-W43/data.json) and charts. This legacy report retains its original date-only compilation/period and source-attributed claims; catalog inclusion does not reassess them.
+
+## Weekend
+
+- [October 24–25, 2026 · weekend closing edition](weekend/2026-10-24_2026-10-26/README.md) · [data](weekend/2026-10-24_2026-10-26/data.json) · local Saturday 00:00 through Monday 00:00. The partial subset has 72 timestamped main rows mentioning 20 unique CVEs, with one date-boundary row kept separately on watch. Compiled retrospectively at 13:36:45 UTC. The next nominal report/revision opportunity is **October 26 at 14:00 America/Chicago (19:00 UTC)**.
 
 ## 2026 monthly editions
 

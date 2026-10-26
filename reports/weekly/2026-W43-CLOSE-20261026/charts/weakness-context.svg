@@ -1,0 +1,307 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="2603" viewBox="0 0 1000 2603" role="img" aria-labelledby="title desc">
+<title id="title">Captured CNA weakness context</title>
+<desc id="desc">127 main CVE contexts; 110 with supplied CWE IDs. Each CWE bar counts unique CVE contexts; one CVE can appear in several CWE bars. Missing/status bars are explicit. Weakness and CAPEC mappings do not establish observed attacks, devices or actor responsibility.</desc>
+<rect width="1000" height="2603" rx="14" fill="#101214"/>
+<rect x="28" y="24" width="6" height="31" fill="#ff8a3d"/>
+<text x="48" y="49" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="25" font-weight="700">Captured CNA weakness context</text>
+<text x="48" y="78" fill="#b3b8bf" font-family="Arial,sans-serif" font-size="14">127 main CVE contexts; 110 with supplied CWE IDs</text>
+<text x="48" y="112" fill="#ff8a3d" font-family="Arial,sans-serif" font-size="16" font-weight="700">110 with CWE | 17 without supplied CWE</text>
+<text x="48" y="160" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-416</text>
+<rect x="355" y="142" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="142" width="36.142" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="160" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">9</text>
+<text x="48" y="192" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-78</text>
+<rect x="355" y="174" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="174" width="28.110" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="192" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">7</text>
+<text x="48" y="224" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-284</text>
+<rect x="355" y="206" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="206" width="20.079" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="224" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">5</text>
+<text x="48" y="256" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-918</text>
+<rect x="355" y="238" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="238" width="20.079" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="256" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">5</text>
+<text x="48" y="288" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-122</text>
+<rect x="355" y="270" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="270" width="16.063" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="288" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">4</text>
+<text x="48" y="320" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-184</text>
+<rect x="355" y="302" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="302" width="16.063" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="320" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">4</text>
+<text x="48" y="352" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-863</text>
+<rect x="355" y="334" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="334" width="16.063" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="352" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">4</text>
+<text x="48" y="384" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-190</text>
+<rect x="355" y="366" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="366" width="12.047" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="384" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">3</text>
+<text x="48" y="416" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-20</text>
+<rect x="355" y="398" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="398" width="12.047" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="416" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">3</text>
+<text x="48" y="448" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-295</text>
+<rect x="355" y="430" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="430" width="12.047" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="448" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">3</text>
+<text x="48" y="480" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-407</text>
+<rect x="355" y="462" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="462" width="12.047" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="480" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">3</text>
+<text x="48" y="512" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-444</text>
+<rect x="355" y="494" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="494" width="12.047" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="512" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">3</text>
+<text x="48" y="544" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-617</text>
+<rect x="355" y="526" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="526" width="12.047" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="544" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">3</text>
+<text x="48" y="576" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-787</text>
+<rect x="355" y="558" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="558" width="12.047" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="576" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">3</text>
+<text x="48" y="608" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-1325</text>
+<rect x="355" y="590" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="590" width="8.031" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="608" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="640" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-1419</text>
+<rect x="355" y="622" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="622" width="8.031" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="640" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="672" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-195</text>
+<rect x="355" y="654" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="654" width="8.031" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="672" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="704" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-200</text>
+<rect x="355" y="686" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="686" width="8.031" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="704" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="736" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-22</text>
+<rect x="355" y="718" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="718" width="8.031" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="736" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="768" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-23</text>
+<rect x="355" y="750" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="750" width="8.031" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="768" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="800" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-283</text>
+<rect x="355" y="782" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="782" width="8.031" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="800" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="832" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-290</text>
+<rect x="355" y="814" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="814" width="8.031" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="832" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="864" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-306</text>
+<rect x="355" y="846" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="846" width="8.031" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="864" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="896" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-341</text>
+<rect x="355" y="878" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="878" width="8.031" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="896" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="928" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-400</text>
+<rect x="355" y="910" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="910" width="8.031" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="928" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="960" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-755</text>
+<rect x="355" y="942" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="942" width="8.031" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="960" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="992" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-770</text>
+<rect x="355" y="974" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="974" width="8.031" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="992" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="1024" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-824</text>
+<rect x="355" y="1006" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1006" width="8.031" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1024" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="1056" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-88</text>
+<rect x="355" y="1038" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1038" width="8.031" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1056" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="1088" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-119</text>
+<rect x="355" y="1070" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1070" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1088" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1120" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-120</text>
+<rect x="355" y="1102" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1102" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1120" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1152" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-121</text>
+<rect x="355" y="1134" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1134" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1152" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1184" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-1220</text>
+<rect x="355" y="1166" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1166" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1184" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1216" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-1289</text>
+<rect x="355" y="1198" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1198" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1216" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1248" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-172</text>
+<rect x="355" y="1230" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1230" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1248" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1280" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-197</text>
+<rect x="355" y="1262" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1262" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1280" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1312" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-201</text>
+<rect x="355" y="1294" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1294" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1312" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1344" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-205</text>
+<rect x="355" y="1326" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1326" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1344" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1376" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-248</text>
+<rect x="355" y="1358" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1358" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1376" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1408" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-252</text>
+<rect x="355" y="1390" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1390" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1408" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1440" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-266</text>
+<rect x="355" y="1422" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1422" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1440" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1472" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-288</text>
+<rect x="355" y="1454" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1454" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1472" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1504" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-319</text>
+<rect x="355" y="1486" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1486" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1504" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1536" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-330</text>
+<rect x="355" y="1518" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1518" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1536" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1568" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-35</text>
+<rect x="355" y="1550" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1550" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1568" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1600" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-354</text>
+<rect x="355" y="1582" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1582" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1600" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1632" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-362</text>
+<rect x="355" y="1614" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1614" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1632" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1664" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-367</text>
+<rect x="355" y="1646" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1646" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1664" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1696" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-409</text>
+<rect x="355" y="1678" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1678" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1696" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1728" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-415</text>
+<rect x="355" y="1710" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1710" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1728" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1760" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-427</text>
+<rect x="355" y="1742" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1742" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1760" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1792" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-476</text>
+<rect x="355" y="1774" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1774" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1792" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1824" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-488</text>
+<rect x="355" y="1806" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1806" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1824" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1856" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-502</text>
+<rect x="355" y="1838" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1838" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1856" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1888" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-565</text>
+<rect x="355" y="1870" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1870" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1888" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1920" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-59</text>
+<rect x="355" y="1902" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1902" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1920" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1952" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-611</text>
+<rect x="355" y="1934" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1934" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1952" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1984" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-653</text>
+<rect x="355" y="1966" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1966" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1984" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="2016" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-73</text>
+<rect x="355" y="1998" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1998" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="2016" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="2048" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-754</text>
+<rect x="355" y="2030" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="2030" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="2048" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="2080" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-77</text>
+<rect x="355" y="2062" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="2062" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="2080" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="2112" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-789</text>
+<rect x="355" y="2094" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="2094" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="2112" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="2144" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-79</text>
+<rect x="355" y="2126" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="2126" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="2144" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="2176" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-807</text>
+<rect x="355" y="2158" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="2158" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="2176" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="2208" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-84</text>
+<rect x="355" y="2190" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="2190" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="2208" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="2240" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-840</text>
+<rect x="355" y="2222" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="2222" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="2240" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="2272" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-862</text>
+<rect x="355" y="2254" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="2254" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="2272" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="2304" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-89</text>
+<rect x="355" y="2286" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="2286" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="2304" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="2336" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-90</text>
+<rect x="355" y="2318" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="2318" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="2336" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="2368" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-908</text>
+<rect x="355" y="2350" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="2350" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="2368" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="2400" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-94</text>
+<rect x="355" y="2382" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="2382" width="4.016" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="2400" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="2432" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-940</text>
+<rect x="355" y="2414" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="2414" width="4.016" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="2432" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="2464" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">No supplied CWE: not_projected</text>
+<rect x="355" y="2446" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="2446" width="8.031" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="2464" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="2496" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">No supplied CWE: not_supplied</text>
+<rect x="355" y="2478" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="2478" width="60.236" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="2496" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">15</text>
+<text x="48" y="2536" fill="#b3b8bf" font-family="Arial,sans-serif" font-size="12">Each CWE bar counts unique CVE contexts; one CVE can appear in several CWE bars. Missing/status bars are</text>
+<text x="48" y="2555" fill="#b3b8bf" font-family="Arial,sans-serif" font-size="12">explicit. Weakness and CAPEC mappings do not establish observed attacks, devices or actor responsibility.</text>
+</svg>

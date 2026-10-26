@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="491" viewBox="0 0 1000 491" role="img" aria-labelledby="title desc">
+<title id="title">Captured CNA weakness context</title>
+<desc id="desc">7 main CVE contexts; 4 with supplied CWE IDs. Each CWE bar counts unique CVE contexts; one CVE can appear in several CWE bars. Missing/status bars are explicit. Weakness and CAPEC mappings do not establish observed attacks, devices or actor responsibility.</desc>
+<rect width="1000" height="491" rx="14" fill="#101214"/>
+<rect x="28" y="24" width="6" height="31" fill="#ff8a3d"/>
+<text x="48" y="49" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="25" font-weight="700">Captured CNA weakness context</text>
+<text x="48" y="78" fill="#b3b8bf" font-family="Arial,sans-serif" font-size="14">7 main CVE contexts; 4 with supplied CWE IDs</text>
+<text x="48" y="112" fill="#ff8a3d" font-family="Arial,sans-serif" font-size="16" font-weight="700">4 with CWE | 3 without supplied CWE</text>
+<text x="48" y="160" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-1325</text>
+<rect x="355" y="142" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="142" width="145.714" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="160" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="192" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-1419</text>
+<rect x="355" y="174" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="174" width="145.714" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="192" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="224" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-416</text>
+<rect x="355" y="206" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="206" width="145.714" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="224" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="256" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-755</text>
+<rect x="355" y="238" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="238" width="145.714" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="256" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="288" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-824</text>
+<rect x="355" y="270" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="270" width="145.714" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="288" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="320" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-754</text>
+<rect x="355" y="302" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="302" width="72.857" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="320" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="352" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">CWE-78</text>
+<rect x="355" y="334" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="334" width="72.857" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="352" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="384" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">No supplied CWE: not_projected</text>
+<rect x="355" y="366" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="366" width="218.571" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="384" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">3</text>
+<text x="48" y="424" fill="#b3b8bf" font-family="Arial,sans-serif" font-size="12">Each CWE bar counts unique CVE contexts; one CVE can appear in several CWE bars. Missing/status bars are</text>
+<text x="48" y="443" fill="#b3b8bf" font-family="Arial,sans-serif" font-size="12">explicit. Weakness and CAPEC mappings do not establish observed attacks, devices or actor responsibility.</text>
+</svg>

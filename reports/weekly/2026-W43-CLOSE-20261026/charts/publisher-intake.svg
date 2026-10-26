@@ -1,0 +1,216 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1886" viewBox="0 0 1000 1886" role="img" aria-labelledby="title desc">
+<title id="title">Selected rows by source</title>
+<desc id="desc">561 selected main rows across 51 source IDs. Bars count selected declared timestamps plus full UTC-calendar rows, not publisher intake, requests, completeness or incidents. CISA and curation retain their separate origin meanings. Boundary watch rows are excluded.</desc>
+<rect width="1000" height="1886" rx="14" fill="#101214"/>
+<rect x="28" y="24" width="6" height="31" fill="#ff8a3d"/>
+<text x="48" y="49" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="25" font-weight="700">Selected rows by source</text>
+<text x="48" y="78" fill="#b3b8bf" font-family="Arial,sans-serif" font-size="14">561 selected main rows across 51 source IDs</text>
+<text x="48" y="112" fill="#ff8a3d" font-family="Arial,sans-serif" font-size="16" font-weight="700">539 timestamp + 22 UTC-calendar rows | 127 mentioned CVEs</text>
+<text x="48" y="160" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">redhat-security</text>
+<rect x="355" y="142" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="142" width="510.000" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="160" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">103</text>
+<text x="48" y="192" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">the-hacker-news</text>
+<rect x="355" y="174" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="174" width="262.427" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="192" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">53</text>
+<text x="48" y="224" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">register-security</text>
+<rect x="355" y="206" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="206" width="163.398" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="224" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">33</text>
+<text x="48" y="256" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">dark-reading</text>
+<rect x="355" y="238" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="238" width="143.592" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="256" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">29</text>
+<text x="48" y="288" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">canadian-cyber-centre</text>
+<rect x="355" y="270" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="270" width="123.786" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="288" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">25</text>
+<text x="48" y="320" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">infosecurity-magazine</text>
+<rect x="355" y="302" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="302" width="113.883" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="320" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">23</text>
+<text x="48" y="352" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">aws-security-bulletins</text>
+<rect x="355" y="334" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="334" width="103.981" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="352" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">21</text>
+<text x="48" y="384" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">cso</text>
+<rect x="355" y="366" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="366" width="99.029" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="384" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">20</text>
+<text x="48" y="416" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">bleepingcomputer</text>
+<rect x="355" y="398" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="398" width="79.223" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="416" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">16</text>
+<text x="48" y="448" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">help-net-security</text>
+<rect x="355" y="430" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="430" width="69.320" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="448" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">14</text>
+<text x="48" y="480" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">security-affairs</text>
+<rect x="355" y="462" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="462" width="69.320" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="480" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">14</text>
+<text x="48" y="512" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">debian-security</text>
+<rect x="355" y="494" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="494" width="64.369" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="512" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">13</text>
+<text x="48" y="544" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">securityweek</text>
+<rect x="355" y="526" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="526" width="54.466" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="544" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">11</text>
+<text x="48" y="576" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">cyberinsider</text>
+<rect x="355" y="558" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="558" width="49.515" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="576" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">10</text>
+<text x="48" y="608" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">cyberscoop</text>
+<rect x="355" y="590" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="590" width="49.515" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="608" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">10</text>
+<text x="48" y="640" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">cybersecurity-dive</text>
+<rect x="355" y="622" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="622" width="49.515" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="640" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">10</text>
+<text x="48" y="672" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">hackread</text>
+<rect x="355" y="654" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="654" width="49.515" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="672" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">10</text>
+<text x="48" y="704" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">ubuntu-usn</text>
+<rect x="355" y="686" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="686" width="49.515" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="704" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">10</text>
+<text x="48" y="736" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">sans-isc</text>
+<rect x="355" y="718" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="718" width="44.563" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="736" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">9</text>
+<text x="48" y="768" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">ars-security</text>
+<rect x="355" y="750" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="750" width="39.612" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="768" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">8</text>
+<text x="48" y="800" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">cisa-kev</text>
+<rect x="355" y="782" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="782" width="39.612" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="800" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">8</text>
+<text x="48" y="832" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">techcrunch-security</text>
+<rect x="355" y="814" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="814" width="39.612" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="832" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">8</text>
+<text x="48" y="864" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">wired-security</text>
+<rect x="355" y="846" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="846" width="39.612" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="864" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">8</text>
+<text x="48" y="896" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">splunk-advisories</text>
+<rect x="355" y="878" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="878" width="34.660" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="896" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">7</text>
+<text x="48" y="928" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">databreaches</text>
+<rect x="355" y="910" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="910" width="29.709" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="928" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">6</text>
+<text x="48" y="960" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">qualys</text>
+<rect x="355" y="942" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="942" width="29.709" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="960" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">6</text>
+<text x="48" y="992" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">schneier</text>
+<rect x="355" y="974" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="974" width="29.709" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="992" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">6</text>
+<text x="48" y="1024" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">tenable</text>
+<rect x="355" y="1006" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1006" width="29.709" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1024" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">6</text>
+<text x="48" y="1056" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">cloudflare-security</text>
+<rect x="355" y="1038" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1038" width="24.757" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1056" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">5</text>
+<text x="48" y="1088" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">sonatype</text>
+<rect x="355" y="1070" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1070" width="24.757" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1088" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">5</text>
+<text x="48" y="1120" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">the-record</text>
+<rect x="355" y="1102" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1102" width="24.757" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1120" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">5</text>
+<text x="48" y="1152" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">unit42</text>
+<rect x="355" y="1134" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1134" width="24.757" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1152" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">5</text>
+<text x="48" y="1184" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">risky-business-news</text>
+<rect x="355" y="1166" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1166" width="19.806" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1184" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">4</text>
+<text x="48" y="1216" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">securelist</text>
+<rect x="355" y="1198" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1198" width="19.806" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1216" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">4</text>
+<text x="48" y="1248" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">snyk</text>
+<rect x="355" y="1230" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1230" width="19.806" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1248" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">4</text>
+<text x="48" y="1280" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">check-point-research</text>
+<rect x="355" y="1262" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1262" width="14.854" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1280" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">3</text>
+<text x="48" y="1312" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">f5-labs</text>
+<rect x="355" y="1294" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1294" width="14.854" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1312" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">3</text>
+<text x="48" y="1344" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">google-security</text>
+<rect x="355" y="1326" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1326" width="14.854" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1344" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">3</text>
+<text x="48" y="1376" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">microsoft-security</text>
+<rect x="355" y="1358" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1358" width="14.854" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1376" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">3</text>
+<text x="48" y="1408" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">talos</text>
+<rect x="355" y="1390" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1390" width="14.854" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1408" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">3</text>
+<text x="48" y="1440" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">cert-cc</text>
+<rect x="355" y="1422" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1422" width="9.903" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1440" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="1472" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">eset-research</text>
+<rect x="355" y="1454" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1454" width="9.903" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1472" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="1504" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">krebs</text>
+<rect x="355" y="1486" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1486" width="9.903" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1504" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="1536" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">ncsc-uk</text>
+<rect x="355" y="1518" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1518" width="9.903" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1536" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="1568" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">sekoia</text>
+<rect x="355" y="1550" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1550" width="9.903" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1568" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="1600" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">talos-threat-advisories</text>
+<rect x="355" y="1582" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1582" width="9.903" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1600" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">2</text>
+<text x="48" y="1632" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">cisa-cybersecurity-advisories</text>
+<rect x="355" y="1614" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1614" width="4.951" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1632" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1664" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">graham-cluley</text>
+<rect x="355" y="1646" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1646" width="4.951" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1664" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1696" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">litellm</text>
+<rect x="355" y="1678" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1678" width="4.951" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1696" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1728" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">mozilla-security</text>
+<rect x="355" y="1710" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1710" width="4.951" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="1728" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1760" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">troy-hunt</text>
+<rect x="355" y="1742" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="1742" width="4.951" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="1760" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">1</text>
+<text x="48" y="1800" fill="#b3b8bf" font-family="Arial,sans-serif" font-size="12">Bars count selected declared timestamps plus full UTC-calendar rows, not publisher intake, requests,</text>
+<text x="48" y="1819" fill="#b3b8bf" font-family="Arial,sans-serif" font-size="12">completeness or incidents. CISA and curation retain their separate origin meanings. Boundary watch rows are</text>
+<text x="48" y="1838" fill="#b3b8bf" font-family="Arial,sans-serif" font-size="12">excluded.</text>
+</svg>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="427" viewBox="0 0 1000 427" role="img" aria-labelledby="title desc">
+<title id="title">Retained row coverage</title>
+<desc id="desc">3,817 saved rows; six mutually exclusive date cohorts. Date-only selection uses a UTC-calendar convention with unknown publisher timezone. Undated/outside rows are retained-input denominators, not period activity. Later generation does not establish complete coverage.</desc>
+<rect width="1000" height="427" rx="14" fill="#101214"/>
+<rect x="28" y="24" width="6" height="31" fill="#ff8a3d"/>
+<text x="48" y="49" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="25" font-weight="700">Retained row coverage</text>
+<text x="48" y="78" fill="#b3b8bf" font-family="Arial,sans-serif" font-size="14">3,817 saved rows; six mutually exclusive date cohorts</text>
+<text x="48" y="112" fill="#ff8a3d" font-family="Arial,sans-serif" font-size="16" font-weight="700">539 timestamp + 22 UTC-calendar rows | 127 mentioned CVEs</text>
+<text x="48" y="160" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">Declared timestamp in period</text>
+<rect x="355" y="142" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="142" width="72.017" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="160" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">539</text>
+<text x="48" y="192" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">Full UTC-calendar date</text>
+<rect x="355" y="174" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="174" width="2.939" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="192" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">22</text>
+<text x="48" y="224" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">Boundary / generation-uncertain date</text>
+<rect x="355" y="206" width="510" height="23" rx="3" fill="#24282d"/>
+<text x="901" y="224" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">0</text>
+<text x="48" y="256" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">Undated</text>
+<rect x="355" y="238" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="238" width="8.017" height="23" rx="3" fill="#828b97"/>
+<text x="901" y="256" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">60</text>
+<text x="48" y="288" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">Outside period</text>
+<rect x="355" y="270" width="510" height="23" rx="3" fill="#24282d"/>
+<rect x="355" y="270" width="427.026" height="23" rx="3" fill="#ff8a3d"/>
+<text x="901" y="288" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">3,196</text>
+<text x="48" y="320" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="13">Explicit timestamp after generation</text>
+<rect x="355" y="302" width="510" height="23" rx="3" fill="#24282d"/>
+<text x="901" y="320" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="15">0</text>
+<text x="48" y="360" fill="#b3b8bf" font-family="Arial,sans-serif" font-size="12">Date-only selection uses a UTC-calendar convention with unknown publisher timezone. Undated/outside rows are</text>
+<text x="48" y="379" fill="#b3b8bf" font-family="Arial,sans-serif" font-size="12">retained-input denominators, not period activity. Later generation does not establish complete coverage.</text>
+</svg>

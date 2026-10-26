@@ -1,0 +1,4231 @@
+{
+  "schema": "SW-REPORT-DATA-V1",
+  "report_id": "SW-DAILY-2026-10-26-0600-CDT",
+  "cadence": "daily",
+  "status": "partial",
+  "period": {
+    "timezone": "America/Chicago",
+    "start_inclusive_local": "2026-10-25T06:00:00-05:00",
+    "end_exclusive_local": "2026-10-26T06:00:00-05:00",
+    "start_inclusive_utc": "2026-10-25T11:00:00Z",
+    "end_exclusive_utc": "2026-10-26T11:00:00Z",
+    "elapsed_hours": 24,
+    "phase": "rolling_elapsed",
+    "calendar_period_closed": false,
+    "period_key": "SW-DAILY-2026-10-26-0600-CDT"
+  },
+  "clocks": {
+    "compiled_at": "2026-10-26T13:36:45.448Z",
+    "input_generated_at": "2026-10-26T11:16:36+00:00",
+    "input_captured_at": "2026-10-26T12:11:04.706663+00:00",
+    "source_record_clocks_in_briefs": true,
+    "compiled_retrospectively": true
+  },
+  "input": {
+    "url": "https://teamstarwolf.github.io/intelligence-hub/data/feed.json",
+    "sha256": "0f712b6249963a7e3d402faba8d33deebff31494f7e3dfb62aa1be7e1a9c65cb",
+    "bytes": 11003365,
+    "schema_version": 6,
+    "qualified_level": "Whole saved schema-six input and bounded projection; not a publisher-body review",
+    "saved_window": {
+      "start": "1998-01-01",
+      "end": "2026-10-26"
+    }
+  },
+  "coverage": {
+    "status": "source_subset",
+    "source_subset": [
+      "bleepingcomputer",
+      "cso",
+      "cybersecurity-dive",
+      "help-net-security",
+      "infosecurity-magazine",
+      "paloalto-psirt",
+      "qualys",
+      "redhat-security",
+      "register-security",
+      "risky-business-news",
+      "sans-isc",
+      "securelist",
+      "security-affairs",
+      "securityweek",
+      "the-hacker-news"
+    ],
+    "whole_input_counts": {
+      "articles": 3817,
+      "CNA_contexts": 2180,
+      "sources": 62
+    },
+    "source_health": [
+      {
+        "id": "apple-security-research",
+        "name": "Apple Security Research",
+        "kind": "research",
+        "url": "https://security.apple.com/blog/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 13
+      },
+      {
+        "id": "ars-security",
+        "name": "Ars Technica Security",
+        "kind": "reporting",
+        "url": "https://arstechnica.com/security/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 20
+      },
+      {
+        "id": "aws-security-bulletins",
+        "name": "AWS Security Bulletins",
+        "kind": "advisory",
+        "url": "https://aws.amazon.com/security/security-bulletins/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:30+00:00",
+        "last_success": "2026-10-26T11:16:30+00:00",
+        "articles": 50
+      },
+      {
+        "id": "bleepingcomputer",
+        "name": "BleepingComputer",
+        "kind": "reporting",
+        "url": "https://www.bleepingcomputer.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:29+00:00",
+        "last_success": "2026-10-26T11:16:30+00:00",
+        "articles": 18
+      },
+      {
+        "id": "canadian-cyber-centre",
+        "name": "Canadian Centre for Cyber Security",
+        "kind": "advisory",
+        "url": "https://www.cyber.gc.ca/en",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:30+00:00",
+        "last_success": "2026-10-26T11:16:30+00:00",
+        "articles": 50
+      },
+      {
+        "id": "cert-cc",
+        "name": "CERT/CC Vulnerability Notes",
+        "kind": "advisory",
+        "url": "https://www.kb.cert.org/vuls/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:30+00:00",
+        "last_success": "2026-10-26T11:16:30+00:00",
+        "articles": 15
+      },
+      {
+        "id": "cert-eu",
+        "name": "CERT-EU",
+        "kind": "advisory",
+        "url": "https://cert.europa.eu/publications/security-advisories/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:29+00:00",
+        "last_success": "2026-10-26T11:16:30+00:00",
+        "articles": 10
+      },
+      {
+        "id": "check-point-research",
+        "name": "Check Point Research",
+        "kind": "research",
+        "url": "https://research.checkpoint.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:30+00:00",
+        "last_success": "2026-10-26T11:16:30+00:00",
+        "articles": 15
+      },
+      {
+        "id": "cisa-advisories",
+        "name": "CISA Advisories",
+        "kind": "advisory",
+        "url": "https://www.cisa.gov/cybersecurity-advisories",
+        "status": "failed",
+        "last_attempt": "2026-10-26T11:16:29+00:00",
+        "last_success": null,
+        "articles": 0
+      },
+      {
+        "id": "cisa-cybersecurity-advisories",
+        "name": "CISA Cybersecurity Advisories (category subset)",
+        "kind": "advisory",
+        "url": "https://www.cisa.gov/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:29+00:00",
+        "last_success": "2026-10-26T11:16:29+00:00",
+        "articles": 10
+      },
+      {
+        "id": "cisa-kev",
+        "name": "CISA KEV",
+        "kind": "advisory",
+        "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:33+00:00",
+        "last_success": "2026-10-26T11:16:33+00:00",
+        "articles": 1756
+      },
+      {
+        "id": "cisco-psirt",
+        "name": "Cisco Systems, Inc. PSIRT",
+        "kind": "advisory",
+        "url": "https://sec.cloudapps.cisco.com/security/center/home.x",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:31+00:00",
+        "last_success": "2026-10-26T11:16:31+00:00",
+        "articles": 50
+      },
+      {
+        "id": "cloudflare-security",
+        "name": "Cloudflare Security",
+        "kind": "research",
+        "url": "https://blog.cloudflare.com/tag/security/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:31+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 20
+      },
+      {
+        "id": "cso",
+        "name": "CSO",
+        "kind": "reporting",
+        "url": "https://www.csoonline.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 24
+      },
+      {
+        "id": "cyberinsider",
+        "name": "CyberInsider",
+        "kind": "reporting",
+        "url": "https://cyberinsider.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 11
+      },
+      {
+        "id": "cyberscoop",
+        "name": "CyberScoop",
+        "kind": "reporting",
+        "url": "https://cyberscoop.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 10
+      },
+      {
+        "id": "cybersecurity-dive",
+        "name": "Cybersecurity Dive",
+        "kind": "reporting",
+        "url": "https://www.cybersecuritydive.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 11
+      },
+      {
+        "id": "dark-reading",
+        "name": "Dark Reading",
+        "kind": "reporting",
+        "url": "https://www.darkreading.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:31+00:00",
+        "last_success": "2026-10-26T11:16:31+00:00",
+        "articles": 50
+      },
+      {
+        "id": "databreaches",
+        "name": "DataBreaches.net",
+        "kind": "reporting",
+        "url": "https://databreaches.net/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 10
+      },
+      {
+        "id": "debian-security",
+        "name": "Debian Security Advisories",
+        "kind": "advisory",
+        "url": "https://www.debian.org/security/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:30+00:00",
+        "last_success": "2026-10-26T11:16:30+00:00",
+        "articles": 30
+      },
+      {
+        "id": "dfir-report",
+        "name": "The DFIR Report",
+        "kind": "research",
+        "url": "https://thedfirreport.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:30+00:00",
+        "last_success": "2026-10-26T11:16:30+00:00",
+        "articles": 10
+      },
+      {
+        "id": "eset-research",
+        "name": "ESET WeLiveSecurity",
+        "kind": "research",
+        "url": "https://www.welivesecurity.com/en/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:30+00:00",
+        "last_success": "2026-10-26T11:16:30+00:00",
+        "articles": 100
+      },
+      {
+        "id": "f5-labs",
+        "name": "F5 Labs",
+        "kind": "research",
+        "url": "https://www.f5.com/labs",
+        "status": "partial",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 237
+      },
+      {
+        "id": "google-security",
+        "name": "Google Security Blog",
+        "kind": "research",
+        "url": "https://blog.google/security/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 20
+      },
+      {
+        "id": "google-threat-intelligence",
+        "name": "Google Threat Intelligence",
+        "kind": "research",
+        "url": "https://cloud.google.com/blog/topics/threat-intelligence",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:29+00:00",
+        "last_success": "2026-10-26T11:16:30+00:00",
+        "articles": 20
+      },
+      {
+        "id": "graham-cluley",
+        "name": "Graham Cluley",
+        "kind": "reporting",
+        "url": "https://grahamcluley.com/",
+        "status": "partial",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 6
+      },
+      {
+        "id": "hackread",
+        "name": "Hackread",
+        "kind": "reporting",
+        "url": "https://hackread.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 10
+      },
+      {
+        "id": "help-net-security",
+        "name": "Help Net Security",
+        "kind": "reporting",
+        "url": "https://www.helpnetsecurity.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:31+00:00",
+        "last_success": "2026-10-26T11:16:31+00:00",
+        "articles": 20
+      },
+      {
+        "id": "infosecurity-magazine",
+        "name": "Infosecurity Magazine",
+        "kind": "reporting",
+        "url": "https://www.infosecurity-magazine.com/",
+        "status": "partial",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:33+00:00",
+        "articles": 152
+      },
+      {
+        "id": "krebs",
+        "name": "Krebs on Security",
+        "kind": "reporting",
+        "url": "https://krebsonsecurity.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:30+00:00",
+        "last_success": "2026-10-26T11:16:30+00:00",
+        "articles": 10
+      },
+      {
+        "id": "microsoft-security",
+        "name": "Microsoft Security",
+        "kind": "research",
+        "url": "https://www.microsoft.com/en-us/security/blog/",
+        "status": "partial",
+        "last_attempt": "2026-10-26T11:16:29+00:00",
+        "last_success": "2026-10-26T11:16:29+00:00",
+        "articles": 14
+      },
+      {
+        "id": "mozilla-security",
+        "name": "Mozilla Security Blog",
+        "kind": "research",
+        "url": "https://blog.mozilla.org/security/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:31+00:00",
+        "last_success": "2026-10-26T11:16:31+00:00",
+        "articles": 10
+      },
+      {
+        "id": "ncsc-uk",
+        "name": "UK National Cyber Security Centre",
+        "kind": "advisory",
+        "url": "https://www.ncsc.gov.uk/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:30+00:00",
+        "last_success": "2026-10-26T11:16:30+00:00",
+        "articles": 20
+      },
+      {
+        "id": "paloalto-psirt",
+        "name": "Palo Alto Networks Security Advisories",
+        "kind": "advisory",
+        "url": "https://security.paloaltonetworks.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 28
+      },
+      {
+        "id": "portswigger-research",
+        "name": "PortSwigger Research",
+        "kind": "research",
+        "url": "https://portswigger.net/research",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 40
+      },
+      {
+        "id": "qualys",
+        "name": "Qualys Security Blog",
+        "kind": "research",
+        "url": "https://blog.qualys.com/",
+        "status": "partial",
+        "last_attempt": "2026-10-26T11:16:33+00:00",
+        "last_success": "2026-10-26T11:16:33+00:00",
+        "articles": 10
+      },
+      {
+        "id": "redhat-security",
+        "name": "Red Hat Security Advisories",
+        "kind": "advisory",
+        "url": "https://access.redhat.com/security/data",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:31+00:00",
+        "last_success": "2026-10-26T11:16:31+00:00",
+        "articles": 113
+      },
+      {
+        "id": "register-security",
+        "name": "The Register Security",
+        "kind": "reporting",
+        "url": "https://www.theregister.com/security/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:35+00:00",
+        "articles": 72
+      },
+      {
+        "id": "risky-business-news",
+        "name": "Risky Business Newsletters",
+        "kind": "reporting",
+        "url": "https://risky.biz/feeds/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:33+00:00",
+        "articles": 101
+      },
+      {
+        "id": "sans-isc",
+        "name": "SANS Internet Storm Center",
+        "kind": "research",
+        "url": "https://isc.sans.edu/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:30+00:00",
+        "last_success": "2026-10-26T11:16:30+00:00",
+        "articles": 13
+      },
+      {
+        "id": "schneier",
+        "name": "Schneier on Security",
+        "kind": "reporting",
+        "url": "https://www.schneier.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:31+00:00",
+        "last_success": "2026-10-26T11:16:31+00:00",
+        "articles": 11
+      },
+      {
+        "id": "securelist",
+        "name": "Kaspersky Securelist",
+        "kind": "research",
+        "url": "https://securelist.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:30+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 11
+      },
+      {
+        "id": "security-affairs",
+        "name": "Security Affairs",
+        "kind": "reporting",
+        "url": "https://securityaffairs.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:33+00:00",
+        "articles": 16
+      },
+      {
+        "id": "securityweek",
+        "name": "SecurityWeek",
+        "kind": "reporting",
+        "url": "https://www.securityweek.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:29+00:00",
+        "last_success": "2026-10-26T11:16:30+00:00",
+        "articles": 13
+      },
+      {
+        "id": "sekoia",
+        "name": "Sekoia",
+        "kind": "research",
+        "url": "https://www.sekoia.com/blog",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:30+00:00",
+        "last_success": "2026-10-26T11:16:31+00:00",
+        "articles": 100
+      },
+      {
+        "id": "sentinellabs",
+        "name": "SentinelLabs",
+        "kind": "research",
+        "url": "https://www.sentinelone.com/labs/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 10
+      },
+      {
+        "id": "snyk",
+        "name": "Snyk",
+        "kind": "research",
+        "url": "https://snyk.io/blog/",
+        "status": "partial",
+        "last_attempt": "2026-10-26T11:16:31+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 150
+      },
+      {
+        "id": "sonatype",
+        "name": "Sonatype",
+        "kind": "research",
+        "url": "https://www.sonatype.com/blog",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:31+00:00",
+        "last_success": "2026-10-26T11:16:31+00:00",
+        "articles": 10
+      },
+      {
+        "id": "splunk-advisories",
+        "name": "Splunk Security Advisories",
+        "kind": "advisory",
+        "url": "https://advisory.splunk.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 30
+      },
+      {
+        "id": "talos",
+        "name": "Cisco Talos",
+        "kind": "research",
+        "url": "https://blog.talosintelligence.com/",
+        "status": "partial",
+        "last_attempt": "2026-10-26T11:16:29+00:00",
+        "last_success": "2026-10-26T11:16:29+00:00",
+        "articles": 15
+      },
+      {
+        "id": "talos-threat-advisories",
+        "name": "Cisco Talos Threat Advisory (category subset)",
+        "kind": "research",
+        "url": "https://blog.talosintelligence.com/category/threat-advisory/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:33+00:00",
+        "last_success": "2026-10-26T11:16:33+00:00",
+        "articles": 15
+      },
+      {
+        "id": "techcrunch-security",
+        "name": "TechCrunch Security",
+        "kind": "reporting",
+        "url": "https://techcrunch.com/category/security/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 20
+      },
+      {
+        "id": "tenable",
+        "name": "Tenable",
+        "kind": "research",
+        "url": "https://www.tenable.com/blog",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:31+00:00",
+        "last_success": "2026-10-26T11:16:31+00:00",
+        "articles": 10
+      },
+      {
+        "id": "the-hacker-news",
+        "name": "The Hacker News",
+        "kind": "reporting",
+        "url": "https://thehackernews.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:30+00:00",
+        "last_success": "2026-10-26T11:16:31+00:00",
+        "articles": 57
+      },
+      {
+        "id": "the-record",
+        "name": "The Record",
+        "kind": "reporting",
+        "url": "https://therecord.media/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:30+00:00",
+        "last_success": "2026-10-26T11:16:30+00:00",
+        "articles": 5
+      },
+      {
+        "id": "threatpost",
+        "name": "Threatpost (legacy archive)",
+        "kind": "reporting",
+        "url": "https://threatpost.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:31+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 10
+      },
+      {
+        "id": "troy-hunt",
+        "name": "Troy Hunt",
+        "kind": "research",
+        "url": "https://www.troyhunt.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 15
+      },
+      {
+        "id": "ubuntu-usn",
+        "name": "Ubuntu Security Notices",
+        "kind": "advisory",
+        "url": "https://ubuntu.com/security/notices",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:30+00:00",
+        "last_success": "2026-10-26T11:16:30+00:00",
+        "articles": 10
+      },
+      {
+        "id": "unit42",
+        "name": "Palo Alto Unit 42",
+        "kind": "research",
+        "url": "https://unit42.paloaltonetworks.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:29+00:00",
+        "last_success": "2026-10-26T11:16:29+00:00",
+        "articles": 15
+      },
+      {
+        "id": "volexity",
+        "name": "Volexity",
+        "kind": "research",
+        "url": "https://www.volexity.com/blog/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:30+00:00",
+        "last_success": "2026-10-26T11:16:31+00:00",
+        "articles": 10
+      },
+      {
+        "id": "watchtowr-labs",
+        "name": "watchTowr Labs",
+        "kind": "research",
+        "url": "https://labs.watchtowr.com/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:31+00:00",
+        "last_success": "2026-10-26T11:16:31+00:00",
+        "articles": 15
+      },
+      {
+        "id": "wired-security",
+        "name": "WIRED Security",
+        "kind": "reporting",
+        "url": "https://www.wired.com/category/security/",
+        "status": "ok",
+        "last_attempt": "2026-10-26T11:16:32+00:00",
+        "last_success": "2026-10-26T11:16:32+00:00",
+        "articles": 20
+      }
+    ],
+    "whole_input_source_status_counts": {
+      "failed": 1,
+      "ok": 54,
+      "partial": 7
+    },
+    "whole_input_missing_primary_dates_excluded": 60,
+    "outside_rows_excluded": 3682,
+    "after_generation_rows_excluded": 0,
+    "date_only_boundary_rows": [],
+    "date_only_uncertain_whole_input_count": 0,
+    "capped_source_history": true,
+    "not_an_incident_count": true,
+    "input_capture_start": "2026-10-26T12:11:03.087237+00:00",
+    "input_capture_end": "2026-10-26T12:11:04.706663+00:00",
+    "analysis_completed_at": "2026-10-26T12:48:59.084465+00:00",
+    "nominal_cutoff_unobserved_tail_seconds": 0,
+    "generation_after_cutoff_seconds": 996,
+    "actual_compilation_late": true,
+    "publication": {
+      "state": "not_observed_at_compilation",
+      "observed_at": null
+    },
+    "next_nominal_opportunity": {
+      "UTC": "2026-10-26T19:00:00Z",
+      "local": "2026-10-26 14:00 America/Chicago",
+      "state": "planned"
+    },
+    "prior_report_source_review": {
+      "method": "metadata-only eligibility review",
+      "citation_occurrences": 462,
+      "previous_report_count": 12,
+      "literal_URLs": 378,
+      "canonical_URLs": 378,
+      "recent_candidates": 378,
+      "older_candidates": 0,
+      "unknown_history": 377,
+      "held_prior_route_count": 1,
+      "selected": 0,
+      "attempted_new": 0,
+      "qualified_checks": 0,
+      "comparable_checks": 0,
+      "material_changes": null,
+      "cap_excluded": 0,
+      "unused_request_slots": 12,
+      "coverage": "partial",
+      "old_date_only_report_excluded": true,
+      "source_body_checks_not_performed": true,
+      "previous_daily_report_id": "SW-DAILY-2026-10-25-2200-CDT",
+      "next_nominal_review_UTC": "2026-10-26T19:00:00Z",
+      "next_nominal_review_local": "2026-10-26 14:00 America/Chicago"
+    },
+    "public_link_counts": {
+      "counted_main_rows": 75,
+      "linked_main_rows": 75,
+      "withheld_main_links": 0,
+      "separate_boundary_watch_rows": 0,
+      "linked_boundary_watch_rows": 0,
+      "distinct_public_citations": 96
+    }
+  },
+  "membership_recipe": {
+    "version": "declared-timestamp-and-UTC-calendar-v1",
+    "primary_date": "published_at; event_date remains context only",
+    "aware_timestamps": "Half-open declared period; explicit timestamps after payload generation are excluded in a separate bucket",
+    "date_only": "Separate full UTC-calendar date cohort with unknown publisher timezone; boundary/generation-uncertain dates are watch context only",
+    "missing_dates": "Only null is undated; unknown dates not assigned to this period",
+    "cutoff": "Declared period close, not an as-of-cutoff reconstruction",
+    "main_union": "Declared timestamps plus selected full UTC-calendar rows; not guaranteed elapsed-hour event timing"
+  },
+  "metrics": {
+    "observed_entries": 75,
+    "selected_source_ids": 15,
+    "unique_mentioned_cves": 7,
+    "cohort_counts": {
+      "explicit_timestamp_in_window": 75,
+      "date_only_full_window": 0,
+      "date_only_boundary_uncertain": 0,
+      "undated": 60,
+      "outside_window": 3682,
+      "after_generation_uncertain": 0
+    },
+    "selected_full_calendar_rows": 0,
+    "selected_boundary_rows": 0,
+    "selected_period_kev_addition_rows": 0,
+    "currently_kev_listed_mentioned_cves": 1,
+    "CNA_source_status_counts": {
+      "failed": 3,
+      "ok": 4
+    },
+    "CNA_record_state_counts": {
+      "PUBLISHED": 4,
+      "UNKNOWN": 3
+    },
+    "CVSS_supplied": 4,
+    "CVSS_missing": 3,
+    "weakness_supplied_contexts": 4,
+    "weakness_missing_contexts": 3,
+    "publisher_row_counts": {
+      "bleepingcomputer": 3,
+      "cso": 4,
+      "cybersecurity-dive": 1,
+      "help-net-security": 9,
+      "infosecurity-magazine": 2,
+      "paloalto-psirt": 1,
+      "qualys": 1,
+      "redhat-security": 34,
+      "register-security": 1,
+      "risky-business-news": 1,
+      "sans-isc": 3,
+      "securelist": 1,
+      "security-affairs": 5,
+      "securityweek": 3,
+      "the-hacker-news": 6
+    }
+  },
+  "monthly_rows": [],
+  "developments": [
+    {
+      "id": "php-initial-pair",
+      "title": "PHP: initial pair, deployment conditions and separate follow-up",
+      "summary": "The loaded PHP context separates the initial pair from a later conditional issue. Upstream release numbers do not settle distribution backports, and the SAPI/request prerequisites differ. The later follow-up must not inherit the initial pair’s shipped fixes.",
+      "cve_ids": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ],
+      "entry_ids": [
+        "feed-da7909e1a7248f0ddcd8",
+        "feed-b086d13176745941442b",
+        "feed-de1b1a5205558ea919ae",
+        "feed-7c54e769948b6fc771cc",
+        "feed-18fe3072bd791ef07178"
+      ],
+      "source_urls": [
+        "https://www.cve.org/CVERecord?id=CVE-2026-109618",
+        "https://www.php.net/archive/2026.php",
+        "https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w",
+        "https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp",
+        "https://www.cisa.gov/news-events/alerts/2026/10/21/critical-vulnerabilities-php-require-immediate-patching"
+      ],
+      "evidence_scope": "Retained structured context; no new publisher-body check"
+    },
+    {
+      "id": "siteguard",
+      "title": "SiteGuard: captured KEV context with a local, low-privilege metric",
+      "summary": "The CNA projection identifies SiteGuard product/version ranges and a CVSS 4.0 score of 8.5 with AV:L and PR:L. It must not be described as a generic remote unauthenticated issue. The captured KEV entry is dated October 20; that is catalog context, not a new incident here.",
+      "cve_ids": [
+        "CVE-2026-106931"
+      ],
+      "entry_ids": [
+        "feed-da7909e1a7248f0ddcd8"
+      ],
+      "source_urls": [
+        "https://www.cve.org/CVERecord?id=CVE-2026-106931",
+        "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-106931"
+      ],
+      "evidence_scope": "Retained structured context; no new publisher-body check"
+    },
+    {
+      "id": "ringrtc",
+      "title": "Signal RingRTC: preserve the range and metric conditions",
+      "summary": "The retained record marks RingRTC versions below 2.72.0 as affected and supplies CVSS 4.0 9.3. Its vector and product statement are retained in data.json. The projection supplies no solution or workaround text, so the range boundary alone is not a verified shipped-fix claim.",
+      "cve_ids": [
+        "CVE-2026-113380"
+      ],
+      "entry_ids": [
+        "feed-da7909e1a7248f0ddcd8"
+      ],
+      "source_urls": [
+        "https://www.cve.org/CVERecord?id=CVE-2026-113380"
+      ],
+      "evidence_scope": "Retained structured context; no new publisher-body check"
+    }
+  ],
+  "kev_additions": [],
+  "cve_briefs": [
+    {
+      "cve": "CVE-2026-104621",
+      "title": "CVE-2026-104621",
+      "source_status": "failed",
+      "record_state": "UNKNOWN",
+      "source_updated_at": null,
+      "retrieved_at": null,
+      "source_attempted_at": "2026-10-26T11:16:36+00:00",
+      "products": [],
+      "solutions": [],
+      "workarounds": [],
+      "cvss": null,
+      "references": [
+        {
+          "url": "https://www.cve.org/CVERecord?id=CVE-2026-104621",
+          "kind": "record"
+        }
+      ],
+      "required_action": null,
+      "required_action_source_url": null,
+      "kev": null,
+      "analysis": {
+        "priority": "review",
+        "guidance_status": "needs-review",
+        "assessment": "Check the publisher's product/version statements and guidance. Absence from this KEV input does not establish that exploitation is absent.",
+        "steps": [
+          {
+            "title": "Establish applicability",
+            "detail": "Compare the exact installed product, version and deployment conditions with the cited publisher record; no environment inventory was checked by this hub.",
+            "evidence_url": "https://www.cve.org/CVERecord?id=CVE-2026-104621"
+          },
+          {
+            "title": "Vendor guidance needs review",
+            "detail": "No patch version or workaround is established in the loaded structured inputs. Follow the CVE/vendor references; this hub will not invent a fix.",
+            "evidence_url": "https://www.cve.org/CVERecord?id=CVE-2026-104621"
+          },
+          {
+            "title": "Confirm remediation",
+            "detail": "After an authorized change, confirm the installed version/configuration against vendor guidance and retain evidence. This feed does not patch or verify a device.",
+            "evidence_url": null
+          }
+        ],
+        "limitations": [
+          "This is a deterministic source-grounded briefing, not an environment assessment or an automatic patch instruction.",
+          "Product/version conditions and guidance excerpts are bounded; the original vendor advisory controls applicability.",
+          "CNA enrichment is pending or its last attempt failed. Any retained successful record keeps its original retrieval date; missing guidance is unknown."
+        ]
+      },
+      "weaknesses": [],
+      "weaknesses_status": "not_projected",
+      "context_scope": "Captured CNA/KEV context as of payload; applicability/version/backport conditions retained, not installed exposure/current fix assurance.",
+      "projection_omissions": []
+    },
+    {
+      "cve": "CVE-2026-104622",
+      "title": "CVE-2026-104622",
+      "source_status": "failed",
+      "record_state": "UNKNOWN",
+      "source_updated_at": null,
+      "retrieved_at": null,
+      "source_attempted_at": "2026-10-26T11:16:36+00:00",
+      "products": [],
+      "solutions": [],
+      "workarounds": [],
+      "cvss": null,
+      "references": [
+        {
+          "url": "https://www.cve.org/CVERecord?id=CVE-2026-104622",
+          "kind": "record"
+        }
+      ],
+      "required_action": null,
+      "required_action_source_url": null,
+      "kev": null,
+      "analysis": {
+        "priority": "review",
+        "guidance_status": "needs-review",
+        "assessment": "Check the publisher's product/version statements and guidance. Absence from this KEV input does not establish that exploitation is absent.",
+        "steps": [
+          {
+            "title": "Establish applicability",
+            "detail": "Compare the exact installed product, version and deployment conditions with the cited publisher record; no environment inventory was checked by this hub.",
+            "evidence_url": "https://www.cve.org/CVERecord?id=CVE-2026-104622"
+          },
+          {
+            "title": "Vendor guidance needs review",
+            "detail": "No patch version or workaround is established in the loaded structured inputs. Follow the CVE/vendor references; this hub will not invent a fix.",
+            "evidence_url": "https://www.cve.org/CVERecord?id=CVE-2026-104622"
+          },
+          {
+            "title": "Confirm remediation",
+            "detail": "After an authorized change, confirm the installed version/configuration against vendor guidance and retain evidence. This feed does not patch or verify a device.",
+            "evidence_url": null
+          }
+        ],
+        "limitations": [
+          "This is a deterministic source-grounded briefing, not an environment assessment or an automatic patch instruction.",
+          "Product/version conditions and guidance excerpts are bounded; the original vendor advisory controls applicability.",
+          "CNA enrichment is pending or its last attempt failed. Any retained successful record keeps its original retrieval date; missing guidance is unknown."
+        ]
+      },
+      "weaknesses": [],
+      "weaknesses_status": "not_projected",
+      "context_scope": "Captured CNA/KEV context as of payload; applicability/version/backport conditions retained, not installed exposure/current fix assurance.",
+      "projection_omissions": []
+    },
+    {
+      "cve": "CVE-2026-106931",
+      "title": "CVE-2026-106931",
+      "source_status": "ok",
+      "record_state": "PUBLISHED",
+      "source_updated_at": "2026-10-21T03:56:27+00:00",
+      "retrieved_at": "2026-10-26T00:14:09+00:00",
+      "source_attempted_at": "2026-10-26T00:14:09+00:00",
+      "products": [
+        {
+          "vendor": "EG Secure Solutions Inc.",
+          "product": "SiteGuard Server Edition for Apache httpd",
+          "default_status": "unaffected",
+          "versions": [
+            {
+              "version": "Ver2.20",
+              "status": "affected",
+              "less_than": "Ver8.00 Update 5",
+              "less_than_or_equal": "",
+              "version_type": "semver"
+            }
+          ]
+        },
+        {
+          "vendor": "EG Secure Solutions Inc.",
+          "product": "SiteGuard Server Edition for Nginx",
+          "default_status": "unaffected",
+          "versions": [
+            {
+              "version": "Ver2.20",
+              "status": "affected",
+              "less_than": "Ver8.00 Update 5",
+              "less_than_or_equal": "",
+              "version_type": "semver"
+            }
+          ]
+        },
+        {
+          "vendor": "EG Secure Solutions Inc.",
+          "product": "SiteGuard Server Edition for IIS",
+          "default_status": "unaffected",
+          "versions": [
+            {
+              "version": "Ver2.20",
+              "status": "affected",
+              "less_than": "Ver8.00 Update 5",
+              "less_than_or_equal": "",
+              "version_type": "semver"
+            }
+          ]
+        },
+        {
+          "vendor": "EG Secure Solutions Inc.",
+          "product": "SiteGuard Server Edition for Apache httpd on FreeBSD",
+          "default_status": "unaffected",
+          "versions": [
+            {
+              "version": "Ver2.20",
+              "status": "affected",
+              "less_than": "Ver7.00 Update 6",
+              "less_than_or_equal": "",
+              "version_type": "semver"
+            }
+          ]
+        },
+        {
+          "vendor": "EG Secure Solutions Inc.",
+          "product": "SiteGuard Server Edition for Nginx on FreeBSD",
+          "default_status": "unaffected",
+          "versions": [
+            {
+              "version": "Ver2.20",
+              "status": "affected",
+              "less_than": "Ver7.00 Update 6",
+              "less_than_or_equal": "",
+              "version_type": "semver"
+            }
+          ]
+        }
+      ],
+      "solutions": [],
+      "workarounds": [],
+      "cvss": {
+        "score": 8.5,
+        "version": "4.0",
+        "vector": "CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+        "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-106931"
+      },
+      "references": [
+        {
+          "url": "https://www.cve.org/CVERecord?id=CVE-2026-106931",
+          "kind": "record"
+        },
+        {
+          "url": "https://www.eg-secure.co.jp/siteguard/news/alert-202610-1",
+          "kind": "record"
+        },
+        {
+          "url": "https://jvn.jp/en/jp/JVN88474777/",
+          "kind": "record"
+        }
+      ],
+      "required_action": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
+      "required_action_source_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-106931",
+      "kev": {
+        "date_added": "2026-10-20",
+        "due_date": "2026-10-23",
+        "ransomware": "Unknown"
+      },
+      "analysis": {
+        "priority": "known-exploited",
+        "guidance_status": "cisa-action",
+        "assessment": "CISA records exploitation in the wild. Prioritize checking affected assets and the cited required action; this does not establish exposure on your devices.",
+        "steps": [
+          {
+            "title": "Establish applicability",
+            "detail": "Compare the exact installed product, version and deployment conditions with the cited publisher record; no environment inventory was checked by this hub.",
+            "evidence_url": "https://www.cve.org/CVERecord?id=CVE-2026-106931"
+          },
+          {
+            "title": "Review the CISA action",
+            "detail": "Apply mitigations in accordance with vendor instructions, ensuring compliance with CISA’s BOD 26-04 Prioritizing Security Updates Based on Risk (see URL in Notes) guidance and CISA’s “Forensics Triage Requirements” (see URL in Notes). Follow applicable BOD 26-04 guidance for cloud services or discontinue use of the product if mitigations are unavailable. Stakeholders are responsible for evaluating each asset's internet exposure and ensuring adherence to BOD 26-04 patching guidelines.",
+            "evidence_url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-106931"
+          },
+          {
+            "title": "Confirm remediation",
+            "detail": "After an authorized change, confirm the installed version/configuration against vendor guidance and retain evidence. This feed does not patch or verify a device.",
+            "evidence_url": null
+          }
+        ],
+        "limitations": [
+          "This is a deterministic source-grounded briefing, not an environment assessment or an automatic patch instruction.",
+          "Product/version conditions and guidance excerpts are bounded; the original vendor advisory controls applicability.",
+          "The displayed CISA due date is a catalog/federal directive datum, not a deadline assigned to this site's visitors.",
+          "CVSS versions and product contexts differ; a numeric sort is not an organization-specific risk ranking."
+        ]
+      },
+      "weaknesses": [
+        {
+          "id": "CWE-78",
+          "description": "Improper neutralization of special elements used in an OS command ('OS Command Injection')",
+          "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-106931"
+        }
+      ],
+      "weaknesses_status": "supplied",
+      "context_scope": "Captured CNA/KEV context as of payload; applicability/version/backport conditions retained, not installed exposure/current fix assurance.",
+      "projection_omissions": []
+    },
+    {
+      "cve": "CVE-2026-109618",
+      "title": "RCE via OOM corruption",
+      "source_status": "ok",
+      "record_state": "PUBLISHED",
+      "source_updated_at": "2026-10-23T14:07:55+00:00",
+      "retrieved_at": "2026-10-26T00:14:09+00:00",
+      "source_attempted_at": "2026-10-26T00:14:09+00:00",
+      "products": [
+        {
+          "vendor": "PHP Group",
+          "product": "PHP",
+          "default_status": "unaffected",
+          "versions": [
+            {
+              "version": "8.2.*",
+              "status": "affected",
+              "less_than": "8.2.35",
+              "less_than_or_equal": "",
+              "version_type": "semver"
+            },
+            {
+              "version": "8.3.*",
+              "status": "affected",
+              "less_than": "8.3.36",
+              "less_than_or_equal": "",
+              "version_type": "semver"
+            },
+            {
+              "version": "8.4.*",
+              "status": "affected",
+              "less_than": "8.4.27",
+              "less_than_or_equal": "",
+              "version_type": "semver"
+            },
+            {
+              "version": "8.5.*",
+              "status": "affected",
+              "less_than": "8.5.12",
+              "less_than_or_equal": "",
+              "version_type": "semver"
+            }
+          ]
+        }
+      ],
+      "solutions": [],
+      "workarounds": [
+        {
+          "text": "Check the GitHub Security Advisory for mitigation strategies.",
+          "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-109618"
+        }
+      ],
+      "cvss": {
+        "score": 9.2,
+        "version": "4.0",
+        "vector": "CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+        "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-109618"
+      },
+      "references": [
+        {
+          "url": "https://www.cve.org/CVERecord?id=CVE-2026-109618",
+          "kind": "record"
+        },
+        {
+          "url": "https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w",
+          "kind": "vendor-guidance"
+        }
+      ],
+      "required_action": null,
+      "required_action_source_url": null,
+      "kev": null,
+      "analysis": {
+        "priority": "review",
+        "guidance_status": "publisher-guidance",
+        "assessment": "Check the publisher's product/version statements and guidance. Absence from this KEV input does not establish that exploitation is absent.",
+        "steps": [
+          {
+            "title": "Establish applicability",
+            "detail": "Compare the exact installed product, version and deployment conditions with the cited publisher record; no environment inventory was checked by this hub.",
+            "evidence_url": "https://www.cve.org/CVERecord?id=CVE-2026-109618"
+          },
+          {
+            "title": "Publisher workaround excerpt",
+            "detail": "Check the GitHub Security Advisory for mitigation strategies.",
+            "evidence_url": "https://www.cve.org/CVERecord?id=CVE-2026-109618"
+          },
+          {
+            "title": "Confirm remediation",
+            "detail": "After an authorized change, confirm the installed version/configuration against vendor guidance and retain evidence. This feed does not patch or verify a device.",
+            "evidence_url": null
+          },
+          {
+            "title": "PHP initial-pair fixes - notice published 2026-10-21",
+            "detail": "PHP lists upstream releases 8.5.12, 8.4.27, 8.3.36 and 8.2.35 for CVE-2026-109618 and CVE-2026-109619. PHP also describes distribution/LTS fixes and minimal backports for 7.4, 8.0 and 8.1. A lower displayed version alone does not establish that a vendor package lacks the patch; its package/backport evidence remains necessary.",
+            "evidence_url": "https://www.php.net/archive/2026.php"
+          },
+          {
+            "title": "PHP susceptibility advisory - published 2026-10-21",
+            "detail": "PHP documents an unauthenticated pre-application mod_php demonstration and discusses other SAPIs with susceptibility qualifications. Broad web-serving risk attribution is not proof of equal demonstrated exploitability for every SAPI, configuration, version or patched installation.",
+            "evidence_url": "https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w"
+          },
+          {
+            "title": "PHP request-state advisory - published 2026-10-21",
+            "detail": "The request-state advisory separates concrete demonstrations from candidate cases and configuration-dependent, same-worker request-state paths. Compare the cited SAPI and request prerequisites; this hub has not established them for any deployment.",
+            "evidence_url": "https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp"
+          },
+          {
+            "title": "CISA conditional guidance - alert revised 2026-10-23",
+            "detail": "CISA advises temporary offline status when organizations cannot update immediately or continue using unsupported PHP 8.1 or earlier, until patched or updated. This is attributed guidance under those conditions, not a finding that every numerically older build is unpatched or unpatchable. The retained page does not establish its initial publication time.",
+            "evidence_url": "https://www.cisa.gov/news-events/alerts/2026/10/21/critical-vulnerabilities-php-require-immediate-patching"
+          },
+          {
+            "title": "Separate PHP follow-up - notice published 2026-10-23",
+            "detail": "The initial-pair release list does not establish a fix for the later CVE-2026-115560. PHP described a next-regular-release plan and session.upload_progress.enabled=0 as an interim setting for an unusual path: php_binary or php_serialize switched to php through ini_set() before session_start(), with upload progress still enabled. That conditional measure is not complete mitigation of the initial pair. These sources do not establish a shipped third fix or historical CVE-registry absence.",
+            "evidence_url": "https://www.php.net/archive/2026.php"
+          }
+        ],
+        "limitations": [
+          "This is a deterministic source-grounded briefing, not an environment assessment or an automatic patch instruction.",
+          "Product/version conditions and guidance excerpts are bounded; the original vendor advisory controls applicability.",
+          "CVSS versions and product contexts differ; a numeric sort is not an organization-specific risk ranking.",
+          "Supplementary publisher context is separate from the loaded CNA fields. It does not change CVE record state, CVSS, KEV status, guidance classification or establish exposure on a device.",
+          "Dates above belong to publisher notices/advisories or the CISA revision. They are not this snapshot generation, retrieval or last-check dates; later release/registry history and actual vendor packages were not established here."
+        ]
+      },
+      "weaknesses": [
+        {
+          "id": "CWE-416",
+          "description": "CWE-416 Use after free",
+          "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-109618"
+        },
+        {
+          "id": "CWE-755",
+          "description": "CWE-755 Improper Handling of Exceptional Conditions",
+          "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-109618"
+        },
+        {
+          "id": "CWE-824",
+          "description": "CWE-824 Access of uninitialized pointer",
+          "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-109618"
+        },
+        {
+          "id": "CWE-1325",
+          "description": "CWE-1325 Improperly controlled sequential memory allocation",
+          "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-109618"
+        },
+        {
+          "id": "CWE-1419",
+          "description": "CWE-1419 Incorrect Initialization of Resource",
+          "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-109618"
+        }
+      ],
+      "weaknesses_status": "supplied",
+      "context_scope": "Captured CNA/KEV context as of payload; applicability/version/backport conditions retained, not installed exposure/current fix assurance.",
+      "projection_omissions": []
+    },
+    {
+      "cve": "CVE-2026-109619",
+      "title": "RCE via stale global state",
+      "source_status": "ok",
+      "record_state": "PUBLISHED",
+      "source_updated_at": "2026-10-23T14:07:57+00:00",
+      "retrieved_at": "2026-10-26T00:14:09+00:00",
+      "source_attempted_at": "2026-10-26T00:14:09+00:00",
+      "products": [
+        {
+          "vendor": "PHP Group",
+          "product": "PHP",
+          "default_status": "unaffected",
+          "versions": [
+            {
+              "version": "8.2.*",
+              "status": "affected",
+              "less_than": "8.2.35",
+              "less_than_or_equal": "",
+              "version_type": "semver"
+            },
+            {
+              "version": "8.3.*",
+              "status": "affected",
+              "less_than": "8.3.36",
+              "less_than_or_equal": "",
+              "version_type": "semver"
+            },
+            {
+              "version": "8.4.*",
+              "status": "affected",
+              "less_than": "8.4.27",
+              "less_than_or_equal": "",
+              "version_type": "semver"
+            },
+            {
+              "version": "8.5.*",
+              "status": "affected",
+              "less_than": "8.5.12",
+              "less_than_or_equal": "",
+              "version_type": "semver"
+            }
+          ]
+        }
+      ],
+      "solutions": [],
+      "workarounds": [
+        {
+          "text": "Check the GitHub Security Advisory for mitigation strategies.",
+          "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-109619"
+        }
+      ],
+      "cvss": {
+        "score": 9.2,
+        "version": "4.0",
+        "vector": "CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+        "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-109619"
+      },
+      "references": [
+        {
+          "url": "https://www.cve.org/CVERecord?id=CVE-2026-109619",
+          "kind": "record"
+        },
+        {
+          "url": "https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp",
+          "kind": "vendor-guidance"
+        }
+      ],
+      "required_action": null,
+      "required_action_source_url": null,
+      "kev": null,
+      "analysis": {
+        "priority": "review",
+        "guidance_status": "publisher-guidance",
+        "assessment": "Check the publisher's product/version statements and guidance. Absence from this KEV input does not establish that exploitation is absent.",
+        "steps": [
+          {
+            "title": "Establish applicability",
+            "detail": "Compare the exact installed product, version and deployment conditions with the cited publisher record; no environment inventory was checked by this hub.",
+            "evidence_url": "https://www.cve.org/CVERecord?id=CVE-2026-109619"
+          },
+          {
+            "title": "Publisher workaround excerpt",
+            "detail": "Check the GitHub Security Advisory for mitigation strategies.",
+            "evidence_url": "https://www.cve.org/CVERecord?id=CVE-2026-109619"
+          },
+          {
+            "title": "Confirm remediation",
+            "detail": "After an authorized change, confirm the installed version/configuration against vendor guidance and retain evidence. This feed does not patch or verify a device.",
+            "evidence_url": null
+          },
+          {
+            "title": "PHP initial-pair fixes - notice published 2026-10-21",
+            "detail": "PHP lists upstream releases 8.5.12, 8.4.27, 8.3.36 and 8.2.35 for CVE-2026-109618 and CVE-2026-109619. PHP also describes distribution/LTS fixes and minimal backports for 7.4, 8.0 and 8.1. A lower displayed version alone does not establish that a vendor package lacks the patch; its package/backport evidence remains necessary.",
+            "evidence_url": "https://www.php.net/archive/2026.php"
+          },
+          {
+            "title": "PHP susceptibility advisory - published 2026-10-21",
+            "detail": "PHP documents an unauthenticated pre-application mod_php demonstration and discusses other SAPIs with susceptibility qualifications. Broad web-serving risk attribution is not proof of equal demonstrated exploitability for every SAPI, configuration, version or patched installation.",
+            "evidence_url": "https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w"
+          },
+          {
+            "title": "PHP request-state advisory - published 2026-10-21",
+            "detail": "The request-state advisory separates concrete demonstrations from candidate cases and configuration-dependent, same-worker request-state paths. Compare the cited SAPI and request prerequisites; this hub has not established them for any deployment.",
+            "evidence_url": "https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp"
+          },
+          {
+            "title": "CISA conditional guidance - alert revised 2026-10-23",
+            "detail": "CISA advises temporary offline status when organizations cannot update immediately or continue using unsupported PHP 8.1 or earlier, until patched or updated. This is attributed guidance under those conditions, not a finding that every numerically older build is unpatched or unpatchable. The retained page does not establish its initial publication time.",
+            "evidence_url": "https://www.cisa.gov/news-events/alerts/2026/10/21/critical-vulnerabilities-php-require-immediate-patching"
+          },
+          {
+            "title": "Separate PHP follow-up - notice published 2026-10-23",
+            "detail": "The initial-pair release list does not establish a fix for the later CVE-2026-115560. PHP described a next-regular-release plan and session.upload_progress.enabled=0 as an interim setting for an unusual path: php_binary or php_serialize switched to php through ini_set() before session_start(), with upload progress still enabled. That conditional measure is not complete mitigation of the initial pair. These sources do not establish a shipped third fix or historical CVE-registry absence.",
+            "evidence_url": "https://www.php.net/archive/2026.php"
+          }
+        ],
+        "limitations": [
+          "This is a deterministic source-grounded briefing, not an environment assessment or an automatic patch instruction.",
+          "Product/version conditions and guidance excerpts are bounded; the original vendor advisory controls applicability.",
+          "CVSS versions and product contexts differ; a numeric sort is not an organization-specific risk ranking.",
+          "Supplementary publisher context is separate from the loaded CNA fields. It does not change CVE record state, CVSS, KEV status, guidance classification or establish exposure on a device.",
+          "Dates above belong to publisher notices/advisories or the CISA revision. They are not this snapshot generation, retrieval or last-check dates; later release/registry history and actual vendor packages were not established here."
+        ]
+      },
+      "weaknesses": [
+        {
+          "id": "CWE-416",
+          "description": "CWE-416 Use after free",
+          "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-109619"
+        },
+        {
+          "id": "CWE-755",
+          "description": "CWE-755 Improper Handling of Exceptional Conditions",
+          "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-109619"
+        },
+        {
+          "id": "CWE-824",
+          "description": "CWE-824 Access of uninitialized pointer",
+          "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-109619"
+        },
+        {
+          "id": "CWE-1325",
+          "description": "CWE-1325 Improperly controlled sequential memory allocation",
+          "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-109619"
+        },
+        {
+          "id": "CWE-1419",
+          "description": "CWE-1419 Incorrect Initialization of Resource",
+          "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-109619"
+        }
+      ],
+      "weaknesses_status": "supplied",
+      "context_scope": "Captured CNA/KEV context as of payload; applicability/version/backport conditions retained, not installed exposure/current fix assurance.",
+      "projection_omissions": []
+    },
+    {
+      "cve": "CVE-2026-113380",
+      "title": "CVE-2026-113380",
+      "source_status": "ok",
+      "record_state": "PUBLISHED",
+      "source_updated_at": "2026-10-20T14:38:10+00:00",
+      "retrieved_at": "2026-10-26T00:49:36+00:00",
+      "source_attempted_at": "2026-10-26T00:49:36+00:00",
+      "products": [
+        {
+          "vendor": "Signal",
+          "product": "RingRTC",
+          "default_status": "unaffected",
+          "versions": [
+            {
+              "version": "0",
+              "status": "affected",
+              "less_than": "2.72.0",
+              "less_than_or_equal": "",
+              "version_type": "semver"
+            }
+          ]
+        }
+      ],
+      "solutions": [],
+      "workarounds": [],
+      "cvss": {
+        "score": 9.3,
+        "version": "4.0",
+        "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:N/SC:H/SI:N/SA:N/S:P",
+        "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-113380"
+      },
+      "references": [
+        {
+          "url": "https://www.cve.org/CVERecord?id=CVE-2026-113380",
+          "kind": "record"
+        },
+        {
+          "url": "https://github.com/signalapp/ringrtc/commit/4b1b6fa53c9f30c87c8ea78e44675d4a13e1e4d3",
+          "kind": "record"
+        },
+        {
+          "url": "https://github.com/signalapp/ringrtc/compare/v2.71.0...v2.72.0",
+          "kind": "record"
+        }
+      ],
+      "required_action": null,
+      "required_action_source_url": null,
+      "kev": null,
+      "analysis": {
+        "priority": "review",
+        "guidance_status": "needs-review",
+        "assessment": "Check the publisher's product/version statements and guidance. Absence from this KEV input does not establish that exploitation is absent.",
+        "steps": [
+          {
+            "title": "Establish applicability",
+            "detail": "Compare the exact installed product, version and deployment conditions with the cited publisher record; no environment inventory was checked by this hub.",
+            "evidence_url": "https://www.cve.org/CVERecord?id=CVE-2026-113380"
+          },
+          {
+            "title": "Vendor guidance needs review",
+            "detail": "No patch version or workaround is established in the loaded structured inputs. Follow the CVE/vendor references; this hub will not invent a fix.",
+            "evidence_url": "https://www.cve.org/CVERecord?id=CVE-2026-113380"
+          },
+          {
+            "title": "Confirm remediation",
+            "detail": "After an authorized change, confirm the installed version/configuration against vendor guidance and retain evidence. This feed does not patch or verify a device.",
+            "evidence_url": null
+          }
+        ],
+        "limitations": [
+          "This is a deterministic source-grounded briefing, not an environment assessment or an automatic patch instruction.",
+          "Product/version conditions and guidance excerpts are bounded; the original vendor advisory controls applicability.",
+          "CVSS versions and product contexts differ; a numeric sort is not an organization-specific risk ranking."
+        ]
+      },
+      "weaknesses": [
+        {
+          "id": "CWE-754",
+          "description": "CWE-754 Improper Check for Unusual or Exceptional Conditions",
+          "source_url": "https://www.cve.org/CVERecord?id=CVE-2026-113380"
+        }
+      ],
+      "weaknesses_status": "supplied",
+      "context_scope": "Captured CNA/KEV context as of payload; applicability/version/backport conditions retained, not installed exposure/current fix assurance.",
+      "projection_omissions": []
+    },
+    {
+      "cve": "CVE-2026-115560",
+      "title": "CVE-2026-115560",
+      "source_status": "failed",
+      "record_state": "UNKNOWN",
+      "source_updated_at": null,
+      "retrieved_at": null,
+      "source_attempted_at": "2026-10-26T11:16:36+00:00",
+      "products": [],
+      "solutions": [],
+      "workarounds": [],
+      "cvss": null,
+      "references": [
+        {
+          "url": "https://www.cve.org/CVERecord?id=CVE-2026-115560",
+          "kind": "record"
+        }
+      ],
+      "required_action": null,
+      "required_action_source_url": null,
+      "kev": null,
+      "analysis": {
+        "priority": "review",
+        "guidance_status": "needs-review",
+        "assessment": "Check the publisher's product/version statements and guidance. Absence from this KEV input does not establish that exploitation is absent.",
+        "steps": [
+          {
+            "title": "Establish applicability",
+            "detail": "Compare the exact installed product, version and deployment conditions with the cited publisher record; no environment inventory was checked by this hub.",
+            "evidence_url": "https://www.cve.org/CVERecord?id=CVE-2026-115560"
+          },
+          {
+            "title": "Vendor guidance needs review",
+            "detail": "No patch version or workaround is established in the loaded structured inputs. Follow the CVE/vendor references; this hub will not invent a fix.",
+            "evidence_url": "https://www.cve.org/CVERecord?id=CVE-2026-115560"
+          },
+          {
+            "title": "Confirm remediation",
+            "detail": "After an authorized change, confirm the installed version/configuration against vendor guidance and retain evidence. This feed does not patch or verify a device.",
+            "evidence_url": null
+          }
+        ],
+        "limitations": [
+          "This is a deterministic source-grounded briefing, not an environment assessment or an automatic patch instruction.",
+          "Product/version conditions and guidance excerpts are bounded; the original vendor advisory controls applicability.",
+          "CNA enrichment is pending or its last attempt failed. Any retained successful record keeps its original retrieval date; missing guidance is unknown."
+        ]
+      },
+      "weaknesses": [],
+      "weaknesses_status": "not_projected",
+      "context_scope": "Captured CNA/KEV context as of payload; applicability/version/backport conditions retained, not installed exposure/current fix assurance.",
+      "projection_omissions": []
+    }
+  ],
+  "brief_selection": {
+    "basis": "All main-row mentioned CVE IDs, with full bounded captured context; no subset",
+    "count": 7,
+    "ids": [
+      "CVE-2026-104621",
+      "CVE-2026-104622",
+      "CVE-2026-106931",
+      "CVE-2026-109618",
+      "CVE-2026-109619",
+      "CVE-2026-113380",
+      "CVE-2026-115560"
+    ],
+    "current_kev_context": [
+      "CVE-2026-106931"
+    ],
+    "boundary_watch_ids": []
+  },
+  "topics": [
+    {
+      "id": "php-initial-pair",
+      "label": "PHP: initial pair, deployment conditions and separate follow-up",
+      "cve_ids": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ],
+      "evidence_scope": "Retained structured context; no new publisher-body check"
+    },
+    {
+      "id": "siteguard",
+      "label": "SiteGuard: captured KEV context with a local, low-privilege metric",
+      "cve_ids": [
+        "CVE-2026-106931"
+      ],
+      "evidence_scope": "Retained structured context; no new publisher-body check"
+    },
+    {
+      "id": "ringrtc",
+      "label": "Signal RingRTC: preserve the range and metric conditions",
+      "cve_ids": [
+        "CVE-2026-113380"
+      ],
+      "evidence_scope": "Retained structured context; no new publisher-body check"
+    }
+  ],
+  "actor_context": {
+    "interpretation": "Source attribution and publication dates, not incident counts or independent identity proof",
+    "records": [
+      {
+        "id": "ACTOR-storm-0940",
+        "type": "actor",
+        "label": "Storm-0940",
+        "confidence": "source_stated",
+        "attribution": "Microsoft source-stated attribution; no independent actor identity or universal compromise/data-theft inference",
+        "evidence": [
+          {
+            "source_url": "https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/",
+            "publisher": "Microsoft Security Blog",
+            "published_at": "2026-10-21T18:23:55+00:00",
+            "updated_at": "2026-10-23T19:16:23+00:00",
+            "event_at": null,
+            "observed_at": "2026-10-25T17:49:09.094155+00:00",
+            "source_version": null,
+            "claim": "Microsoft names Storm-0940 and describes its alignment and reported application-abuse activity."
+          }
+        ],
+        "current_period_source_entry_ids": [],
+        "scope": "Earlier background outside this publication window; not a new daily/weekend event or attribution"
+      },
+      {
+        "id": "CAMPAIGN-connectwise-application-abuse-2026",
+        "type": "campaign",
+        "label": "ConnectWise-linked application abuse · 2026",
+        "confidence": "source_stated",
+        "attribution": "Microsoft source-stated attribution; no independent actor identity or universal compromise/data-theft inference",
+        "evidence": [
+          {
+            "source_url": "https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/",
+            "publisher": "Microsoft Security Blog",
+            "published_at": "2026-10-21T18:23:55+00:00",
+            "updated_at": "2026-10-23T19:16:23+00:00",
+            "event_at": null,
+            "observed_at": "2026-10-25T17:49:09.094155+00:00",
+            "source_version": null,
+            "claim": "Microsoft reports ConnectWise-linked application credential abuse and qualified downstream activity; affected application presence does not establish exfiltration."
+          }
+        ],
+        "current_period_source_entry_ids": [],
+        "scope": "Earlier background outside this publication window; not a new daily/weekend event or attribution"
+      }
+    ]
+  },
+  "taxonomy": {
+    "CWE_catalog_version": "4.20 where supplied by retained catalog",
+    "CAPEC_definition_version": "3.9; qualified definitions only for 63/66/88/115/126/593",
+    "CNA_weakness_cve_membership": {
+      "CWE-1325": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ],
+      "CWE-1419": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ],
+      "CWE-416": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ],
+      "CWE-754": [
+        "CVE-2026-113380"
+      ],
+      "CWE-755": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ],
+      "CWE-78": [
+        "CVE-2026-106931"
+      ],
+      "CWE-824": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ]
+    },
+    "contexts": [
+      {
+        "id": "CAPEC-108",
+        "type": "capec",
+        "label": "Command Line Execution through SQL Injection",
+        "definition_summary": null,
+        "definition_scope": "Retained name/mapping only; definition not qualified here",
+        "evidence": [
+          {
+            "source_url": "https://cwe.mitre.org/data/definitions/89.html",
+            "publisher": "The MITRE Corporation",
+            "published_at": null,
+            "updated_at": "2025-12-11",
+            "event_at": null,
+            "observed_at": "2026-10-25T22:34:44.730180+00:00",
+            "source_version": "CWE 4.20",
+            "claim": null
+          },
+          {
+            "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+            "publisher": "The MITRE Corporation",
+            "published_at": null,
+            "updated_at": "2026-04-30",
+            "event_at": null,
+            "observed_at": "2026-10-25T22:34:48.384527+00:00",
+            "source_version": "CWE 4.20",
+            "claim": null
+          }
+        ],
+        "claim_omission_reason": "Definition not qualified; name/mapping reference only"
+      },
+      {
+        "id": "CAPEC-15",
+        "type": "capec",
+        "label": "Command Delimiters",
+        "definition_summary": null,
+        "definition_scope": "Retained name/mapping only; definition not qualified here",
+        "evidence": [
+          {
+            "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+            "publisher": "The MITRE Corporation",
+            "published_at": null,
+            "updated_at": "2026-04-30",
+            "event_at": null,
+            "observed_at": "2026-10-25T22:34:48.384527+00:00",
+            "source_version": "CWE 4.20",
+            "claim": null
+          }
+        ],
+        "claim_omission_reason": "Definition not qualified; name/mapping reference only"
+      },
+      {
+        "id": "CAPEC-43",
+        "type": "capec",
+        "label": "Exploiting Multiple Input Interpretation Layers",
+        "definition_summary": null,
+        "definition_scope": "Retained name/mapping only; definition not qualified here",
+        "evidence": [
+          {
+            "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+            "publisher": "The MITRE Corporation",
+            "published_at": null,
+            "updated_at": "2026-04-30",
+            "event_at": null,
+            "observed_at": "2026-10-25T22:34:48.384527+00:00",
+            "source_version": "CWE 4.20",
+            "claim": null
+          }
+        ],
+        "claim_omission_reason": "Definition not qualified; name/mapping reference only"
+      },
+      {
+        "id": "CAPEC-6",
+        "type": "capec",
+        "label": "Argument Injection",
+        "definition_summary": null,
+        "definition_scope": "Retained name/mapping only; definition not qualified here",
+        "evidence": [
+          {
+            "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+            "publisher": "The MITRE Corporation",
+            "published_at": null,
+            "updated_at": "2026-04-30",
+            "event_at": null,
+            "observed_at": "2026-10-25T22:34:48.384527+00:00",
+            "source_version": "CWE 4.20",
+            "claim": null
+          }
+        ],
+        "claim_omission_reason": "Definition not qualified; name/mapping reference only"
+      },
+      {
+        "id": "CAPEC-88",
+        "type": "capec",
+        "label": "OS Command Injection",
+        "definition_summary": "MITRE describes injection of operating-system commands through untrusted input used by an application to build command strings. The described consequences can include command execution and greater privileges; they are pattern capabilities, not observed activity.",
+        "definition_scope": "Qualified retained CAPEC 3.9 definition",
+        "evidence": [
+          {
+            "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+            "publisher": "The MITRE Corporation",
+            "published_at": null,
+            "updated_at": "2026-04-30",
+            "event_at": null,
+            "observed_at": "2026-10-25T22:34:48.384527+00:00",
+            "source_version": "CWE 4.20",
+            "claim": "The Related Attack Patterns table lists CAPEC-88 under CWE-78 and explicitly supplies its displayed pattern name."
+          },
+          {
+            "source_url": "https://capec.mitre.org/data/definitions/88.html",
+            "publisher": "MITRE",
+            "published_at": null,
+            "updated_at": "2021-06-24",
+            "event_at": null,
+            "observed_at": "2026-10-25T23:34:00.367821+00:00",
+            "source_version": "CAPEC 3.9",
+            "claim": "The CAPEC 3.9 page identifies CAPEC-88 as OS Command Injection and its Description supports the pattern-definition summary. updated_at is the most recent listed content modification, not an incident or retrieval date."
+          }
+        ]
+      },
+      {
+        "id": "CWE-416",
+        "type": "cwe",
+        "label": "Use After Free",
+        "definition_summary": "Code accesses memory after it has been freed. If that storage is reallocated, an old pointer can refer into a new allocation where its original use is no longer valid.",
+        "definition_scope": "Retained CWE 4.20 context where supplied",
+        "evidence": [
+          {
+            "source_url": "https://cwe.mitre.org/data/definitions/416.html",
+            "publisher": "The MITRE Corporation",
+            "published_at": null,
+            "updated_at": "2026-04-30",
+            "event_at": null,
+            "observed_at": "2026-10-25T22:34:48.314845+00:00",
+            "source_version": "CWE 4.20",
+            "claim": "The captured official CWE page defines CWE-416: Code accesses memory after it has been freed. If that storage is reallocated, an old pointer can refer into a new allocation where its original use is no longer valid."
+          }
+        ]
+      },
+      {
+        "id": "CWE-78",
+        "type": "cwe",
+        "label": "Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')",
+        "definition_summary": "External input is incorporated into an operating-system command without correctly neutralizing command-significant elements, allowing the input to alter the downstream command.",
+        "definition_scope": "Retained CWE 4.20 context where supplied",
+        "evidence": [
+          {
+            "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+            "publisher": "The MITRE Corporation",
+            "published_at": null,
+            "updated_at": "2026-04-30",
+            "event_at": null,
+            "observed_at": "2026-10-25T22:34:48.384527+00:00",
+            "source_version": "CWE 4.20",
+            "claim": "The captured official CWE page defines CWE-78: External input is incorporated into an operating-system command without correctly neutralizing command-significant elements, allowing the input to alter the downstream command."
+          }
+        ]
+      }
+    ],
+    "mappings": [
+      {
+        "id": "REL-cwe-78-capec-108",
+        "source_id": "CWE-78",
+        "target_id": "CAPEC-108",
+        "relation": "taxonomy_mapping",
+        "basis": "catalogue",
+        "confidence": "source_stated",
+        "evidence": [
+          {
+            "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+            "publisher": "The MITRE Corporation",
+            "published_at": null,
+            "updated_at": "2026-04-30",
+            "event_at": null,
+            "observed_at": "2026-10-25T22:34:48.384527+00:00",
+            "source_version": "CWE 4.20",
+            "claim": "The Related Attack Patterns table lists CAPEC-108 under CWE-78 and explicitly supplies its displayed pattern name."
+          }
+        ]
+      },
+      {
+        "id": "REL-cwe-78-capec-15",
+        "source_id": "CWE-78",
+        "target_id": "CAPEC-15",
+        "relation": "taxonomy_mapping",
+        "basis": "catalogue",
+        "confidence": "source_stated",
+        "evidence": [
+          {
+            "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+            "publisher": "The MITRE Corporation",
+            "published_at": null,
+            "updated_at": "2026-04-30",
+            "event_at": null,
+            "observed_at": "2026-10-25T22:34:48.384527+00:00",
+            "source_version": "CWE 4.20",
+            "claim": "The Related Attack Patterns table lists CAPEC-15 under CWE-78 and explicitly supplies its displayed pattern name."
+          }
+        ]
+      },
+      {
+        "id": "REL-cwe-78-capec-43",
+        "source_id": "CWE-78",
+        "target_id": "CAPEC-43",
+        "relation": "taxonomy_mapping",
+        "basis": "catalogue",
+        "confidence": "source_stated",
+        "evidence": [
+          {
+            "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+            "publisher": "The MITRE Corporation",
+            "published_at": null,
+            "updated_at": "2026-04-30",
+            "event_at": null,
+            "observed_at": "2026-10-25T22:34:48.384527+00:00",
+            "source_version": "CWE 4.20",
+            "claim": "The Related Attack Patterns table lists CAPEC-43 under CWE-78 and explicitly supplies its displayed pattern name."
+          }
+        ]
+      },
+      {
+        "id": "REL-cwe-78-capec-6",
+        "source_id": "CWE-78",
+        "target_id": "CAPEC-6",
+        "relation": "taxonomy_mapping",
+        "basis": "catalogue",
+        "confidence": "source_stated",
+        "evidence": [
+          {
+            "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+            "publisher": "The MITRE Corporation",
+            "published_at": null,
+            "updated_at": "2026-04-30",
+            "event_at": null,
+            "observed_at": "2026-10-25T22:34:48.384527+00:00",
+            "source_version": "CWE 4.20",
+            "claim": "The Related Attack Patterns table lists CAPEC-6 under CWE-78 and explicitly supplies its displayed pattern name."
+          }
+        ]
+      },
+      {
+        "id": "REL-cwe-78-capec-88",
+        "source_id": "CWE-78",
+        "target_id": "CAPEC-88",
+        "relation": "taxonomy_mapping",
+        "basis": "catalogue",
+        "confidence": "source_stated",
+        "evidence": [
+          {
+            "source_url": "https://cwe.mitre.org/data/definitions/78.html",
+            "publisher": "The MITRE Corporation",
+            "published_at": null,
+            "updated_at": "2026-04-30",
+            "event_at": null,
+            "observed_at": "2026-10-25T22:34:48.384527+00:00",
+            "source_version": "CWE 4.20",
+            "claim": "The Related Attack Patterns table lists CAPEC-88 under CWE-78 and explicitly supplies its displayed pattern name."
+          }
+        ]
+      }
+    ],
+    "interpretation": "CNA weakness IDs and explicit catalog mappings do not establish an observed exploit or actor attribution"
+  },
+  "revision_watch": {
+    "method": "metadata-only eligibility review",
+    "citation_occurrences": 462,
+    "previous_report_count": 12,
+    "literal_URLs": 378,
+    "canonical_URLs": 378,
+    "recent_candidates": 378,
+    "older_candidates": 0,
+    "unknown_history": 377,
+    "held_prior_route_count": 1,
+    "selected": 0,
+    "attempted_new": 0,
+    "qualified_checks": 0,
+    "comparable_checks": 0,
+    "material_changes": null,
+    "cap_excluded": 0,
+    "unused_request_slots": 12,
+    "coverage": "partial",
+    "old_date_only_report_excluded": true,
+    "source_body_checks_not_performed": true,
+    "previous_daily_report_id": "SW-DAILY-2026-10-25-2200-CDT",
+    "next_nominal_review_UTC": "2026-10-26T19:00:00Z",
+    "next_nominal_review_local": "2026-10-26 14:00 America/Chicago"
+  },
+  "watchlist": [
+    {
+      "kind": "next_nominal_report",
+      "UTC": "2026-10-26T19:00:00Z",
+      "local": "2026-10-26 14:00 America/Chicago",
+      "state": "planned_opportunity_not_completed"
+    },
+    {
+      "kind": "source_revision",
+      "state": "Unknown history and one prior held AWS route remain unresolved; no automatic URI/redirect check or comparison is authorized by this report"
+    },
+    {
+      "kind": "CNA_missingness",
+      "cve_ids": [
+        "CVE-2026-104621",
+        "CVE-2026-104622",
+        "CVE-2026-115560"
+      ],
+      "meaning": "Missing enrichment is not registry absence or a product/fix/exploitation finding"
+    },
+    {
+      "kind": "boundary_dates",
+      "entry_ids": [],
+      "meaning": "Unknown publisher timezone and partial UTC-day overlap; not main metric membership"
+    },
+    {
+      "kind": "publication_lead",
+      "label": "Microsoft 365 token-replay reporting",
+      "entry_id": "feed-399172439712b08d5e85",
+      "published_at": "2026-10-26T08:35:51+00:00",
+      "source_id": "the-hacker-news",
+      "url": "https://thehackernews.com/2026/10/microsoft-365-token-replay-attacks.html",
+      "note": "Publication metadata flags token-replay coverage; no tenant/account total or CVE association is verified here.",
+      "cve_ids": []
+    },
+    {
+      "kind": "publication_lead",
+      "label": "AI coding-agent download risks",
+      "entry_id": "feed-0a1f7446b6d0ffbe4c83",
+      "published_at": "2026-10-26T10:35:08+00:00",
+      "source_id": "cso",
+      "url": "https://www.csoonline.com/article/4240222/malicious-downloads-can-trick-ai-coding-agents-into-compromising-themselves.html",
+      "note": "An editorial lead on agent/download trust boundaries, not a confirmed vulnerability or assessed control.",
+      "cve_ids": []
+    },
+    {
+      "kind": "publication_lead",
+      "label": "AI-agent deployment controls",
+      "entry_id": "feed-4a8aac30d8c990609357",
+      "published_at": "2026-10-26T10:00:18+00:00",
+      "source_id": "securelist",
+      "url": "https://securelist.com/tr/how-to-secure-ai-agents/121444/",
+      "note": "Vendor reporting is a review lead, not evidence that a product prevents the reported threat.",
+      "cve_ids": []
+    },
+    {
+      "kind": "publication_lead",
+      "label": "Runtime and compression update coverage",
+      "entry_id": "feed-15faad20100130033abd",
+      "published_at": "2026-10-26T10:21:57+00:00",
+      "source_id": "securityweek",
+      "url": "https://www.securityweek.com/node2shell-brotli-flaw-triggers-patching-across-microsoft-node-js-python-packages/",
+      "note": "The row supplies no CVE association; no identifier or affected-version claim is inferred from its headline.",
+      "cve_ids": []
+    },
+    {
+      "kind": "publication_lead",
+      "label": "AI-assisted coding quality tooling",
+      "entry_id": "feed-ced89b93365415e1b79c",
+      "published_at": "2026-10-26T04:25:59+00:00",
+      "source_id": "help-net-security",
+      "url": "https://www.helpnetsecurity.com/2026/10/26/google-elephant-goldfish-model-plugin/",
+      "note": "A publication lead only; functionality, efficacy and security assurances were not independently checked.",
+      "cve_ids": []
+    }
+  ],
+  "limitations": [
+    "The selection is saved source-declared publications/catalog rows and metadata CVE mentions, not incidents, victims, confirmed exposure or all vulnerabilities.",
+    "Date-only rows use a declared UTC-calendar convention with unknown publisher timezone. They are not proven elapsed-hour publication or event instants.",
+    "The input was generated after the nominal cutoff and captured later. This is retrospective source/CNA context; zero positive generation tail does not mean complete coverage.",
+    "Failed, partial and last-good source observations can leave gaps. A successful status is not exhaustive publisher intake. Raw intake and selection details are not projected.",
+    "A CVE missing from a row, including an advisory row, is not proof that the source discusses no CVEs. No identifiers or exploitation claims are inferred from headlines.",
+    "All main CVE contexts are retained. Failed/UNKNOWN CNA states, absent CVSS, null workaround text and missing weaknesses remain explicit unknowns. A reference or guidance classification is not a usable workaround.",
+    "CNA affected ranges, unaffected products, vendor solution statements, package backports, SAPI/request conditions and CVSS versions remain distinct. No device or patch verification occurred.",
+    "CWE/CAPEC mappings classify supplied context; they do not establish an observed attack, actor responsibility, environment applicability or a transitive attribution.",
+    "Private editorial titles are not copied. Entries use neutral labels; selected prose is a reviewed paraphrase of accepted metadata/context, not a new publisher-body qualification.",
+    "This revision pass performed no new article requests, qualified source checks or comparisons. Unknown/held/not-selected is not updated or unchanged.",
+    "CISA catalog addition and due dates are catalog/federal data, not first exploitation times or deadlines assigned to this report’s readers.",
+    "Overlapping periods and CVE memberships must not be summed. CNA retrieval/update and publisher evidence clocks remain separate, nullable source fields. None establishes an as-of-cutoff snapshot."
+  ],
+  "charts": [
+    {
+      "path": "charts/coverage.svg",
+      "title": "Retained row coverage",
+      "denominator": 3817,
+      "unit": "saved publication/catalog rows, not incidents",
+      "row_values": [
+        [
+          "Declared timestamp in period",
+          75
+        ],
+        [
+          "Full UTC-calendar date",
+          0
+        ],
+        [
+          "Boundary / generation-uncertain date",
+          0
+        ],
+        [
+          "Undated",
+          60
+        ],
+        [
+          "Outside period",
+          3682
+        ],
+        [
+          "Explicit timestamp after generation",
+          0
+        ]
+      ]
+    },
+    {
+      "path": "charts/publisher-intake.svg",
+      "title": "Selected rows by source",
+      "denominator": 75,
+      "unit": "main declared-time/calendar rows, not intake or document checks",
+      "row_values": [
+        [
+          "redhat-security",
+          34
+        ],
+        [
+          "help-net-security",
+          9
+        ],
+        [
+          "the-hacker-news",
+          6
+        ],
+        [
+          "security-affairs",
+          5
+        ],
+        [
+          "cso",
+          4
+        ],
+        [
+          "bleepingcomputer",
+          3
+        ],
+        [
+          "sans-isc",
+          3
+        ],
+        [
+          "securityweek",
+          3
+        ],
+        [
+          "infosecurity-magazine",
+          2
+        ],
+        [
+          "cybersecurity-dive",
+          1
+        ],
+        [
+          "paloalto-psirt",
+          1
+        ],
+        [
+          "qualys",
+          1
+        ],
+        [
+          "register-security",
+          1
+        ],
+        [
+          "risky-business-news",
+          1
+        ],
+        [
+          "securelist",
+          1
+        ]
+      ]
+    },
+    {
+      "path": "charts/weakness-context.svg",
+      "title": "Captured CNA weakness context",
+      "denominator": 7,
+      "unit": "unique main-CVE context memberships; CWEs overlap",
+      "row_values": [
+        [
+          "CWE-1325",
+          2
+        ],
+        [
+          "CWE-1419",
+          2
+        ],
+        [
+          "CWE-416",
+          2
+        ],
+        [
+          "CWE-755",
+          2
+        ],
+        [
+          "CWE-824",
+          2
+        ],
+        [
+          "CWE-754",
+          1
+        ],
+        [
+          "CWE-78",
+          1
+        ],
+        [
+          "No supplied CWE: not_projected",
+          3
+        ]
+      ]
+    }
+  ],
+  "entries": [
+    {
+      "id": "feed-38c705de0f5ebeead9e1",
+      "title": "Source-declared publication entry",
+      "source_id": "securityweek",
+      "source_name": "SecurityWeek",
+      "kind": "reporting",
+      "published_at": "2026-10-25T11:00:00+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.securityweek.com/former-unit-8200-officers-raise-34-million-for-agentic-secops-startup-mave/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-da7909e1a7248f0ddcd8",
+      "title": "Source-declared publication entry",
+      "source_id": "security-affairs",
+      "source_name": "Security Affairs",
+      "kind": "reporting",
+      "published_at": "2026-10-25T12:28:47+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [
+        "CVE-2026-106931",
+        "CVE-2026-109618",
+        "CVE-2026-109619",
+        "CVE-2026-113380"
+      ],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://securityaffairs.com/201698/breaking-news/security-affairs-newsletter-round-601-by-pierluigi-paganini-international-edition.html",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-56f7fabfec813116f101",
+      "title": "Source-declared publication entry",
+      "source_id": "security-affairs",
+      "source_name": "Security Affairs",
+      "kind": "reporting",
+      "published_at": "2026-10-25T13:27:05+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://securityaffairs.com/201709/security/security-affairs-malware-newsletter-round-120.html",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-5db2cad8ad53b4cb9cf0",
+      "title": "Source-declared publication entry",
+      "source_id": "bleepingcomputer",
+      "source_name": "BleepingComputer",
+      "kind": "reporting",
+      "published_at": "2026-10-25T15:49:38+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.bleepingcomputer.com/news/security/ai-coding-agents-hijacked-using-agentsmd-file-in-downloads-folder/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-da19872bd8ebd641fd63",
+      "title": "Source-declared publication entry",
+      "source_id": "the-hacker-news",
+      "source_name": "The Hacker News",
+      "kind": "reporting",
+      "published_at": "2026-10-25T17:19:46+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://thehackernews.com/2026/10/php2shell-exploitation-hits-government.html",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-33f7736e74631c3e9265",
+      "title": "Source-declared publication entry",
+      "source_id": "the-hacker-news",
+      "source_name": "The Hacker News",
+      "kind": "reporting",
+      "published_at": "2026-10-25T17:44:09+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://thehackernews.com/2026/10/unpatched-tailscale-ssh-flaws-could-let.html",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-863e72cb6e4e485ea568",
+      "title": "Source-declared publication entry",
+      "source_id": "security-affairs",
+      "source_name": "Security Affairs",
+      "kind": "reporting",
+      "published_at": "2026-10-25T17:49:25+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://securityaffairs.com/201718/ai/security-affairs-ai-cybersecurity-newsletter-round-5.html",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-cbc6b5f311de5bf33cfa",
+      "title": "Source-declared publication entry",
+      "source_id": "sans-isc",
+      "source_name": "SANS Internet Storm Center",
+      "kind": "research",
+      "published_at": "2026-10-25T19:57:53+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://isc.sans.edu/diary/rss/33454",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-0679ef6824f482ea04fc",
+      "title": "Source-declared publication entry",
+      "source_id": "help-net-security",
+      "source_name": "Help Net Security",
+      "kind": "reporting",
+      "published_at": "2026-10-25T23:33:35+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.helpnetsecurity.com/2026/10/26/openssl-4-1-0-released/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-1e94d034caffcf69d1fa",
+      "title": "Source-declared publication entry",
+      "source_id": "risky-business-news",
+      "source_name": "Risky Business Newsletters",
+      "kind": "reporting",
+      "published_at": "2026-10-26T01:26:37+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://risky.biz/risky-bulletin-while-everyone-was-looking-at-php-another-rce-is-wrecking-whats-left-of-the-internet/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-55e965b8a08cacbb24d5",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T01:43:24+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89730",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-51736e2e4998c1ba5bfc",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T01:46:20+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89734",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-42b5a8b0c3d12500137d",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T01:46:55+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89732",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-ef3aa0659547732caeb6",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T01:58:38+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89737",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-8a7a748668a66f411ac4",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T02:04:08+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89736",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-3a0f76211b2a574f1b7f",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T02:12:35+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89733",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-1a054f02b88c7e2ff2f2",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T02:35:34+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89741",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-03de9978edea683b73b6",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T02:36:59+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89738",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-2d42588d763737c5fe80",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T02:43:58+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89748",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-2f4f7eb3e8a50edd0664",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T03:01:45+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89752",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-fbbf97b6505556951e99",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T03:03:30+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89744",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-7b80f034db888412d1b0",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T03:09:10+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89755",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-56751b636677303bd1eb",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T03:10:17+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89740",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-7859be7bf95d27e15e52",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T03:12:09+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89750",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-e30e430ff1b6819edb24",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T03:26:20+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89751",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-c69fcb6936220c12852d",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T03:26:26+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89739",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-dca48f2d41d52768727b",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T03:26:40+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89759",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-39ab96c66c401e45a5bd",
+      "title": "Source-declared publication entry",
+      "source_id": "sans-isc",
+      "source_name": "SANS Internet Storm Center",
+      "kind": "research",
+      "published_at": "2026-10-26T03:30:12+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://isc.sans.edu/diary/rss/33456",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-fc9e1ca0025b0d4bad22",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T03:32:58+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89761",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-8f916b9984d00b5981b6",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T03:39:38+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89754",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-e8b0b81a204173003cb5",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T03:59:28+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89747",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-36c1dc00773e0454b382",
+      "title": "Source-declared publication entry",
+      "source_id": "register-security",
+      "source_name": "The Register Security",
+      "kind": "reporting",
+      "published_at": "2026-10-26T04:08:23+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.theregister.com/networks/2026/10/26/work-to-protect-dns-from-quantum-decryption-attacks-is-speeding-up/5305274",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-ced89b93365415e1b79c",
+      "title": "Source-declared publication entry",
+      "source_id": "help-net-security",
+      "source_name": "Help Net Security",
+      "kind": "reporting",
+      "published_at": "2026-10-26T04:25:59+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.helpnetsecurity.com/2026/10/26/google-elephant-goldfish-model-plugin/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-808433398b84269dc553",
+      "title": "Source-declared publication entry",
+      "source_id": "help-net-security",
+      "source_name": "Help Net Security",
+      "kind": "reporting",
+      "published_at": "2026-10-26T04:30:36+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.helpnetsecurity.com/2026/10/26/reddit-r-opensource-ai-ban/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-b086d13176745941442b",
+      "title": "Source-declared publication entry",
+      "source_id": "qualys",
+      "source_name": "Qualys Security Blog",
+      "kind": "research",
+      "published_at": "2026-10-26T04:31:11+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://blog.qualys.com/product-tech/2026/10/25/cant-patch-php2shell-yet-build-a-stopgap-with-the-controls-you-own",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-cfc9e890e84a215787b8",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T04:35:02+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89760",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-97cff8feff1a03cccceb",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T04:40:02+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89745",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-b52a078f0739f345bc39",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T04:40:59+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89746",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-6f484beb8318b28e2d42",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T04:45:16+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89742",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-7290989d6ec32cb08c71",
+      "title": "Source-declared publication entry",
+      "source_id": "help-net-security",
+      "source_name": "Help Net Security",
+      "kind": "reporting",
+      "published_at": "2026-10-26T05:00:59+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.helpnetsecurity.com/2026/10/26/transunion-synthetic-identity-fraud-risks-report/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-b22df1a47ab1f59d9b14",
+      "title": "Source-declared publication entry",
+      "source_id": "help-net-security",
+      "source_name": "Help Net Security",
+      "kind": "reporting",
+      "published_at": "2026-10-26T05:30:27+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.helpnetsecurity.com/2026/10/26/arrakis-dormant-ai-agent-risks-report/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-de1b1a5205558ea919ae",
+      "title": "Source-declared publication entry",
+      "source_id": "paloalto-psirt",
+      "source_name": "Palo Alto Networks Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T05:45:00+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://security.paloaltonetworks.com/CVE-2026-109618",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-32df539d3d9519d394ea",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T05:52:40+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89753",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-0181192af112f3b8ff9b",
+      "title": "Source-declared publication entry",
+      "source_id": "help-net-security",
+      "source_name": "Help Net Security",
+      "kind": "reporting",
+      "published_at": "2026-10-26T06:00:12+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.helpnetsecurity.com/2026/10/26/product-showcase-stellar-cyber-isoc-platform/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-63f16ca1b1ad1c49473e",
+      "title": "Source-declared publication entry",
+      "source_id": "the-hacker-news",
+      "source_name": "The Hacker News",
+      "kind": "reporting",
+      "published_at": "2026-10-26T06:03:48+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://thehackernews.com/2026/10/malicious-file-in-downloads-folder.html",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-90eb0f05244e7c7986b7",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T06:05:25+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89814",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-ef0d1b72bcd557c8bf4e",
+      "title": "Source-declared publication entry",
+      "source_id": "help-net-security",
+      "source_name": "Help Net Security",
+      "kind": "reporting",
+      "published_at": "2026-10-26T06:30:29+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.helpnetsecurity.com/2026/10/26/linux-foundation-open-source-ai-slop/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-dabf80aac23c36540e58",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T06:57:11+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89816",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-9568a236f68da4a16c1f",
+      "title": "Source-declared publication entry",
+      "source_id": "help-net-security",
+      "source_name": "Help Net Security",
+      "kind": "reporting",
+      "published_at": "2026-10-26T07:00:45+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.helpnetsecurity.com/2026/10/26/witness-open-source-software-supply-chain-tool/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-a26d3a2a0bb03d720cf8",
+      "title": "Source-declared publication entry",
+      "source_id": "the-hacker-news",
+      "source_name": "The Hacker News",
+      "kind": "reporting",
+      "published_at": "2026-10-26T07:49:46+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://thehackernews.com/2026/10/gheist-uses-stolen-github-tokens-to.html",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-fff619ad4e98ce14969a",
+      "title": "Source-declared publication entry",
+      "source_id": "cso",
+      "source_name": "CSO",
+      "kind": "reporting",
+      "published_at": "2026-10-26T07:52:46+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [
+        "CVE-2026-104621",
+        "CVE-2026-104622"
+      ],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.csoonline.com/article/4240151/bright-security-introduces-star-fuzzer-agentic-fuzzing-that-writes-its-own-harnesses-and-proves-every-finding.html",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-8ed950204167cb3aedd2",
+      "title": "Source-declared publication entry",
+      "source_id": "security-affairs",
+      "source_name": "Security Affairs",
+      "kind": "reporting",
+      "published_at": "2026-10-26T08:05:12+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://securityaffairs.com/201729/ai/anthropic-reveals-how-claude-mythos-5-crossed-security-testing-boundaries.html",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-0232f1c4c73c3d7ef26c",
+      "title": "Source-declared publication entry",
+      "source_id": "cso",
+      "source_name": "CSO",
+      "kind": "reporting",
+      "published_at": "2026-10-26T08:25:00+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.csoonline.com/article/569075/the-10-most-powerful-cybersecurity-companies.html",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-399172439712b08d5e85",
+      "title": "Source-declared publication entry",
+      "source_id": "the-hacker-news",
+      "source_name": "The Hacker News",
+      "kind": "reporting",
+      "published_at": "2026-10-26T08:35:51+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://thehackernews.com/2026/10/microsoft-365-token-replay-attacks.html",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-6410f6a2c993dc5f084c",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T08:49:03+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89832",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-1bca5ccd00967cf5ede9",
+      "title": "Source-declared publication entry",
+      "source_id": "cybersecurity-dive",
+      "source_name": "Cybersecurity Dive",
+      "kind": "reporting",
+      "published_at": "2026-10-26T09:00:00+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.cybersecuritydive.com/spons/security-anchors-a-modern-hybrid-sovereign-architecture/833427/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-ccdffaf1591bdcbcba21",
+      "title": "Source-declared publication entry",
+      "source_id": "cso",
+      "source_name": "CSO",
+      "kind": "reporting",
+      "published_at": "2026-10-26T09:00:00+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.csoonline.com/article/4239703/what-eviltokens-teaches-us-about-defending-against-ai-assisted-attacks.html",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-e84a8003dbea7666967a",
+      "title": "Source-declared publication entry",
+      "source_id": "securityweek",
+      "source_name": "SecurityWeek",
+      "kind": "reporting",
+      "published_at": "2026-10-26T09:10:03+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.securityweek.com/mythos-5-ignored-real-world-harm-in-july-attack/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-d20444dd0495bc21e766",
+      "title": "Source-declared publication entry",
+      "source_id": "infosecurity-magazine",
+      "source_name": "Infosecurity Magazine",
+      "kind": "reporting",
+      "published_at": "2026-10-26T09:15:00+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [
+        "CVE-2026-115560"
+      ],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.infosecurity-magazine.com/news/php-publishes-mitigation-advice/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-7c54e769948b6fc771cc",
+      "title": "Source-declared publication entry",
+      "source_id": "bleepingcomputer",
+      "source_name": "BleepingComputer",
+      "kind": "reporting",
+      "published_at": "2026-10-26T09:19:57+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.bleepingcomputer.com/news/security/php2shell-security-flaws-now-sucessfully-exploited-in-the-wild/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-0f81938e3da5d5f8d144",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T09:29:05+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89849",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-3752165e9c29de9f6900",
+      "title": "Source-declared publication entry",
+      "source_id": "sans-isc",
+      "source_name": "SANS Internet Storm Center",
+      "kind": "research",
+      "published_at": "2026-10-26T09:38:03+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://isc.sans.edu/diary/rss/33442",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-10c765b2d58cba346f66",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T09:41:43+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89850",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-20494af63ce3fb8e1268",
+      "title": "Source-declared publication entry",
+      "source_id": "the-hacker-news",
+      "source_name": "The Hacker News",
+      "kind": "reporting",
+      "published_at": "2026-10-26T09:54:02+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://thehackernews.com/2026/10/ucreator-android-spyware-can-steal.html",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-f06a313f5aef44bf5033",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T09:56:07+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89884",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-18fe3072bd791ef07178",
+      "title": "Source-declared publication entry",
+      "source_id": "security-affairs",
+      "source_name": "Security Affairs",
+      "kind": "reporting",
+      "published_at": "2026-10-26T09:58:31+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [
+        "CVE-2026-109618",
+        "CVE-2026-109619"
+      ],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://securityaffairs.com/201748/hacking/php2shell-suspected-north-korean-campaign-targets-216-vulnerable-php-hosts.html",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-4a8aac30d8c990609357",
+      "title": "Source-declared publication entry",
+      "source_id": "securelist",
+      "source_name": "Kaspersky Securelist",
+      "kind": "research",
+      "published_at": "2026-10-26T10:00:18+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://securelist.com/tr/how-to-secure-ai-agents/121444/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-6a6b8d983b6ae4ab6ce6",
+      "title": "Source-declared publication entry",
+      "source_id": "infosecurity-magazine",
+      "source_name": "Infosecurity Magazine",
+      "kind": "reporting",
+      "published_at": "2026-10-26T10:15:00+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.infosecurity-magazine.com/news/blue-initiative-maritime/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-15faad20100130033abd",
+      "title": "Source-declared publication entry",
+      "source_id": "securityweek",
+      "source_name": "SecurityWeek",
+      "kind": "reporting",
+      "published_at": "2026-10-26T10:21:57+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.securityweek.com/node2shell-brotli-flaw-triggers-patching-across-microsoft-node-js-python-packages/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-982f2ce768917b596cb1",
+      "title": "Source-declared publication entry",
+      "source_id": "bleepingcomputer",
+      "source_name": "BleepingComputer",
+      "kind": "reporting",
+      "published_at": "2026-10-26T10:26:52+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.bleepingcomputer.com/news/linux/kali-linux-20263-released-with-6-new-tools-desktop-updates/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-9af9b917a2222df19b03",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T10:33:46+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89859",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-d13153bc316eea2c83f7",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T10:34:56+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89892",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-0a1f7446b6d0ffbe4c83",
+      "title": "Source-declared publication entry",
+      "source_id": "cso",
+      "source_name": "CSO",
+      "kind": "reporting",
+      "published_at": "2026-10-26T10:35:08+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.csoonline.com/article/4240222/malicious-downloads-can-trick-ai-coding-agents-into-compromising-themselves.html",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-0af7d38d27be83d6cad1",
+      "title": "Source-declared publication entry",
+      "source_id": "redhat-security",
+      "source_name": "Red Hat Security Advisories",
+      "kind": "advisory",
+      "published_at": "2026-10-26T10:36:51+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://access.redhat.com/errata/RHSA-2026:89888",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    },
+    {
+      "id": "feed-ccb8f249e1b0580d3ec9",
+      "title": "Source-declared publication entry",
+      "source_id": "help-net-security",
+      "source_name": "Help Net Security",
+      "kind": "reporting",
+      "published_at": "2026-10-26T10:41:47+00:00",
+      "event_date": null,
+      "date_basis": "publication",
+      "cves": [],
+      "origin": "publisher-feed",
+      "exploitation": "unknown",
+      "url": "https://www.helpnetsecurity.com/2026/10/26/anthropic-claude-duet-security-safeguards/",
+      "url_omission_reason": null,
+      "cohort": "explicit_timestamp_in_window",
+      "reference_urls": [],
+      "withheld_reference_links": [],
+      "title_omission_reason": "Private raw title not projected; neutral source-row label used"
+    }
+  ],
+  "public_citations": [
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89730",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89732",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89733",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89734",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89736",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89737",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89738",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89739",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89740",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89741",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89742",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89744",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89745",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89746",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89747",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89748",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89750",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89751",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89752",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89753",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89754",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89755",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89759",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89760",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89761",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89814",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89816",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89832",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89849",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89850",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89859",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89884",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89888",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://access.redhat.com/errata/RHSA-2026:89892",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://capec.mitre.org/data/definitions/88.html",
+      "label": "Retained taxonomy reference",
+      "evidence_level": "primary",
+      "kind": "taxonomy"
+    },
+    {
+      "url": "https://cwe.mitre.org/data/definitions/416.html",
+      "label": "Retained taxonomy reference",
+      "evidence_level": "primary",
+      "kind": "taxonomy"
+    },
+    {
+      "url": "https://cwe.mitre.org/data/definitions/78.html",
+      "label": "Retained taxonomy reference",
+      "evidence_level": "primary",
+      "kind": "taxonomy"
+    },
+    {
+      "url": "https://cwe.mitre.org/data/definitions/89.html",
+      "label": "Retained taxonomy reference",
+      "evidence_level": "primary",
+      "kind": "taxonomy"
+    },
+    {
+      "url": "https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp",
+      "label": "Qualified retained source context",
+      "evidence_level": "primary",
+      "kind": "retained_context"
+    },
+    {
+      "url": "https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w",
+      "label": "Qualified retained source context",
+      "evidence_level": "primary",
+      "kind": "retained_context"
+    },
+    {
+      "url": "https://security.paloaltonetworks.com/CVE-2026-109618",
+      "label": "Source advisory reference",
+      "evidence_level": "primary",
+      "kind": "advisory"
+    },
+    {
+      "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-106931",
+      "label": "CISA catalog reference",
+      "evidence_level": "primary",
+      "kind": "cisa_catalog"
+    },
+    {
+      "url": "https://www.cisa.gov/news-events/alerts/2026/10/21/critical-vulnerabilities-php-require-immediate-patching",
+      "label": "Qualified retained source context",
+      "evidence_level": "primary",
+      "kind": "retained_context"
+    },
+    {
+      "url": "https://www.cve.org/CVERecord?id=CVE-2026-104621",
+      "label": "CVE-2026-104621 official record",
+      "evidence_level": "primary",
+      "kind": "cve_record"
+    },
+    {
+      "url": "https://www.cve.org/CVERecord?id=CVE-2026-104622",
+      "label": "CVE-2026-104622 official record",
+      "evidence_level": "primary",
+      "kind": "cve_record"
+    },
+    {
+      "url": "https://www.cve.org/CVERecord?id=CVE-2026-106931",
+      "label": "CVE-2026-106931 official record",
+      "evidence_level": "primary",
+      "kind": "cve_record"
+    },
+    {
+      "url": "https://www.cve.org/CVERecord?id=CVE-2026-109618",
+      "label": "CVE-2026-109618 official record",
+      "evidence_level": "primary",
+      "kind": "cve_record"
+    },
+    {
+      "url": "https://www.cve.org/CVERecord?id=CVE-2026-109619",
+      "label": "CVE-2026-109619 official record",
+      "evidence_level": "primary",
+      "kind": "cve_record"
+    },
+    {
+      "url": "https://www.cve.org/CVERecord?id=CVE-2026-113380",
+      "label": "CVE-2026-113380 official record",
+      "evidence_level": "primary",
+      "kind": "cve_record"
+    },
+    {
+      "url": "https://www.cve.org/CVERecord?id=CVE-2026-115560",
+      "label": "CVE-2026-115560 official record",
+      "evidence_level": "primary",
+      "kind": "cve_record"
+    },
+    {
+      "url": "https://www.microsoft.com/en-us/security/blog/2026/10/21/storm-0940-uses-artex-agentic-ai-connectwise-supply-chain-compromise/",
+      "label": "Microsoft attributed background account",
+      "evidence_level": "primary",
+      "kind": "publisher_context"
+    },
+    {
+      "url": "https://www.php.net/archive/2026.php",
+      "label": "Qualified retained source context",
+      "evidence_level": "primary",
+      "kind": "retained_context"
+    },
+    {
+      "url": "https://blog.qualys.com/product-tech/2026/10/25/cant-patch-php2shell-yet-build-a-stopgap-with-the-controls-you-own",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://github.com/signalapp/ringrtc/commit/4b1b6fa53c9f30c87c8ea78e44675d4a13e1e4d3",
+      "label": "Retained CNA reference",
+      "evidence_level": "secondary",
+      "kind": "cna_reference"
+    },
+    {
+      "url": "https://github.com/signalapp/ringrtc/compare/v2.71.0...v2.72.0",
+      "label": "Retained CNA reference",
+      "evidence_level": "secondary",
+      "kind": "cna_reference"
+    },
+    {
+      "url": "https://isc.sans.edu/diary/rss/33442",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://isc.sans.edu/diary/rss/33454",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://isc.sans.edu/diary/rss/33456",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://jvn.jp/en/jp/JVN88474777/",
+      "label": "Retained CNA reference",
+      "evidence_level": "secondary",
+      "kind": "cna_reference"
+    },
+    {
+      "url": "https://risky.biz/risky-bulletin-while-everyone-was-looking-at-php-another-rce-is-wrecking-whats-left-of-the-internet/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://securelist.com/tr/how-to-secure-ai-agents/121444/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://securityaffairs.com/201698/breaking-news/security-affairs-newsletter-round-601-by-pierluigi-paganini-international-edition.html",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://securityaffairs.com/201709/security/security-affairs-malware-newsletter-round-120.html",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://securityaffairs.com/201718/ai/security-affairs-ai-cybersecurity-newsletter-round-5.html",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://securityaffairs.com/201729/ai/anthropic-reveals-how-claude-mythos-5-crossed-security-testing-boundaries.html",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://securityaffairs.com/201748/hacking/php2shell-suspected-north-korean-campaign-targets-216-vulnerable-php-hosts.html",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://thehackernews.com/2026/10/gheist-uses-stolen-github-tokens-to.html",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://thehackernews.com/2026/10/malicious-file-in-downloads-folder.html",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://thehackernews.com/2026/10/microsoft-365-token-replay-attacks.html",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://thehackernews.com/2026/10/php2shell-exploitation-hits-government.html",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://thehackernews.com/2026/10/ucreator-android-spyware-can-steal.html",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://thehackernews.com/2026/10/unpatched-tailscale-ssh-flaws-could-let.html",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.bleepingcomputer.com/news/linux/kali-linux-20263-released-with-6-new-tools-desktop-updates/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.bleepingcomputer.com/news/security/ai-coding-agents-hijacked-using-agentsmd-file-in-downloads-folder/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.bleepingcomputer.com/news/security/php2shell-security-flaws-now-sucessfully-exploited-in-the-wild/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.csoonline.com/article/4239703/what-eviltokens-teaches-us-about-defending-against-ai-assisted-attacks.html",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.csoonline.com/article/4240151/bright-security-introduces-star-fuzzer-agentic-fuzzing-that-writes-its-own-harnesses-and-proves-every-finding.html",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.csoonline.com/article/4240222/malicious-downloads-can-trick-ai-coding-agents-into-compromising-themselves.html",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.csoonline.com/article/569075/the-10-most-powerful-cybersecurity-companies.html",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.cybersecuritydive.com/spons/security-anchors-a-modern-hybrid-sovereign-architecture/833427/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.eg-secure.co.jp/siteguard/news/alert-202610-1",
+      "label": "Retained CNA reference",
+      "evidence_level": "secondary",
+      "kind": "cna_reference"
+    },
+    {
+      "url": "https://www.helpnetsecurity.com/2026/10/26/anthropic-claude-duet-security-safeguards/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.helpnetsecurity.com/2026/10/26/arrakis-dormant-ai-agent-risks-report/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.helpnetsecurity.com/2026/10/26/google-elephant-goldfish-model-plugin/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.helpnetsecurity.com/2026/10/26/linux-foundation-open-source-ai-slop/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.helpnetsecurity.com/2026/10/26/openssl-4-1-0-released/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.helpnetsecurity.com/2026/10/26/product-showcase-stellar-cyber-isoc-platform/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.helpnetsecurity.com/2026/10/26/reddit-r-opensource-ai-ban/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.helpnetsecurity.com/2026/10/26/transunion-synthetic-identity-fraud-risks-report/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.helpnetsecurity.com/2026/10/26/witness-open-source-software-supply-chain-tool/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.infosecurity-magazine.com/news/blue-initiative-maritime/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.infosecurity-magazine.com/news/php-publishes-mitigation-advice/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.securityweek.com/former-unit-8200-officers-raise-34-million-for-agentic-secops-startup-mave/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.securityweek.com/mythos-5-ignored-real-world-harm-in-july-attack/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.securityweek.com/node2shell-brotli-flaw-triggers-patching-across-microsoft-node-js-python-packages/",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    },
+    {
+      "url": "https://www.theregister.com/networks/2026/10/26/work-to-protect-dns-from-quantum-decryption-attacks-is-speeding-up/5305274",
+      "label": "Selected publication reference",
+      "evidence_level": "secondary",
+      "kind": "publication"
+    }
+  ]
+}
