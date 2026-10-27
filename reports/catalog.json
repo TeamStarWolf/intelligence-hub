@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-27T17:19:54.369Z",
+  "updated_at": "2026-10-27T20:49:22.277Z",
   "reports": [
     {
       "id": "SW-MONTHLY-2026-01-RETRO",
@@ -337,6 +337,22 @@
       "report_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-27/0600-CDT/README.md",
       "data_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-27/0600-CDT/data.json",
       "prior_report_id": "SW-DAILY-2026-10-26-2200-CDT"
+    },
+    {
+      "id": "SW-DAILY-2026-10-27-1400-CDT",
+      "origin": "generated_report",
+      "cadence": "daily",
+      "title": "October 27, 2026 · 14:00 Chicago · 24-hour edition",
+      "period_start": "2026-10-26T19:00:00Z",
+      "period_end": "2026-10-27T19:00:00Z",
+      "period_kind": "rolling_elapsed",
+      "compiled_at": "2026-10-27T20:30:13.962Z",
+      "compilation_precision": "timestamp",
+      "status": "partial",
+      "coverage": "source_subset",
+      "report_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-27/1400-CDT/README.md",
+      "data_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-27/1400-CDT/data.json",
+      "prior_report_id": "SW-DAILY-2026-10-27-0600-CDT"
     }
   ],
   "indexes": [
@@ -356,19 +372,19 @@
     "min_success_interval_hours": 8,
     "min_failure_interval_hours": 24,
     "state": "partial",
-    "report_id": "SW-DAILY-2026-10-27-0600-CDT",
-    "recorded_at": "2026-10-27T12:41:08.492423+00:00",
-    "nominal_cutoff": "2026-10-27T11:00:00Z",
+    "report_id": "SW-DAILY-2026-10-27-1400-CDT",
+    "recorded_at": "2026-10-27T19:32:41.252226+00:00",
+    "nominal_cutoff": "2026-10-27T19:00:00Z",
     "records": [],
     "notes": [
-      "Offline citation metadata only: 2,170 occurrences from 17 reports, 1,449 literal URLs, 1,447 canonical identities and two unsupported identities. All 721 repeated occurrences were retained.",
-      "All 1,449 candidate groups were recent under the 96-hour lookback and 48-hour priority windows; older groups: zero. The legacy date-only report was excluded from the fixed input set.",
-      "Finite history is unknown for 1,445 groups. Unknown history does not establish whether a source was previously requested, eligibility, a baseline or cooldown.",
-      "Two routes remain held under distinct prior scopes; two unsupported literal identities remain unselected. These counts classify retained metadata and do not record new transport attempts or refusals.",
+      "Offline citation metadata only: 2,443 occurrences from 18 reports, 1,531 literal URLs, 1,529 canonical identities and two unsupported identities. All 912 repeated occurrences were retained.",
+      "All 1,531 candidate groups were recent under the 96-hour lookback and 48-hour priority windows; older groups: zero. The legacy date-only report was excluded from the fixed input set.",
+      "Finite history is unknown for 1,527 groups. Unknown history does not establish whether a source was previously requested, eligibility, a baseline or cooldown.",
+      "Two routes remain held under distinct historical scopes; two unsupported literal identities remain unselected. These counts classify retained metadata and do not record new transport attempts or refusals.",
       "Selected, attempted, qualified, comparable and new-baseline counts are zero. No publisher bodies were fetched or compared; material change remains unassessed.",
       "No candidate was excluded by the 12-source cap; all 12 request slots were unused. No per-source revision records or old/new response hashes are proposed.",
-      "Recorded time is actual offline metadata compilation at 2026-10-27T12:41:08.492423+00:00; nominal cutoff is 2026-10-27T11:00:00Z. Compilation does not establish source currency or changes through the cutoff.",
-      "The next nominal review is 2026-10-27T19:00:00Z (14:00 America/Chicago)."
+      "Recorded time is actual offline metadata compilation at 2026-10-27T19:32:41.252226+00:00; nominal cutoff is 2026-10-27T19:00:00Z. Compilation does not establish source currency or changes through the cutoff.",
+      "The next nominal review is 2026-10-28T03:00:00Z (October 27 at 22:00 America/Chicago)."
     ]
   },
   "notes": [
@@ -379,6 +395,7 @@
     "The October26 morning daily, W43 closing and weekend editions use one later captured source subset. Their declared publication-date windows and retrospective CNA/context clocks do not reconstruct what was known at period close; prior editions remain unchanged.",
     "The October 26 afternoon daily edition is a late, partial source subset with 148 explicitly timestamped publication records and 17 mentioned CVEs. Its 17:27:38 UTC input generation precedes the 19:00 UTC cutoff by 5,542 seconds; later capture, analysis and compilation do not fill that tail or establish repaired ten-minute collection.",
     "The October 26 evening daily edition is late and partial: 185 explicitly timestamped source-publication rows mention 22 CVEs. Input generation at October 27 00:54:32 UTC leaves a 7,528-second gap to its 03:00 UTC cutoff; later capture and compilation do not fill that gap or establish repaired ten-minute collection.",
-    "October 27 morning edition is late and partial: 144 timestamped source entries mention 20 unique CVEs; the frozen 06:14:51 UTC input leaves 17109 seconds unobserved before the 11:00 UTC cutoff. No publisher-body revision checks. Next nominal report/revision: October 27 14:00 America/Chicago (19:00 UTC)."
+    "October 27 morning edition is late and partial: 144 timestamped source entries mention 20 unique CVEs; the frozen 06:14:51 UTC input leaves 17109 seconds unobserved before the 11:00 UTC cutoff. No publisher-body revision checks. Next nominal report/revision: October 27 14:00 America/Chicago (19:00 UTC).",
+    "October 27 afternoon edition is late and partial: 145 explicitly timestamped source entries mention 17 unique CVEs. The frozen 17:41:42 UTC input leaves 4,698 seconds unobserved before the 19:00 UTC cutoff; later capture, analysis and compilation do not fill that tail or establish repaired ten-minute collection. No publisher-body revision checks. Next nominal report/revision opportunity: October 27 at 22:00 America/Chicago (October 28 at 03:00 UTC)."
   ]
 }

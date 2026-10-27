@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="740" viewBox="0 0 1080 740" role="img" aria-labelledby="chartTitle chartDescription">
+<title id="chartTitle">Selected publications by source</title>
+<desc id="chartDescription">Top eight sources, then Other (25 sources); 33 sources contribute 145 rows. Publication volume is not incident impact; Other combines sources outside the top eight. Denominator 145 main publication rows. Compiled 2026-10-27T20:30:13.962Z. Input SHA256 b787c5a05299d9dab972fe367c95ee363515c6c824b4dd6e626f79f4817cc05c</desc>
+<rect width="1080" height="740" fill="#252729"/>
+<g font-family="Arial, sans-serif" fill="#f1f1ef">
+<text x="24" y="38" font-size="23" font-weight="700">Selected publications by source</text>
+<text x="24" y="66" font-size="14" fill="#ff8a3d">October 27 · 14:00 America/Chicago nominal slot · late / partial</text>
+<text x="24" y="91" font-size="13">Denominator: 145 main publication rows; counts describe source metadata.</text>
+<line x1="390" y1="113" x2="390" y2="506" stroke="#4d5050" stroke-width="1"/>
+<text x="390" y="529" text-anchor="middle" font-size="12" fill="#c3c6c3">0</text>
+<line x1="542.5" y1="113" x2="542.5" y2="506" stroke="#4d5050" stroke-width="1"/>
+<text x="542.5" y="529" text-anchor="middle" font-size="12" fill="#c3c6c3">15</text>
+<line x1="695" y1="113" x2="695" y2="506" stroke="#4d5050" stroke-width="1"/>
+<text x="695" y="529" text-anchor="middle" font-size="12" fill="#c3c6c3">30</text>
+<line x1="847.5" y1="113" x2="847.5" y2="506" stroke="#4d5050" stroke-width="1"/>
+<text x="847.5" y="529" text-anchor="middle" font-size="12" fill="#c3c6c3">45</text>
+<line x1="1000" y1="113" x2="1000" y2="506" stroke="#4d5050" stroke-width="1"/>
+<text x="1000" y="529" text-anchor="middle" font-size="12" fill="#c3c6c3">60</text>
+<text x="24" y="143" font-size="13">Help Net Security</text>
+<rect x="390" y="126" width="203.333" height="25" fill="#ff8a3d"/>
+<text x="601.333" y="144" font-size="13" font-weight="700">20</text>
+<text x="24" y="187" font-size="13">Red Hat Security Advisories</text>
+<rect x="390" y="170" width="172.833" height="25" fill="#ff8a3d"/>
+<text x="570.833" y="188" font-size="13" font-weight="700">17</text>
+<text x="24" y="231" font-size="13">SecurityWeek</text>
+<rect x="390" y="214" width="111.833" height="25" fill="#ff8a3d"/>
+<text x="509.833" y="232" font-size="13" font-weight="700">11</text>
+<text x="24" y="275" font-size="13">BleepingComputer</text>
+<rect x="390" y="258" width="101.667" height="25" fill="#ff8a3d"/>
+<text x="499.667" y="276" font-size="13" font-weight="700">10</text>
+<text x="24" y="319" font-size="13">The Hacker News</text>
+<rect x="390" y="302" width="101.667" height="25" fill="#ff8a3d"/>
+<text x="499.667" y="320" font-size="13" font-weight="700">10</text>
+<text x="24" y="363" font-size="13">Infosecurity Magazine</text>
+<rect x="390" y="346" width="81.333" height="25" fill="#ff8a3d"/>
+<text x="479.333" y="364" font-size="13" font-weight="700">8</text>
+<text x="24" y="407" font-size="13">The Register Security</text>
+<rect x="390" y="390" width="81.333" height="25" fill="#ff8a3d"/>
+<text x="479.333" y="408" font-size="13" font-weight="700">8</text>
+<text x="24" y="451" font-size="13">Canadian Centre for Cyber Security</text>
+<rect x="390" y="434" width="71.167" height="25" fill="#ff8a3d"/>
+<text x="469.167" y="452" font-size="13" font-weight="700">7</text>
+<text x="24" y="495" font-size="13">Other selected sources (25)</text>
+<rect x="390" y="478" width="549.000" height="25" fill="#777a7a"/>
+<text x="947.000" y="496" font-size="13" font-weight="700">54</text>
+<text x="24" y="564" font-size="12" fill="#c3c6c3">Top eight sources, then Other (25 sources); 33 sources contribute 145 rows.</text>
+<text x="24" y="587" font-size="12" fill="#c3c6c3">Publication volume is not incident impact; Other combines sources outside the top eight.</text>
+<text x="24" y="610" font-size="12" fill="#c3c6c3">Window: [2026-10-26T19:00:00Z, 2026-10-27T19:00:00Z).</text>
+<text x="24" y="633" font-size="12" fill="#c3c6c3">Generated: 2026-10-27T17:41:42+00:00; capture completed: 2026-10-27T18:25:44.220987+00:00.</text>
+<text x="24" y="656" font-size="12" fill="#c3c6c3">Compiled: 2026-10-27T20:30:13.962Z. The 4,698-second generation-to-cutoff gap remains unobserved.</text>
+<text x="24" y="679" font-size="11" fill="#c3c6c3">Input SHA256: b787c5a05299d9dab972fe367c95ee363515c6c824b4dd6e626f79f4817cc05c</text>
+</g>
+</svg>
