@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="605" viewBox="0 0 1100 605" role="img" aria-labelledby="title desc">
+<title id="title">Selected source activity</title>
+<desc id="desc">Main timestamp/calendar union only; top8 plus every remaining publisher. Publication rows are not incidents. Fixed window 2026-10-26T11:00:00Z to 2026-10-27T11:00:00Z; compiled 2026-10-27T16:37:29.941Z.</desc>
+<rect width="1100" height="605" fill="#252729"/>
+<g font-family="Arial, sans-serif" fill="#f1f1ef">
+<text x="34" y="43" font-size="25" font-weight="700">Selected source activity</text>
+<text x="34" y="75" font-size="14">SW-DAILY-2026-10-27-0600-CDT | main rows | denominator 144</text>
+<text x="34" y="100" font-size="13">27 current main publishers; top 8 = 99 and remaining 19 publishers = 45.</text>
+<line x1="350.00" y1="130" x2="350.00" y2="469" stroke="#777a7a" stroke-width="0.6" opacity="0.45"/>
+<text x="350.00" y="119" text-anchor="middle" font-size="12">0</text>
+<line x1="480.00" y1="130" x2="480.00" y2="469" stroke="#777a7a" stroke-width="0.6" opacity="0.45"/>
+<text x="480.00" y="119" text-anchor="middle" font-size="12">10</text>
+<line x1="610.00" y1="130" x2="610.00" y2="469" stroke="#777a7a" stroke-width="0.6" opacity="0.45"/>
+<text x="610.00" y="119" text-anchor="middle" font-size="12">20</text>
+<line x1="740.00" y1="130" x2="740.00" y2="469" stroke="#777a7a" stroke-width="0.6" opacity="0.45"/>
+<text x="740.00" y="119" text-anchor="middle" font-size="12">30</text>
+<line x1="870.00" y1="130" x2="870.00" y2="469" stroke="#777a7a" stroke-width="0.6" opacity="0.45"/>
+<text x="870.00" y="119" text-anchor="middle" font-size="12">40</text>
+<line x1="1000.00" y1="130" x2="1000.00" y2="469" stroke="#777a7a" stroke-width="0.6" opacity="0.45"/>
+<text x="1000.00" y="119" text-anchor="middle" font-size="12">50</text>
+<text x="336" y="162" text-anchor="end" font-size="13">Red Hat Security Advisories</text>
+<rect class="bar" x="350" y="145" width="585.000" height="24" fill="#ff8a3d"/>
+<text x="944.000" y="162" font-size="13" font-weight="700">45</text>
+<text x="336" y="199" text-anchor="end" font-size="13">The Register Security</text>
+<rect class="bar" x="350" y="182" width="130.000" height="24" fill="#ff8a3d"/>
+<text x="489.000" y="199" font-size="13" font-weight="700">10</text>
+<text x="336" y="236" text-anchor="end" font-size="13">Help Net Security</text>
+<rect class="bar" x="350" y="219" width="117.000" height="24" fill="#ff8a3d"/>
+<text x="476.000" y="236" font-size="13" font-weight="700">9</text>
+<text x="336" y="273" text-anchor="end" font-size="13">BleepingComputer</text>
+<rect class="bar" x="350" y="256" width="104.000" height="24" fill="#ff8a3d"/>
+<text x="463.000" y="273" font-size="13" font-weight="700">8</text>
+<text x="336" y="310" text-anchor="end" font-size="13">SecurityWeek</text>
+<rect class="bar" x="350" y="293" width="104.000" height="24" fill="#ff8a3d"/>
+<text x="463.000" y="310" font-size="13" font-weight="700">8</text>
+<text x="336" y="347" text-anchor="end" font-size="13">The Hacker News</text>
+<rect class="bar" x="350" y="330" width="91.000" height="24" fill="#ff8a3d"/>
+<text x="450.000" y="347" font-size="13" font-weight="700">7</text>
+<text x="336" y="384" text-anchor="end" font-size="13">Canadian Centre for Cyber Security</text>
+<rect class="bar" x="350" y="367" width="78.000" height="24" fill="#ff8a3d"/>
+<text x="437.000" y="384" font-size="13" font-weight="700">6</text>
+<text x="336" y="421" text-anchor="end" font-size="13">Hackread</text>
+<rect class="bar" x="350" y="404" width="78.000" height="24" fill="#ff8a3d"/>
+<text x="437.000" y="421" font-size="13" font-weight="700">6</text>
+<text x="336" y="458" text-anchor="end" font-size="13">Other selected sources</text>
+<rect class="bar" x="350" y="441" width="585.000" height="24" fill="#777a7a"/>
+<text x="944.000" y="458" font-size="13" font-weight="700">45</text>
+<text x="34" y="521" font-size="11">Generated: 2026-10-27T06:14:51+00:00 | Capture complete: 2026-10-27T11:37:04.359208+00:00</text>
+<text x="34" y="543" font-size="11">Compiled: 2026-10-27T16:37:29.941Z | Nominal cutoff: 2026-10-27T11:00:00Z | Tail: 17109 seconds</text>
+<text x="34" y="565" font-size="11">Source subset; captured context and date conventions do not prove incidents, installed exposure or live source freshness.</text>
+</g>
+</svg>
