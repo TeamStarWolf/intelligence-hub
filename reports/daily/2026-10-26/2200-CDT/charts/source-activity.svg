@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="725" viewBox="0 0 1100 725" role="img" aria-labelledby="title description">
+<title id="title">Selected publication rows by publisher</title>
+<desc id="description">SW-DAILY-2026-10-26-2200-CDT. Publication rows; denominator 185. Compiled 2026-10-27T05:31:08.724Z. Top 8 publishers: 130 rows. All remaining 21 publishers: 55 rows. Total: 185. Declared publication intake only; no incident, exploitation or threat-growth inference.</desc>
+<rect width="1100" height="725" fill="#252729"/>
+<g font-family="Arial, sans-serif" fill="#f1f1ef">
+<text x="30" y="42" font-size="26" font-weight="700">Selected publication rows by publisher</text>
+<text x="30" y="72" font-size="14">26 Oct 22:00 Chicago edition | 2026-10-26T03:00:00Z to exclusive 2026-10-27T03:00:00Z</text>
+<text x="30" y="96" font-size="13">Publication rows | denominator 185 | late / partial / source subset</text>
+<line x1="355.00" y1="108" x2="355.00" y2="535" stroke="#4c4f50" stroke-width="1"/>
+<text x="355.00" y="558" text-anchor="middle" font-size="12">0</text>
+<line x1="485.00" y1="108" x2="485.00" y2="535" stroke="#4c4f50" stroke-width="1"/>
+<text x="485.00" y="558" text-anchor="middle" font-size="12">14</text>
+<line x1="615.00" y1="108" x2="615.00" y2="535" stroke="#4c4f50" stroke-width="1"/>
+<text x="615.00" y="558" text-anchor="middle" font-size="12">28</text>
+<line x1="745.00" y1="108" x2="745.00" y2="535" stroke="#4c4f50" stroke-width="1"/>
+<text x="745.00" y="558" text-anchor="middle" font-size="12">42</text>
+<line x1="875.00" y1="108" x2="875.00" y2="535" stroke="#4c4f50" stroke-width="1"/>
+<text x="875.00" y="558" text-anchor="middle" font-size="12">56</text>
+<line x1="1005.00" y1="108" x2="1005.00" y2="535" stroke="#4c4f50" stroke-width="1"/>
+<text x="1005.00" y="558" text-anchor="middle" font-size="12">70</text>
+<text x="338" y="138" text-anchor="end" font-size="14">Red Hat Security Advisories</text>
+<rect x="355" y="120" width="622.143" height="25" rx="3" fill="#ff8a3d"><title>Red Hat Security Advisories: 67 Publication rows</title></rect>
+<text x="1040" y="138" text-anchor="end" font-size="14" font-weight="700">67</text>
+<text x="338" y="184" text-anchor="end" font-size="14">Help Net Security</text>
+<rect x="355" y="166" width="111.429" height="25" rx="3" fill="#ff8a3d"><title>Help Net Security: 12 Publication rows</title></rect>
+<text x="1040" y="184" text-anchor="end" font-size="14" font-weight="700">12</text>
+<text x="338" y="230" text-anchor="end" font-size="14">BleepingComputer</text>
+<rect x="355" y="212" width="92.857" height="25" rx="3" fill="#ff8a3d"><title>BleepingComputer: 10 Publication rows</title></rect>
+<text x="1040" y="230" text-anchor="end" font-size="14" font-weight="700">10</text>
+<text x="338" y="276" text-anchor="end" font-size="14">The Register Security</text>
+<rect x="355" y="258" width="92.857" height="25" rx="3" fill="#ff8a3d"><title>The Register Security: 10 Publication rows</title></rect>
+<text x="1040" y="276" text-anchor="end" font-size="14" font-weight="700">10</text>
+<text x="338" y="322" text-anchor="end" font-size="14">The Hacker News</text>
+<rect x="355" y="304" width="92.857" height="25" rx="3" fill="#ff8a3d"><title>The Hacker News: 10 Publication rows</title></rect>
+<text x="1040" y="322" text-anchor="end" font-size="14" font-weight="700">10</text>
+<text x="338" y="368" text-anchor="end" font-size="14">SecurityWeek</text>
+<rect x="355" y="350" width="83.571" height="25" rx="3" fill="#ff8a3d"><title>SecurityWeek: 9 Publication rows</title></rect>
+<text x="1040" y="368" text-anchor="end" font-size="14" font-weight="700">9</text>
+<text x="338" y="414" text-anchor="end" font-size="14">Canadian Centre for Cyber Security</text>
+<rect x="355" y="396" width="55.714" height="25" rx="3" fill="#ff8a3d"><title>Canadian Centre for Cyber Security: 6 Publication rows</title></rect>
+<text x="1040" y="414" text-anchor="end" font-size="14" font-weight="700">6</text>
+<text x="338" y="460" text-anchor="end" font-size="14">Hackread</text>
+<rect x="355" y="442" width="55.714" height="25" rx="3" fill="#ff8a3d"><title>Hackread: 6 Publication rows</title></rect>
+<text x="1040" y="460" text-anchor="end" font-size="14" font-weight="700">6</text>
+<text x="338" y="506" text-anchor="end" font-size="14">Other selected sources</text>
+<rect x="355" y="488" width="510.714" height="25" rx="3" fill="#777a7a"><title>Other selected sources: 55 Publication rows</title></rect>
+<text x="1040" y="506" text-anchor="end" font-size="14" font-weight="700">55</text>
+<text x="30" y="589" font-size="12">Top 8 publishers: 130 rows. All remaining 21 publishers: 55 rows. Total: 185.</text>
+<text x="30" y="612" font-size="12">Declared publication intake only; no incident, exploitation or threat-growth inference.</text>
+<text x="30" y="635" font-size="12">Generated 2026-10-27T00:54:32+00:00 | captured 2026-10-27T03:36:25.013776+00:00</text>
+<text x="30" y="658" font-size="12">Nominal tail: 7528 seconds (2 h 5 m 28 s). Later capture does not fill the gap.</text>
+<text x="30" y="681" font-size="12">Compiled 2026-10-27T05:31:08.724Z | publication not observed at compilation; later delivery tracked separately.</text>
+</g>
+</svg>

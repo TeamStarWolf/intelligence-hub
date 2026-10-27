@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-26T21:18:11.983Z",
+  "updated_at": "2026-10-27T05:37:07.241Z",
   "reports": [
     {
       "id": "SW-MONTHLY-2026-01-RETRO",
@@ -305,6 +305,22 @@
       "report_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-26/1400-CDT/README.md",
       "data_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-26/1400-CDT/data.json",
       "prior_report_id": "SW-DAILY-2026-10-26-0600-CDT"
+    },
+    {
+      "id": "SW-DAILY-2026-10-26-2200-CDT",
+      "origin": "generated_report",
+      "cadence": "daily",
+      "title": "October 26, 2026 · 22:00 Chicago · 24-hour edition",
+      "period_start": "2026-10-26T03:00:00Z",
+      "period_end": "2026-10-27T03:00:00Z",
+      "period_kind": "rolling_elapsed",
+      "compiled_at": "2026-10-27T05:31:08.724Z",
+      "compilation_precision": "timestamp",
+      "status": "partial",
+      "coverage": "source_subset",
+      "report_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-26/2200-CDT/README.md",
+      "data_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-26/2200-CDT/data.json",
+      "prior_report_id": "SW-DAILY-2026-10-26-1400-CDT"
     }
   ],
   "indexes": [
@@ -318,22 +334,25 @@
     }
   ],
   "revision_review": {
-    "state": "partial",
-    "report_id": "SW-DAILY-2026-10-26-1400-CDT",
-    "recorded_at": "2026-10-26T19:53:05.439093+00:00",
-    "nominal_cutoff": "2026-10-26T19:00:00Z",
     "lookback_hours": 96,
     "priority_hours": 48,
     "max_sources": 12,
     "min_success_interval_hours": 8,
     "min_failure_interval_hours": 24,
+    "state": "partial",
+    "report_id": "SW-DAILY-2026-10-26-2200-CDT",
+    "recorded_at": "2026-10-27T04:00:15.397327+00:00",
+    "nominal_cutoff": "2026-10-27T03:00:00Z",
     "records": [],
     "notes": [
-      "A dedicated metadata-only pass preserved 1,713 citation occurrences from 15 timestamped generated reports, representing 1,285 literal URL groups: 1,283 canonical identities and two unsupported identities. The date-only legacy report remains excluded.",
-      "Among canonical routes, 1,281 have unqualified finite history and two match historical held scopes covering five occurrences. The two unsupported identities remain unknown. Unknown finite history does not establish never-requested history or request eligibility.",
-      "All 1,285 groups are recent-priority candidates; the older bucket is empty. Selected routes, new requests, qualified article checks, comparisons, qualified baselines and cap exclusions are all zero. No article change or unchanged security claim is established.",
-      "The prior AWS refusal remains deactivated; the separate completed Talos one-request scope remains held. Neither was repeated or counted as a new request or refusal. Per-source eligibility remains unavailable or held until distinct review; earlier immutable editions retain their outcomes.",
-      "The review cutoff is 19:00 UTC. At most 12 URLs and 24 shared primary documents may be requested per edition, with eight recent and four older slots and deterministic spillover. Success cooldowns of eight hours and failure cooldowns of 24 hours do not reactivate held routes or grant requests. Normal feed/CNA refreshes remain separate from article-body comparisons."
+      "Citation metadata reconciliation covered 16 known generated reports and 1,917 citation occurrences. There were 1,391 literal URL groups and 1,389 canonical URL groups; 2 literal groups were unsupported because of unsafe query keys.",
+      "The canonical groups comprise 1,387 with unknown attempt history and 2 under existing holds. The held groups account for 5 citation occurrences (AWS 4; Talos 1). These are existing holds, not 2 new refusals.",
+      "All 1,391 literal URL groups were in the recent 48-hour priority window; 0 were in the older part of the 96-hour window. The occurrence count includes 526 repeated literal occurrences and 0 exact five-field duplicates.",
+      "Selected sources: 0. New publisher requests: 0. Qualified article checks: 0. Comparisons: 0. Qualified baselines: 0. Public revision records: 0.",
+      "Material article updates, timestamp changes, raw-response changes and supported unchanged status were not assessed. Empty records do not establish that articles are unchanged or fully updated. Baseline establishment, refusal and not-checked states remain distinct.",
+      "Finite available attempt history does not establish that an unknown URL was never requested or is eligible. Per-URL next eligibility remains unknown (null), with held routes retained separately; policy intervals do not supply missing attempt clocks.",
+      "Recorded at is the actual citation metadata reconciliation clock, 2026-10-27T04:00:15.397327+00:00. It is separate from nominal cutoff 2026-10-27T03:00:00Z, report compilation, publication and publisher event or update clocks.",
+      "Next nominal report and revision-review cycle: 2026-10-27 06:00 America/Chicago (2026-10-27T11:00:00Z). This scheduled slot does not prove execution or delivery and does not establish any URL's next eligibility."
     ]
   },
   "notes": [
@@ -342,6 +361,7 @@
     "Future November and December records are plans without reports, metrics or future facts.",
     "Eleven source-subset report files are recorded: January–September retrospective, October month-to-date and April–September rolling six months. Their source4 input did not project actors/CWE/CAPEC; unknowns remain explicit.",
     "The October26 morning daily, W43 closing and weekend editions use one later captured source subset. Their declared publication-date windows and retrospective CNA/context clocks do not reconstruct what was known at period close; prior editions remain unchanged.",
-    "The October 26 afternoon daily edition is a late, partial source subset with 148 explicitly timestamped publication records and 17 mentioned CVEs. Its 17:27:38 UTC input generation precedes the 19:00 UTC cutoff by 5,542 seconds; later capture, analysis and compilation do not fill that tail or establish repaired ten-minute collection."
+    "The October 26 afternoon daily edition is a late, partial source subset with 148 explicitly timestamped publication records and 17 mentioned CVEs. Its 17:27:38 UTC input generation precedes the 19:00 UTC cutoff by 5,542 seconds; later capture, analysis and compilation do not fill that tail or establish repaired ten-minute collection.",
+    "The October 26 evening daily edition is late and partial: 185 explicitly timestamped source-publication rows mention 22 CVEs. Input generation at October 27 00:54:32 UTC leaves a 7,528-second gap to its 03:00 UTC cutoff; later capture and compilation do not fill that gap or establish repaired ten-minute collection."
   ]
 }

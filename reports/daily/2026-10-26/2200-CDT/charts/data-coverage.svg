@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="587" viewBox="0 0 1100 587" role="img" aria-labelledby="title description">
+<title id="title">Date-class coverage of the frozen input</title>
+<desc id="description">SW-DAILY-2026-10-26-2200-CDT. Whole-input rows; denominator 3948. Compiled 2026-10-27T05:31:08.724Z. Exclusive six-class partition: 185 + 0 + 2 + 60 + 3701 + 0 = 3948. Main union: 185. Boundary watch: 2, excluded from main; date-only publisher timezone unknown.</desc>
+<rect width="1100" height="587" fill="#252729"/>
+<g font-family="Arial, sans-serif" fill="#f1f1ef">
+<text x="30" y="42" font-size="26" font-weight="700">Date-class coverage of the frozen input</text>
+<text x="30" y="72" font-size="14">26 Oct 22:00 Chicago edition | 2026-10-26T03:00:00Z to exclusive 2026-10-27T03:00:00Z</text>
+<text x="30" y="96" font-size="13">Whole-input rows | denominator 3948 | late / partial / source subset</text>
+<line x1="355.00" y1="108" x2="355.00" y2="397" stroke="#4c4f50" stroke-width="1"/>
+<text x="355.00" y="420" text-anchor="middle" font-size="12">0</text>
+<line x1="485.07" y1="108" x2="485.07" y2="397" stroke="#4c4f50" stroke-width="1"/>
+<text x="485.07" y="420" text-anchor="middle" font-size="12">790</text>
+<line x1="614.97" y1="108" x2="614.97" y2="397" stroke="#4c4f50" stroke-width="1"/>
+<text x="614.97" y="420" text-anchor="middle" font-size="12">1579</text>
+<line x1="745.03" y1="108" x2="745.03" y2="397" stroke="#4c4f50" stroke-width="1"/>
+<text x="745.03" y="420" text-anchor="middle" font-size="12">2369</text>
+<line x1="874.93" y1="108" x2="874.93" y2="397" stroke="#4c4f50" stroke-width="1"/>
+<text x="874.93" y="420" text-anchor="middle" font-size="12">3158</text>
+<line x1="1005.00" y1="108" x2="1005.00" y2="397" stroke="#4c4f50" stroke-width="1"/>
+<text x="1005.00" y="420" text-anchor="middle" font-size="12">3948</text>
+<text x="338" y="138" text-anchor="end" font-size="14">Explicit timestamp in period</text>
+<rect x="355" y="120" width="30.458" height="25" rx="3" fill="#ff8a3d"><title>Explicit timestamp in period: 185 Whole-input rows</title></rect>
+<text x="1040" y="138" text-anchor="end" font-size="14" font-weight="700">185</text>
+<text x="338" y="184" text-anchor="end" font-size="14">Full UTC calendar date in period</text>
+<rect x="355" y="166" width="0.000" height="25" rx="3" fill="#ff8a3d"><title>Full UTC calendar date in period: 0 Whole-input rows</title></rect>
+<text x="1040" y="184" text-anchor="end" font-size="14" font-weight="700">0</text>
+<text x="338" y="230" text-anchor="end" font-size="14">Date-only boundary uncertainty</text>
+<rect x="355" y="212" width="0.329" height="25" rx="3" fill="#777a7a"><title>Date-only boundary uncertainty: 2 Whole-input rows</title></rect>
+<text x="1040" y="230" text-anchor="end" font-size="14" font-weight="700">2</text>
+<text x="338" y="276" text-anchor="end" font-size="14">Undated</text>
+<rect x="355" y="258" width="9.878" height="25" rx="3" fill="#777a7a"><title>Undated: 60 Whole-input rows</title></rect>
+<text x="1040" y="276" text-anchor="end" font-size="14" font-weight="700">60</text>
+<text x="338" y="322" text-anchor="end" font-size="14">Outside period</text>
+<rect x="355" y="304" width="609.334" height="25" rx="3" fill="#777a7a"><title>Outside period: 3701 Whole-input rows</title></rect>
+<text x="1040" y="322" text-anchor="end" font-size="14" font-weight="700">3701</text>
+<text x="338" y="368" text-anchor="end" font-size="14">After-generation uncertainty</text>
+<rect x="355" y="350" width="0.000" height="25" rx="3" fill="#777a7a"><title>After-generation uncertainty: 0 Whole-input rows</title></rect>
+<text x="1040" y="368" text-anchor="end" font-size="14" font-weight="700">0</text>
+<text x="30" y="451" font-size="12">Exclusive six-class partition: 185 + 0 + 2 + 60 + 3701 + 0 = 3948.</text>
+<text x="30" y="474" font-size="12">Main union: 185. Boundary watch: 2, excluded from main; date-only publisher timezone unknown.</text>
+<text x="30" y="497" font-size="12">Generated 2026-10-27T00:54:32+00:00 | captured 2026-10-27T03:36:25.013776+00:00</text>
+<text x="30" y="520" font-size="12">Nominal tail: 7528 seconds (2 h 5 m 28 s). Later capture does not fill the gap.</text>
+<text x="30" y="543" font-size="12">Compiled 2026-10-27T05:31:08.724Z | publication not observed at compilation; later delivery tracked separately.</text>
+</g>
+</svg>
