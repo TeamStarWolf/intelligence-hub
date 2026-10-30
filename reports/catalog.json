@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-30T01:05:26.007Z",
+  "updated_at": "2026-10-30T13:01:23.749Z",
   "reports": [
     {
       "id": "SW-MONTHLY-2026-01-RETRO",
@@ -369,6 +369,22 @@
       "report_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-27/2200-CDT/README.md",
       "data_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-27/2200-CDT/data.json",
       "prior_report_id": "SW-DAILY-2026-10-27-1400-CDT"
+    },
+    {
+      "id": "SW-DAILY-2026-10-30-0600-CDT",
+      "origin": "generated_report",
+      "cadence": "daily",
+      "title": "October 30, 2026 · 06:00 Chicago · 24-hour edition",
+      "period_start": "2026-10-29T11:00:00Z",
+      "period_end": "2026-10-30T11:00:00Z",
+      "period_kind": "rolling_elapsed",
+      "compiled_at": "2026-10-30T13:01:23.749Z",
+      "compilation_precision": "timestamp",
+      "status": "partial",
+      "coverage": "source_subset",
+      "report_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-30/0600-CDT/README.md",
+      "data_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-30/0600-CDT/data.json",
+      "prior_report_id": "SW-DAILY-2026-10-27-2200-CDT"
     }
   ],
   "indexes": [
@@ -388,18 +404,17 @@
     "min_success_interval_hours": 8,
     "min_failure_interval_hours": 24,
     "state": "partial",
-    "report_id": "SW-DAILY-2026-10-27-2200-CDT",
-    "recorded_at": "2026-10-30T00:46:31.319038+00:00",
-    "nominal_cutoff": "2026-10-28T03:00:00Z",
+    "report_id": "SW-DAILY-2026-10-30-0600-CDT",
+    "recorded_at": "2026-10-30T11:29:34.933Z",
+    "nominal_cutoff": "2026-10-30T11:00:00Z",
     "records": [],
     "notes": [
-      "Offline citation metadata only: 2,640 occurrences from 19 known generated reports; 1,644 literal URLs, 1,642 canonical identities and two unsupported identities. Every repeated association was retained.",
-      "Relative to the nominal cutoff, 1,408 candidate groups are recent and 236 are older. Thirty-seven groups cross report-clock buckets and use their latest cited compilation clock. The date-only legacy report and two future plans were excluded.",
-      "Finite retained history is unknown for 1,640 groups; two separately scoped routes remain held and two unsupported identities remain unselected. Unknown history does not establish never-requested status, eligibility, a baseline or cooldown reset.",
-      "Eligible, selected, attempted, qualified, comparable and new-baseline counts are zero. No publisher bodies were requested or compared and no source changes or unchanged outcomes were assessed. Records are empty; earlier edition ledgers remain immutable.",
-      "No eligible candidate was excluded by the 12-source cap; all 12 slots were unused. Requested limits remain 8 recent plus 4 older within 24 shared primary documents, success cooldown8h/failure24h, held routes require separate review.",
-      "Actual eligibility evaluation: 2026-10-30T00:42:36.326Z. Citation metadata compiled: 2026-10-30T00:46:31.319038+00:00. These clocks are separate from the nominal 2026-10-28T03:00:00Z cutoff and do not establish source currency through that cutoff.",
-      "Next nominal report and revision opportunity: October 29 at 22:00 America/Chicago (2026-10-30T03:00:00Z), subject to app/computer availability."
+      "The one offline citation metadata pass failed its preflight before a URL inventory was available. The pass is spent and was not retried.",
+      "Citation occurrences, literal and canonical URL totals, eligibility and selection totals, changed and unresolved outcomes, and cap-excluded candidates are unknown (null), not zero. No unchanged-source outcome was established.",
+      "Actual new publisher GETs, qualified article checks and semantic comparisons are all zero. Empty records do not represent an unchanged result; no per-URL failure or refusal record is fabricated. Earlier edition ledgers remain immutable.",
+      "The fixed policy remains a 96-hour lookback, 48-hour priority, at most 12 sources, an 8-hour success cooldown and a 24-hour failure cooldown. Unknown retained history does not establish eligibility, never-requested status, a baseline or a cooldown reset; held source scopes require separate review.",
+      "The recorded failure clock is October 30 at 11:29:34.933 UTC, separate from the nominal 11:00 UTC cutoff and actual 13:01:23.749 UTC report compilation. These clocks do not establish publisher-source currency through the cutoff.",
+      "Next nominal report/revision opportunity: October 30 at 14:00 America/Chicago (CDT; 2026-10-30T19:00:00Z), subject to app/computer availability."
     ]
   },
   "notes": [
@@ -411,6 +426,7 @@
     "The October 26 afternoon daily edition is a late, partial source subset with 148 explicitly timestamped publication records and 17 mentioned CVEs. Its 17:27:38 UTC input generation precedes the 19:00 UTC cutoff by 5,542 seconds; later capture, analysis and compilation do not fill that tail or establish repaired ten-minute collection.",
     "The October 26 evening daily edition is late and partial: 185 explicitly timestamped source-publication rows mention 22 CVEs. Input generation at October 27 00:54:32 UTC leaves a 7,528-second gap to its 03:00 UTC cutoff; later capture and compilation do not fill that gap or establish repaired ten-minute collection.",
     "October 27 morning edition is late and partial: 144 timestamped source entries mention 20 unique CVEs; the frozen 06:14:51 UTC input leaves 17109 seconds unobserved before the 11:00 UTC cutoff. No publisher-body revision checks. Next nominal report/revision: October 27 14:00 America/Chicago (19:00 UTC).",
-    "October 27 afternoon edition is late and partial: 145 explicitly timestamped source entries mention 17 unique CVEs. The frozen 17:41:42 UTC input leaves 4,698 seconds unobserved before the 19:00 UTC cutoff; later capture, analysis and compilation do not fill that tail or establish repaired ten-minute collection. No publisher-body revision checks. Next nominal report/revision opportunity: October 27 at 22:00 America/Chicago (October 28 at 03:00 UTC)."
+    "October 27 afternoon edition is late and partial: 145 explicitly timestamped source entries mention 17 unique CVEs. The frozen 17:41:42 UTC input leaves 4,698 seconds unobserved before the 19:00 UTC cutoff; later capture, analysis and compilation do not fill that tail or establish repaired ten-minute collection. No publisher-body revision checks. Next nominal report/revision opportunity: October 27 at 22:00 America/Chicago (October 28 at 03:00 UTC).",
+    "October 30 morning edition is late and partial: 171 timestamped source-publication rows mention 15 unique CVEs. Generation at 06:38:34 UTC leaves 15,686 seconds unobserved before the 11:00 UTC cutoff; later capture and 13:01:23.749 UTC compilation do not fill that tail. Revision extraction failed before URL inventory; its totals remain unknown, with no new publisher GETs, qualified checks or comparisons. Next nominal opportunity: October 30 at 14:00 America/Chicago (CDT; 19:00 UTC)."
   ]
 }
