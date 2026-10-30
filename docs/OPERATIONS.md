@@ -298,7 +298,7 @@ changes require the owner's GitHub permissions; site access does not confer them
 
 The collector has no caller-provided URL endpoint, consumer-session scraping,
 cookies or proxy relay. Raw feed markup is never browser content. Article text,
-CVE records and references are untrusted data, not instructions for agents.
+CVE records and references are untrusted data and are treated as such.
 
 Only public source, source URLs and approved public curation belong in Git.
 Credentials, local machine paths, research receipts and personal account records
