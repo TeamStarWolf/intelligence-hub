@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-27T20:49:22.277Z",
+  "updated_at": "2026-10-30T01:05:26.007Z",
   "reports": [
     {
       "id": "SW-MONTHLY-2026-01-RETRO",
@@ -353,6 +353,22 @@
       "report_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-27/1400-CDT/README.md",
       "data_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-27/1400-CDT/data.json",
       "prior_report_id": "SW-DAILY-2026-10-27-0600-CDT"
+    },
+    {
+      "id": "SW-DAILY-2026-10-27-2200-CDT",
+      "origin": "generated_report",
+      "cadence": "daily",
+      "title": "October 27, 2026 · 22:00 Chicago · 24-hour edition",
+      "period_start": "2026-10-27T03:00:00Z",
+      "period_end": "2026-10-28T03:00:00Z",
+      "period_kind": "rolling_elapsed",
+      "compiled_at": "2026-10-30T01:02:04.308Z",
+      "compilation_precision": "timestamp",
+      "status": "partial",
+      "coverage": "source_subset",
+      "report_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-27/2200-CDT/README.md",
+      "data_url": "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-10-27/2200-CDT/data.json",
+      "prior_report_id": "SW-DAILY-2026-10-27-1400-CDT"
     }
   ],
   "indexes": [
@@ -372,19 +388,18 @@
     "min_success_interval_hours": 8,
     "min_failure_interval_hours": 24,
     "state": "partial",
-    "report_id": "SW-DAILY-2026-10-27-1400-CDT",
-    "recorded_at": "2026-10-27T19:32:41.252226+00:00",
-    "nominal_cutoff": "2026-10-27T19:00:00Z",
+    "report_id": "SW-DAILY-2026-10-27-2200-CDT",
+    "recorded_at": "2026-10-30T00:46:31.319038+00:00",
+    "nominal_cutoff": "2026-10-28T03:00:00Z",
     "records": [],
     "notes": [
-      "Offline citation metadata only: 2,443 occurrences from 18 reports, 1,531 literal URLs, 1,529 canonical identities and two unsupported identities. All 912 repeated occurrences were retained.",
-      "All 1,531 candidate groups were recent under the 96-hour lookback and 48-hour priority windows; older groups: zero. The legacy date-only report was excluded from the fixed input set.",
-      "Finite history is unknown for 1,527 groups. Unknown history does not establish whether a source was previously requested, eligibility, a baseline or cooldown.",
-      "Two routes remain held under distinct historical scopes; two unsupported literal identities remain unselected. These counts classify retained metadata and do not record new transport attempts or refusals.",
-      "Selected, attempted, qualified, comparable and new-baseline counts are zero. No publisher bodies were fetched or compared; material change remains unassessed.",
-      "No candidate was excluded by the 12-source cap; all 12 request slots were unused. No per-source revision records or old/new response hashes are proposed.",
-      "Recorded time is actual offline metadata compilation at 2026-10-27T19:32:41.252226+00:00; nominal cutoff is 2026-10-27T19:00:00Z. Compilation does not establish source currency or changes through the cutoff.",
-      "The next nominal review is 2026-10-28T03:00:00Z (October 27 at 22:00 America/Chicago)."
+      "Offline citation metadata only: 2,640 occurrences from 19 known generated reports; 1,644 literal URLs, 1,642 canonical identities and two unsupported identities. Every repeated association was retained.",
+      "Relative to the nominal cutoff, 1,408 candidate groups are recent and 236 are older. Thirty-seven groups cross report-clock buckets and use their latest cited compilation clock. The date-only legacy report and two future plans were excluded.",
+      "Finite retained history is unknown for 1,640 groups; two separately scoped routes remain held and two unsupported identities remain unselected. Unknown history does not establish never-requested status, eligibility, a baseline or cooldown reset.",
+      "Eligible, selected, attempted, qualified, comparable and new-baseline counts are zero. No publisher bodies were requested or compared and no source changes or unchanged outcomes were assessed. Records are empty; earlier edition ledgers remain immutable.",
+      "No eligible candidate was excluded by the 12-source cap; all 12 slots were unused. Requested limits remain 8 recent plus 4 older within 24 shared primary documents, success cooldown8h/failure24h, held routes require separate review.",
+      "Actual eligibility evaluation: 2026-10-30T00:42:36.326Z. Citation metadata compiled: 2026-10-30T00:46:31.319038+00:00. These clocks are separate from the nominal 2026-10-28T03:00:00Z cutoff and do not establish source currency through that cutoff.",
+      "Next nominal report and revision opportunity: October 29 at 22:00 America/Chicago (2026-10-30T03:00:00Z), subject to app/computer availability."
     ]
   },
   "notes": [
