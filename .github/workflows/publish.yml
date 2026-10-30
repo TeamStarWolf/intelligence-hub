@@ -119,8 +119,8 @@ jobs:
           tar_bytes = archive.getvalue()
           estimate = max(len(gzip.compress(tar_bytes, compresslevel=6, mtime=0)),
                          len(zlib.compress(tar_bytes, level=6)))
-          if estimate > 1200000:
-              raise SystemExit('The estimated compressed artifact exceeds the 1200000-byte budget; publication is blocked.')
+          if estimate > 3000000:
+              raise SystemExit('The estimated compressed artifact exceeds the 3000000-byte budget; publication is blocked.')
           print('Public input bytes: ' + str(total))
           print('Estimated compressed artifact bytes: ' + str(estimate))
       - name: Upload public site

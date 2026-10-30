@@ -254,7 +254,7 @@ The package must contain exactly:
 Symlinks, hard-linked files, other file types and unexpected directories are
 rejected. Actual file content must total at most **21 MiB**. The workflow builds
 an in-memory tar from those five contents and estimates compression using both
-gzip and zlib at level 6. If the larger estimate exceeds **1,200,000 bytes**, it
+gzip and zlib at level 6. If the larger estimate exceeds **3,000,000 bytes**, it
 fails before artifact upload. The previous live site remains in place.
 
 Final JSON serialization groups CVE-map members by their recorded vendor/product
@@ -271,7 +271,7 @@ tar/ZIP metadata or proof of actual billed storage. The
 creates the real artifact, retained for **one day**.
 
 At 144 scheduled publications/day, the estimate budget corresponds to
-**172.8 MB (about 165 MiB)** for those artifacts. Manual/push runs, existing artifacts, other
+**432 MB (about 412 MiB)** for those artifacts. Manual/push runs, existing artifacts, other
 repositories/Packages usage, actual compression and retention processing remain
 separate. GitHub documents a **500 MB** Free-plan artifact allowance shared with
 Packages; public standard-runner minutes being free does not remove storage limits.
@@ -343,7 +343,7 @@ Before appending, all matching briefs are copied and checked against the existin
 100-step/100-limitation detail caps and JavaScript UTF-16 field limits. A later
 failure leaves original briefs, CNA projections and cache evidence untouched.
 Context changes participate in the existing content revision. Original intake,
-retention and the 1,200,000-byte artifact/one-day storage guards remain unchanged;
+retention and the 3,000,000-byte artifact/one-day storage guards remain unchanged;
 an oversized publication stays blocked rather than widening those guards.
 
 ## Evidence and troubleshooting

@@ -139,9 +139,9 @@ snapshot timestamp. GitHub's minimum schedule interval is five minutes; delays,
 dropped jobs and inactivity disabling still apply. This is not a delivery SLA.
 
 Only five allowlisted public files enter Pages. A changed publication must fit
-both **21 MiB of input** and a **1,200,000-byte level-6 compressed-size estimate**.
+both **21 MiB of input** and a **3,000,000-byte level-6 compressed-size estimate**.
 The artifact retains for one day. At 144 scheduled publications/day, that estimate
-is at most **172.8 MB (about 165 MiB)** for those publications. This limits this
+is at most **432 MB (about 412 MiB)** for those publications. This limits this
 project's estimated footprint, not account-wide billing or actual artifact size;
 push/manual runs and other account usage are separate. No billing setting or quota is
 changed. [GitHub documents separate runner and storage allowances](https://docs.github.com/en/billing/concepts/product-billing/github-actions).

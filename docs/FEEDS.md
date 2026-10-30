@@ -23,7 +23,7 @@ is fixed since 1998; the limit is a technical review horizon, not full coverage.
 Schema 5 keeps 7,306 days and older readers keep their 3,661-day profile. The existing 3 MiB publisher response, strict UTF-8, DTD/entity rejection,
 40,000-node/depth-48 XML, 100-CVE whole-entry rejection, 150 normalization,
 600 retained articles per source, 500 curation entries, 8,000 total articles,
-16 MiB resume, 1,200,000-byte package and one-day artifact-retention guards remain.
+16 MiB resume, 3,000,000-byte package and one-day artifact-retention guards remain.
 Neither the broader window nor a source's accepted input proves complete history
 or timely reporting. Known modern schema 5/6 fields on legacy labels are refused;
 there is no metadata stripping or silent downconversion.
@@ -185,7 +185,7 @@ option and retain document order; older site readers can reject schema 4. Do not
 silently strip selection fields, relabel new data as legacy or mix incompatible
 versions. Existing safeguards remain: 150 normalizations, 100 CVEs per entry,
 600 retained articles per source, 8,000 total articles, 16 MiB public-resume input,
-the 1,200,000-byte compressed artifact estimate guard and one-day artifact
+the 3,000,000-byte compressed artifact estimate guard and one-day artifact
 retention, alongside the whole-response/XML bounds above.
 
 ### Response byte-limit failures
