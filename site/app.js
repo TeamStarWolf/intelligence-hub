@@ -1108,7 +1108,7 @@
   function renderSnapshot() {
     renderFreshness();
     renderReports(); renderRevisions(); renderKnowledge();
-    $("#generated-at").textContent = "Content as of " + stamp(snapshot.generated_at);
+    $("#generated-at").textContent = "Snapshot generated " + stamp(snapshot.generated_at);
     $("#archive-window").textContent = dateLabel(snapshot.window.start) + " — " + dateLabel(snapshot.window.end);
     const coverage = [["KEV catalog records", snapshot.coverage.kev_records], ["Curated archive events", snapshot.coverage.curated_events], ["Publisher feed articles", snapshot.coverage.feed_articles], ["Linked CVE records", snapshot.mitigations.size], ["URL duplicates removed", snapshot.deduplication.url_duplicates_removed]];
     $("#coverage").replaceChildren(...coverage.map(([label, count]) => { const item = node("div"); item.append(node("dt", "", label), node("dd", "", count.toLocaleString())); return item; }));
@@ -1122,7 +1122,7 @@
     if (!$("#coverage-notes").children.length) $("#coverage-notes").append(node("li", "", "No additional notes supplied."));
     $("#integrations").replaceChildren(...[["xai", "Grok / xAI"], ["x", "X"], ["sec", "SEC cyber filings"]].map(([key, name]) => { const item = node("div", "integration-row"); const heading = node("div", "integration-heading"); heading.append(node("span", "", name), node("span", "integration-state", "NOT CONNECTED")); item.append(heading, node("p", "", snapshot.integrations[key].message)); return item; }));
     const refresh = $("#refresh-policy");
-    refresh.replaceChildren(node("span", "", "Collection requests a " + snapshot.refresh.requested_minutes + "-minute schedule; execution and deployment may be delayed. "));
+    refresh.replaceChildren(node("span", "", "Collection requests a " + snapshot.refresh.requested_minutes + "-minute schedule; execution and deployment may be delayed. An unchanged collection can retain an older snapshot. "));
     const statusUrl = safeUrl(snapshot.refresh.status_url);
     if (statusUrl) {
       const url = new URL(statusUrl);
@@ -1157,8 +1157,13 @@
     try {
       const response = await fetch("./data/feed.json", { credentials: "omit", cache: "no-store", redirect: "error", signal: controller.signal });
       const result = await readFeed(response);
+      const firstRead = snapshot === null;
+      const previousGeneration = snapshot ? new Date(snapshot.generated_at).getTime() : null;
       const changed = snapshotText !== result.text;
       const value = changed ? normalize(result.value) : snapshot;
+      const generation = new Date(value.generated_at).getTime();
+      const readOutcome = firstRead ? "published snapshot loaded" : !changed ? "same saved snapshot" :
+        "different saved snapshot · " + (generation > previousGeneration ? "later generation time" : generation < previousGeneration ? "earlier generation time" : "no generation-time difference detected");
       lastRead = new Date().toISOString();
       $("#feed-error").hidden = true;
       if (changed) {
@@ -1174,7 +1179,7 @@
         }
         window.scrollTo({ left: scroll.x, top: scroll.y, behavior: "instant" });
       } else renderFreshness();
-      $("#poll-status").textContent = "Browser read " + stamp(lastRead) + " · " + (changed ? "snapshot updated" : "same saved snapshot") + " · Checks every 10 minutes while visible; publishers are not contacted by this browser.";
+      $("#poll-status").textContent = "Browser read " + stamp(lastRead) + " · " + readOutcome + " · Checks every 10 minutes while visible; publishers are not contacted by this browser.";
     } catch (error) {
       showError((error.name === "AbortError" ? "The snapshot read timed out." : error instanceof SyntaxError ? "The saved feed is not valid JSON." : error.message || "The saved feed could not load.") + (snapshot ? " The prior snapshot generated " + stamp(snapshot.generated_at) + " remains displayed with its original dates." : " No feed data is displayed. Read a later valid snapshot."));
       $("#poll-status").textContent = "Browser check failed " + stamp(lastAttempt) + (lastRead ? " · Last successful read " + stamp(lastRead) : " · No successful snapshot read this session");

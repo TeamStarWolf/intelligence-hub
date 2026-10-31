@@ -87,6 +87,20 @@ affect arrival time. This is not continuous monitoring or a ten-minute delivery 
 The snapshot badge shows its age in minutes independently of the latest browser
 read; reading the same saved file never claims a new publisher collection.
 
+On its first successful read, the page says **published snapshot loaded**. An
+identical saved file says **same saved snapshot**. A different file says
+**different saved snapshot** and whether the browser detects a later generation
+time, an earlier one, or no difference at its timestamp precision, compared with
+the snapshot previously displayed in this page session. No detected difference
+does not establish exact timestamp equality. These labels compare saved files
+and clocks, not newly collected intelligence. An earlier generation can still be
+displayed with its original time.
+
+The snapshot marker changes when its generation time is more than 24 hours old
+or more than five minutes ahead of the device clock. This is an age/clock warning,
+not an assessment of workflow health or source freshness. A normal marker does
+not establish that collection is current.
+
 The collector records a typed Boolean `changed` decision. Article, guidance,
 source-outcome, intake-count/reason and layout changes can trigger publication.
 Publisher-feed response hashes and collection attempt clocks alone do not;
@@ -95,7 +109,7 @@ including its response hash, can. Package/upload/deploy steps run only when
 `changed` is true.
 
 An unchanged successful check therefore keeps the prior deployed snapshot time.
-The **Content as of** clock remains the saved snapshot's generation time. A browser
+The **Snapshot generated** clock remains the saved snapshot's generation time. A browser
 read or successful workflow result never replaces that date or the source dates.
 
 ### Read public refresh evidence
