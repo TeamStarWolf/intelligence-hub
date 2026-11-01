@@ -6,9 +6,13 @@ The [Intelligence Hub reports view](https://teamstarwolf.github.io/intelligence-
 
 ## Publication cadence
 
+Current edition set: November 1 06:00 CST daily, October closing and May-October six-month reports are late/partial retained-source subsets. Actual compilation: 2026-11-01T16:35:01.913Z. Source generated October 30 23:03:35 UTC, captured 23:21:46.745324-23:21:48.291337UTC; later compilation does not fill source gaps. Citation inventory failed; unknown totals are not zero or unchanged. **Next nominal report/revision: November 1 at 14:00 America/Chicago (CST;20:00 UTC)**.
+
 Daily editions are requested at **06:00, 14:00 and 22:00 America/Chicago**, covering 24 elapsed hours on weekdays or 48 on Saturday/Sunday. Weekly and weekend editions publish Monday06:00. Fortnightly means every two weeks, first close November2,2026. Monthly, quarterly and rolling six-completed-month reports publish after calendar close. Activation is recorded separately in [reporting.json](reporting.json); this index alone does not prove that a scheduler ran.
 
 ## Daily
+
+- [November 1, 2026 · 06:00 Chicago · 48-hour edition](daily/2026-11-01/0600-CST/README.md) - [data](daily/2026-11-01/0600-CST/data.json); 76 main publication entries, 14 unique CVEs; late/partial, source-tail 132985 seconds. Compiled 2026-11-01T16:35:01.913Z. Next nominal report/revision **November 1 14:00 America/Chicago (CST; 20:00 UTC)**.
 
 - [October 30, 2026 · 14:00 Chicago · 24-hour edition](daily/2026-10-30/1400-CDT/README.md) · [data](daily/2026-10-30/1400-CDT/data.json) · [source activity](daily/2026-10-30/1400-CDT/charts/source-activity.svg) · [CVE context](daily/2026-10-30/1400-CDT/charts/cve-context.svg) · [coverage](daily/2026-10-30/1400-CDT/charts/data-coverage.svg) · 128 explicitly timestamped source-publication rows mentioning 9 unique CVEs; late, partial source-subset coverage of October 29 at 19:00 through October 30 at 19:00 UTC. Six date-boundary rows remain separate, including two date-only KEV catalog-addition rows; zero precisely timestamped main-window KEV additions does not mean zero across date-only or unknown-time rows. Input generation was October 30 at 13:41:01 UTC; capture ran at 15:24:57.675246–15:25:00.742856 UTC and compilation was recorded at 20:08:40.587 UTC. Later capture, analysis and compilation do not fill the 19,139-second unobserved tail. Citation metadata extraction failed after preflight without an accepted URL inventory: pool, occurrence, URL, selection, changed, unresolved and cap-excluded totals remain unknown, with zero new publisher GETs, qualified article checks or comparisons. **Next nominal report/revision opportunity: October 30 at 22:00 America/Chicago (CDT; October 31 at 03:00 UTC)**, subject to app/computer availability.
 - [October 30, 2026 · 06:00 Chicago · 24-hour edition](daily/2026-10-30/0600-CDT/README.md) · [data](daily/2026-10-30/0600-CDT/data.json) · [source activity](daily/2026-10-30/0600-CDT/charts/source-activity.svg) · [CVE context](daily/2026-10-30/0600-CDT/charts/cve-context.svg) · [coverage](daily/2026-10-30/0600-CDT/charts/data-coverage.svg) · 171 explicitly timestamped source-publication rows mentioning 15 unique CVEs; late, partial source-subset coverage of October 29 at 11:00 through October 30 at 11:00 UTC. Six date-boundary rows remain separate, including two date-only KEV catalog-addition rows; zero precisely timestamped KEV additions in the main window does not mean zero additions across date-only or unknown-time rows. Input generation was October 30 at 06:38:34 UTC; capture ran at 11:40:21.992847–11:40:23.945566 UTC and compilation completed at 13:01:23.749 UTC. Later capture and compilation do not fill the 15,686-second unobserved tail to the 11:00 UTC cutoff. Revision metadata extraction failed preflight before URL inventory: occurrence, URL, selection, changed, unresolved and cap-excluded totals are unknown, with zero new publisher GETs, qualified article checks or comparisons. **Next nominal report/revision opportunity: October 30 at 14:00 America/Chicago (CDT; 19:00 UTC)**, subject to app/computer availability.
@@ -35,6 +39,8 @@ Daily editions are requested at **06:00, 14:00 and 22:00 America/Chicago**, cove
 
 ## 2026 monthly editions
 
+- [October 2026 · completed-month closing edition](monthly/2026-10-CLOSE-20261101/README.md) - [data](monthly/2026-10-CLOSE-20261101/data.json); 1830 main publication entries, 321 unique CVEs; late/partial, source-tail 107785 seconds. Compiled 2026-11-01T16:35:01.913Z. Next nominal report/revision **November 1 14:00 America/Chicago (CST; 20:00 UTC)**.
+
 - [January 2026 · retrospective](monthly/2026-01/README.md) · [data](monthly/2026-01/data.json) · selective, incomplete coverage.
 - [February 2026 · retrospective](monthly/2026-02/README.md) · [data](monthly/2026-02/data.json) · selective, incomplete coverage.
 - [March 2026 · retrospective](monthly/2026-03/README.md) · [data](monthly/2026-03/data.json) · selective, incomplete coverage.
@@ -49,6 +55,8 @@ Daily editions are requested at **06:00, 14:00 and 22:00 America/Chicago**, cove
 November and December2026 remain planned after calendar close, with no report files, metrics or future facts. October will receive a separate closing edition rather than overwriting this dated month-to-date report.
 
 ## Rolling six months
+
+- [May–October 2026 · six completed months](six-month/2026-05_2026-10-CLOSE-20261101/README.md) - [data](six-month/2026-05_2026-10-CLOSE-20261101/data.json); 2547 main publication entries, 529 unique CVEs; late/partial, source-tail 107785 seconds. Compiled 2026-11-01T16:35:01.913Z. Next nominal report/revision **November 1 14:00 America/Chicago (CST; 20:00 UTC)**.
 
 - [April–September2026 · six completed months](six-month/2026-04_2026-09/README.md), with [data](six-month/2026-04_2026-09/data.json) and charts. The saved subset contains794entries,175KEV addition rows and264unique CVEs. These are different units, not incident counts.
 
