@@ -43,7 +43,8 @@ globalThis.fetch = async (url, options = {}) => {
   return { ok: true, status: 200, headers: { get: key => key.toLowerCase() === "content-length" ? String(bytes.byteLength) : null }, body: null, arrayBuffer: async () => bytes.buffer };
 };
 
-const source = fs.readFileSync(appPath, "utf8");
+// A Windows checkout may carry CRLF line endings; the harness matches on LF.
+const source = fs.readFileSync(appPath, "utf8").replace(/\r\n/g, "\n");
 const ending = "\n  load();\n})();";
 if (!source.includes(ending)) throw new Error("site/app.js no longer ends with load(); update the test harness.");
 // Expose the functions under test instead of starting the page's first network read.

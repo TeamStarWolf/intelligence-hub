@@ -29,6 +29,13 @@ FETCH_CEILING = 16 * 1024 * 1024
 # a run that would cross a bound fails and the deployed publication stays.
 FEED_MAX_BYTES = 8 * 1024 * 1024
 BRIEFS_MAX_BYTES = 12 * 1024 * 1024
+# The feed's article-row ceiling is derived from its byte bound, so it is not a
+# second, hidden wall: the smallest live row is 363 bytes (publisher rows average
+# about 480, KEV rows about 794), so at real sizes the byte bound is crossed first.
+# It stays a structure guard for readers and is printed with its headroom every run.
+MIN_ROW_BYTES = 300
+MAX_FEED_ROWS = FEED_MAX_BYTES // MIN_ROW_BYTES
+MAX_CVE_BRIEFS = 15000  # mirrors mitigations.MAX_RECORDS
 SNAPSHOT_VERSION = 7
 LEGACY_MAX_ARTICLES = 8000
 HISTORY_START = date(1998, 1, 1)
@@ -91,12 +98,16 @@ class ResponseByteLimitExceeded(ValueError):
     """The existing fetch loop crossed its configured response byte bound."""
 
 
-def fetch(url, maximum=MAX_BYTES):
+def fetch(url, maximum=MAX_BYTES, fresh=False):
     require(safe_url(url) == url, "Source URL must be a canonical public HTTPS URL.")
     require(type(maximum) is int and 1 <= maximum <= FETCH_CEILING, "Invalid bounded read size.")
     started = time.monotonic()
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
-    request = urllib.request.Request(url, headers={"User-Agent": "TeamStarWolf-IntelligenceHub/0.1 (public feed reader)", "Accept": "application/rss+xml, application/atom+xml, application/json, text/xml, application/xml", "Accept-Encoding": "identity"})
+    headers = {"User-Agent": "TeamStarWolf-IntelligenceHub/0.1 (public feed reader)", "Accept": "application/rss+xml, application/atom+xml, application/json, text/xml, application/xml", "Accept-Encoding": "identity"}
+    if fresh:
+        # The deployed files are served through a CDN cache; ask for the current copy.
+        headers.update({"Cache-Control": "no-cache", "Pragma": "no-cache"})
+    request = urllib.request.Request(url, headers=headers)
     chunks, size = [], 0
     try:
         with opener.open(request, timeout=12) as response:
@@ -639,6 +650,30 @@ def bound_report(name, raw, limit):
     return {"file": name, "bytes": len(raw), "limit": limit, "headroom": limit - len(raw), "gzip_estimate": compressed}
 
 
+def rows_over_message(count):
+    return ("data/feed.json would hold " + format(count, ",") + " article rows, over its " + format(MAX_FEED_ROWS, ",") +
+            "-row ceiling (the " + format(FEED_MAX_BYTES, ",") + "-byte feed bound / " + str(MIN_ROW_BYTES) +
+            " bytes per row). Nothing was evicted; the deployed publication is preserved.")
+
+
+def cves_over_message(count):
+    return ("data/briefs.json would hold " + format(count, ",") + " CVE briefs, over its " + format(MAX_CVE_BRIEFS, ",") +
+            "-brief ceiling. Nothing was evicted; the deployed publication is preserved.")
+
+
+def check_rows(articles, cves):
+    """Print the row and CVE headroom every run, and refuse a publication that crosses either ceiling."""
+    reports = [{"file": "data/feed.json", "count": articles, "unit": "article rows", "limit": MAX_FEED_ROWS},
+               {"file": "data/briefs.json", "count": cves, "unit": "CVE briefs", "limit": MAX_CVE_BRIEFS}]
+    for report in reports:
+        report["headroom"] = report["limit"] - report["count"]
+        print("{file}: {count:,} of {limit:,} {unit}, {headroom:,} of headroom ({percent}% free)".format(
+            percent=max(0, report["headroom"]) * 100 // report["limit"], **report), file=sys.stderr)
+    require(articles <= MAX_FEED_ROWS, rows_over_message(articles))
+    require(cves <= MAX_CVE_BRIEFS, cves_over_message(cves))
+    return reports
+
+
 def check_bounds(feed_raw, briefs_raw):
     """Refuse a publication whose data files cross their byte bounds; never drop rows to fit."""
     reports = [bound_report("data/feed.json", feed_raw, FEED_MAX_BYTES), bound_report("data/briefs.json", briefs_raw, BRIEFS_MAX_BYTES)]
@@ -767,6 +802,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     snapshot["content_revision"] = content_revision(snapshot)
     snapshot["layout_revision"] = hashlib.sha256(b"".join((ROOT / "site" / name).read_bytes() for name in ("index.html", "styles.css", "app.js", "icon.svg"))).hexdigest()
     # Refuse before replacing either public output or newly collected caches.
+    rows = check_rows(len(snapshot["articles"]), len(snapshot["mitigations"]))
     validate_snapshot(snapshot)
     changed = previous is None or previous.get("content_revision") != snapshot["content_revision"] or previous.get("layout_revision") != snapshot["layout_revision"]
     # Group final wire members for compression; canonical content meaning is unchanged.
@@ -786,7 +822,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     result = {"articles": len(ordered), "source_ok": sum(item["status"] == "ok" for item in health),
         "source_partial": sum(item["status"] == "partial" for item in health), "source_total": len(health),
         "coverage": snapshot["coverage"], "mitigations": mitigation_stats, "reports": reports, "changed": changed, "generated_at": snapshot["generated_at"],
-        "schema_version": SNAPSHOT_VERSION, "publication": bounds, "source_failures": failures[:100]}
+        "schema_version": SNAPSHOT_VERSION, "publication": bounds, "rows": rows, "source_failures": failures[:100]}
     write_json(STATE / "collection-result.json", result)
     return result
 
@@ -807,6 +843,30 @@ def content_revision(snapshot):
     return hashlib.sha256(json.dumps(value, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
 
 
+def deployed_files():
+    """Fetch the deployed feed and, for schema 7, its briefs file, joined into one snapshot.
+
+    Both are fetched with no-cache headers. If the CDN still hands back files from two
+    different runs (a deploy landed between the two reads), both are fetched once more.
+    """
+    from .mitigations import SNAPSHOT_MISMATCH, join_publication
+    for attempt in (1, 2):
+        raw = fetch(PUBLIC_FEED, FETCH_CEILING, fresh=True)
+        previous = json.loads(raw, parse_constant=reject_constant)
+        require(isinstance(previous, dict) and type(previous.get("schema_version")) is int and previous["schema_version"] in (1, 2, 3, 4, 5, 6, 7), "Unsupported deployed snapshot.")
+        if previous["schema_version"] != 7:
+            return previous
+        require(len(raw) <= FEED_MAX_BYTES, "The deployed feed exceeds its byte bound.")
+        briefs_raw = fetch(PUBLIC_BRIEFS, FETCH_CEILING, fresh=True)
+        require(len(briefs_raw) <= BRIEFS_MAX_BYTES, "The deployed briefs file exceeds its byte bound.")
+        try:
+            return join_publication(previous, json.loads(briefs_raw, parse_constant=reject_constant))
+        except ValueError as error:
+            if attempt == 2 or str(error) != SNAPSHOT_MISMATCH:
+                raise
+            print("Resume: the deployed feed and briefs came from different runs; fetching both once more.", file=sys.stderr)
+
+
 def resume_deployed(sources, cache):
     """Use only this hub's fixed public snapshot as an additional, validated history input.
 
@@ -814,15 +874,7 @@ def resume_deployed(sources, cache):
     A schema 7 snapshot is two files; both must load and belong to the same run.
     """
     try:
-        raw = fetch(PUBLIC_FEED, FETCH_CEILING)
-        previous = json.loads(raw, parse_constant=reject_constant)
-        require(isinstance(previous, dict) and type(previous.get("schema_version")) is int and previous["schema_version"] in (1, 2, 3, 4, 5, 6, 7), "Unsupported deployed snapshot.")
-        if previous["schema_version"] == 7:
-            from .mitigations import join_publication
-            require(len(raw) <= FEED_MAX_BYTES, "The deployed feed exceeds its byte bound.")
-            briefs_raw = fetch(PUBLIC_BRIEFS, FETCH_CEILING)
-            require(len(briefs_raw) <= BRIEFS_MAX_BYTES, "The deployed briefs file exceeds its byte bound.")
-            previous = join_publication(previous, json.loads(briefs_raw, parse_constant=reject_constant))
+        previous = deployed_files()
         if previous["schema_version"] in (5, 6, 7):
             from .archive import validate_snapshot
             validate_snapshot(previous)

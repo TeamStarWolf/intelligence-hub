@@ -14,8 +14,8 @@ import stat
 import sys
 import time
 
-from .collect import (BRIEFS_MAX_BYTES, FEED_MAX_BYTES, LEGACY_MAX_ARTICLES, public_bytes, published, safe_url,
-                      validate_article, validate_observation, validate_window)
+from .collect import (BRIEFS_MAX_BYTES, FEED_MAX_BYTES, LEGACY_MAX_ARTICLES, MAX_FEED_ROWS, public_bytes, published, rows_over_message,
+                      safe_url, validate_article, validate_observation, validate_window)
 from .mitigations import INDEX_FIELDS, brief_index, join_publication, split_publication, valid_projection
 from .intelligence import validate_intelligence, validate_weaknesses
 from .mitigations import brief_url
@@ -33,6 +33,10 @@ MAX_KEV_ROWS = 15000
 MAX_DATABASE = 1024 * 1024 * 1024
 MAX_RECORD = 256 * 1024
 MAX_SNAPSHOTS = 10000
+MAX_ARRAY = 15000
+MAX_NODES = 500000
+# A schema 7 feed may hold up to MAX_FEED_ROWS articles; live rows have 16 to 56 nodes.
+FEED_MAX_NODES = FEED_MAX_BYTES // 4
 APPLICATION_ID = 0x49484152
 DIGEST = re.compile(r"[a-f0-9]{64}")
 CVE = re.compile(r"CVE-[0-9]{4}-[0-9]{4,8}")
@@ -104,17 +108,19 @@ def decode(raw):
     return json.loads(raw.decode("utf-8"), object_pairs_hook=pairs, parse_constant=reject)
 
 
-def tree(value):
+def tree(value, articles=MAX_ARRAY, nodes=MAX_NODES):
+    """Bound a JSON value's shape. `articles` bounds only a top-level "articles" array."""
+    top = value.get("articles") if isinstance(value, dict) else None
     pending, count = [(value, 0)], 0
     while pending:
         item, depth = pending.pop()
         count += 1
-        require(count <= 500000 and depth <= 32, "JSON structure exceeds archive bounds.")
+        require(count <= nodes and depth <= 32, "JSON structure exceeds archive bounds.")
         if isinstance(item, dict):
-            require(len(item) <= 15000 and all(isinstance(key, str) and len(key) <= 160 for key in item), "Invalid JSON members.")
+            require(len(item) <= MAX_ARRAY and all(isinstance(key, str) and len(key) <= 160 for key in item), "Invalid JSON members.")
             pending.extend((child, depth + 1) for child in item.values())
         elif isinstance(item, list):
-            require(len(item) <= 15000, "JSON array exceeds archive bounds.")
+            require(len(item) <= (articles if item is top else MAX_ARRAY), "JSON array exceeds archive bounds.")
             pending.extend((child, depth + 1) for child in item)
         elif isinstance(item, str):
             require(len(item) <= 100000 and "\x00" not in item and not any(0xD800 <= ord(char) <= 0xDFFF for char in item), "Invalid JSON text.")
@@ -185,7 +191,9 @@ def validate_snapshot(value):
     if current:
         # Each public file is checked against the structure bounds on its own.
         feed = {key: item for key, item in value.items() if key != "mitigations"}
-        tree(feed)
+        # The row ceiling is derived from the feed byte bound; check it first so a crossing says why.
+        require(not isinstance(feed.get("articles"), list) or len(feed["articles"]) <= MAX_FEED_ROWS, rows_over_message(len(feed.get("articles") or ())))
+        tree(feed, articles=MAX_FEED_ROWS, nodes=FEED_MAX_NODES)
         if joined:
             tree(value["mitigations"])
         require(len(public_bytes(feed)) <= FEED_MAX_BYTES, "The feed file exceeds its byte bound.")
@@ -206,7 +214,7 @@ def validate_snapshot(value):
         require(start.isoformat() == value["window"]["start"] and end.isoformat() == value["window"]["end"], "Schema5/6 coverage needs canonical dates.")
     for field in ("content_revision", "layout_revision"):
         require(isinstance(value[field], str) and DIGEST.fullmatch(value[field]), "Invalid supplied revision.")
-    # Schema 7 has no row count: the feed byte bound above limits it, and rows are never evicted.
+    # Schema 7 rows are limited by the feed byte bound and the row ceiling derived from it; rows are never evicted.
     require(isinstance(value["articles"], list) and 1 <= len(value["articles"]) and (current or len(value["articles"]) <= LEGACY_MAX_ARTICLES), "Invalid archive article count.")
     require(isinstance(value["sources"], list) and 1 <= len(value["sources"]) <= 97, "Invalid archive source count.")
     if not current or joined:
@@ -534,7 +542,7 @@ def reconstruct(db, snapshot):
     require(isinstance(row[3], str) and len(row[3].encode("utf-8")) <= MAX_RECORD, "Saved header exceeds its bound.")
     value = decode(row[3].encode("utf-8"))
     total_bytes = len(row[3].encode("utf-8"))
-    for kind, field, maximum, expected in (("source", "sources", 97, row[6]), ("article", "articles", 15000, row[4]), ("cve", "mitigations", 15000, row[5])):
+    for kind, field, maximum, expected in (("source", "sources", 97, row[6]), ("article", "articles", MAX_FEED_ROWS, row[4]), ("cve", "mitigations", 15000, row[5])):
         require(type(expected) is int and 0 <= expected <= maximum, "Invalid archived membership count.")
         records = db.execute("""SELECT m.entity_id,m.version_sha256,v.payload,m.position FROM members m
             JOIN versions v ON (v.kind,v.entity_id,v.sha256)=(m.kind,m.entity_id,m.version_sha256)

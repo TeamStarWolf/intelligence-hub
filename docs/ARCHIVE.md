@@ -164,8 +164,9 @@ matching receipt/hash before use. Reconcile uncertain writes before retrying.
 - Each input file at most **16 MiB** and a selected export at most **21 MiB**; strict
   UTF-8/JSON, duplicate member and nonfinite-number rejection, bounded tree
   depth/node/string counts, checked for each of a schema 7 snapshot's two files.
-- Snapshot: at most 8,000 articles for schemas 3 to 6 (schema 7: within its 8 MiB
-  feed bound), 15,000 CVE briefs and 97 source observations;
+- Snapshot: at most 8,000 articles for schemas 3 to 6 (schema 7: at most 27,962,
+  the 8 MiB feed bound / 300 bytes per row, and within that byte bound), 15,000 CVE
+  briefs and 97 source observations;
   a version payload or saved header is at most 256 KiB.
 - Archive: at most 10,000 snapshots and **1 GiB of SQLite pages** with 4 KiB pages;
   the existing main-file size is also checked. There is no automatic retention

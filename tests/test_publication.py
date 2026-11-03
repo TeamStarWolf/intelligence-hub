@@ -9,6 +9,7 @@ from unittest import mock
 
 import support
 from intelligence_hub import collect
+from intelligence_hub import archive
 from intelligence_hub.archive import validate_snapshot
 from intelligence_hub.mitigations import brief_index, join_publication, split_publication
 
@@ -110,9 +111,76 @@ class BoundTest(unittest.TestCase):
             self.assertTrue(all(item["headroom"] == item["limit"] - item["bytes"] for item in result["publication"]))
             self.assertIn("data/feed.json: " + format(len(feed_raw), ",") + " of 8,388,608 bytes", workspace.log)
             self.assertIn("data/briefs.json: " + format(len(briefs_raw), ",") + " of 12,582,912 bytes", workspace.log)
+            rows = len(feed["articles"])
+            self.assertIn("data/feed.json: " + format(rows, ",") + " of 27,962 article rows, " + format(27962 - rows, ",") + " of headroom", workspace.log)
+            self.assertIn("data/briefs.json: " + format(len(briefs["briefs"]), ",") + " of 15,000 CVE briefs", workspace.log)
+            self.assertEqual([item["count"] for item in result["rows"]], [rows, len(briefs["briefs"])])
             workspace.build()
             self.assertEqual(workspace.raw("feed.json"), feed_raw, "the same inputs must give the same feed bytes")
             self.assertEqual(workspace.raw("briefs.json"), briefs_raw, "the same inputs must give the same briefs bytes")
+        finally:
+            workspace.close()
+
+    def test_more_than_15000_rows_publish_under_the_byte_bound(self):
+        # The old structure bound held every JSON array to 15,000 items. These 15,174
+        # rows fit the 8 MiB feed bound, so they must publish.
+        cache = synthetic_cache(publisher_rows=13500, kev_rows=1600)
+        workspace = Workspace(cache)
+        try:
+            workspace.build()
+            feed_raw, feed, briefs = workspace.raw("feed.json"), workspace.json("feed.json"), workspace.json("briefs.json")
+        finally:
+            workspace.close()
+        history = json.loads((support.ROOT / "config/history.json").read_text(encoding="utf-8"))["entries"]
+        self.assertEqual(len(feed["articles"]), 15100 + len(history))
+        self.assertLessEqual(len(feed_raw), collect.FEED_MAX_BYTES)
+        validate_snapshot(feed)
+        validate_snapshot(join_publication(feed, briefs))
+
+    def test_the_row_ceiling_is_derived_from_the_byte_bound(self):
+        self.assertEqual(collect.MAX_FEED_ROWS, collect.FEED_MAX_BYTES // collect.MIN_ROW_BYTES)
+        self.assertEqual(collect.MAX_FEED_ROWS, 27962)
+        self.assertGreater(collect.MAX_FEED_ROWS, archive.MAX_ARRAY)
+        self.assertEqual(archive.MAX_FEED_ROWS, collect.MAX_FEED_ROWS)
+        rows = [{"id": str(number)} for number in range(archive.MAX_ARRAY + 1)]
+        archive.tree({"articles": rows}, articles=collect.MAX_FEED_ROWS, nodes=archive.FEED_MAX_NODES)
+        with self.assertRaisesRegex(ValueError, "JSON array exceeds archive bounds"):
+            archive.tree({"articles": rows})
+        with self.assertRaisesRegex(ValueError, "JSON array exceeds archive bounds"):
+            archive.tree({"articles": [], "other": rows}, articles=collect.MAX_FEED_ROWS, nodes=archive.FEED_MAX_NODES)
+
+    def test_crossing_the_row_ceiling_fails_with_a_clear_message(self):
+        workspace = Workspace()
+        try:
+            with mock.patch.object(collect, "MAX_FEED_ROWS", 50):
+                with self.assertRaisesRegex(ValueError, r"data/feed\.json would hold [0-9,]+ article rows, over its 50-row ceiling "
+                                                        r"\(the 8,388,608-byte feed bound / 300 bytes per row\)\. Nothing was evicted"):
+                    workspace.build()
+            self.assertRegex(workspace.log, r"data/feed\.json: [0-9,]+ of 50 article rows, -[0-9,]+ of headroom \(0% free\)")
+            self.assertFalse((workspace.root / "site" / "data").exists())
+            self.assertFalse((workspace.root / ".state" / "collection-result.json").exists())
+        finally:
+            workspace.close()
+
+    def test_the_validator_names_the_row_ceiling(self):
+        workspace = Workspace()
+        try:
+            workspace.build()
+            feed = workspace.json("feed.json")
+        finally:
+            workspace.close()
+        ceiling = len(feed["articles"]) - 1
+        with mock.patch.object(collect, "MAX_FEED_ROWS", ceiling), mock.patch.object(archive, "MAX_FEED_ROWS", ceiling):
+            with self.assertRaisesRegex(ValueError, "over its " + format(ceiling, ",") + "-row ceiling"):
+                validate_snapshot(feed)
+
+    def test_crossing_the_cve_ceiling_fails_with_a_clear_message(self):
+        workspace = Workspace()
+        try:
+            with mock.patch("intelligence_hub.mitigations.MAX_RECORDS", 3):
+                with self.assertRaisesRegex(ValueError, r"CVEs, over the 3-brief ceiling\. Nothing was evicted"):
+                    workspace.build()
+            self.assertFalse((workspace.root / "site" / "data").exists())
         finally:
             workspace.close()
 
@@ -145,6 +213,7 @@ class BoundTest(unittest.TestCase):
         app = (support.ROOT / "site" / "app.js").read_text(encoding="utf-8")
         self.assertIn("const maximumFeedBytes = " + str(collect.FEED_MAX_BYTES // 1048576) + " * 1024 * 1024;", app)
         self.assertIn("const maximumBriefsBytes = " + str(collect.BRIEFS_MAX_BYTES // 1048576) + " * 1024 * 1024;", app)
+        self.assertIn("const maximumArticles = " + str(collect.MAX_FEED_ROWS) + ";", app)
         from intelligence_hub.mitigations import INDEX_FIELDS
         self.assertIn("const indexFields = " + json.dumps(list(INDEX_FIELDS)) + ";", app)
         workflow = (support.ROOT / ".github" / "workflows" / "publish.yml").read_text(encoding="utf-8")
@@ -214,8 +283,11 @@ class ResumeTest(unittest.TestCase):
         cls.feed_raw, cls.briefs_raw = BriefsFileTest.feed_raw, BriefsFileTest.briefs_raw
 
     def serve(self, files):
-        def fetch(url, maximum=collect.MAX_BYTES):
+        def fetch(url, maximum=collect.MAX_BYTES, fresh=False):
+            self.assertTrue(fresh, "resume reads must ask the CDN for a fresh copy")
             value = files[url]
+            if isinstance(value, list):
+                value = value.pop(0) if len(value) > 1 else value[0]
             if isinstance(value, Exception):
                 raise value
             self.assertLessEqual(len(value), maximum)
@@ -244,6 +316,50 @@ class ResumeTest(unittest.TestCase):
             previous, reason = self.resume()
         self.assertIsNone(previous)
         self.assertEqual(reason, "ValueError: The briefs file belongs to a different feed snapshot.")
+
+    def test_a_cdn_generation_mismatch_is_fetched_once_more(self):
+        briefs = json.loads(self.briefs_raw)
+        briefs["generated_at"] = "2026-10-31T12:00:00+00:00"
+        stale = collect.public_bytes(briefs)
+        with self.serve({collect.PUBLIC_FEED: [self.feed_raw], collect.PUBLIC_BRIEFS: [stale, self.briefs_raw]}) as fetch, \
+                contextlib.redirect_stderr(io.StringIO()) as log:
+            previous, reason = self.resume()
+        self.assertIsNone(reason)
+        self.assertIn("mitigations", previous)
+        self.assertEqual(fetch.call_count, 4)
+        self.assertIn("fetching both once more", log.getvalue())
+
+    def test_fresh_reads_send_no_cache_headers(self):
+        seen = {}
+
+        class Response:
+            status, length = 200, None
+            headers = {}
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+            def geturl(self):
+                return collect.PUBLIC_FEED
+
+            def read1(self, _size):
+                return b""
+
+        class Opener:
+            def open(self, request, timeout):
+                seen.update({key.lower(): value for key, value in request.header_items()})
+                return Response()
+
+        with mock.patch.object(collect.urllib.request, "build_opener", return_value=Opener()):
+            collect.fetch(collect.PUBLIC_FEED, collect.FETCH_CEILING, fresh=True)
+        self.assertEqual((seen.get("cache-control"), seen.get("pragma")), ("no-cache", "no-cache"))
+        seen.clear()
+        with mock.patch.object(collect.urllib.request, "build_opener", return_value=Opener()):
+            collect.fetch(collect.PUBLIC_FEED, collect.FETCH_CEILING)
+        self.assertNotIn("cache-control", seen)
 
     def test_schema_6_feed_with_inline_briefs_still_resumes(self):
         legacy = join_publication(json.loads(self.feed_raw), json.loads(self.briefs_raw))

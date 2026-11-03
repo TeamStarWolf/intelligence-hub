@@ -16,12 +16,17 @@ public data files:
   from a different run.
 
 There is no longer an 8,000-article abort. Each file has a byte bound instead:
-**8 MiB** for `data/feed.json` and **12 MiB** for `data/briefs.json`. Every run
-prints each file's size, its headroom and a gzip estimate. A run that would cross
-a bound fails and the deployed publication stays. No row is evicted to make room,
-because the deployed files are the only durable store of live rows, and KEV and
-curated rows are never trimmed. The site and the archive validator check the
-same bounds.
+**8 MiB** for `data/feed.json` and **12 MiB** for `data/briefs.json`. Two count
+ceilings sit beside them. The feed holds at most **27,962 article rows**, a number
+derived from its byte bound (8,388,608 bytes / 300 bytes per row). The smallest
+live row is 363 bytes and the average is about 480, so at real sizes the byte
+bound is reached first. The briefs file holds at most **15,000 CVE briefs**. Every
+run prints each file's size, its byte headroom and a gzip estimate, then the row
+count and row headroom for both ceilings. A run that would cross a bound or a
+ceiling fails with a message that names it, and the deployed publication stays.
+No row is evicted to make room, because the deployed files are the only durable
+store of live rows, and KEV and curated rows are never trimmed. The site and the
+archive validator check the same bounds and ceilings.
 
 Publisher responses keep the **3 MiB** default bound. A source can set its own
 `max_bytes` in `config/sources.json`, up to a **16 MiB** fetch ceiling. The CISA
@@ -66,7 +71,7 @@ Schema 5 keeps 7,306 days and older readers keep their 3,661-day profile. The ex
 40,000-node/depth-48 XML, 100-CVE whole-entry rejection, 150 normalization,
 600 retained articles per source, 500 curation entries, 8,000 total articles,
 16 MiB resume, 3,000,000-byte package and one-day artifact-retention guards applied
-to schema 6. Schema 7 replaces the 8,000-article limit with the per-file byte bounds above.
+to schema 6. Schema 7 replaces the 8,000-article limit with the per-file byte bounds above and the 27,962-row ceiling derived from the feed bound.
 Neither the broader window nor a source's accepted input proves complete history
 or timely reporting. Known modern schema 5/6 fields on legacy labels are refused;
 there is no metadata stripping or silent downconversion.
@@ -81,7 +86,7 @@ and manual runs add extra collections.
 
 ## What is configured
 
-The catalog contains **62 publisher RSS/Atom sources**, counting feed definitions rather than unique publishers. The first 29 comprise ten retained sources, sixteen additions from the repository owner's public [cybersecurity-resources bookmarks](https://github.com/TeamStarWolf/cybersecurity-resources/blob/f95fb4a3fae14acfa172c22507a1554339cb3655/LINKS.md), and three further requested publishers: watchTowr Labs, Dark Reading and the legacy Threatpost archive. A further 29 advisory, research and reporting feeds, one separately scoped Talos category feed, the Qualys Security Blog and a separately scoped CISA category feed are listed below. The fixed configuration is [sources.json](../config/sources.json). CISA KEV is a separate JSON catalog and is not included in this RSS count. Curated historical publications are also a separate input. SEC filings are not connected by this feed intake.
+The catalog contains **62 publisher RSS/Atom sources**, counting feed definitions rather than unique publishers. The first 29 comprise ten retained sources, sixteen additions from the repository owner's public [cybersecurity-resources bookmarks](https://github.com/TeamStarWolf/cybersecurity-resources/blob/f95fb4a3fae14acfa172c22507a1554339cb3655/LINKS.md), and three further requested publishers: watchTowr Labs, Dark Reading and the legacy Threatpost archive. A further 30 advisory, research and reporting feeds (including the CISA ICS advisories feed added with schema 7), one separately scoped Talos category feed, the Qualys Security Blog and a separately scoped CISA category feed are listed below. The fixed configuration is [sources.json](../config/sources.json). CISA KEV is a separate JSON catalog and is not included in this RSS count. Curated historical publications are also a separate input. SEC filings are not connected by this feed intake.
 
 Configured does not mean every source is currently healthy. The site records each collection attempt and last accepted input. The retained CISA advisory feed failed the initial production intake; its configured address is preserved and its failure remains visible. No replacement CISA advisory URL was established by this expansion. A failed source is not evidence that its publisher has no new advisories.
 

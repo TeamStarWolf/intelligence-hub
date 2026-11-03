@@ -13,7 +13,8 @@
   const maximumBriefsBytes = 12 * 1024 * 1024;
   // Schema 6 and earlier carried every brief inline, so those files could reach 16 MiB.
   const maximumLegacyFeedBytes = 16 * 1024 * 1024;
-  const maximumArticles = 15000;
+  // Mirrors MAX_FEED_ROWS in the collector: the 8 MiB feed bound / 300 bytes per row.
+  const maximumArticles = 27962;
   const indexFields = ["record_state", "source_status", "guidance_status", "required_action", "cvss_score", "cvss_version", "kev_date_added", "weaknesses"];
   const workflowApi = "https://api.github.com/repos/TeamStarWolf/intelligence-hub/actions/workflows/395429963/runs";
   const workflowQueries = { recent: workflowApi + "?branch=main&per_page=10", schedule: workflowApi + "?event=schedule&branch=main&per_page=1" };

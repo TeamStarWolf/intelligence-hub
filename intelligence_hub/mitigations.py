@@ -10,6 +10,7 @@ from .intelligence import CWE, plain, validate_weaknesses
 
 CVE_ID = re.compile(r"CVE-[0-9]{4}-[0-9]{4,8}")
 MAX_RECORDS = 15000
+SNAPSHOT_MISMATCH = "The briefs file belongs to a different feed snapshot."
 
 
 def reject_constant(_value):
@@ -225,8 +226,11 @@ def merge_retained(local, remote, cve, safe_url, normalize_date):
 
 def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, safe_url, normalize_date, stamp):
     wanted = sorted({cve for article in articles for cve in article["cves"]}, reverse=True)
-    if len(wanted) > MAX_RECORDS or not isinstance(retained, dict):
-        raise ValueError("CVE projection count exceeds its bound.")
+    if not isinstance(retained, dict):
+        raise ValueError("Invalid retained CVE projections.")
+    if len(wanted) > MAX_RECORDS:
+        raise ValueError("The articles link " + format(len(wanted), ",") + " CVEs, over the " + format(MAX_RECORDS, ",") +
+                         "-brief ceiling. Nothing was evicted; the deployed publication is preserved.")
     records = {cve: normalize_weaknesses(retained[cve], cve) if cve in retained and valid_projection(retained[cve], cve, safe_url, normalize_date) else blank(cve) for cve in wanted}
     current = datetime.fromisoformat(stamp)
 
@@ -341,5 +345,5 @@ def join_publication(feed, briefs):
         raise ValueError("Unsupported briefs file.")
     if (briefs["feed_schema_version"] != feed.get("schema_version") or briefs["generated_at"] != feed.get("generated_at")
             or briefs["content_revision"] != feed.get("content_revision")):
-        raise ValueError("The briefs file belongs to a different feed snapshot.")
+        raise ValueError(SNAPSHOT_MISMATCH)
     return {**feed, "mitigations": briefs["briefs"]}
