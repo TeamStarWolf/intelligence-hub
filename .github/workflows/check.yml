@@ -1,0 +1,58 @@
+name: Check pull request
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.10', '3.12']
+    steps:
+      - name: Read repository source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Unit tests
+        run: python -I -m unittest discover -s tests -v
+      - name: Fixture is current
+        run: python -I tests/fixtures/build_fixture.py --check
+      - name: Offline build on the committed fixture
+        # -I would drop the checkout from sys.path, so -E -s keep the rest of isolated mode.
+        run: |
+          mkdir -p .state
+          cp tests/fixtures/public-cache.json .state/public-cache.json
+          python -E -s -m intelligence_hub --cached --start 1998-01-01 --end 2026-11-01
+      - name: Validate the offline snapshot
+        shell: python
+        run: |
+          import json
+          import sys
+          sys.path.insert(0, '.')
+          from intelligence_hub.archive import validate_snapshot
+          with open('site/data/feed.json', encoding='utf-8') as stream:
+              feed = json.load(stream)
+          validate_snapshot(feed)
+          with open('.state/collection-result.json', encoding='utf-8') as stream:
+              result = json.load(stream)
+          print('Articles: ' + str(len(feed['articles'])) + '; reports: ' + result['reports']['status'])
+      - name: Site script syntax
+        run: |
+          node --version
+          node --check site/app.js
+      - name: Em-dash lint outside reports/
+        run: python -I tests/check_em_dash.py

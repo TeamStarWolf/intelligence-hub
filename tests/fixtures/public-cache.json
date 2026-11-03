@@ -1,0 +1,112 @@
+{
+  "kev": {
+    "catalog": {
+      "catalogVersion": "2026.11.01",
+      "count": 2,
+      "dateReleased": "2026-11-01T00:00:00.000Z",
+      "title": "Fixture catalog for offline tests",
+      "vulnerabilities": [
+        {
+          "cveID": "CVE-2026-99991",
+          "cwes": [],
+          "dateAdded": "2026-10-27",
+          "dueDate": "2026-11-17",
+          "knownRansomwareCampaignUse": "Unknown",
+          "notes": "",
+          "product": "Example Gateway",
+          "requiredAction": "Synthetic action text for the offline build test.",
+          "shortDescription": "Synthetic record used only by the offline build test.",
+          "vendorProject": "Example Vendor",
+          "vulnerabilityName": "Example Gateway fixture vulnerability"
+        },
+        {
+          "cveID": "CVE-2026-99992",
+          "cwes": [],
+          "dateAdded": "2026-10-29",
+          "dueDate": "2026-11-19",
+          "knownRansomwareCampaignUse": "Unknown",
+          "notes": "",
+          "product": "Example Portal",
+          "requiredAction": "Synthetic action text for the offline build test.",
+          "shortDescription": "Second synthetic record used only by the offline build test.",
+          "vendorProject": "Example Vendor",
+          "vulnerabilityName": "Example Portal fixture vulnerability"
+        }
+      ]
+    },
+    "error": null,
+    "intake": null,
+    "last_attempt": "2026-11-01T12:00:00+00:00",
+    "last_success": "2026-11-01T12:00:05+00:00",
+    "sha256": "d12a22756fc6ee236452765731f769b265893c5a864f9a073b335150f86c2575",
+    "status": "ok"
+  },
+  "sources": {
+    "cisa-advisories": {
+      "articles": [
+        {
+          "cves": [
+            "CVE-2026-99991"
+          ],
+          "date_basis": "publication",
+          "event_date": null,
+          "exploitation": "unknown",
+          "id": "feed-62b593a820a864eef4f7",
+          "kind": "advisory",
+          "origin": "publisher-feed",
+          "published_at": "2026-10-26T14:00:00+00:00",
+          "references": [],
+          "source_id": "cisa-advisories",
+          "source_name": "CISA Advisories",
+          "summary": "",
+          "tags": [],
+          "title": "Fixture advisory one",
+          "url": "https://www.cisa.gov/fixture/advisory-one"
+        },
+        {
+          "cves": [],
+          "date_basis": "publication",
+          "event_date": null,
+          "exploitation": "unknown",
+          "id": "feed-4b5ee9399c39105fb5b9",
+          "kind": "advisory",
+          "origin": "publisher-feed",
+          "published_at": "2026-10-28T09:30:00+00:00",
+          "references": [],
+          "source_id": "cisa-advisories",
+          "source_name": "CISA Advisories",
+          "summary": "",
+          "tags": [],
+          "title": "Fixture advisory two",
+          "url": "https://www.cisa.gov/fixture/advisory-two"
+        }
+      ],
+      "error": null,
+      "intake": {
+        "attempted_at": "2026-11-01T12:00:00+00:00",
+        "cve_limit": 100,
+        "entry_limit": 150,
+        "items_admitted": 2,
+        "items_filtered": 0,
+        "items_processed": 3,
+        "items_rejected": 1,
+        "items_seen": 3,
+        "items_unprocessed": 0,
+        "rejection_reasons": {
+          "cve_limit_exceeded": 0,
+          "invalid_link_or_title": 1
+        },
+        "response_sha256": "27360d6a2c43569f0b026dffa0ec2905b91beb9d0795909ce726e869502b1ce4",
+        "selection": {
+          "basis": "document-order-v1",
+          "cutoff_date": null,
+          "version": 1
+        }
+      },
+      "last_attempt": "2026-11-01T12:00:00+00:00",
+      "last_success": "2026-11-01T12:00:05+00:00",
+      "sha256": "27360d6a2c43569f0b026dffa0ec2905b91beb9d0795909ce726e869502b1ce4",
+      "status": "partial"
+    }
+  }
+}
