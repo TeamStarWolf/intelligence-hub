@@ -4,7 +4,9 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '2,12,22,32,42,52 * * * *'
+    # Every two hours. GitHub starts scheduled runs late or drops them; the site
+    # reports the observed gap from data/v7/index.json, never this request.
+    - cron: '7 */2 * * *'
   workflow_dispatch:
 
 permissions:
@@ -50,6 +52,7 @@ jobs:
         run: |
           import json
           import os
+          import re
           from pathlib import Path
           path = Path('.state/collection-result.json')
           with path.open('rb') as source:
@@ -59,71 +62,24 @@ jobs:
           result = json.loads(raw)
           if not isinstance(result, dict) or type(result.get('changed')) is not bool:
               raise SystemExit('The collection result requires a Boolean changed field.')
+          shard = re.compile(r'(?:sources|coverage|reports|cve-index)\.json|live/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json'
+                             r'|history/(?:[0-9]{4}|undated)\.json|kev/[0-9]{4}\.json|cve/[0-9]{4}/[0-9]{1,5}k\.json')
+          for field in ('changed_shards', 'removed_shards'):
+              paths = result.get(field)
+              if (type(paths) is not list or len(paths) > 1000 or
+                      not all(type(path) is str and shard.fullmatch(path) for path in paths)):
+                  raise SystemExit('The collection result requires a typed ' + field + ' list.')
+          print('Changed shards: ' + str(len(result['changed_shards'])) + '; removed shards: ' + str(len(result['removed_shards'])))
           value = 'true' if result['changed'] else 'false'
           with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
               output.write('changed=' + value + '\n')
           print('Publication required: ' + value)
-      - name: Package only public site files
+      - name: Package only the files the v7 manifest lists
         if: steps.result.outputs.changed == 'true'
-        shell: python
-        run: |
-          import gzip
-          import io
-          import stat
-          import tarfile
-          import zlib
-          from pathlib import Path
-          expected = {'index.html', 'styles.css', 'app.js', 'icon.svg', 'data/feed.json', 'data/briefs.json'}
-          root = Path('site')
-          if not stat.S_ISDIR(root.lstat().st_mode) or root.is_symlink():
-              raise SystemExit('The public site must be an ordinary directory.')
-          found = set()
-          for path in root.rglob('*'):
-              info = path.lstat()
-              if stat.S_ISLNK(info.st_mode):
-                  raise SystemExit('Links are not permitted in the site artifact.')
-              name = path.relative_to(root).as_posix()
-              if stat.S_ISDIR(info.st_mode):
-                  if name != 'data':
-                      raise SystemExit('The public artifact contains an unexpected directory.')
-              elif stat.S_ISREG(info.st_mode) and info.st_nlink == 1:
-                  found.add(name)
-              else:
-                  raise SystemExit('Only ordinary single-link files may enter the public artifact.')
-          if found != expected:
-              raise SystemExit('The public artifact file list differs from its allowlist.')
-          maximum_input = 21 * 1024 * 1024
-          total = 0
-          archive = io.BytesIO()
-          with tarfile.open(fileobj=archive, mode='w', format=tarfile.USTAR_FORMAT) as tar:
-              for directory in ('.', './data'):
-                  info = tarfile.TarInfo(directory)
-                  info.type = tarfile.DIRTYPE
-                  info.mode = 0o755
-                  tar.addfile(info)
-              for name in sorted(expected):
-                  path = root / name
-                  if path.stat().st_size > maximum_input - total:
-                      raise SystemExit('The public site exceeds its package limit.')
-                  with path.open('rb') as source:
-                      content = source.read(maximum_input - total + 1)
-                  total += len(content)
-                  print('Public file ' + name + ': ' + str(len(content)) + ' bytes')
-                  if total > maximum_input:
-                      raise SystemExit('The public site exceeds its package limit.')
-                  info = tarfile.TarInfo('./' + name)
-                  info.mode = 0o644
-                  info.size = len(content)
-                  tar.addfile(info, io.BytesIO(content))
-          # Estimate the pinned upload action's default level-6 compression.
-          # Its actual tar/ZIP metadata and account-wide storage remain separate.
-          tar_bytes = archive.getvalue()
-          estimate = max(len(gzip.compress(tar_bytes, compresslevel=6, mtime=0)),
-                         len(zlib.compress(tar_bytes, level=6)))
-          if estimate > 3000000:
-              raise SystemExit('The estimated compressed artifact exceeds the 3000000-byte budget; publication is blocked.')
-          print('Public input bytes: ' + str(total))
-          print('Estimated compressed artifact bytes: ' + str(estimate))
+        # Checks every file against data/v7/index.json (allowlisted patterns, the exact
+        # set, sha256 and bytes, no links), then the 21 MiB input and 3,000,000-byte
+        # compressed caps. The checks live in intelligence_hub/shards.py with tests.
+        run: python3 -m intelligence_hub.shards package site
       - name: Upload public site
         if: steps.result.outputs.changed == 'true'
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4

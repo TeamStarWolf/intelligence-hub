@@ -31,12 +31,12 @@ time and format bounds, enriches mentioned CVEs from official CVE records, and
 writes one snapshot that the static site in `site/` renders. The browser never
 contacts publishers.
 
-The publish workflow asks GitHub for a run every ten minutes. In practice GitHub
-starts scheduled runs only every few hours (about every 3 to 10 hours between
-30 October and 3 November 2026), so a new item can take several hours to appear.
-Pushes to `main` and manual runs add extra collections. A visible page checks
-the saved snapshot every ten minutes and shows the snapshot's age separately
-from its own reads.
+The publish workflow asks GitHub for a run every two hours (`7 */2 * * *`).
+GitHub does not guarantee scheduled runs: between 30 October and 3 November 2026
+they came about every 3 to 10 hours, so a new item can take several hours to
+appear. Pushes to `main` and manual runs add extra collections. The page header
+shows the content date, the last published run and the observed gap between
+published runs, all read from `data/v7/index.json`.
 
 Report editions in `reports/` come from a separate desktop compiler that the
 owner runs; the collector only lists them. Requested daily slots are

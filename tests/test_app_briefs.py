@@ -128,8 +128,9 @@ class AppBriefsTest(unittest.TestCase):
         # The open register asks for the new snapshot's briefs without another click.
         self.assertTrue(result["briefs_loaded"])
         self.assertEqual(result["title_after"], "Later CNA title")
-        self.assertEqual(result["requests"], ["./data/feed.json no-store", "./data/briefs.json no-cache",
-                                              "./data/feed.json no-store", "./data/briefs.json no-cache"])
+        # Each read of the feed also reads the collector's run record from data/v7/index.json.
+        self.assertEqual(result["requests"], ["./data/feed.json no-store", "./data/briefs.json no-cache", "./data/v7/index.json no-store",
+                                              "./data/feed.json no-store", "./data/briefs.json no-cache", "./data/v7/index.json no-store"])
         self.assertIsNone(result["error"])
 
     def test_feed_over_its_bound_is_refused(self):

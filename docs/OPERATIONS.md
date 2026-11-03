@@ -68,14 +68,14 @@ against current vendor guidance and retain evidence.
 
 ## Collection schedule and publication
 
-GitHub Actions requests collection at minutes **2, 12, 22, 32, 42 and 52** of every UTC hour,
+GitHub Actions requests collection every two hours at minute 7 (`7 */2 * * *`),
 as well as on pushes to `main` and manual dispatch. Manual action:
 repository **Actions → Refresh and publish Intelligence Hub → Run workflow**.
 
-In practice GitHub starts the scheduled run only every few hours. Between
-30 October and 3 November 2026 the gaps between scheduled runs were about 3 to
-10 hours. Treat the ten-minute request as an upper bound on how often collection
-can happen, not as the real cadence.
+GitHub does not guarantee scheduled runs. Between 30 October and 3 November 2026,
+under the older request for six runs an hour, the gaps between scheduled
+runs were about 3 to 10 hours. The two-hour request asks for no more than GitHub
+actually delivered; it is not the real cadence either.
 
 GitHub documents a five-minute minimum, default-branch execution, possible delays
 or dropped jobs under load, and disabling after 60 days of public-repository
@@ -84,13 +84,27 @@ See [schedule behavior](https://docs.github.com/en/actions/reference/workflows-a
 Check the [workflow history](https://github.com/TeamStarWolf/intelligence-hub/actions/workflows/publish.yml)
 when the desk appears stale; an owner can re-enable a disabled workflow.
 
-The browser reads this site's saved snapshot every ten minutes while visible,
-and separately observes the fixed public GitHub workflow API as described below.
-Refreshing the browser does not start publisher collection. Publisher
-cadence, the workflow, collection duration, deployment and browser visibility all
-affect arrival time. This is not continuous monitoring or a ten-minute delivery SLA.
-The snapshot badge shows its age in minutes independently of the latest browser
-read; reading the same saved file never claims a new publisher collection.
+### The run record in data/v7/index.json
+
+Every published run appends itself to `runs` in `data/v7/index.json`, which keeps
+the last 20 runs, newest first. Each entry has the collector's own `generated_at`
+clock and the event that started it (`schedule`, `push`, `workflow_dispatch`, or
+`local` for a build outside Actions). The first run after schema 7 shards were
+added has no earlier index, so it records the previous v6 feed's generation time
+as one `unrecorded` entry. `observed_interval_hours` gives the median and the
+longest gap between the recorded runs, and `requested_cron` repeats the request.
+
+Only published runs are recorded: a run that finds nothing new does not publish,
+so it leaves no entry, and the gaps measure time between publications. The page
+header reads the content date, the last published run and the observed median
+from this file. The site makes no request to the GitHub API.
+
+The browser rechecks this site's saved snapshot while the page stays visible.
+Refreshing the browser does not start publisher collection. Publisher cadence,
+the workflow, collection duration, deployment and browser visibility all affect
+arrival time. This is not continuous monitoring or a delivery SLA. The snapshot
+badge shows its age in minutes independently of the latest browser read; reading
+the same saved file never claims a new publisher collection.
 
 On its first successful read, the page says **published snapshot loaded**. An
 identical saved file says **same saved snapshot**. A different file says
@@ -106,55 +120,50 @@ or more than five minutes ahead of the device clock. This is an age/clock warnin
 not an assessment of workflow health or source freshness. A normal marker does
 not establish that collection is current.
 
-The collector records a typed Boolean `changed` decision. Article, guidance,
-source-outcome, intake-count/reason and layout changes can trigger publication.
-Publisher-feed response hashes and collection attempt clocks alone do not;
-changes to retained CVE evidence,
-including its response hash, can. Package/upload/deploy steps run only when
-`changed` is true.
+### The publication decision
+
+The collector records a typed Boolean `changed` decision in
+`.state/collection-result.json`, with `changed_shards` and `removed_shards`: the
+v7 paths whose sha256 differs from the previous index, and the paths it no longer
+lists. Article, guidance, source-outcome, intake-count/reason and layout changes
+can trigger publication, and so can any changed or removed shard except
+`sources.json`, which carries every run's attempt clocks. Publisher-feed response
+hashes and collection attempt clocks alone do not; changes to retained CVE
+evidence, including its response hash, can. The workflow reads the file under a
+64 KiB bound and checks every field's type before the package step runs.
 
 An unchanged successful check therefore keeps the prior deployed snapshot time.
 The **Snapshot generated** clock remains the saved snapshot's generation time. A browser
 read or successful workflow result never replaces that date or the source dates.
 
-### Read public refresh evidence
+### Schema 7 shards
 
-**Refresh evidence** distinguishes three observations: saved content time, returned
-workflow run activity and the time this browser successfully read the public API.
-The latest-run panel displays the most recently created of up to ten returned
-`main`-branch runs for this repository's fixed publishing workflow. It labels
-manual dispatch, push and automatic schedule separately, and shows pending,
-successful and other completed outcomes without treating them as new content.
-If the latest returned run is not successful, any separately displayed success is
-limited to that same returned window. Later activity on older runs can fall outside
-the window; the fixed **Workflow history** link is the place to inspect further.
+Beside `data/feed.json` and `data/briefs.json`, which the page still reads, the
+collector writes `site/data/v7/`:
 
-A separate schedule-only query requests one run. **No scheduled run observed in
-this API result** means exactly that; it does not establish that scheduling is
-disabled. A schedule run can itself be queued, running or unsuccessful. Run start
-and workflow update times are GitHub run fields, not the collector-step timestamp.
-These endpoints do not establish whether publication was needed, whether every
-publisher was admitted or whether new unadmitted news exists. They do not expose
-job-level output or prove the last deployment.
+| File | Content |
+| --- | --- |
+| `index.json` | Schema, clocks, content date, the run record, counts, and every shard with path, rows, bytes, sha256 and date span |
+| `live/YYYY-MM.json` | Publisher and KEV rows whose primary date falls in that month, for the current month and the 23 before it; `live/undated.json` holds rows without a date |
+| `history/YYYY.json` | Rows older than the live window, plus every curated archive row for that year |
+| `kev/YYYY.json` | The whole KEV catalog by `dateAdded` year: due date, the directive parsed from `requiredAction` (for example BOD 22-01, BOD 26-04 or an Emergency Directive such as ED 26-03, which CISA writes out as "Emergency Directive 26-03" or "Emergency Directive (ED) 25-03"; several are joined as "BOD 22-01; ED 26-03"; null when none is cited), ransomware use, forensic triage, CWE and CISA's own text |
+| `cve-index.json` | One row per CVE with the list-view fields and where its full brief is read |
+| `sources.json` | The source ledger |
+| `coverage.json` | A stub that makes no coverage claim until the history adapters add rows |
+| `reports.json` | A copy of the validated `reports/catalog.json`, or status `unavailable` with the reason |
 
-The two fixed HTTPS reads omit credentials and referrers, reject redirects and
-use no authenticated fallback. Each response is bounded to 512 KiB and both share
-a 20-second deadline. They share the page's single in-flight load cycle and one
-API-attempt cooldown of at least ten minutes during this loaded page session, run only while visible,
-and are interrupted if the page becomes hidden. **Reload snapshot** does not
-bypass the API cooldown. Eligibility uses a monotonic elapsed-time clock; displayed
-wall-clock dates are observations, and the next eligible date is only an estimate.
-Public GitHub requests can fail or hit the unauthenticated
-60-request/hour allowance, including usage from other tabs or clients. No token
-is requested or stored. Failed reads retain each endpoint's prior successful
-observation and its original API-read date; without one, the status stays unknown.
-Observations live only in page memory and are not a durable collection log. A full
-browser reload resets this volatile observation and cooldown state; the in-page
-**Reload snapshot** button does not bypass the cooldown.
+Every file is canonical JSON: sorted keys, compact separators, UTF-8 and one
+trailing newline, rows in a fixed order. The same inputs give the same bytes, so
+a shard's sha256 changes only when its content does. Article rows keep the v6
+feed record unchanged. A `--resume-public` run reads `index.json`, the article and
+source shards it lists and `data/briefs.json`, checks each against its listed
+bytes and sha256, and never reads `data/feed.json`. If the index is missing or a
+file differs from it after one retry, the run resumes from the feed instead.
 
-The workflow API's read time is never presented as a successful collection time.
-Use the Actions link for job-level evidence; do not relabel old source evidence
-as freshly collected just because either public file or API was read.
+CVE brief buckets (`cve/YYYY/NNNk.json`) are built and tested but not published:
+they would copy every brief in `data/briefs.json` and push the package past its
+21 MiB input cap. They wait for the owner's cap decision, and `cve-index.json`
+names `data/briefs.json` as the brief source until then.
 
 ## Failure and retention behavior
 
@@ -262,20 +271,22 @@ deploy job receives `pages: write` and `id-token: write`. Checkout does not reta
 credentials, official actions keep immutable commit pins, and no pull-request
 trigger executes untrusted fork code.
 
-The package must contain exactly:
+The package must match `data/v7/index.json` exactly. Fixed files:
 
-- `index.html`
-- `styles.css`
-- `app.js`
-- `icon.svg`
-- `data/feed.json`
-- `data/briefs.json`
+- `index.html`, `styles.css`, `app.js` and `icon.svg`
+- `data/feed.json` and `data/briefs.json`, each with the bytes and sha256 the index lists
+- `data/v7/index.json`
 
-Symlinks, hard-linked files, other file types and unexpected directories are
-rejected. Actual file content must total at most **21 MiB**. The workflow builds
-an in-memory tar from those six contents and estimates compression using both
-gzip and zlib at level 6. If the larger estimate exceeds **3,000,000 bytes**, it
-fails before artifact upload. The previous live site remains in place.
+Data files: every path the index lists under `shards`, each with its listed bytes
+and sha256, and nothing else. `python -m intelligence_hub.shards package site`
+checks that every file matches an allowlisted pattern, that the set of files
+equals the manifest set, and that each byte count and sha256 agree. Symlinks,
+hard-linked files, other file types and unexpected directories are rejected.
+Actual file content must total at most **21 MiB**. The check builds an in-memory
+tar and estimates compression using both gzip and zlib at level 6. If the larger
+estimate exceeds **3,000,000 bytes**, it fails before artifact upload, and it
+prints the headroom for both caps on every run. The previous live site remains in
+place. New cap numbers are the owner's decision.
 
 Final JSON serialization groups CVE-map members by their recorded vendor/product
 text, with the CVE identifier as a tie-breaker, to improve compression. This only
@@ -290,9 +301,9 @@ tar/ZIP metadata or proof of actual billed storage. The
 [pinned official upload action](https://github.com/actions/upload-pages-artifact/blob/7b1f4a764d45c48632c6b24a0339c27f5614fb0b/action.yml)
 creates the real artifact, retained for **one day**.
 
-At the requested maximum of 144 scheduled publications/day (actual scheduled
-runs are far fewer), the estimate budget corresponds to
-**432 MB (about 412 MiB)** for those artifacts. Manual/push runs, existing artifacts, other
+At the requested maximum of 12 scheduled publications/day (actual scheduled
+runs are fewer), the estimate budget corresponds to
+**36 MB (about 34 MiB)** for those artifacts. Manual/push runs, existing artifacts, other
 repositories/Packages usage, actual compression and retention processing remain
 separate. GitHub documents a **500 MB** Free-plan artifact allowance shared with
 Packages; public standard-runner minutes being free does not remove storage limits.
@@ -415,8 +426,8 @@ recorded configuration says configured. It computes Chicago slots using the
 platform time-zone database, including daylight-saving changes; planned,
 paused or unavailable time-zone calculation is displayed explicitly. The
 configuration's observation time is not live scheduler or delivery proof.
-Browser polling and the separate feed schedule (requested every ten minutes,
-run by GitHub every few hours) remain distinct from reporting slots and source
+Browser polling and the separate feed schedule (requested every two hours,
+run by GitHub when it can) remain distinct from reporting slots and source
 freshness.
 
 New intelligence-context URLs use the same conservative raw syntax in producer
@@ -426,8 +437,8 @@ and optional nonempty, unique unreserved `key=value` query pairs. Private/tracki
 parameters refuse. Citation fragments are unreserved tokens; request identities
 and report URLs forbid them. Unsupported syntax is refused without normalizing,
 re-encoding or rerouting an approved source. Existing article URL rules remain.
-The browser's nominal ten-minute polling is not an eligibility guarantee:
-visibility, workflow freshness and manual reloads can request earlier checks.
+The browser's polling is not an eligibility guarantee: visibility and manual
+reloads can request earlier checks.
 
 Revision-review records concern sources cited in precise report observations
 within the prior 96 hours, prioritizing 48 hours, with at most twelve selected

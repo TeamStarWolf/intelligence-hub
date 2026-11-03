@@ -97,9 +97,10 @@ there is no metadata stripping or silent downconversion.
 
 ## How often feeds are read
 
-The publish workflow asks GitHub for a run every ten minutes, but GitHub starts
-scheduled runs only every few hours: between 30 October and 3 November 2026 the
-gaps were about 3 to 10 hours. Each run reads every configured feed once, so a
+The publish workflow asks GitHub for a run every two hours (`7 */2 * * *`), but
+GitHub does not guarantee scheduled runs: between 30 October and 3 November 2026
+the gaps were about 3 to 10 hours. `data/v7/index.json` records the last 20
+published runs and the observed median and longest gap. Each run reads every configured feed once, so a
 new publisher item can take several hours to reach the site. Pushes to `main`
 and manual runs add extra collections.
 

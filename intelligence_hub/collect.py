@@ -43,6 +43,10 @@ KINDS = {"advisory", "research", "reporting", "incident", "kev", "filing"}
 CVE = re.compile(r"\bCVE-[0-9]{4}-[0-9]{4,8}\b", re.I)
 PUBLIC_FEED = "https://teamstarwolf.github.io/intelligence-hub/data/feed.json"
 PUBLIC_BRIEFS = "https://teamstarwolf.github.io/intelligence-hub/data/briefs.json"
+PUBLIC_V7 = "https://teamstarwolf.github.io/intelligence-hub/data/v7/"
+V7_MISMATCH = "A v7 shard differs from the deployed index."
+# The workflow reads .state/collection-result.json with this bound and a typed check.
+RESULT_MAX_BYTES = 65536
 ZONE_ASSUMED = ", zone not stated, read as UTC"
 NAMED_ZONES = {"CET": "+0100", "CEST": "+0200"}
 NAIVE_STAMP = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2})[T ]([0-9]{2}:[0-9]{2}(?::[0-9]{2})?)(?:\.[0-9]{1,9})?")
@@ -788,8 +792,8 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     snapshot = {"schema_version": SNAPSHOT_VERSION, "generated_at": now(), "window": {"start": start.isoformat(), "end": end.isoformat()},
         "articles": ordered, "sources": health, "history_reviewed_at": history.get("curated_at"),
         "mitigations": briefs, "mitigation_coverage": mitigation_stats, "deduplication": {"url_duplicates_removed": duplicates},
-        "refresh": {"requested_minutes": 10, "mode": "scheduled-check", "status_url": "https://github.com/TeamStarWolf/intelligence-hub/actions/workflows/publish.yml",
-            "notes": ["The workflow asks GitHub for a run every ten minutes, but GitHub starts scheduled runs only every few hours in practice. Runs can also be delayed, dropped or disabled after repository inactivity.", "The visible page checks the saved snapshot every ten minutes. A new item can take several hours to appear; this is not a timed news delivery service.", "Snapshot and source dates describe the last published collection; unchanged checks can complete without republishing. Latest workflow outcomes are linked separately."]},
+        "refresh": {"requested_minutes": 120, "mode": "scheduled-check", "status_url": "https://github.com/TeamStarWolf/intelligence-hub/actions/workflows/publish.yml",
+            "notes": ["The workflow asks GitHub for a run every two hours (cron 7 */2 * * *). GitHub does not guarantee scheduled runs: they start late, are sometimes dropped, and stop after long repository inactivity.", "data/v7/index.json records the last 20 published runs and the observed gap between them. The content date is the only freshness promise; a new item can take several hours to appear.", "Snapshot and source dates describe the last published collection; a run that finds nothing new does not republish."]},
         "coverage": {"kev_records": counts["cisa-kev"], "curated_events": counts["library-curation"], "feed_articles": counts["publisher-feed"],
             "notes": ["This is a selected collection within the declared date window, not every cyber incident, article or vulnerability.", "KEV dates indicate catalog addition, not first disclosure or first exploitation.", "RSS usually exposes recent posts; historical curation and legacy feeds do not form a complete historical archive.", "Unknown dates remain explicit. Failed sources retain last-good input when available; public snapshot resume helps retain prior publisher items.", "Per-feed retained history is bounded to 600 articles. Missing, evicted or changed inputs can leave coverage gaps.", "Publisher intake reports describe only the latest bounded response selection window of at most 150 processed entries. Rejected or unprocessed entries are not newly admitted; unprocessed entries may include recent items, and older retained versions may remain.", "Last accepted input is not exhaustive publisher coverage. Legacy observations without intake reports have unknown window completeness.", "Canonical article URLs are deduplicated; distinct publishers covering one CVE remain separate evidence.", "CVE mentions can come from RSS metadata/body text; they do not mean every mentioned CVE was exploited.", "Headlines link to publishers; full article bodies are not copied. No environment exposure is inferred.", "Threatpost is a legacy archive with observed August 2022 items; a successful fetch does not imply current reporting.", "SEC direct filing access is pending after HTTP 403; news reporting about filings is not complete Item 1.05 or 8.01 coverage."]},
         "integrations": {"xai": {"status": "not_connected", "message": "The collector makes no Grok or xAI calls and runs no model. Report editions come from a separate desktop compiler and name their own tools."},
@@ -813,18 +817,62 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     feed, briefs_file = split_publication(snapshot)
     feed_raw, briefs_raw = public_bytes(feed), public_bytes(briefs_file)
     bounds = check_bounds(feed_raw, briefs_raw)
+    v7 = build_v7(snapshot, previous, kev.get("catalog"), reports, intelligence_inputs, end, feed_raw, briefs_raw)
+    # sources.json carries every run's attempt clocks, so on its own it never republishes;
+    # the v6 content revision above ignores those clocks in the same way.
+    changed = changed or v7["removed_shards"] != [] or any(path != "sources.json" for path in v7["changed_shards"])
     if refresh:
         write_json(cache_path, cache)
         write_json(cve_path, projections, compact=True)
-    # Briefs first: a reader that sees the new feed can then also read its briefs.
+    # v7 first, then briefs: a reader that sees the new feed can then also read its briefs.
+    from .shards import write_v7
+    write_v7(ROOT / "site", v7["raw"], v7["index_raw"], write_raw)
     write_raw(ROOT / "site/data/briefs.json", briefs_raw)
     write_raw(ROOT / "site/data/feed.json", feed_raw)
     result = {"articles": len(ordered), "source_ok": sum(item["status"] == "ok" for item in health),
         "source_partial": sum(item["status"] == "partial" for item in health), "source_total": len(health),
         "coverage": snapshot["coverage"], "mitigations": mitigation_stats, "reports": reports, "changed": changed, "generated_at": snapshot["generated_at"],
-        "schema_version": SNAPSHOT_VERSION, "publication": bounds, "rows": rows, "source_failures": failures[:100]}
-    write_json(STATE / "collection-result.json", result)
+        "schema_version": SNAPSHOT_VERSION, "publication": bounds, "rows": rows, "source_failures": failures[:100],
+        "changed_shards": v7["changed_shards"], "removed_shards": v7["removed_shards"], "v7": v7["summary"]}
+    result_raw = (json.dumps(result, ensure_ascii=False, allow_nan=False, indent=2) + "\n").encode("utf-8")
+    require(len(result_raw) <= RESULT_MAX_BYTES, "The collection result would exceed its " + format(RESULT_MAX_BYTES, ",") + "-byte bound.")
+    write_raw(STATE / "collection-result.json", result_raw)
     return result
+
+
+def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs_raw):
+    """The schema 7 shards and index for this run, compared with the previous index. Nothing is written here."""
+    from . import shards
+    catalog_value, catalog_sha, _reason = inputs[2]
+    files = shards.build_shards(snapshot["articles"], snapshot["sources"], catalog, snapshot["mitigations"],
+                                shards.reports_file(reports, catalog_value, catalog_sha), end)
+    raw, entries = shards.serialize(files)
+    previous_index = previous.get("v7_index") if previous is not None else shards.local_index(ROOT / "site")
+    changed_shards, removed_shards = shards.compare(previous_index, entries)
+    # A first v7 run knows the previous publication only from the v6 feed's generation time.
+    seed = previous.get("generated_at") if previous is not None and previous_index is None else None
+    runs = shards.run_chain(previous_index["runs"] if previous_index else [], snapshot["generated_at"], shards.run_trigger(), seed)
+    articles = snapshot["articles"]
+    version = (catalog or {}).get("catalogVersion")
+    counts = {"articles": len(articles),
+              "live_rows": sum(entry["rows"] for entry in entries if entry["path"].startswith("live/")),
+              "history_rows": sum(entry["rows"] for entry in entries if entry["path"].startswith("history/")),
+              "curated_rows": sum(article["origin"] == "library-curation" for article in articles),
+              "kev": sum(entry["rows"] for entry in entries if entry["path"].startswith("kev/")),
+              "kev_catalog_version": version if isinstance(version, str) and len(version) <= 40 else None,
+              "cves": len(snapshot["mitigations"]), "sources": len(snapshot["sources"]), "shards": len(entries)}
+    index = shards.build_index(entries, generated_at=snapshot["generated_at"], end=end, feed_content_revision=snapshot["content_revision"],
+                               layout_revision=snapshot["layout_revision"], runs=runs, counts=counts,
+                               v6_files=[shards.file_entry("data/feed.json", feed_raw), shards.file_entry("data/briefs.json", briefs_raw)])
+    index_raw = shards.canonical(index)
+    shards.read_index(index_raw)
+    total = sum(len(item) for item in raw.values()) + len(index_raw)
+    print("data/v7: {:,} shards, {:,} bytes; {:,} changed and {:,} removed since the previous index".format(
+        len(entries), total, len(changed_shards), len(removed_shards)), file=sys.stderr)
+    summary = {"shards": len(entries), "bytes": total, "content_revision": index["content_revision"],
+               "observed_interval_hours": index["observed_interval_hours"], "runs_recorded": len(runs)}
+    return {"raw": raw, "index_raw": index_raw, "index": index, "changed_shards": changed_shards,
+            "removed_shards": removed_shards, "summary": summary}
 
 
 def content_revision(snapshot):
@@ -843,13 +891,62 @@ def content_revision(snapshot):
     return hashlib.sha256(json.dumps(value, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
 
 
+def deployed_v7():
+    """Resume from data/v7/index.json: the article and source shards it lists, plus data/briefs.json.
+
+    Every file is checked against the index's byte count and sha256, so files from two
+    different deploys are refused. data/feed.json is not read on this path.
+    """
+    from . import shards
+    from .mitigations import BRIEFS_KEYS
+    index = shards.read_index(fetch(PUBLIC_V7 + "index.json", shards.INDEX_MAX_BYTES, fresh=True))
+    wanted = [entry for entry in index["shards"] if entry["path"].startswith(("live/", "history/")) or entry["path"] == "sources.json"]
+
+    def read(entry):
+        raw = fetch(PUBLIC_V7 + entry["path"], shards.SHARD_MAX_BYTES, fresh=True)
+        require(len(raw) == entry["bytes"] and shards.sha256(raw) == entry["sha256"], V7_MISMATCH)
+        return entry["path"], json.loads(raw, parse_constant=reject_constant)
+
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        files = dict(pool.map(read, wanted))
+    briefs_entry = next(item for item in index["v6_files"] if item["path"] == "data/briefs.json")
+    require(briefs_entry["bytes"] <= BRIEFS_MAX_BYTES, "The deployed briefs file exceeds its byte bound.")
+    briefs_raw = fetch(PUBLIC_BRIEFS, FETCH_CEILING, fresh=True)
+    require(len(briefs_raw) == briefs_entry["bytes"] and shards.sha256(briefs_raw) == briefs_entry["sha256"], V7_MISMATCH)
+    briefs = json.loads(briefs_raw, parse_constant=reject_constant)
+    require(isinstance(briefs, dict) and set(briefs) == BRIEFS_KEYS and isinstance(briefs["briefs"], dict) and
+            briefs["content_revision"] == index["feed_content_revision"], V7_MISMATCH)
+    articles = []
+    for path in sorted(files):
+        if path == "sources.json":
+            continue
+        value = files[path]
+        require(isinstance(value, dict) and value.get("kind") == "articles" and isinstance(value.get("rows"), list), "Invalid deployed v7 article shard.")
+        articles.extend(value["rows"])
+    sources = files.get("sources.json")
+    require(isinstance(sources, dict) and sources.get("kind") == "sources" and isinstance(sources.get("rows"), list), "Invalid deployed v7 source ledger.")
+    return {"schema_version": 7, "generated_at": index["generated_at"], "articles": articles, "sources": sources["rows"],
+            "mitigations": briefs["briefs"], "content_revision": index["feed_content_revision"],
+            "layout_revision": index["layout_revision"], "v7_index": index}
+
+
 def deployed_files():
-    """Fetch the deployed feed and, for schema 7, its briefs file, joined into one snapshot.
+    """Resume from the v7 index when it is deployed; otherwise from the feed and its briefs file.
 
     Both are fetched with no-cache headers. If the CDN still hands back files from two
     different runs (a deploy landed between the two reads), both are fetched once more.
     """
     from .mitigations import SNAPSHOT_MISMATCH, join_publication
+    for attempt in (1, 2):
+        try:
+            return deployed_v7()
+        except (OSError, ValueError, TypeError, KeyError, StopIteration, RecursionError) as error:
+            if attempt == 1 and str(error) == V7_MISMATCH:
+                print("Resume: a v7 shard came from a different deploy; reading the index once more.", file=sys.stderr)
+                continue
+            print("Resume: data/v7/index.json was not used (" + failure_reason(error, "v7 index unavailable or rejected") +
+                  "); reading data/feed.json.", file=sys.stderr)
+            break
     for attempt in (1, 2):
         raw = fetch(PUBLIC_FEED, FETCH_CEILING, fresh=True)
         previous = json.loads(raw, parse_constant=reject_constant)
@@ -875,7 +972,12 @@ def resume_deployed(sources, cache):
     """
     try:
         previous = deployed_files()
-        if previous["schema_version"] in (5, 6, 7):
+        if "v7_index" in previous:
+            # Shards were checked against the index; every row and observation is validated
+            # below, and every brief passes valid_projection before it is merged.
+            require(isinstance(previous["articles"], list) and len(previous["articles"]) <= MAX_FEED_ROWS and
+                    len(previous["mitigations"]) <= MAX_CVE_BRIEFS, "Invalid deployed v7 row counts.")
+        elif previous["schema_version"] in (5, 6, 7):
             from .archive import validate_snapshot
             validate_snapshot(previous)
         else:
