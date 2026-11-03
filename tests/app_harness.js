@@ -52,7 +52,7 @@ const source = fs.readFileSync(appPath, "utf8").replace(/\r\n/g, "\n");
 const ending = "\n  load();\n})();";
 if (!source.includes(ending)) throw new Error("site/app.js no longer ends with load(); update the test harness.");
 // Expose the functions under test instead of starting the page's first network read.
-vm.runInThisContext(source.replace(ending, "\n  globalThis.hub = { normalize, normalizeBriefs, openMitigation, cveRows, matches, load, current: () => snapshot, use: value => { snapshot = value; } };\n})();"), { filename: appPath });
+vm.runInThisContext(source.replace(ending, "\n  globalThis.hub = { normalize, normalizeBriefs, openMitigation, cveRows, matches, load, normalizeRunIndex, cadenceText, current: () => snapshot, use: value => { snapshot = value; } };\n})();"), { filename: appPath });
 
 const settle = (milliseconds = 50) => new Promise(resolve => setTimeout(resolve, milliseconds));
 // Runs the handlers the page registered, as a browser would for a user event.
@@ -63,6 +63,13 @@ async function main() {
   const hub = globalThis.hub;
   const feedText = files["./data/feed.json"];
   const result = { case: scenario.case };
+  if (scenario.case === "cadence") {
+    // The header line built from data/v7/index.json, and the line shown when it cannot be read.
+    result.text = hub.cadenceText(hub.normalizeRunIndex(scenario.index));
+    result.missing = hub.cadenceText(null);
+    try { hub.normalizeRunIndex({ ...scenario.index, schema_version: 6 }); result.wrong_schema_accepted = true; } catch (_) { result.wrong_schema_accepted = false; }
+    return result;
+  }
   if (scenario.case === "oversize") {
     try { hub.normalize(JSON.parse(feedText), 8 * 1024 * 1024 + 1); result.accepted = true; } catch (_) { result.accepted = false; }
     try { hub.normalize(JSON.parse(feedText), new TextEncoder().encode(feedText).byteLength); result.accepted_at_size = true; } catch (_) { result.accepted_at_size = false; }
