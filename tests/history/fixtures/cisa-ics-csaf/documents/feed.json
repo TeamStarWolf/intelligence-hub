@@ -1,0 +1,36 @@
+{
+ "feed": {
+  "entry": [
+   {
+    "content": {
+     "src": "https://raw.githubusercontent.com/cisagov/CSAF/develop/csaf_files/OT/white/2010/icsa-10-147-01.json"
+    },
+    "id": "ICSA-10-147-01",
+    "link": [
+     {
+      "href": "https://raw.githubusercontent.com/cisagov/CSAF/develop/csaf_files/OT/white/2010/icsa-10-147-01.json",
+      "rel": "self"
+     }
+    ],
+    "published": "2010-05-27T00:00:00.000000Z",
+    "title": "Example ICS Advisory One"
+   },
+   {
+    "content": {
+     "src": "https://raw.githubusercontent.com/cisagov/CSAF/develop/csaf_files/OT/white/2017/icsa-17-012-01.json"
+    },
+    "id": "ICSA-17-012-01",
+    "published": "2017-01-12T00:00:00.000000Z",
+    "title": "Advantech WebAccess"
+   },
+   {
+    "content": {
+     "src": "https://raw.githubusercontent.com/cisagov/CSAF/develop/csaf_files/OT/white/2017/icsa-17-061-01.json"
+    },
+    "id": "ICSA-17-061-01",
+    "published": "2017-03-02T00:00:00.000000Z",
+    "title": "Not fetched in this fixture"
+   }
+  ]
+ }
+}

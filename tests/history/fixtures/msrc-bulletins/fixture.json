@@ -1,0 +1,23 @@
+{
+ "adapter": "msrc-bulletins",
+ "documents": {
+  "BulletinSearch.xlsx": "BulletinSearch.xlsx",
+  "page/ms98-001.md": "page/ms98-001.md",
+  "page/ms98-002.md": "page/ms98-002.md",
+  "toc.json": "toc.json"
+ },
+ "fetched_at": "2026-11-03T00:00:00Z",
+ "stats": {
+  "missing": {
+   "1998": 1
+  },
+  "upstream": {
+   "1998": 3,
+   "2016": 1
+  }
+ },
+ "years": [
+  1998,
+  2017
+ ]
+}

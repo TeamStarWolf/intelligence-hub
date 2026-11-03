@@ -491,7 +491,7 @@
         "zero-day",
         "espionage"
       ],
-      "exploitation": "reported",
+      "exploitation": "known",
       "references": [
         {
           "label": "Primary publication",
@@ -543,7 +543,7 @@
         "windows",
         "patching"
       ],
-      "exploitation": "reported",
+      "exploitation": "known",
       "references": [
         {
           "label": "Primary publication",
@@ -569,7 +569,7 @@
         "supply-chain",
         "lateral-movement"
       ],
-      "exploitation": "reported",
+      "exploitation": "known",
       "references": [
         {
           "label": "Primary publication",
@@ -954,7 +954,7 @@
         "zero-day",
         "web-shells"
       ],
-      "exploitation": "reported",
+      "exploitation": "known",
       "references": [
         {
           "label": "Primary publication",
@@ -1138,7 +1138,7 @@
         "identity",
         "security-keys"
       ],
-      "exploitation": "reported",
+      "exploitation": "known",
       "references": [
         {
           "label": "Primary publication",
@@ -1381,7 +1381,7 @@
         "linux",
         "build-security"
       ],
-      "exploitation": "unknown",
+      "exploitation": "known",
       "references": [
         {
           "label": "Primary publication",
@@ -1652,7 +1652,7 @@
         "espionage",
         "agents"
       ],
-      "exploitation": "reported",
+      "exploitation": "known",
       "references": [
         {
           "label": "Primary publication",
@@ -2249,7 +2249,7 @@
         "rpc",
         "legacy-advisory"
       ],
-      "exploitation": "unknown",
+      "exploitation": "known",
       "references": [
         {
           "label": "Primary publication",
@@ -2277,7 +2277,7 @@
         "rpc",
         "targeted-attacks"
       ],
-      "exploitation": "reported",
+      "exploitation": "known",
       "references": [
         {
           "label": "Primary publication",
@@ -2389,7 +2389,7 @@
         "remote-code-execution",
         "legacy-advisory"
       ],
-      "exploitation": "reported",
+      "exploitation": "known",
       "references": [
         {
           "label": "Primary publication",

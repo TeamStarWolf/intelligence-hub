@@ -1,0 +1,41 @@
+{
+ "limit": 100,
+ "notices": [
+  {
+   "cves_ids": [
+    "CVE-2004-0889"
+   ],
+   "id": "USN-2-1",
+   "published": "2004-10-23T02:11:46",
+   "releases": [
+    {
+     "codename": "warty"
+    }
+   ],
+   "title": "xpdf vulnerabilities"
+  },
+  {
+   "cves_ids": [
+    "CVE-2004-0597"
+   ],
+   "id": "USN-1-1",
+   "published": "2004-10-22T00:00:00",
+   "releases": [
+    {
+     "codename": "warty"
+    }
+   ],
+   "title": "PNG library vulnerabilities"
+  },
+  {
+   "cves_ids": [
+    "CVE-2004-0001"
+   ],
+   "id": "USN-3-1",
+   "published": "2004-10-24T00:00:00",
+   "title": "Example notice outside every filter"
+  }
+ ],
+ "offset": 0,
+ "total_results": 3
+}

@@ -1,0 +1,19 @@
+{
+ "adapter": "certcc-ca",
+ "documents": {
+  "summary/2000.json": "summary/2000.json",
+  "vu/17566.json": "vu/17566.json",
+  "vu/20851.json": "vu/20851.json"
+ },
+ "fetched_at": "2026-11-03T00:00:00Z",
+ "stats": {
+  "missing": {},
+  "upstream": {
+   "2000": 1
+  }
+ },
+ "years": [
+  1998,
+  2004
+ ]
+}

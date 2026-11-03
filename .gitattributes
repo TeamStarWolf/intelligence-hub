@@ -1,0 +1,4 @@
+# History files and fixtures are byte-exact: their checks compare bytes and sha256 values,
+# so no checkout may rewrite their line endings.
+history/** -text
+tests/history/fixtures/** -text

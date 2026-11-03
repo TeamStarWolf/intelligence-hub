@@ -121,7 +121,8 @@ def row_day(article):
 def article_path(article, live_from):
     """live/YYYY-MM.json inside the live window, history/YYYY.json before it; curated rows are history."""
     day = row_day(article)
-    if article["origin"] == "library-curation":
+    # Curated rows and history-adapter rows always live in their year's history shard.
+    if article["origin"] == "library-curation" or article["origin"].startswith("history:"):
         return "history/" + (format(day.year, "04d") if day else "undated") + ".json"
     if day is None:
         return "live/undated.json"
@@ -236,8 +237,12 @@ def coverage_stub():
             "note": "Per-source and per-year coverage rows arrive with the history adapters. This file makes no coverage claim yet."}
 
 
-def build_shards(articles, sources, catalog, briefs, reports, end, safe_url=collector_safe_url):
-    """Every v7 shard except index.json, as {relative path: value}."""
+def build_shards(articles, sources, catalog, briefs, reports, end, safe_url=collector_safe_url, coverage=None):
+    """Every v7 shard except index.json, as {relative path: value}.
+
+    coverage is the history coverage file (intelligence_hub.history.publish.coverage_file);
+    without one, coverage.json is the stub that makes no coverage claim.
+    """
     live_from = live_start(end)
     groups = {}
     for article in articles:
@@ -251,7 +256,7 @@ def build_shards(articles, sources, catalog, briefs, reports, end, safe_url=coll
         shards.update(cve_buckets(briefs))
     shards["cve-index.json"] = cve_index(briefs)
     shards["sources.json"] = {"schema_version": SCHEMA_VERSION, "kind": "sources", "rows": sources}
-    shards["coverage.json"] = coverage_stub()
+    shards["coverage.json"] = coverage if coverage is not None else coverage_stub()
     shards["reports.json"] = reports
     for path in shards:
         require(SHARD_PATH.fullmatch(path), "Unexpected v7 shard path " + path + ".")

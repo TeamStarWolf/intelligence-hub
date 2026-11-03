@@ -1,0 +1,22 @@
+{
+ "adapter": "cisa-ics-csaf",
+ "documents": {
+  "csaf/icsa-10-147-01.json": "csaf/icsa-10-147-01.json",
+  "csaf/icsa-17-012-01.json": "csaf/icsa-17-012-01.json",
+  "feed.json": "feed.json"
+ },
+ "fetched_at": "2026-11-03T00:00:00Z",
+ "stats": {
+  "missing": {
+   "2017": 1
+  },
+  "upstream": {
+   "2010": 1,
+   "2017": 2
+  }
+ },
+ "years": [
+  2010,
+  2026
+ ]
+}

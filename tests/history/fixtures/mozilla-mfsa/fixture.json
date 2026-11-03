@@ -1,0 +1,18 @@
+{
+ "adapter": "mozilla-mfsa",
+ "documents": {
+  "repository.tar.gz": "repository.tar.gz"
+ },
+ "fetched_at": "2026-11-03T00:00:00Z",
+ "stats": {
+  "missing": {},
+  "upstream": {
+   "2005": 1,
+   "2024": 1
+  }
+ },
+ "years": [
+  2005,
+  2026
+ ]
+}

@@ -145,11 +145,11 @@ collector writes `site/data/v7/`:
 | --- | --- |
 | `index.json` | Schema, clocks, content date, the run record, counts, and every shard with path, rows, bytes, sha256 and date span |
 | `live/YYYY-MM.json` | Publisher and KEV rows whose primary date falls in that month, for the current month and the 23 before it; `live/undated.json` holds rows without a date |
-| `history/YYYY.json` | Rows older than the live window, plus every curated archive row for that year |
+| `history/YYYY.json` | Rows older than the live window, plus every curated archive row and every committed history-adapter row (`history/` at the repository root, see [history/README.md](../history/README.md)) for that year |
 | `kev/YYYY.json` | The whole KEV catalog by `dateAdded` year: due date, the directive parsed from `requiredAction` (for example BOD 22-01, BOD 26-04 or an Emergency Directive such as ED 26-03, which CISA writes out as "Emergency Directive 26-03" or "Emergency Directive (ED) 25-03"; several are joined as "BOD 22-01; ED 26-03"; null when none is cited), ransomware use, forensic triage, CWE and CISA's own text |
 | `cve-index.json` | One row per CVE with the list-view fields and where its full brief is read |
 | `sources.json` | The source ledger |
-| `coverage.json` | A stub that makes no coverage claim until the history adapters add rows |
+| `coverage.json` | One coverage statement per source and year from 1998 (complete, filtered, partial, sample, gap or unreachable), copied from the committed `history/coverage.json`, plus any adapter rows held back to keep a year shard inside its byte bound; a stub that says why when the committed file is missing or invalid |
 | `reports.json` | A copy of the validated `reports/catalog.json`, or status `unavailable` with the reason |
 
 Every file is canonical JSON: sorted keys, compact separators, UTF-8 and one

@@ -31,6 +31,10 @@ jobs:
         run: python -I -m unittest discover -s tests -v
       - name: Fixture is current
         run: python -I tests/fixtures/build_fixture.py --check
+      - name: History check (offline)
+        # Schema, sort order, unique ids, URL safety, in-year dates, caps, coverage agreement
+        # and every fixture re-parsed to its golden file. -E -s for the same reason as below.
+        run: python -E -s -m intelligence_hub.history check
       - name: Offline build on the committed fixture
         # -I would drop the checkout from sys.path, so -E -s keep the rest of isolated mode.
         run: |

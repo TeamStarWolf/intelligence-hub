@@ -953,15 +953,53 @@ def write_analytics_exports(files, report):
             "files": len(files), "bytes": total, "written": len(written), "removed": len(removed)}
 
 
+def tag_history(snapshot, tagged, catalog):
+    """The committed history-adapter rows as tagged v7 rows, and a summary. Never blocks the feed.
+
+    Rows come from history/ in the repository (the publish run fetches no history source).
+    They are tagged by the same engine as every other row, with the adapters' own source
+    entries; when tagging is unavailable in this run they keep no tagging block.
+    """
+    from .history import publish as history_publish, registry
+    from . import tagging
+    from .tagging.engine import compact
+    rows, summary = history_publish.articles(ROOT, {article["url"] for article in snapshot["articles"]})
+    context = (tagged or {}).get("context")
+    if rows and context is not None:
+        try:
+            history_context = tagging.build_context(context.vocab, registry(), catalog, snapshot["mitigations"])
+            blocks = tagging.tag_rows(rows, history_context)
+            rows = [{**row, "tagging": compact(blocks[row["id"]])} for row in rows]
+            summary["tagging"] = "ok"
+        except (ValueError, TypeError, KeyError, AttributeError) as error:
+            summary["tagging"] = "unavailable: " + (str(error) or type(error).__name__)[:200]
+    elif rows:
+        summary["tagging"] = "unavailable in this run"
+    print("History: " + summary["status"] + ", " + format(len(rows), ",") + " adapter rows" +
+          (" (" + summary["reason"] + ")" if summary.get("reason") else ""), file=sys.stderr)
+    return rows, summary
+
+
 def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs_raw, tagged=None, exports_entry=None):
     """The schema 7 shards and index for this run, compared with the previous index. Nothing is written here."""
     from . import shards
     from .tagging.engine import compact
     catalog_value, catalog_sha, _reason = inputs[2]
+    from .history import publish as history_publish
     blocks = (tagged or {}).get("blocks", {})
     rows = [{**article, "tagging": compact(blocks[article["id"]])} if article["id"] in blocks else article for article in snapshot["articles"]]
-    files = shards.build_shards(rows, snapshot["sources"], catalog, snapshot["mitigations"],
-                                shards.reports_file(reports, catalog_value, catalog_sha), end)
+    history_rows, history_summary = tag_history(snapshot, tagged, catalog)
+    files = shards.build_shards(rows + history_rows, snapshot["sources"], catalog, snapshot["mitigations"],
+                                shards.reports_file(reports, catalog_value, catalog_sha), end,
+                                coverage=history_publish.coverage_file(ROOT, shards.SCHEMA_VERSION))
+    # Adapter rows never push a year's history shard past its byte bound; any held back are named.
+    held = history_publish.fit(files, shards.SHARD_MAX_BYTES, shards.canonical)
+    if files["coverage.json"].get("status") == "ok":
+        files["coverage.json"]["held_back"] = held
+    if held:
+        history_summary["held_back"] = held
+        print("History: " + format(sum(item["rows"] for item in held), ",") + " adapter rows held back to keep " +
+              ", ".join(sorted({item["path"] for item in held})) + " inside the shard bound", file=sys.stderr)
     raw, entries = shards.serialize(files)
     previous_index = previous.get("v7_index") if previous is not None else shards.local_index(ROOT / "site")
     changed_shards, removed_shards = shards.compare(previous_index, entries)
@@ -974,6 +1012,7 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
               "live_rows": sum(entry["rows"] for entry in entries if entry["path"].startswith("live/")),
               "history_rows": sum(entry["rows"] for entry in entries if entry["path"].startswith("history/")),
               "curated_rows": sum(article["origin"] == "library-curation" for article in articles),
+              "history_adapter_rows": len(history_rows) - sum(item["rows"] for item in held),
               "kev": sum(entry["rows"] for entry in entries if entry["path"].startswith("kev/")),
               "kev_catalog_version": version if isinstance(version, str) and len(version) <= 40 else None,
               "cves": len(snapshot["mitigations"]), "sources": len(snapshot["sources"]), "shards": len(entries)}
@@ -987,7 +1026,7 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
     print("data/v7: {:,} shards, {:,} bytes; {:,} changed and {:,} removed since the previous index".format(
         len(entries), total, len(changed_shards), len(removed_shards)), file=sys.stderr)
     summary = {"shards": len(entries), "bytes": total, "content_revision": index["content_revision"],
-               "observed_interval_hours": index["observed_interval_hours"], "runs_recorded": len(runs)}
+               "observed_interval_hours": index["observed_interval_hours"], "runs_recorded": len(runs), "history": history_summary}
     export_paths = [item["path"] for item in (exports_entry or {}).get("files", [])]
     return {"raw": raw, "index_raw": index_raw, "index": index, "changed_shards": changed_shards,
             "removed_shards": removed_shards, "summary": summary, "export_paths": export_paths,
@@ -1042,7 +1081,9 @@ def deployed_v7():
         value = files[path]
         require(isinstance(value, dict) and value.get("kind") == "articles" and isinstance(value.get("rows"), list), "Invalid deployed v7 article shard.")
         # Tags are derived again on every run; the deployed tagging block is never an input.
-        articles.extend({key: item for key, item in row.items() if key != "tagging"} if isinstance(row, dict) else row for row in value["rows"])
+        # History-adapter rows are read from the repository on every run, never resumed.
+        articles.extend({key: item for key, item in row.items() if key != "tagging"} if isinstance(row, dict) else row
+                        for row in value["rows"] if not (isinstance(row, dict) and str(row.get("origin", "")).startswith("history:")))
     sources = files.get("sources.json")
     require(isinstance(sources, dict) and sources.get("kind") == "sources" and isinstance(sources.get("rows"), list), "Invalid deployed v7 source ledger.")
     return {"schema_version": 7, "generated_at": index["generated_at"], "articles": articles, "sources": sources["rows"],

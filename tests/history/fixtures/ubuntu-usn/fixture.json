@@ -1,0 +1,25 @@
+{
+ "adapter": "ubuntu-usn",
+ "context": {
+  "kev": [
+   "CVE-2004-0597"
+  ],
+  "referenced": [
+   "CVE-2004-0889"
+  ]
+ },
+ "documents": {
+  "page/0000.json": "page/0000.json"
+ },
+ "fetched_at": "2026-11-03T00:00:00Z",
+ "stats": {
+  "capped": {},
+  "upstream": {
+   "2004": 3
+  }
+ },
+ "years": [
+  2004,
+  2026
+ ]
+}
