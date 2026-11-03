@@ -26,12 +26,15 @@ coding agent that changes this repository.
 
 ## Tests and the pull-request check
 
-- New code needs tests. Use the standard library's `unittest` under `tests/`. A
-  change to the collector, a validator or the logic in `site/app.js` comes with a
-  test that fails without the change.
+- New code needs tests. Use the standard library's `unittest` under `tests/` for
+  Python and Node's built-in `node --test` under `tests/js/` for the site (no npm, no
+  dependencies). A change to the collector, a validator or the page logic in `site/js/`
+  comes with a test that fails without the change.
 - `.github/workflows/check.yml` runs on every pull request: the unit tests, the
-  fixture currency check, an offline `--cached` build on the committed fixture,
-  `node --check site/app.js` and the em-dash lint. Keep it green, and never
+  fixture currency check, the offline history check, an offline `--cached` build on
+  the committed fixture, the page-file and stamping check, `node --check` on every
+  module, the site tests, the contrast check, the 12 px type floor and the em-dash
+  lint. Keep it green, and never
   weaken a check to make a change pass.
 - Run the same gates locally:
 
@@ -39,7 +42,11 @@ coding agent that changes this repository.
   python -I -m unittest discover -s tests
   python -I tests/fixtures/build_fixture.py --check
   python -I tests/check_em_dash.py
-  node --check site/app.js
+  python -E -s -m intelligence_hub.site check site
+  python -E -s -m intelligence_hub.site labels --check
+  python -I tests/check_contrast.py
+  python -I tests/check_font_size.py
+  node --test tests/js/*.test.js
   ```
 
 - Never raise a byte, count or time bound (feed size, package estimate, article
@@ -96,5 +103,8 @@ coding agent that changes this repository.
   anything.
 - Stage paths explicitly and check `git diff --numstat` for line-ending churn
   before committing.
-- Keep the Pages artifact to its allowlisted files; a new public file needs the
+- Keep the Pages artifact to its allowlisted files: the page files `site/files.json`
+  lists and the data files `data/v7/index.json` lists. A new public file needs the
   owner's approval in the pull request that adds it.
+- Hub links follow the route contract in `docs/URLS.md`; a change to it changes
+  `site/js/router.js`, `tests/js/router.test.js` and that page together.

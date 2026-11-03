@@ -6,19 +6,15 @@ from datetime import date
 import io
 import json
 import os
-from pathlib import Path
 import re
 import shutil
 import subprocess
-import tempfile
 import unittest
 from unittest import mock
 
 import support
 from intelligence_hub import collect, shards
 from test_publication import END, Workspace, synthetic_cache
-
-NODE = shutil.which("node")
 
 
 def v7_files(workspace):
@@ -306,6 +302,62 @@ class BuildTest(unittest.TestCase):
         self.assertEqual("".join(pieces), shards.SHARD_PATH.pattern)
 
 
+class RecentTest(unittest.TestCase):
+    """recent.json is the Today view's bounded data file."""
+
+    def test_recent_file_holds_exactly_what_today_reads(self):
+        workspace = Workspace(synthetic_cache(publisher_rows=900, kev_rows=200))
+        try:
+            workspace.build()
+            files = v7_files(workspace)
+            index = index_of(workspace)
+            recent = json.loads(files["recent.json"])
+            entry = next(item for item in index["shards"] if item["path"] == "recent.json")
+            self.assertEqual((entry["rows"], entry["from"], entry["to"]), (len(recent["rows"]), None, None))
+            day = date.fromisoformat(index["content_date"])
+            self.assertEqual(recent["content_date"], index["content_date"])
+            self.assertEqual((recent["from"], recent["to"]), (str(day.fromordinal(day.toordinal() - 3)), str(day.fromordinal(day.toordinal() + 1))))
+            self.assertEqual((recent["kev_from"], recent["due_until"]), (str(day.fromordinal(day.toordinal() - 6)), str(day.fromordinal(day.toordinal() + 14))))
+            live = [row for path, raw in files.items() if path.startswith("live/") and path != "live/undated.json" for row in json.loads(raw)["rows"]]
+            wanted = sorted(row["id"] for row in live if recent["from"] <= shards.row_day(row).isoformat() <= recent["to"])
+            self.assertTrue(wanted, "the synthetic cache has rows in the last days")
+            self.assertEqual(sorted(row["id"] for row in recent["rows"]), wanted)
+            self.assertLess(len(recent["rows"]), len(live))
+            ledger = [row for path, raw in files.items() if path.startswith("kev/") for row in json.loads(raw)["rows"]]
+            kev = sorted(row["cve"] for row in ledger if recent["kev_from"] <= row["date_added"] <= recent["content_date"] or
+                         (row["due_date"] and recent["content_date"] <= row["due_date"] <= recent["due_until"]))
+            self.assertEqual(sorted(row["cve"] for row in recent["kev"]), kev)
+            cve_index = json.loads(files["cve-index.json"])
+            self.assertEqual(recent["cve_fields"], cve_index["fields"])
+            named = {cve for row in recent["rows"] for cve in row["cves"]}
+            self.assertEqual(recent["cves"], [row for row in cve_index["rows"] if row[0] in named])
+        finally:
+            workspace.close()
+
+    def test_an_oversized_recent_file_is_left_out_and_the_run_still_builds(self):
+        workspace = Workspace(synthetic_cache(publisher_rows=300, kev_rows=60))
+        try:
+            real = shards.canonical
+            with mock.patch.object(shards, "canonical", side_effect=lambda value: (b"x" * (shards.SHARD_MAX_BYTES + 1)) if isinstance(value, dict) and value.get("kind") == "recent" else real(value)):
+                workspace.build()
+            self.assertNotIn("recent.json", v7_files(workspace))
+            self.assertNotIn("recent.json", [entry["path"] for entry in index_of(workspace)["shards"]])
+        finally:
+            workspace.close()
+
+    def test_the_windows_match_the_page_constants(self):
+        page = (support.ROOT / "site" / "js" / "filters.js").read_text(encoding="utf-8")
+        constants = {name: int(value) for name, value in re.findall(r"export const ([A-Z_]+) = (\d+);", page)}
+        self.assertEqual(constants["TODAY_DAYS"], shards.RECENT_DAYS)
+        self.assertEqual(constants["KEV_STRIP_DAYS"], shards.RECENT_KEV_DAYS)
+        self.assertEqual(constants["ACT_WITHIN_DAYS"], shards.RECENT_DUE_DAYS)
+
+    def test_an_index_without_recent_still_validates(self):
+        # A deployed index written before recent.json existed must still resume.
+        self.assertNotIn("recent.json", shards.NAMED)
+        self.assertTrue(shards.SHARD_PATH.fullmatch("recent.json"))
+
+
 class ResumeV7Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -410,7 +462,8 @@ class PackageTest(unittest.TestCase):
         report = self.package()
         index = index_of(self.workspace)
         self.assertTrue(index["exports"]["files"])
-        self.assertEqual(report["files"], len(index["shards"]) + len(index["exports"]["files"]) + 7)
+        # The page files site/files.json lists (and files.json), index.json and the two v6 files.
+        self.assertEqual(report["files"], len(index["shards"]) + len(index["exports"]["files"]) + len(support.site_files()) + 3)
         self.assertEqual(report["exports"], len(index["exports"]["files"]))
         self.assertLess(report["compressed_estimate"], report["input_bytes"])
 
@@ -543,7 +596,7 @@ class SiteTest(unittest.TestCase):
         page = (support.ROOT / "site" / "index.html").read_text(encoding="utf-8")
         policy = re.search(r'Content-Security-Policy" content="([^"]+)"', page)[1]
         self.assertIn("connect-src 'self';", policy)
-        for name in ("index.html", "app.js"):
+        for name in support.site_files():
             self.assertNotIn("api.github.com", (support.ROOT / "site" / name).read_text(encoding="utf-8"))
 
     def test_no_ten_minute_cadence_claim_outside_reports(self):
@@ -556,28 +609,6 @@ class SiteTest(unittest.TestCase):
             text = (support.ROOT / name).read_text(encoding="utf-8", errors="replace")
             found += [name + ": " + match[0] for match in claim.finditer(text)]
         self.assertEqual(found, [])
-
-
-@unittest.skipIf(NODE is None, "Node is not installed")
-class CadenceHeaderTest(unittest.TestCase):
-    def test_header_states_the_observed_interval(self):
-        index = {"schema_version": 7, "generated_at": "2026-11-03T12:00:00+00:00", "content_date": "2026-11-03", "requested_cron": "7 */2 * * *",
-                 "runs": [{"generated_at": "2026-11-03T12:00:00+00:00", "trigger": "schedule", "changed": True},
-                          {"generated_at": "2026-11-03T07:42:00+00:00", "trigger": "schedule", "changed": True}],
-                 "observed_interval_hours": {"median": 4.3, "max": 10.2, "runs_counted": 10}}
-        with tempfile.TemporaryDirectory() as directory:
-            scenario = Path(directory) / "cadence.json"
-            scenario.write_text(json.dumps({"case": "cadence", "files": {}, "index": index}), encoding="utf-8")
-            completed = subprocess.run([NODE, str(support.ROOT / "tests" / "app_harness.js"), str(support.ROOT / "site" / "app.js"), str(scenario)],
-                                       capture_output=True, text=True, timeout=60)
-        self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
-        result = json.loads(completed.stdout)
-        self.assertIn("Content date ", result["text"])
-        self.assertIn("Last published run ", result["text"])
-        self.assertIn("median 4.3 h, longest 10.2 h over the last 10 runs", result["text"])
-        self.assertIn("cron 7 */2 * * *", result["text"])
-        self.assertIn("could not be read", result["missing"])
-        self.assertFalse(result["wrong_schema_accepted"])
 
 
 if __name__ == "__main__":

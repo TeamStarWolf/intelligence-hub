@@ -103,7 +103,10 @@ stay outside Git.
 Every change arrives as a pull request and is squash-merged by someone other
 than its author after review; [AGENTS.md](AGENTS.md) holds the full rules. The
 pull-request check runs the unit tests, an offline build on a committed fixture,
-a syntax check of `site/app.js` and an em-dash lint. New code needs tests.
+the page-file and stamping check, a syntax check of every module in `site/files.json`,
+the site tests (`node --test`, no npm), a contrast check of both themes, the 12 px type
+floor and an em-dash lint. New code needs tests. Hub links follow the route contract in
+[docs/URLS.md](docs/URLS.md).
 
 ## Limits
 

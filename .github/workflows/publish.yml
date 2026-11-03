@@ -62,7 +62,7 @@ jobs:
           result = json.loads(raw)
           if not isinstance(result, dict) or type(result.get('changed')) is not bool:
               raise SystemExit('The collection result requires a Boolean changed field.')
-          shard = re.compile(r'(?:sources|coverage|reports|cve-index)\.json|live/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json'
+          shard = re.compile(r'(?:sources|coverage|reports|cve-index|recent)\.json|live/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json'
                              r'|history/(?:[0-9]{4}|undated)\.json|kev/[0-9]{4}\.json|cve/[0-9]{4}/[0-9]{1,5}k\.json')
           for field in ('changed_shards', 'removed_shards'):
               paths = result.get(field)
@@ -74,10 +74,18 @@ jobs:
           with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
               output.write('changed=' + value + '\n')
           print('Publication required: ' + value)
-      - name: Package only the files the v7 manifest lists
+      - name: Stamp the page with its layout revision
         if: steps.result.outputs.changed == 'true'
-        # Checks every file against data/v7/index.json (allowlisted patterns, the exact
-        # set of shards and exports, sha256 and bytes, no links), then the caps: 4,000
+        # Appends ?v=<layout revision> to the stylesheet and module URLs in index.html and to
+        # every import between the modules site/files.json lists, so a browser never pairs this
+        # deploy's data with a script it cached from an earlier one. The checkout is changed;
+        # the repository files are not.
+        run: python3 -m intelligence_hub.site stamp site
+      - name: Package only the files the v7 manifest and site/files.json list
+        if: steps.result.outputs.changed == 'true'
+        # Checks every data file against data/v7/index.json and every page file against
+        # site/files.json (allowlisted patterns, the exact set of shards and exports, sha256
+        # and bytes, no links), then the caps: 4,000
         # files, 4 MiB per v7 shard or export file, 192 MiB input and a 48,000,000-byte
         # compressed estimate, each printed with its headroom. The checks and the cap
         # numbers live in intelligence_hub/shards.py with tests.

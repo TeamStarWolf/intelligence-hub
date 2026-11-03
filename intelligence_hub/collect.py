@@ -702,6 +702,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     from .mitigations import brief_index, build_briefs, merge_retained, split_publication
     from .intelligence import compose_with_reports, load_inputs
     from .archive import validate_snapshot
+    from .site import layout_revision as site_layout_revision
 
     validate_window(start, end, SNAPSHOT_VERSION)
     intelligence_inputs = load_inputs(ROOT)
@@ -814,7 +815,8 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     snapshot["intelligence"] = intelligence
     snapshot["brief_index"] = brief_index(briefs)
     snapshot["content_revision"] = content_revision(snapshot)
-    snapshot["layout_revision"] = hashlib.sha256(b"".join((ROOT / "site" / name).read_bytes() for name in ("index.html", "styles.css", "app.js", "icon.svg"))).hexdigest()
+    # Every page file site/files.json lists; publish.yml stamps the same revision into the page.
+    snapshot["layout_revision"] = site_layout_revision(ROOT / "site")
     # Refuse before replacing either public output or newly collected caches.
     rows = check_rows(len(snapshot["articles"]), len(snapshot["mitigations"]))
     validate_snapshot(snapshot)

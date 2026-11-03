@@ -1,0 +1,6 @@
+{
+  "name": "intelligence-hub-site",
+  "private": true,
+  "description": "Marks site/js and tests/js as ES modules for node --check and node --test. There are no dependencies and no install step.",
+  "type": "module"
+}

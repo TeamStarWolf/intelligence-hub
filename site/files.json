@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "comment": "Every page file the Pages artifact carries, read by intelligence_hub/site.py and intelligence_hub/shards.py. Data files are listed by data/v7/index.json instead. A new file here is a new public file.",
+  "files": [
+    "index.html",
+    "styles.css",
+    "icon.svg",
+    "app.js",
+    "js/main.js",
+    "js/router.js",
+    "js/fetcher.js",
+    "js/guard.js",
+    "js/store.js",
+    "js/validate.js",
+    "js/legacy.js",
+    "js/filters.js",
+    "js/limits.js",
+    "js/theme.js",
+    "js/util.js",
+    "js/labels.js",
+    "js/views/common.js",
+    "js/views/explore.js",
+    "js/views/today.js",
+    "js/views/kev.js",
+    "js/views/cves.js",
+    "js/views/panels.js"
+  ]
+}

@@ -210,16 +210,18 @@ class BoundTest(unittest.TestCase):
                 validate_snapshot(feed)
 
     def test_app_and_workflow_mirror_the_bounds(self):
-        app = (support.ROOT / "site" / "app.js").read_text(encoding="utf-8")
-        self.assertIn("const maximumFeedBytes = " + str(collect.FEED_MAX_BYTES // 1048576) + " * 1024 * 1024;", app)
-        self.assertIn("const maximumBriefsBytes = " + str(collect.BRIEFS_MAX_BYTES // 1048576) + " * 1024 * 1024;", app)
-        self.assertIn("const maximumArticles = " + str(collect.MAX_FEED_ROWS) + ";", app)
+        limits = (support.ROOT / "site" / "js" / "limits.js").read_text(encoding="utf-8")
+        self.assertIn("export const maximumFeedBytes = " + str(collect.FEED_MAX_BYTES // 1048576) + " * 1024 * 1024;", limits)
+        self.assertIn("export const maximumBriefsBytes = " + str(collect.BRIEFS_MAX_BYTES // 1048576) + " * 1024 * 1024;", limits)
+        self.assertIn("export const maximumArticles = " + str(collect.MAX_FEED_ROWS) + ";", limits)
         from intelligence_hub.mitigations import INDEX_FIELDS
-        self.assertIn("const indexFields = " + json.dumps(list(INDEX_FIELDS)) + ";", app)
+        self.assertIn("export const indexFields = " + json.dumps(list(INDEX_FIELDS)) + ";", limits)
+        from intelligence_hub import shards
+        self.assertIn("export const maximumIndexBytes = " + str(shards.INDEX_MAX_BYTES // 1048576) + " * 1024 * 1024;", limits)
+        self.assertIn("export const maximumShardBytes = " + str(shards.V7_FILE_MAX_BYTES // 1048576) + " * 1024 * 1024;", limits)
         workflow = (support.ROOT / ".github" / "workflows" / "publish.yml").read_text(encoding="utf-8")
         # The package check, with its allowlist and caps, lives in intelligence_hub/shards.py.
         self.assertIn("run: python3 -m intelligence_hub.shards package site", workflow)
-        from intelligence_hub import shards
         # The caps raised in pull request #7.
         self.assertEqual((shards.PACKAGE_MAX_INPUT, shards.PACKAGE_MAX_COMPRESSED, shards.PACKAGE_MAX_FILES, shards.V7_FILE_MAX_BYTES),
                          (192 * 1024 * 1024, 48000000, 4000, 4 * 1024 * 1024))

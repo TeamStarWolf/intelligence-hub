@@ -148,6 +148,7 @@ collector writes `site/data/v7/`:
 | `history/YYYY.json` | Rows older than the live window, plus every curated archive row and every committed history-adapter row (`history/` at the repository root, see [history/README.md](../history/README.md)) for that year |
 | `kev/YYYY.json` | The whole KEV catalog by `dateAdded` year: due date, the directive parsed from `requiredAction` (for example BOD 22-01, BOD 26-04 or an Emergency Directive such as ED 26-03, which CISA writes out as "Emergency Directive 26-03" or "Emergency Directive (ED) 25-03"; several are joined as "BOD 22-01; ED 26-03"; null when none is cited), ransomware use, forensic triage, CWE and CISA's own text |
 | `cve-index.json` | One row per CVE with the list-view fields and where its full brief is read |
+| `recent.json` | The page's Today file: live rows from three days before the content date to the day after it, the KEV entries added in the last seven days or due in the next fourteen (from the whole catalog), and the `cve-index.json` rows those live rows name. Its size follows a few days of traffic, not a month or a KEV year. Left out when it would pass the shard bound; the page then reads the live months and KEV years |
 | `sources.json` | The source ledger |
 | `coverage.json` | One coverage statement per source and year from 1998 (complete, filtered, partial, sample, gap or unreachable), copied from the committed `history/coverage.json`, plus any adapter rows held back to keep a year shard inside its byte bound; a stub that says why when the committed file is missing or invalid |
 | `reports.json` | A copy of the validated `reports/catalog.json`, or status `unavailable` with the reason |
@@ -277,9 +278,13 @@ deploy job receives `pages: write` and `id-token: write`. Checkout does not reta
 credentials, official actions keep immutable commit pins, and no pull-request
 trigger executes untrusted fork code.
 
-The package must match `data/v7/index.json` exactly. Fixed files:
+The package must match `data/v7/index.json` and `site/files.json` exactly. Fixed files:
 
-- `index.html`, `styles.css`, `app.js` and `icon.svg`
+- `site/files.json` and every page file it lists: `index.html`, `styles.css`, `icon.svg`,
+  the `app.js` reload stub for pages cached before the routed shell, and the modules under
+  `js/`. Before packaging, `python -m intelligence_hub.site stamp site` appends the layout
+  revision to the stylesheet and module URLs, so a new deploy never runs with a module cached
+  from an earlier one.
 - `data/feed.json` and `data/briefs.json`, each with the bytes and sha256 the index lists
 - `data/v7/index.json`
 

@@ -1,79 +1,98 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-hub-shell="1">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
-  <meta name="theme-color" content="#10151b">
-  <meta name="description" content="TeamStarWolf's public security intelligence archive. Browse selected public advisories, reports and source-linked CVE, CWE, CAPEC and mitigation context with explicit dates.">
+  <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f6f7fb" media="(prefers-color-scheme: light)">
+  <meta name="description" content="Open security news, advisories, and known exploited vulnerabilities for the community, linked to their original sources. Part of TeamStarWolf.">
   <title>Intelligence Hub · TeamStarWolf</title>
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
-  <script src="./app.js" defer></script>
+  <script type="module" src="./js/main.js"></script>
 </head>
 <body>
-  <a class="skip-link" href="#briefing">Skip to intelligence</a>
-  <header class="site-header">
-    <a class="brand" href="#top" aria-label="Intelligence Hub home"><span class="brand-mark"><img src="./icon.svg" width="40" height="40" alt=""></span><span>INTELLIGENCE<span class="brand-second">HUB <span class="brand-owner">/ TEAMSTARWOLF</span></span></span></a>
-    <nav aria-label="Main navigation"><a class="nav-library" href="#briefing">Intelligence</a><a class="nav-knowledge" href="#knowledge">Threat context</a><a href="#timeline">Archive</a><a href="#method">Method</a><a href="#reports">Reports</a><button class="nav-button" type="button" data-open-sources disabled>Source ledger ↗</button></nav>
+  <header class="bar">
+    <a class="skip-link" href="#q" data-skip>Skip to search</a>
+    <a class="brand" href="#/explore" aria-label="TeamStarWolf Intelligence Hub, Explorer"><img src="./icon.svg" width="28" height="28" alt=""><span class="brand-name">TeamStarWolf</span><span class="brand-product">Intelligence Hub</span></a>
+    <div class="bar-actions">
+      <button id="theme-toggle" class="bar-button" type="button">Theme</button>
+      <button id="sidebar-toggle" class="bar-button" type="button" aria-controls="sidebar" aria-expanded="false">Panels</button>
+    </div>
   </header>
-  <main id="top">
-    <section class="hero" aria-labelledby="hero-title">
-      <div class="hero-copy"><p class="eyebrow"><span class="desk-emblem" aria-hidden="true">✦</span> TEAMSTARWOLF / INTELLIGENCE DESK</p><h1 id="hero-title">Signal. Context. <span>Response.</span></h1><p class="hero-description">Public security intelligence over time. Original sources. Threat context. Mitigations. Reports with explicit evidence and limits.</p><div class="hero-actions"><a class="button button-primary" href="#briefing">Enter the briefing ↓</a><span class="hero-caption">PUBLIC ARCHIVE <span aria-hidden="true">/</span> READ ONLY</span></div></div>
-      <div class="hero-art" aria-hidden="true"><span class="radar-label">TEAMSTARWOLF / IH</span><div class="radar-orbit orbit-one"></div><div class="radar-orbit orbit-two"></div><div class="radar-orbit orbit-three"></div><div class="radar-axis axis-horizontal"></div><div class="radar-axis axis-vertical"></div><img class="hero-wolf" src="./icon.svg" width="150" height="150" alt=""><span class="radar-caption">OBSERVE / UNDERSTAND / RESPOND</span><span class="orbit-point point-one"></span><span class="orbit-point point-two"></span><span class="art-corner corner-one"></span><span class="art-corner corner-two"></span></div>
-    </section>
-    <div class="snapshot-bar"><div><span id="snapshot-mark" class="snapshot-mark" aria-hidden="true"></span><strong id="snapshot-status">Reading snapshot</strong><span id="generated-at">Snapshot generation time pending</span></div><p id="archive-window">Archive window loading…</p><button id="reload" type="button">Reload snapshot ↻</button></div>
-    <div class="poll-bar"><p id="poll-status" role="status">Browser snapshot check pending.</p><p id="refresh-policy">The collector's run record loads with the saved snapshot.</p></div>
-    <section id="knowledge" class="reports-strip" aria-labelledby="knowledge-title" tabindex="-1">
-      <div class="reports-heading"><h2 id="knowledge-title">Threat context &amp; relationships</h2></div>
-      <p class="reports-links"><a href="#briefing">&larr; Intelligence library</a></p>
-      <p class="reports-note">Explore sourced CWE weaknesses, CAPEC attack patterns, actors, campaigns, products and mitigations. Taxonomy links are definitions, not proof that an attack occurred. CVE-specific guidance stays in the CVE register.</p>
-      <div class="filter-selects"><label><span class="field-label">Search context · all words must match</span><input id="knowledge-filter" type="search" maxlength="200" placeholder="Weakness, pattern, actor, product or mitigation…" autocomplete="off"></label><label><span class="field-label">Context type</span><select id="knowledge-kind"><option value="">All context</option><option value="cwe">CWE weaknesses</option><option value="capec">CAPEC patterns</option><option value="actor">Threat actors</option><option value="campaign">Campaigns</option><option value="product">Products</option><option value="mitigation">Mitigations</option></select></label></div>
-      <p id="knowledge-status" class="reports-note" role="status">Source-backed context has not loaded. Missing data means unknown coverage.</p><div id="knowledge-results" class="article-grid"></div>
-    </section>
-    <section id="reports" class="reports-strip library-view" aria-labelledby="reports-title">
-      <div class="reports-heading"><h2 id="reports-title">Reports &amp; changes over time</h2></div>
-      <p class="reports-note">Three daily editions plus weekly, weekend, fortnightly, monthly, quarterly and rolling six-month reports. Every edition keeps its period, sources, data and coverage limits.</p>
-      <p id="report-status" class="reports-note" role="status">Report catalog and recorded schedule state load with the saved snapshot.</p>
-      <div id="report-schedule" class="reports-note"><p>Requested daily slots: 06:00, 14:00 and 22:00 America/Chicago. Activation and next scheduled opportunity are shown separately from actual publication.</p></div>
-      <p class="reports-links"><a href="https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/README.md" target="_blank" rel="noopener noreferrer nofollow" referrerpolicy="no-referrer">Reports index ↗</a><a href="https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/weekly/2026-W43/README.md" target="_blank" rel="noopener noreferrer nofollow" referrerpolicy="no-referrer">Weekly report 2026-W43 · Oct 19–25, 2026 ↗</a><a href="https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/REPORTING.md" target="_blank" rel="noopener noreferrer nofollow" referrerpolicy="no-referrer">Schedule &amp; coverage method ↗</a></p>
-      <div id="report-list" class="reports-links"></div>
-      <details class="coverage-details"><summary>Previous-source revision review · 48–96 hours</summary><p id="revision-watch-summary" role="status">Dedicated citation review state is unavailable until its saved record loads. Feed refresh alone does not prove that previous articles were checked.</p><div id="revision-watch-list"></div></details>
-    </section>
-    <div id="feed-error" class="notice notice-error" role="alert" hidden><strong>Feed notice.</strong><span id="feed-error-message"></span></div>
-    <noscript><p class="notice">JavaScript is needed to read and filter the saved snapshot. Your browser does not fetch publishers or contact a model.</p></noscript>
-    <section id="timeline" class="timeline-section library-view" aria-labelledby="timeline-title"><div class="compact-heading"><div><p class="eyebrow">ARCHIVE INDEX</p><h2 id="timeline-title">The long view.</h2></div><p>Calendar-year counts follow non-date filters.<br>Partial boundary years · primary dates in UTC</p></div><div id="year-timeline" class="year-timeline" role="group" aria-label="Filter by calendar year"><p class="muted">Years appear with the snapshot.</p></div><details class="month-drawer"><summary><span id="month-context">Month shortcuts</span><span class="drawer-action">MONTH INDEX <span aria-hidden="true">+</span></span></summary><div class="month-strip-heading"><span>Boundary months may cover only part of the month.</span><button id="clear-dates" type="button">Clear dates ×</button></div><div id="month-timeline" class="month-timeline" role="group" aria-label="Filter by primary date month"></div></details></section>
-    <section id="briefing" class="briefing library-view" aria-labelledby="briefing-title">
-      <div class="section-heading"><div><p class="eyebrow">THE BRIEFING</p><h2 id="briefing-title">Intelligence explorer<span class="heading-dot" aria-hidden="true">.</span></h2></div><span class="section-kicker"><span aria-hidden="true">✦</span> SOURCE FIRST / CONTEXT ALWAYS</span></div>
-      <form id="filters" class="filters" role="search">
-        <label class="search-label"><span class="field-label">Search intelligence · all words must match</span><span class="search-field"><span aria-hidden="true">⌕</span><input id="search" type="search" maxlength="200" placeholder="CVE, vendor, keyword or source…" autocomplete="off"></span></label>
-        <div class="filter-selects">
-          <label><span class="field-label">Kind</span><select id="kind"><option value="">All kinds</option><option value="advisory">Advisories</option><option value="research">Research</option><option value="reporting">Reporting</option><option value="incident">Incidents</option><option value="kev">CISA KEV catalog</option><option value="filing">SEC cyber filings</option></select></label>
-          <label><span class="field-label">Source</span><select id="source"><option value="">All sources</option></select></label>
-          <label><span class="field-label">Exploitation</span><select id="exploitation"><option value="">All recorded states</option><option value="known">Known</option><option value="reported">Reported</option><option value="unknown">Unknown</option></select></label>
-          <label><span class="field-label">CVE guidance</span><select id="mitigation"><option value="">All guidance states</option><option value="publisher-guidance">Publisher guidance</option><option value="cisa-action">CISA action</option><option value="needs-review">Needs review</option><option value="unavailable">CNA lookup failed / pending</option><option value="no-cve">No linked CVE</option></select></label>
-          <label><span class="field-label">Calendar year</span><select id="year"><option value="">All years</option></select></label>
-          <label><span class="field-label">Calendar month</span><select id="month"><option value="">All months</option></select></label>
-          <label><span class="field-label">Date preset</span><select id="preset"><option value="full">Full history</option><option value="day">Last day</option><option value="week">Last week · 7 days</option><option value="month">Last month · 30 days</option><option value="year">Last year · 365 days</option></select></label>
-          <label><span class="field-label">Sort</span><select id="sort"><option value="date-desc">Date · newest</option><option value="date-asc">Date · oldest</option><option value="title-asc">Title · A–Z</option><option value="title-desc">Title · Z–A</option><option value="source-asc">Source · A–Z</option><option value="source-desc">Source · Z–A</option><option value="cve-asc">CVE · ascending</option><option value="cve-desc">CVE · descending</option><option value="cvss-desc">CVSS · highest</option><option value="cvss-asc">CVSS · lowest</option></select></label>
-        </div><div class="filter-footer"><p id="date-filter-note">Presets end at the snapshot archive boundary, not your device clock.</p><button id="reset" class="reset-button" type="button">Reset all filters ×</button></div>
-      </form>
-      <div class="signal-metrics" aria-label="Matching results compared with the whole snapshot"><div class="signal-metric"><span>Matching entries</span><strong id="count-matches">...</strong><p id="total-matches">Waiting for snapshot</p></div><div class="signal-metric"><span>Known exploitation entries</span><strong id="count-exploited">...</strong><p id="total-exploited">Source-reported status</p></div><div class="signal-metric"><span>Distinct linked CVEs</span><strong id="count-cves">...</strong><p id="total-cves">Identifier counts, not incidents</p></div><div class="signal-metric"><span>Sources represented</span><strong id="count-sources">...</strong><p id="total-sources">Publishers in matching entries</p></div></div>
-      <div class="feed-layout"><div class="feed-main">
-        <div class="view-toolbar"><div class="view-switch" role="group" aria-label="Result presentation"><button id="view-feed" type="button" aria-pressed="true">Intelligence stream</button><button id="view-cves" type="button" aria-pressed="false">CVE register</button></div><span id="view-note">Original stories and advisory records</span></div>
-        <div class="results-heading"><p id="results-status" role="status" aria-live="polite" tabindex="-1">Reading the saved intelligence snapshot…</p><span class="results-format">UTC DATES</span></div>
-        <div id="loading-cards" class="loading-cards" aria-hidden="true"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div><div id="articles" class="article-grid"></div><div id="cve-register" class="cve-register" hidden></div>
-        <div id="empty-state" class="empty-state" hidden><span class="empty-symbol" aria-hidden="true">⌕</span><h3 id="empty-title">No matching intelligence</h3><p id="empty-message">Try a broader search or clear a filter.</p><button id="empty-reset" type="button">Clear filters</button></div><div class="load-more-row"><button id="load-more" type="button" hidden>Load more entries +</button><span id="page-status"></span></div>
-      </div><aside class="context-rail" aria-label="Snapshot context">
-        <section class="rail-panel"><div class="rail-panel-header"><span class="eyebrow">SITUATION / SNAPSHOT</span><span class="rail-cross" aria-hidden="true">+</span></div><h3>Evidence over noise.</h3><p class="rail-intro">Selected public sources within the declared archive window. Selected history since 1998 is not an exhaustive incident history.</p><dl id="coverage" class="coverage"><div><dt>KEV catalog records</dt><dd>...</dd></div><div><dt>Curated archive events</dt><dd>...</dd></div><div><dt>Publisher feed articles</dt><dd>...</dd></div></dl><p id="source-health-summary" class="source-health-summary">Source outcomes pending</p><button class="ledger-button" type="button" data-open-sources disabled>Inspect source ledger ↗</button><details class="coverage-details"><summary>Coverage & refresh notes</summary><ul id="coverage-notes"></ul></details></section>
-        <section id="method" class="rail-panel method-panel"><p class="eyebrow">READ THE EVIDENCE</p><h3>Dates, scores<br>& boundaries.</h3><div class="date-definition"><span>01</span><p><strong>Published / updated</strong>The publisher’s recorded article or advisory date.</p></div><div class="date-definition"><span>02</span><p><strong>Event / catalog added</strong>Event dates are separate. CISA dateAdded is a catalog date, not disclosure or incident timing.</p></div><div class="date-definition"><span>03</span><p><strong>CVSS / guidance</strong>Metric versions stay labeled. Scores across versions are not normalized. Affected ranges are not fixed versions.</p></div><p class="method-boundary">CVE guidance requires applicability review. Entries do not prove device exposure. CISA federal due dates are not your deadlines.</p></section>
-        <section class="rail-panel integrations-panel"><p class="eyebrow">COLLECTOR INTEGRATIONS</p><div id="integrations"><p class="muted">Connection declarations load with the snapshot.</p></div></section>
-      </aside></div>
-    </section>
-  </main>
-  <footer class="site-footer"><div class="footer-brand"><img src="./icon.svg" width="29" height="29" alt=""><span>TEAMSTARWOLF<span>INTELLIGENCE HUB</span></span></div><p>Original sources. Explicit uncertainty.<br>Public read-only snapshot · no device scanning or account controls.</p><a href="#top">Back to the top ↑</a></footer>
-  <dialog id="source-dialog" aria-labelledby="source-dialog-title"><div class="dialog-heading"><div><p class="eyebrow">PROVENANCE / COLLECTION</p><h2 id="source-dialog-title">Source ledger</h2></div><button id="close-sources" class="close-dialog" type="button" aria-label="Close source ledger">×</button></div><p id="source-dialog-stamp" class="dialog-intro"></p><p class="dialog-intro">Recorded collection outcomes, not live connectivity checks. Curated publishers may appear in filters without a fetch record. This open view stays on its original snapshot; close and reopen for the latest saved data.</p><div id="source-ledger" class="source-ledger"></div></dialog>
-  <dialog id="mitigation-dialog" class="mitigation-dialog" aria-labelledby="mitigation-title"><div class="dialog-heading"><div><p class="eyebrow">CVE / SOURCE-LED RESPONSE</p><h2 id="mitigation-title">CVE guidance</h2></div><button id="close-mitigation" class="close-dialog" type="button" aria-label="Close CVE guidance">×</button></div><p id="mitigation-stamp" class="dialog-intro"></p><p class="guidance-boundary">Review affected products and your installed version before acting. This is not a device assessment. Source ranges are not a list of fixed versions. No commands or changes run from this view.</p><div id="mitigation-content"></div></dialog>
+  <nav class="tabs" aria-label="Hub views">
+    <a href="#/explore" data-view="explore">Explore</a>
+    <a href="#/today" data-view="today">Today</a>
+    <a href="#/advisories" data-view="advisories">Advisories</a>
+    <a href="#/kev" data-view="kev">Known exploited</a>
+    <a href="#/research" data-view="research">Research</a>
+    <a href="#/news" data-view="news">News</a>
+    <a href="#/cves" data-view="cves">CVEs</a>
+    <a href="#/reports" data-view="reports">Reports</a>
+    <a href="#/sources" data-view="sources">Sources</a>
+    <a href="#/data" data-view="data">Data</a>
+    <a href="#/about" data-view="about">About</a>
+  </nav>
+  <div id="layout" class="layout">
+    <main id="main" class="main" tabindex="-1">
+      <section id="explore" class="explore" aria-labelledby="explore-title">
+        <h1 id="explore-title" class="sr-only">Intelligence Explorer</h1>
+        <form id="explore-form" class="search-row" role="search">
+          <label class="sr-only" for="q">Search every loaded entry</label>
+          <input id="q" class="search-input" type="search" maxlength="200" placeholder="Search CVE, vendor, actor, source or keyword" autocomplete="off" spellcheck="false">
+          <button id="filters-toggle" class="filters-toggle" type="button" aria-controls="filter-rail" aria-expanded="false">Filters<span id="filter-count" class="filter-count"></span></button>
+          <label class="sort-label"><span class="sr-only">Sort results</span><select id="f-sort"><option value="date-desc">Newest first</option><option value="date-asc">Oldest first</option><option value="title-asc">Title A to Z</option><option value="title-desc">Title Z to A</option><option value="source-asc">Source A to Z</option><option value="source-desc">Source Z to A</option><option value="cve-asc">CVE ascending</option><option value="cve-desc">CVE descending</option><option value="cvss-desc">CVSS highest</option><option value="cvss-asc">CVSS lowest</option></select></label>
+        </form>
+        <div class="explore-body">
+          <div id="filter-rail" class="filter-rail" aria-label="Filters" role="group">
+            <label class="field"><span>Kind</span><select id="f-kind" data-key="kind"><option value="">All kinds</option></select></label>
+            <label class="field"><span>Source class</span><select id="f-class" data-key="class"><option value="">All source classes</option></select></label>
+            <label class="field"><span>Event type</span><select id="f-event" data-key="event"><option value="">All event types</option></select></label>
+            <label class="field"><span>Exploitation</span><select id="f-exp" data-key="exp"><option value="">All exploitation states</option></select></label>
+            <label class="check"><input id="f-kev" type="checkbox" data-key="kev"><span>KEV-linked</span></label>
+            <label class="check"><input id="f-action" type="checkbox" data-key="action"><span>CISA required action</span></label>
+            <label class="field"><span>Sector</span><select id="f-sector" data-key="sector"><option value="">All sectors</option></select></label>
+            <label class="field"><span>Region</span><select id="f-region" data-key="region"><option value="">All regions</option></select></label>
+            <label class="field"><span>Vendor</span><select id="f-vendor" data-key="vendor"><option value="">All vendors</option></select></label>
+            <label class="field"><span>Product</span><select id="f-product" data-key="product"><option value="">All products</option></select></label>
+            <label class="field"><span>Actor</span><select id="f-actor" data-key="actor"><option value="">All actors</option></select></label>
+            <label class="field"><span>Malware</span><select id="f-malware" data-key="malware"><option value="">All malware</option></select></label>
+            <label class="field"><span>Source</span><select id="f-source" data-key="source"><option value="">All sources</option></select></label>
+            <label class="field"><span>Year</span><select id="f-year" data-key="year"><option value="">Live window</option></select></label>
+            <label class="field"><span>Month</span><select id="f-month" data-key="month"><option value="">All months</option></select></label>
+            <label class="field"><span>Date range</span><select id="f-range" data-key="range"><option value="all">Whole live window</option><option value="3">Last 3 days</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 365 days</option></select></label>
+            <button id="f-reset" class="reset" type="button">Clear filters</button>
+          </div>
+          <div class="results">
+            <p id="results-status" class="results-status" role="status" aria-live="polite">Reading the saved index.</p>
+            <ol id="results" class="results-list"></ol>
+            <nav id="pager" class="pager" aria-label="Result pages"></nav>
+          </div>
+        </div>
+      </section>
+      <section id="view" class="view" hidden></section>
+      <div id="notice" class="notice toast" role="alert" hidden><p id="notice-text" class="toast-text"></p><button id="notice-close" class="bar-button" type="button" aria-label="Dismiss this notice">Dismiss</button></div>
+      <noscript><p class="notice">JavaScript is needed to read and filter the saved data. The page makes no request outside this site.</p></noscript>
+    </main>
+    <aside id="sidebar" class="sidebar" aria-label="Today, reports and sources" hidden>
+      <div class="sidebar-head"><h2 class="sidebar-title">Panels</h2><button id="sidebar-close" class="bar-button" type="button">Close</button></div>
+      <div id="sidebar-body" class="sidebar-body"></div>
+    </aside>
+  </div>
+  <footer class="site-footer">
+    <p class="family">TeamStarWolf: <a href="https://teamstarwolf.github.io/TeamStarWolf/" rel="noopener noreferrer" referrerpolicy="no-referrer">Library</a> · <a href="https://teamstarwolf.github.io/intelligence-hub/" rel="noopener noreferrer" referrerpolicy="no-referrer">Intelligence Hub</a> · <a href="https://teamstarwolf.github.io/ATTACK-Navi/" rel="noopener noreferrer" referrerpolicy="no-referrer">ATT&amp;CK-Navi</a> · <a href="https://github.com/TeamStarWolf/cybersecurity-resources" rel="noopener noreferrer" referrerpolicy="no-referrer">Bookmarks</a></p>
+    <p class="licence">Code is MIT-licensed. Headlines and links belong to their publishers; KEV entries are CISA's text; curated summaries are original paraphrases.</p>
+    <p class="marks">The MITRE notices for the CWE, CAPEC and ATT&amp;CK identifiers this site shows are on the <a href="#/about">About</a> page.</p>
+  </footer>
+  <dialog id="record-dialog" class="dialog" aria-labelledby="record-title">
+    <div class="dialog-head"><h2 id="record-title">Entry</h2><button id="record-close" class="bar-button" type="button" aria-label="Close entry details">Close</button></div>
+    <div id="record-body" class="dialog-body"></div>
+  </dialog>
+  <dialog id="cve-dialog" class="dialog" aria-labelledby="cve-title">
+    <div class="dialog-head"><h2 id="cve-title">CVE</h2><button id="cve-close" class="bar-button" type="button" aria-label="Close CVE brief">Close</button></div>
+    <div id="cve-body" class="dialog-body"></div>
+  </dialog>
 </body>
 </html>
