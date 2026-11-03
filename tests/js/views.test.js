@@ -229,6 +229,29 @@ test("with a year chosen, each actor and malware row links to that year's entrie
   assert.ok(live.querySelector("tbody a[href='#/actor/G0016']"), "without a year, an actor still opens its own page");
 });
 
+test("on a History year page, every vendor, product, actor and malware chip keeps that year and finds the card's row", async () => {
+  const shell = await boot();
+  for (const year of ["1998", "2010"]) {
+    const view = await go(shell, "#/history/" + year);
+    const chips = [...view.querySelectorAll("li.card")].flatMap(card => [...card.querySelectorAll("a.chip-entity")].map(anchor => [card.getAttribute("data-id"), anchor.getAttribute("href")]));
+    assert.ok(chips.length >= 1, year + " has entity chips");
+    if (year === "2010") for (const field of ["vendor", "actor", "malware"]) assert.ok(chips.some(([, href]) => parseRoute(href, "").query[field]), "2010 has a " + field + " chip");
+    for (const [id, href] of chips) {
+      const route = parseRoute(href, "");
+      assert.equal(route.view, "explore", href + " opens the Explorer");
+      assert.equal(route.query.year, year, href + " carries year=" + year);
+      const entries = await explorerEntries(shell, href);
+      assert.ok(entries.length >= 1, href + " finds at least one entry");
+      assert.ok(entries.some(item => item.getAttribute("data-id") === id), href + " finds the row " + id + " the chip sat on");
+    }
+  }
+  assert.ok((await go(shell, "#/history/1998")).querySelector("a.chip-entity[href='#/explore?vendor=microsoft&year=1998']"), "the 1998 Microsoft chip keeps the year");
+  const vendor = await go(shell, "#/vendor/fortinet");
+  const live = [...vendor.querySelectorAll("a.chip-entity")].map(anchor => parseRoute(anchor.getAttribute("href"), ""));
+  assert.ok(live.length >= 1, "a vendor page card has entity chips");
+  for (const route of live) assert.equal(route.query.year, undefined, "a vendor page's chips keep the live window");
+});
+
 test("the tag alias route opens the Explorer filtered to that value", async () => {
   const shell = await boot({ hash: "#/tag/vendor/fortinet" });
   assert.equal(shell.location.hash, "#/explore?vendor=fortinet");
