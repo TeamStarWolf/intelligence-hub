@@ -560,7 +560,7 @@
     });
     $("#month-timeline").replaceChildren(...monthButtons);
     const presetDays = { day: 1, week: 7, month: 30, year: 365 }[controls.preset.value];
-    $("#date-filter-note").textContent = presetDays ? "Preset: " + presetDays + " calendar day" + (presetDays === 1 ? "" : "s") + " ending " + dateLabel(snapshot.window.end) + " UTC; unknown primary dates excluded." : "Archive: " + dateLabel(snapshot.window.start) + " — " + dateLabel(snapshot.window.end) + ". Year/month filters use primary dates; unknown dates remain explicit.";
+    $("#date-filter-note").textContent = presetDays ? "Preset: " + presetDays + " calendar day" + (presetDays === 1 ? "" : "s") + " ending " + dateLabel(snapshot.window.end) + " UTC; unknown primary dates excluded." : "Archive: " + dateLabel(snapshot.window.start) + " to " + dateLabel(snapshot.window.end) + ". Year/month filters use primary dates; unknown dates remain explicit.";
   }
 
   function cveButton(cve, focusKey) {
@@ -899,7 +899,7 @@
     if (!config) { target.textContent = "The reporting schedule was not supplied in this legacy snapshot. Next report and revision-review cycle are unknown."; return; }
     const slot = config.schedule_state === "configured" ? nextChicagoSlot() : null;
     const policy = "Daily editions: 06:00, 14:00 and 22:00 America/Chicago · rolling 24 hours on weekdays / 48 hours on weekends. Weekly, end-weekend, every-two-weeks, monthly, quarterly and latest six completed months use the reporting protocol.";
-    target.textContent = policy + " " + (config.schedule_state === "configured" ? slot ? "Next scheduled report and revision-review cycle: " + slot + "." : "Next scheduled slot is unknown because time-zone calculation is unavailable." : "Schedule state: " + config.schedule_state + "; no active next-run claim.") + " Configuration observed: " + contextClock(config.schedule_observed_at) + ". Scheduled times do not prove execution or delivery. Each review item's next eligibility is separate. Feed collection requests " + snapshot.refresh.requested_minutes + "-minute checks. The browser reads saved data on nominal ten-minute visible-page checks; visibility, workflow freshness and manual reloads can request earlier checks. A next-browser eligibility timestamp is not asserted.";
+    target.textContent = policy + " " + (config.schedule_state === "configured" ? slot ? "Next scheduled report and revision-review cycle: " + slot + "." : "Next scheduled slot is unknown because time-zone calculation is unavailable." : "Schedule state: " + config.schedule_state + "; no active next-run claim.") + " Configuration observed: " + contextClock(config.schedule_observed_at) + ". Scheduled times do not prove execution or delivery. Each review item's next eligibility is separate. Feed collection requests " + snapshot.refresh.requested_minutes + "-minute checks; GitHub starts scheduled runs only every few hours in practice. The browser reads saved data on nominal ten-minute visible-page checks; visibility, workflow freshness and manual reloads can request earlier checks. A next-browser eligibility timestamp is not asserted.";
   }
 
   function renderReports() {
@@ -907,7 +907,8 @@
     if (!target || !status || !snapshot) return;
     const reporting = snapshot.intelligence?.reporting;
     if (!reporting) { target.replaceChildren(); status.textContent = "A typed report catalog was not supplied in this legacy snapshot. Existing report links remain available."; renderReportSchedule(); return; }
-    status.textContent = reporting.latest_reports.length + " indexed editions · Catalog recorded " + contextClock(reporting.catalog_updated_at) + ". This is a bounded latest subset; published means a report file exists, not every claim has been independently verified.";
+    const listingUnavailable = !reporting.latest_reports.length && reporting.catalog_updated_at === null;
+    status.textContent = listingUnavailable ? "Report listings are unavailable in this snapshot. " + (reporting.notes[0] || "") + " Report editions come from a separate desktop compiler and remain in the repository." : reporting.latest_reports.length + " indexed editions · Catalog recorded " + contextClock(reporting.catalog_updated_at) + ". This is a bounded latest subset; published means a report file exists, not every claim has been independently verified.";
     target.replaceChildren(...reporting.latest_reports.map(report => {
       const item = node("details", "product-record");
       item.append(node("summary", "", report.title + " · " + report.status.replaceAll("_", " ")), node("p", "muted", report.id + " · " + report.cadence + " · Coverage: " + report.coverage.replaceAll("_", " ")),
@@ -1109,7 +1110,7 @@
     renderFreshness();
     renderReports(); renderRevisions(); renderKnowledge();
     $("#generated-at").textContent = "Snapshot generated " + stamp(snapshot.generated_at);
-    $("#archive-window").textContent = dateLabel(snapshot.window.start) + " — " + dateLabel(snapshot.window.end);
+    $("#archive-window").textContent = dateLabel(snapshot.window.start) + " to " + dateLabel(snapshot.window.end);
     const coverage = [["KEV catalog records", snapshot.coverage.kev_records], ["Curated archive events", snapshot.coverage.curated_events], ["Publisher feed articles", snapshot.coverage.feed_articles], ["Linked CVE records", snapshot.mitigations.size], ["URL duplicates removed", snapshot.deduplication.url_duplicates_removed]];
     $("#coverage").replaceChildren(...coverage.map(([label, count]) => { const item = node("div"); item.append(node("dt", "", label), node("dd", "", count.toLocaleString())); return item; }));
     const ok = snapshot.sources.filter(source => source.status === "ok").length;
@@ -1120,9 +1121,9 @@
     $("#source-health-summary").textContent = snapshot.sources.length ? "Recorded source outcomes: " + ok + " input accepted / " + partial + " partial / " + failed + " failed / " + unfetched + " not fetched. " + uncounted + " publisher observations have no item-window report; completeness is unknown." : "Source collection outcomes were not supplied.";
     $("#coverage-notes").replaceChildren(...[...snapshot.coverage.notes, ...snapshot.refresh.notes].map(note => node("li", "", note)));
     if (!$("#coverage-notes").children.length) $("#coverage-notes").append(node("li", "", "No additional notes supplied."));
-    $("#integrations").replaceChildren(...[["xai", "Grok / xAI"], ["x", "X"], ["sec", "SEC cyber filings"]].map(([key, name]) => { const item = node("div", "integration-row"); const heading = node("div", "integration-heading"); heading.append(node("span", "", name), node("span", "integration-state", "NOT CONNECTED")); item.append(heading, node("p", "", snapshot.integrations[key].message)); return item; }));
+    $("#integrations").replaceChildren(...[["xai", "Grok / xAI"], ["x", "X"], ["sec", "SEC cyber filings"]].map(([key, name]) => { const item = node("div", "integration-row"); const heading = node("div", "integration-heading"); heading.append(node("span", "", name), node("span", "integration-state", "NOT IN COLLECTOR")); item.append(heading, node("p", "", snapshot.integrations[key].message)); return item; }));
     const refresh = $("#refresh-policy");
-    refresh.replaceChildren(node("span", "", "Collection requests a " + snapshot.refresh.requested_minutes + "-minute schedule; execution and deployment may be delayed. An unchanged collection can retain an older snapshot. "));
+    refresh.replaceChildren(node("span", "", "The workflow requests a " + snapshot.refresh.requested_minutes + "-minute schedule, but GitHub starts scheduled runs only every few hours in practice. An unchanged collection can retain an older snapshot. "));
     const statusUrl = safeUrl(snapshot.refresh.status_url);
     if (statusUrl) {
       const url = new URL(statusUrl);
