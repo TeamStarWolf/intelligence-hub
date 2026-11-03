@@ -426,6 +426,11 @@
     return briefs;
   }
 
+  // The brief fields a search reads: the CNA title, weakness identifiers and vendor and product names.
+  function recordTerms(record) {
+    return [record.title, ...record.weaknesses.map(weakness => weakness.id), ...record.products.flatMap(product => [product.vendor, product.product])];
+  }
+
   function normalize(raw, byteLength) {
     const current = Boolean(raw) && raw.schema_version === 7;
     const modern = Boolean(raw) && [5, 6, 7].includes(raw.schema_version);
@@ -478,7 +483,7 @@
       item.score = scores.length ? Math.max(...scores) : null;
       item.cve_key = [...item.cves].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))[0] || null;
       const directContext = intelligence ? intelligence.catalog.relationships.filter(relation => item.cves.includes(relation.source_id) || item.cves.includes(relation.target_id)).flatMap(relation => [relation.summary, ...intelligence.catalog.entities.filter(entity => [relation.source_id, relation.target_id].includes(entity.id)).flatMap(entity => [entity.label, ...entity.aliases])]) : [];
-      item.search = normalized([item.title, item.summary, item.source_name, item.source_id, ...item.cves, ...item.tags, ...directContext, ...records.flatMap(record => [record.title, ...record.weaknesses.map(weakness => weakness.id), ...record.products.flatMap(product => [product.vendor, product.product])])].join("\n"));
+      item.search = normalized([item.title, item.summary, item.source_name, item.source_id, ...item.cves, ...item.tags, ...directContext, ...records.flatMap(recordTerms)].join("\n"));
       return item;
     });
     const sourceIds = new Set();
@@ -758,7 +763,8 @@
     else renderCveRegister(visible);
     $("#view-feed").setAttribute("aria-pressed", String(view === "feed")); $("#view-cves").setAttribute("aria-pressed", String(view === "cves"));
     $("#view-note").textContent = view === "feed" ? "Original stories and advisory records" : "Unique CVEs in matching entries · guidance is not exposure confirmation";
-    $("#results-status").textContent = articles.length.toLocaleString() + " matching entries / " + snapshot.articles.length.toLocaleString() + " total" + (view === "cves" ? " · " + rows.length.toLocaleString() + " matching CVEs" : "");
+    const briefNote = snapshot.briefs || !briefsNeeded() ? "" : snapshot.briefsRequest ? " · Reading CVE titles and vendor and product names" : " · CVE titles and vendor and product names are not loaded";
+    $("#results-status").textContent = articles.length.toLocaleString() + " matching entries / " + snapshot.articles.length.toLocaleString() + " total" + (view === "cves" ? " · " + rows.length.toLocaleString() + " matching CVEs" : "") + briefNote;
     $("#empty-state").hidden = rows.length > 0;
     $("#empty-title").textContent = !snapshot.articles.length ? "This snapshot has no entries yet" : view === "cves" ? "No linked CVEs match" : "No matching intelligence";
     $("#empty-message").textContent = !snapshot.articles.length ? "Inspect the source ledger for collection outcomes, then read a later snapshot." : view === "cves" && articles.length ? "Matching stories may have no CVE identifier, or their CVEs do not match the guidance filter. The intelligence stream still contains these stories." : "Broaden the search or clear a date, source, exploitation or guidance filter. Source collection gaps remain in the ledger.";
@@ -1004,7 +1010,10 @@
     try {
       const response = await fetch("./data/briefs.json", { credentials: "omit", cache: "no-cache", redirect: "error", signal: controller.signal });
       const result = await readJson(response, maximumBriefsBytes, "brief file");
-      saved.briefs = normalizeBriefs(result.value, saved);
+      const briefs = normalizeBriefs(result.value, saved);
+      // A schema 7 feed row has no CNA title or product names; add them to each entry's search text once.
+      for (const article of saved.articles) if (article.cves.length) article.search += "\n" + normalized(article.cves.flatMap(cve => recordTerms(briefs.get(cve))).join("\n"));
+      saved.briefs = briefs;
       return saved.briefs;
     } catch (error) {
       if (error.briefMismatch) throw error;
@@ -1022,6 +1031,18 @@
   function briefFailure(error) {
     showError(error.message + " No external lookup was made.");
     if (error.briefMismatch) load();
+  }
+
+  // The CVE register shows CNA titles and a search matches vendor and product names; both live in the
+  // brief file. Read it for the displayed snapshot when either needs it, then render that snapshot again.
+  // An automatic read that failed is not repeated for the same snapshot; the register button and opening a brief do retry.
+  function briefsNeeded() { return view === "cves" || Boolean(controls.search.value.trim()); }
+  function requestBriefs(retry = false) {
+    const saved = snapshot;
+    if (!saved || saved.briefs || !briefsNeeded() || (saved.briefsFailed && !retry)) return;
+    const pending = loadBriefs(saved);
+    if (!saved.briefs) render();
+    pending.then(() => { if (snapshot === saved) render(); }, error => { saved.briefsFailed = true; if (snapshot === saved) { render(); briefFailure(error); } });
   }
 
   function openMitigation(cve) {
@@ -1265,6 +1286,7 @@
         const focused = document.activeElement?.dataset.focusKey;
         snapshot = value; snapshotText = result.text;
         configureFilters(); renderSnapshot(); render();
+        requestBriefs();
         $("#year-timeline").scrollLeft = scroll.years; $("#month-timeline").scrollLeft = scroll.months;
         $("#cve-register").scrollLeft = scroll.register;
         if (focused) {
@@ -1291,8 +1313,8 @@
     controls.preset.value = "full"; controls.sort.value = "date-desc"; visibleCount = pageSize; render();
   }
 
-  $("#filters").addEventListener("submit", event => { event.preventDefault(); clearTimeout(searchTimer); visibleCount = pageSize; render(); });
-  controls.search.addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => { visibleCount = pageSize; render(); }, 150); });
+  $("#filters").addEventListener("submit", event => { event.preventDefault(); clearTimeout(searchTimer); visibleCount = pageSize; render(); requestBriefs(); });
+  controls.search.addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => { visibleCount = pageSize; render(); requestBriefs(); }, 150); });
   for (const select of [controls.kind, controls.source, controls.exploitation, controls.mitigation, controls.sort]) select.addEventListener("change", () => { visibleCount = pageSize; render(); });
   controls.year.addEventListener("change", () => { controls.month.value = ""; controls.preset.value = "full"; visibleCount = pageSize; render(); });
   controls.month.addEventListener("change", () => { controls.year.value = controls.month.value ? controls.month.value.slice(0, 4) : controls.year.value; if (controls.month.value === "unknown") controls.year.value = "unknown"; controls.preset.value = "full"; visibleCount = pageSize; render(); });
@@ -1302,9 +1324,7 @@
   $("#load-more").addEventListener("click", () => { visibleCount += pageSize; render(); });
   for (const [id, mode] of [["#view-feed", "feed"], ["#view-cves", "cves"]]) $(id).addEventListener("click", () => {
     view = mode; visibleCount = pageSize; render();
-    // The register shows CNA titles, which live in the brief file.
-    const saved = snapshot;
-    if (mode === "cves" && saved && !saved.briefs) loadBriefs(saved).then(() => { if (snapshot === saved && view === "cves") render(); }, briefFailure);
+    if (mode === "cves") requestBriefs(true);
   });
   for (const button of document.querySelectorAll("[data-open-sources]")) button.addEventListener("click", () => {
     if (!snapshot || $("#mitigation-dialog").open || $("#source-dialog").open) return;

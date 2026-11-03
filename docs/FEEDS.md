@@ -11,9 +11,12 @@ public data files:
   `required_action`, `cvss_score`, `cvss_version`, `kev_date_added` and
   `weaknesses`).
 - `data/briefs.json` holds the full CVE briefs. Its `generated_at` and
-  `content_revision` match the feed it belongs to. The site reads it the first
-  time a reader opens a brief or the CVE register, and refuses a briefs file
-  from a different run.
+  `content_revision` match the feed it belongs to. CNA titles and
+  vendor and product names live only here, so the site reads it the first time
+  a reader opens a brief, opens the CVE register or searches; search results
+  gain those names once it has loaded, and an open register reads the new file
+  when a later snapshot arrives. The site refuses a briefs file from a
+  different run.
 
 There is no longer an 8,000-article abort. Each file has a byte bound instead:
 **8 MiB** for `data/feed.json` and **12 MiB** for `data/briefs.json`. Two count
@@ -88,7 +91,7 @@ and manual runs add extra collections.
 
 The catalog contains **62 publisher RSS/Atom sources**, counting feed definitions rather than unique publishers. The first 29 comprise ten retained sources, sixteen additions from the repository owner's public [cybersecurity-resources bookmarks](https://github.com/TeamStarWolf/cybersecurity-resources/blob/f95fb4a3fae14acfa172c22507a1554339cb3655/LINKS.md), and three further requested publishers: watchTowr Labs, Dark Reading and the legacy Threatpost archive. A further 30 advisory, research and reporting feeds (including the CISA ICS advisories feed added with schema 7), one separately scoped Talos category feed, the Qualys Security Blog and a separately scoped CISA category feed are listed below. The fixed configuration is [sources.json](../config/sources.json). CISA KEV is a separate JSON catalog and is not included in this RSS count. Curated historical publications are also a separate input. SEC filings are not connected by this feed intake.
 
-Configured does not mean every source is currently healthy. The site records each collection attempt and last accepted input. The retained CISA advisory feed failed the initial production intake; its configured address is preserved and its failure remains visible. No replacement CISA advisory URL was established by this expansion. A failed source is not evidence that its publisher has no new advisories.
+Configured does not mean every source is currently healthy. The site records each collection attempt and last accepted input. The retained CISA advisory feed failed the initial production intake. Since schema 7 it is read under its own 8 MiB bound, and a run reports it as partial when it rejects entries that break the 100-CVE whole-entry rule. No replacement CISA advisory URL was established by this expansion. A failed source is not evidence that its publisher has no new advisories.
 
 The nineteen additions returned direct HTTPS 200 responses with bounded, parseable RSS/Atom and usable HTTPS article links during intake on **24 October 2026**. Threatpost's returned publication dates stop in August 2022: its live transport does not make its reporting current. These are dated transport and structure observations, not promises of continued availability, complete archives, publisher authenticity beyond the observed HTTPS endpoint, factual correctness or permission to reproduce full articles. Scheduled collection and browser behavior are separate evidence.
 
