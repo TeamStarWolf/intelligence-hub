@@ -8,7 +8,13 @@
   const day = 86400000;
   const pollInterval = 600000;
   const pageSize = 24;
-  const maximumFeedBytes = 16 * 1024 * 1024;
+  // Byte bounds mirror the collector (intelligence_hub/collect.py): FEED_MAX_BYTES and BRIEFS_MAX_BYTES.
+  const maximumFeedBytes = 8 * 1024 * 1024;
+  const maximumBriefsBytes = 12 * 1024 * 1024;
+  // Schema 6 and earlier carried every brief inline, so those files could reach 16 MiB.
+  const maximumLegacyFeedBytes = 16 * 1024 * 1024;
+  const maximumArticles = 15000;
+  const indexFields = ["record_state", "source_status", "guidance_status", "required_action", "cvss_score", "cvss_version", "kev_date_added", "weaknesses"];
   const workflowApi = "https://api.github.com/repos/TeamStarWolf/intelligence-hub/actions/workflows/395429963/runs";
   const workflowQueries = { recent: workflowApi + "?branch=main&per_page=10", schedule: workflowApi + "?event=schedule&branch=main&per_page=1" };
   const maximumWorkflowBytes = 512 * 1024;
@@ -280,7 +286,7 @@
   }
 
   function normalizeConfiguredSelection(value, sourceId, schemaVersion) {
-    if (![4, 5, 6].includes(schemaVersion)) { requireValue(!Object.hasOwn(value, "configured_selection")); return null; }
+    if (![4, 5, 6, 7].includes(schemaVersion)) { requireValue(!Object.hasOwn(value, "configured_selection")); return null; }
     requireValue(Object.hasOwn(value, "configured_selection"));
     const basis = value.configured_selection;
     if (sourceId === "cisa-kev") { requireValue(basis === null); return null; }
@@ -294,7 +300,7 @@
     if (value == null) { requireValue(source.status !== "partial"); return null; }
     requireValue(source.status !== "not_fetched");
     const hasSelection = Object.hasOwn(value, "selection");
-    requireValue([4, 5, 6].includes(schemaVersion) || !hasSelection);
+    requireValue([4, 5, 6, 7].includes(schemaVersion) || !hasSelection);
     const keys = ["items_seen", "items_processed", "items_admitted", "items_rejected", "items_filtered", "items_unprocessed", "entry_limit", "cve_limit", "rejection_reasons", "attempted_at", "response_sha256"];
     exactKeys(value, hasSelection ? [...keys, "selection"] : keys);
     exactKeys(value.rejection_reasons, ["invalid_link_or_title", "cve_limit_exceeded"]);
@@ -357,7 +363,7 @@
       requireValue(value.cvss && (value.cvss.score === null || (typeof value.cvss.score === "number" && Number.isFinite(value.cvss.score) && value.cvss.score >= 0 && value.cvss.score <= 10)));
       record.cvss = { score: value.cvss.score, version: optionalText(value.cvss.version, 100), vector: optionalText(value.cvss.vector, 2000), source_url: optionalText(value.cvss.source_url, 4000) };
     }
-    if ([5, 6].includes(schemaVersion)) {
+    if ([5, 6, 7].includes(schemaVersion)) {
       requireValue(/^CVE-[0-9]{4}-[0-9]{4,8}$/.test(key));
       exactKeys(value, ["cve", "title", "description", "source_status", "record_state", "source_updated_at", "retrieved_at", "source_attempted_at", "source_sha256", "products", "solutions", "workarounds", "cvss", "references", "required_action", "required_action_source_url", "kev", "analysis", "weaknesses", "weaknesses_status"]);
       intelligenceHash(value.source_sha256, true);
@@ -380,26 +386,74 @@
     return record;
   }
 
-  function normalize(raw) {
-    requireValue(raw && [2, 3, 4, 5, 6].includes(raw.schema_version) && Array.isArray(raw.articles) && raw.articles.length <= 8000 && Array.isArray(raw.sources) && raw.sources.length <= 200);
-    if ([5, 6].includes(raw.schema_version)) exactKeys(raw, ["schema_version", "generated_at", "window", "articles", "sources", "history_reviewed_at", "mitigations", "mitigation_coverage", "deduplication", "refresh", "coverage", "integrations", "content_revision", "layout_revision", "intelligence"]);
+  // A schema 7 feed lists each CVE as one compact row; the full brief is read from data/briefs.json when needed.
+  function indexRecord(key, row) {
+    requireValue(/^CVE-[0-9]{4}-[0-9]{4,8}$/.test(key) && Array.isArray(row) && row.length === indexFields.length);
+    const [state, status, guidance, action, score, version, added, weaknesses] = row;
+    requireValue(["PUBLISHED", "REJECTED", "UNKNOWN"].includes(state) && ["ok", "failed", "pending"].includes(status) && ["publisher-guidance", "cisa-action", "needs-review"].includes(guidance) && typeof action === "boolean");
+    requireValue(score === null || (typeof score === "number" && Number.isFinite(score) && score >= 0 && score <= 10));
+    const ids = list(weaknesses, 8).map(id => intelligenceId(id, /^CWE-[1-9][0-9]{0,5}$/)); intelligenceUnique(ids);
+    return {
+      cve: key, title: "", record_state: state, source_status: status, analysis: { guidance_status: guidance }, required_action_present: action,
+      cvss: score === null && version === null ? null : { score, version: optionalText(version, 100) },
+      kev: added === null ? null : { date_added: timestamp(added, false) }, weaknesses: ids.map(id => ({ id })), products: []
+    };
+  }
+
+  function normalizeIndex(value) {
+    exactKeys(value, ["version", "fields", "rows"]);
+    requireValue(value.version === 1 && Array.isArray(value.fields) && value.fields.length === indexFields.length && value.fields.every((field, position) => field === indexFields[position]));
+    requireValue(value.rows && typeof value.rows === "object" && !Array.isArray(value.rows));
+    const entries = Object.entries(value.rows); requireValue(entries.length <= 15000);
+    return new Map(entries.map(([key, row]) => [key, indexRecord(key, row)]));
+  }
+
+  function normalizeBriefs(raw, saved) {
+    exactKeys(raw, ["schema_version", "feed_schema_version", "generated_at", "content_revision", "briefs"]);
+    requireValue(raw.schema_version === 1 && raw.feed_schema_version === 7 && raw.briefs && typeof raw.briefs === "object" && !Array.isArray(raw.briefs));
+    if (raw.content_revision !== saved.content_revision || raw.generated_at !== saved.generated_at) {
+      const error = new Error("The brief file belongs to a different snapshot than the one displayed. The snapshot is being read again; open the brief once it has reloaded.");
+      error.briefMismatch = true; throw error;
+    }
+    const entries = Object.entries(raw.briefs); requireValue(entries.length === saved.mitigations.size);
+    const briefs = new Map(entries.map(([key, value]) => [key, normalizeMitigation(value, key, 7)]));
+    for (const [key, row] of saved.mitigations) {
+      const full = briefs.get(key);
+      requireValue(full && full.record_state === row.record_state && full.source_status === row.source_status && full.analysis.guidance_status === row.analysis.guidance_status &&
+        Boolean(full.required_action) === row.required_action_present && (full.kev?.date_added ?? null) === (row.kev?.date_added ?? null) && (full.cvss?.score ?? null) === (row.cvss?.score ?? null));
+    }
+    return briefs;
+  }
+
+  function normalize(raw, byteLength) {
+    const current = Boolean(raw) && raw.schema_version === 7;
+    const modern = Boolean(raw) && [5, 6, 7].includes(raw.schema_version);
+    requireValue(raw && [2, 3, 4, 5, 6, 7].includes(raw.schema_version) && Array.isArray(raw.articles) && raw.articles.length <= (current ? maximumArticles : 8000) && Array.isArray(raw.sources) && raw.sources.length <= 200);
+    if (current) {
+      requireValue(byteLength <= maximumFeedBytes && typeof raw.content_revision === "string" && /^[a-f0-9]{64}$/.test(raw.content_revision));
+      exactKeys(raw, ["schema_version", "generated_at", "window", "articles", "sources", "history_reviewed_at", "brief_index", "mitigation_coverage", "deduplication", "refresh", "coverage", "integrations", "content_revision", "layout_revision", "intelligence"]);
+    } else if (modern) exactKeys(raw, ["schema_version", "generated_at", "window", "articles", "sources", "history_reviewed_at", "mitigations", "mitigation_coverage", "deduplication", "refresh", "coverage", "integrations", "content_revision", "layout_revision", "intelligence"]);
     else requireValue(!Object.hasOwn(raw, "intelligence"));
     timestamp(raw.generated_at, false);
-    requireValue(raw.window && raw.coverage && raw.integrations && raw.refresh && raw.deduplication && raw.mitigations && typeof raw.mitigations === "object" && !Array.isArray(raw.mitigations));
+    requireValue(raw.window && raw.coverage && raw.integrations && raw.refresh && raw.deduplication && (current || (raw.mitigations && typeof raw.mitigations === "object" && !Array.isArray(raw.mitigations))));
     timestamp(raw.window.start, false);
     timestamp(raw.window.end, false);
     const start = new Date(raw.window.start).getTime();
     const end = new Date(raw.window.end).getTime();
-    requireValue(end >= start && end - start <= (raw.schema_version === 6 ? 14610 : raw.schema_version === 5 ? 7306 : 3661) * day);
-    if ([5, 6].includes(raw.schema_version)) { selectionDate(raw.window.start); selectionDate(raw.window.end); }
-    if (raw.schema_version === 6) requireValue(raw.window.start >= "1998-01-01");
-    const mitigationEntries = Object.entries(raw.mitigations);
-    requireValue(mitigationEntries.length <= 15000);
-    const mitigations = new Map(mitigationEntries.map(([key, value]) => [key, normalizeMitigation(value, key, raw.schema_version)]));
-    const intelligence = [5, 6].includes(raw.schema_version) ? normalizeIntelligence(raw.intelligence, new Set(mitigations.keys())) : null;
+    requireValue(end >= start && end - start <= (raw.schema_version >= 6 ? 14610 : raw.schema_version === 5 ? 7306 : 3661) * day);
+    if (modern) { selectionDate(raw.window.start); selectionDate(raw.window.end); }
+    if (raw.schema_version >= 6) requireValue(raw.window.start >= "1998-01-01");
+    let mitigations;
+    if (current) mitigations = normalizeIndex(raw.brief_index);
+    else {
+      const mitigationEntries = Object.entries(raw.mitigations);
+      requireValue(mitigationEntries.length <= 15000);
+      mitigations = new Map(mitigationEntries.map(([key, value]) => [key, normalizeMitigation(value, key, raw.schema_version)]));
+    }
+    const intelligence = modern ? normalizeIntelligence(raw.intelligence, new Set(mitigations.keys())) : null;
     const ids = new Set();
     const articles = raw.articles.map(article => {
-      if ([5, 6].includes(raw.schema_version)) exactKeys(article, ["id", "title", "url", "source_id", "source_name", "kind", "published_at", "event_date", "date_basis", "summary", "cves", "tags", "exploitation", "references", "origin"]);
+      if (modern) exactKeys(article, ["id", "title", "url", "source_id", "source_name", "kind", "published_at", "event_date", "date_basis", "summary", "cves", "tags", "exploitation", "references", "origin"]);
       requireValue(article && Object.hasOwn(kinds, article.kind) && Object.hasOwn(origins, article.origin) && ["known", "reported", "unknown"].includes(article.exploitation));
       const item = {
         id: boundedText(article.id, 160), title: boundedText(article.title, 1000), url: boundedText(article.url, 4000),
@@ -411,7 +465,7 @@
       requireValue(!ids.has(item.id) && item.cves.every(cve => cvePattern.test(cve) && mitigations.has(cve)));
       ids.add(item.id);
       item.references = list(article.references, 50).map(reference => {
-        if ([5, 6].includes(raw.schema_version)) exactKeys(reference, ["label", "url"]);
+        if (modern) exactKeys(reference, ["label", "url"]);
         return { label: boundedText(reference.label, 300), url: boundedText(reference.url, 4000) };
       });
       item.primary_date = item.date_basis === "event" ? item.event_date : item.published_at;
@@ -428,7 +482,7 @@
     });
     const sourceIds = new Set();
     const sources = raw.sources.map(source => {
-      if ([5, 6].includes(raw.schema_version)) exactKeys(source, ["id", "name", "kind", "url", "status", "last_attempt", "last_success", "error", "sha256", "intake", "articles", "configured_selection"]);
+      if (modern) exactKeys(source, ["id", "name", "kind", "url", "status", "last_attempt", "last_success", "error", "sha256", "intake", "articles", "configured_selection"]);
       requireValue(source && ["ok", "partial", "failed", "not_fetched"].includes(source.status));
       const item = { id: boundedText(source.id, 160), name: boundedText(source.name, 240), url: boundedText(source.url, 4000), kind: boundedText(source.kind, 160), status: source.status, last_success: timestamp(source.last_success), last_attempt: timestamp(source.last_attempt), error: source.error === null ? null : boundedText(source.error, 4000, true), articles: nonnegative(source.articles) };
       item.sha256 = source.sha256 == null ? null : boundedText(source.sha256, 64);
@@ -445,8 +499,9 @@
     }
     requireValue(Number.isSafeInteger(raw.refresh.requested_minutes) && raw.refresh.requested_minutes > 0 && raw.refresh.requested_minutes <= 1440 && raw.refresh.mode === "scheduled-check");
     const refresh = { requested_minutes: raw.refresh.requested_minutes, mode: raw.refresh.mode, status_url: boundedText(raw.refresh.status_url, 4000), notes: textList(raw.refresh.notes, 100, 4000) };
-    if ([5, 6].includes(raw.schema_version)) requireValue(new Set(articles.flatMap(article => article.cves)).size === mitigations.size);
-    return { generated_at: raw.generated_at, window: { start: raw.window.start, end: raw.window.end }, articles, sources, coverage, integrations, mitigations, refresh, intelligence, deduplication: { url_duplicates_removed: nonnegative(raw.deduplication.url_duplicates_removed) } };
+    if (modern) requireValue(new Set(articles.flatMap(article => article.cves)).size === mitigations.size);
+    // Older feeds carry their briefs inline; a schema 7 feed reads them on first use.
+    return { schema_version: raw.schema_version, generated_at: raw.generated_at, content_revision: current ? raw.content_revision : null, window: { start: raw.window.start, end: raw.window.end }, articles, sources, coverage, integrations, mitigations, briefs: current ? null : mitigations, briefsRequest: null, refresh, intelligence, deduplication: { url_duplicates_removed: nonnegative(raw.deduplication.url_duplicates_removed) } };
   }
 
   function safeUrl(value) {
@@ -589,7 +644,7 @@
     const card = node("article", "article-card card-kind-" + article.kind + (article.exploitation === "known" ? " card-known-exploitation" : "")); card.dataset.entryId = article.id;
     const top = node("div", "article-topline");
     const date = node("div", "article-date", article.date ? dateLabel(article.primary_date) : "Date unknown");
-    date.append(node("span", "", !article.date ? "UNKNOWN" : article.date_basis === "event" ? "EVENT DATE" : article.date_basis === "filing" ? "FILED" : article.kind === "kev" ? "CATALOG ADDED" : article.date_basis === "publisher update" ? "UPDATED" : "PUBLISHED"));
+    date.append(node("span", "", !article.date ? "UNKNOWN" : article.date_basis === "event" ? "EVENT DATE" : article.date_basis === "filing" ? "FILED" : article.kind === "kev" ? "CATALOG ADDED" : article.date_basis.startsWith("publisher update") ? "UPDATED" : "PUBLISHED"));
     top.append(node("span", "kind-badge kind-" + article.kind, kinds[article.kind]), date);
     const title = node("h3"); const titleLink = link(article.title, article.url, "article-title"); titleLink.dataset.focusKey = article.id + "-title"; title.append(titleLink);
     card.append(top, title); if (article.summary) card.append(node("p", "article-summary", article.summary));
@@ -617,7 +672,7 @@
     if (catalogNote) bottom.append(node("p", "kev-catalog-note", catalogNote));
     const detail = node("details", "article-detail"); detail.open = openDetails.has(article.id);
     const summary = node("summary", "", "Sources & date context" + (article.cves.length > 6 ? " · all " + article.cves.length + " CVEs" : "")); summary.dataset.focusKey = article.id + "-details";
-    detail.append(summary, node("p", "", "Date basis: " + (article.date_basis || "Not specified.")), node("p", "", (article.date_basis === "filing" ? "SEC filing date: " : article.kind === "kev" ? "Catalog addition date: " : article.date_basis === "publisher update" ? "Publisher update date: " : "Publisher date: ") + dateLabel(article.published_at)), node("p", "", "Event date: " + dateLabel(article.event_date)));
+    detail.append(summary, node("p", "", "Date basis: " + (article.date_basis || "Not specified.")), node("p", "", (article.date_basis === "filing" ? "SEC filing date: " : article.kind === "kev" ? "Catalog addition date: " : article.date_basis.startsWith("publisher update") ? "Publisher update date: " : "Publisher date: ") + dateLabel(article.published_at)), node("p", "", "Event date: " + dateLabel(article.event_date)));
     if (article.cves.length > 6) { const allCves = node("div", "article-tags"); for (const cve of article.cves) allCves.append(cveButton(cve, article.id + "-all-" + cve)); detail.append(allCves); }
     if (article.tags.length > 3) detail.append(node("p", "", "All topic tags: " + article.tags.join(", ")));
     if (article.kind === "kev") detail.append(node("p", "", "CISA catalog addition is separate from disclosure and exploitation dates. This entry is not an incident report."));
@@ -653,7 +708,7 @@
     for (const article of articles) for (const cve of new Set(article.cves)) {
       const record = snapshot.mitigations.get(cve);
       if (!recordMatches(record)) continue;
-      if (!grouped.has(cve)) grouped.set(cve, { id: cve, cve_key: cve, record, title: record.title || cve, score: record.cvss?.score ?? null, date: null, sources: new Set(), count: 0 });
+      if (!grouped.has(cve)) grouped.set(cve, { id: cve, cve_key: cve, record, title: snapshot.briefs?.get(cve)?.title || record.title || cve, score: record.cvss?.score ?? null, date: null, sources: new Set(), count: 0 });
       const row = grouped.get(cve); row.count++; row.sources.add(article.source_name);
       if (article.date && (!row.date || article.date > row.date)) row.date = article.date;
     }
@@ -793,7 +848,7 @@
       for (const article of entries.slice(shown, shown + 10)) {
         const entry = node("li", "linked-coverage-entry"); entry.tabIndex = -1;
         entry.append(link(article.title, article.url, "linked-coverage-title"), node("p", "linked-coverage-meta", article.source_name + " · " + kinds[article.kind] + " · " + origins[article.origin]));
-        const basis = article.date_basis === "event" ? "Event date" : article.kind === "filing" ? "Filing date" : article.kind === "kev" ? "CISA catalog added" : article.date_basis === "publisher update" ? "Publisher updated" : "Publisher date";
+        const basis = article.date_basis === "event" ? "Event date" : article.kind === "filing" ? "Filing date" : article.kind === "kev" ? "CISA catalog added" : article.date_basis.startsWith("publisher update") ? "Publisher updated" : "Publisher date";
         entry.append(node("p", "linked-coverage-date", article.date ? basis + ": " + dateLabel(article.primary_date) + " UTC" : "Primary date unknown"));
         if (article.kind === "kev") entry.append(node("p", "linked-coverage-meta", "Catalog entry; addition is separate from disclosure and exploitation dates."));
         if (!firstNew) firstNew = entry;
@@ -943,10 +998,43 @@
     }));
   }
 
+  async function readBriefs(saved) {
+    const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 45000);
+    try {
+      const response = await fetch("./data/briefs.json", { credentials: "omit", cache: "no-cache", redirect: "error", signal: controller.signal });
+      const result = await readJson(response, maximumBriefsBytes, "brief file");
+      saved.briefs = normalizeBriefs(result.value, saved);
+      return saved.briefs;
+    } catch (error) {
+      if (error.briefMismatch) throw error;
+      throw new Error(error.name === "AbortError" ? "The brief file read timed out." : error instanceof SyntaxError ? "The saved brief file is not valid JSON." : error.message || "The saved brief file could not load.");
+    } finally { clearTimeout(timeout); }
+  }
+
+  // Briefs load once per snapshot, on the first brief opened or the first CVE register view.
+  function loadBriefs(saved) {
+    if (saved.briefs) return Promise.resolve(saved.briefs);
+    if (!saved.briefsRequest) saved.briefsRequest = readBriefs(saved).finally(() => { saved.briefsRequest = null; });
+    return saved.briefsRequest;
+  }
+
+  function briefFailure(error) {
+    showError(error.message + " No external lookup was made.");
+    if (error.briefMismatch) load();
+  }
+
   function openMitigation(cve) {
     const savedSnapshot = snapshot;
-    const record = savedSnapshot?.mitigations.get(cve);
-    if (!record) { showError("This CVE is not present in the current saved snapshot. No external lookup was made."); return; }
+    if (!savedSnapshot?.mitigations.has(cve)) { showError("This CVE is not present in the current saved snapshot. No external lookup was made."); return; }
+    if ($("#source-dialog").open || $("#mitigation-dialog").open) return;
+    if (savedSnapshot.briefs) { showMitigation(cve, savedSnapshot); return; }
+    document.body.setAttribute("aria-busy", "true");
+    loadBriefs(savedSnapshot).then(() => showMitigation(cve, savedSnapshot), briefFailure).finally(() => document.body.removeAttribute("aria-busy"));
+  }
+
+  function showMitigation(cve, savedSnapshot) {
+    const record = savedSnapshot.briefs.get(cve);
+    if (!record) { showError("This CVE has no saved brief in this snapshot. No external lookup was made."); return; }
     const dialog = $("#mitigation-dialog");
     if ($("#source-dialog").open || dialog.open) return;
     $("#mitigation-title").textContent = cve;
@@ -1135,19 +1223,23 @@
 
   function showError(message) { $("#feed-error").hidden = false; $("#feed-error-message").textContent = message; }
 
-  async function readFeed(response) {
-    if (!response.ok) throw new Error("The feed snapshot could not be read (HTTP " + response.status + ").");
+  async function readJson(response, maximum, label) {
+    if (!response.ok) throw new Error("The " + label + " could not be read (HTTP " + response.status + ").");
+    const tooLarge = "The " + label + " exceeds the supported " + maximum / 1048576 + " MiB download size.";
     const length = Number(response.headers.get("content-length"));
-    if (Number.isFinite(length) && length > maximumFeedBytes) throw new Error("The snapshot exceeds the supported 16 MiB download size.");
+    if (Number.isFinite(length) && length > maximum) throw new Error(tooLarge);
     let bytes;
     if (response.body) {
       const reader = response.body.getReader(); const chunks = []; let total = 0;
-      while (true) { const { done, value } = await reader.read(); if (done) break; total += value.byteLength; if (total > maximumFeedBytes) { await reader.cancel(); throw new Error("The snapshot exceeds the supported 16 MiB download size."); } chunks.push(value); }
+      while (true) { const { done, value } = await reader.read(); if (done) break; total += value.byteLength; if (total > maximum) { await reader.cancel(); throw new Error(tooLarge); } chunks.push(value); }
       bytes = new Uint8Array(total); let offset = 0; for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
-    } else { bytes = new Uint8Array(await response.arrayBuffer()); if (bytes.byteLength > maximumFeedBytes) throw new Error("The snapshot exceeds the supported 16 MiB download size."); }
+    } else { bytes = new Uint8Array(await response.arrayBuffer()); if (bytes.byteLength > maximum) throw new Error(tooLarge); }
     const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
-    return { value: JSON.parse(text), text };
+    return { value: JSON.parse(text), text, byteLength: bytes.byteLength };
   }
+
+  // The legacy bound admits a schema 6 feed; normalize() holds a schema 7 feed to maximumFeedBytes.
+  function readFeed(response) { return readJson(response, maximumLegacyFeedBytes, "feed snapshot"); }
 
   async function load() {
     if (loading) return;
@@ -1161,7 +1253,7 @@
       const firstRead = snapshot === null;
       const previousGeneration = snapshot ? new Date(snapshot.generated_at).getTime() : null;
       const changed = snapshotText !== result.text;
-      const value = changed ? normalize(result.value) : snapshot;
+      const value = changed ? normalize(result.value, result.byteLength) : snapshot;
       const generation = new Date(value.generated_at).getTime();
       const readOutcome = firstRead ? "published snapshot loaded" : !changed ? "same saved snapshot" :
         "different saved snapshot · " + (generation > previousGeneration ? "later generation time" : generation < previousGeneration ? "earlier generation time" : "no generation-time difference detected");
@@ -1207,7 +1299,12 @@
   $("#clear-dates").addEventListener("click", () => setDates());
   $("#reset").addEventListener("click", reset); $("#empty-reset").addEventListener("click", reset); $("#reload").addEventListener("click", load);
   $("#load-more").addEventListener("click", () => { visibleCount += pageSize; render(); });
-  for (const [id, mode] of [["#view-feed", "feed"], ["#view-cves", "cves"]]) $(id).addEventListener("click", () => { view = mode; visibleCount = pageSize; render(); });
+  for (const [id, mode] of [["#view-feed", "feed"], ["#view-cves", "cves"]]) $(id).addEventListener("click", () => {
+    view = mode; visibleCount = pageSize; render();
+    // The register shows CNA titles, which live in the brief file.
+    const saved = snapshot;
+    if (mode === "cves" && saved && !saved.briefs) loadBriefs(saved).then(() => { if (snapshot === saved && view === "cves") render(); }, briefFailure);
+  });
   for (const button of document.querySelectorAll("[data-open-sources]")) button.addEventListener("click", () => {
     if (!snapshot || $("#mitigation-dialog").open || $("#source-dialog").open) return;
     renderSources(); try { $("#source-dialog").showModal(); $("#source-dialog").scrollTop = 0; } catch (_) { showError("The source ledger could not open in this document. The displayed snapshot is unchanged."); }

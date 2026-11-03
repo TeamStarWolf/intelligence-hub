@@ -64,5 +64,8 @@ class BuildCopy:
     def feed(self):
         return json.loads((self.root / "site" / "data" / "feed.json").read_text(encoding="utf-8"))
 
+    def briefs(self):
+        return json.loads((self.root / "site" / "data" / "briefs.json").read_text(encoding="utf-8"))
+
     def close(self):
         self.directory.cleanup()

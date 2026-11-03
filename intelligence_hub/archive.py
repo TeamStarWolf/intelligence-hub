@@ -14,17 +14,22 @@ import stat
 import sys
 import time
 
-from .collect import published, safe_url, validate_article, validate_observation, validate_window
-from .mitigations import valid_projection
+from .collect import (BRIEFS_MAX_BYTES, FEED_MAX_BYTES, LEGACY_MAX_ARTICLES, public_bytes, published, safe_url,
+                      validate_article, validate_observation, validate_window)
+from .mitigations import INDEX_FIELDS, brief_index, join_publication, split_publication, valid_projection
 from .intelligence import validate_intelligence, validate_weaknesses
 from .mitigations import brief_url
 
 ROOT = Path(__file__).absolute().parents[1]
 HOME = ROOT / ".state" / "archive-foundation"
 INBOX = HOME / "inbox" / "feed.json"
+BRIEFS_INBOX = HOME / "inbox" / "briefs.json"
 DATABASE = HOME / "archive.sqlite3"
 EXPORTS = HOME / "exports"
 MAX_INPUT = 16 * 1024 * 1024
+# A schema 7 snapshot is a feed file plus a briefs file, each under its own bound.
+MAX_EXPORT = FEED_MAX_BYTES + BRIEFS_MAX_BYTES + 1024 * 1024
+MAX_KEV_ROWS = 15000
 MAX_DATABASE = 1024 * 1024 * 1024
 MAX_RECORD = 256 * 1024
 MAX_SNAPSHOTS = 10000
@@ -34,6 +39,12 @@ CVE = re.compile(r"CVE-[0-9]{4}-[0-9]{4,8}")
 TOP = {"schema_version", "generated_at", "window", "articles", "sources", "history_reviewed_at",
        "mitigations", "mitigation_coverage", "deduplication", "refresh", "coverage", "integrations",
        "content_revision", "layout_revision"}
+# Schema 7: the public feed carries brief_index; full briefs live in briefs.json.
+TOP7 = (TOP - {"mitigations"}) | {"intelligence", "brief_index"}
+RECORD_STATES = {"PUBLISHED", "REJECTED", "UNKNOWN"}
+SOURCE_STATES = {"ok", "failed", "pending"}
+GUIDANCE_STATES = {"publisher-guidance", "cisa-action", "needs-review"}
+CWE_ID = re.compile(r"CWE-[1-9][0-9]{0,5}")
 ARTICLE = {"id", "title", "url", "source_id", "source_name", "kind", "published_at", "event_date",
            "date_basis", "summary", "cves", "tags", "exploitation", "references", "origin"}
 SOURCE = {"id", "name", "kind", "url", "status", "last_attempt", "last_success", "error", "sha256", "intake", "articles"}
@@ -129,9 +140,9 @@ def stamp(value, nullable=False):
 
 
 def validate_archive_source(source, snapshot_version):
-    require(type(snapshot_version) is int and snapshot_version in (3, 4, 5, 6), "Unsupported archive source snapshot version.")
+    require(type(snapshot_version) is int and snapshot_version in (3, 4, 5, 6, 7), "Unsupported archive source snapshot version.")
     context = None
-    if snapshot_version in (4, 5, 6):
+    if snapshot_version in (4, 5, 6, 7):
         configured = source["configured_selection"]
         if source["id"] == "cisa-kev":
             require(configured is None, "KEV cannot carry RSS selection configuration.")
@@ -145,14 +156,43 @@ def validate_archive_source(source, snapshot_version):
                            "article_hosts": ["www.f5.com"]}
             else:
                 require(configured == "document-order-v1", "Publisher-date configuration requires the supported F5 ledger.")
-    validate_observation(source, source=context, kev=source["id"] == "cisa-kev", allow_selection=snapshot_version in (4, 5, 6))
+    validate_observation(source, source=context, kev=source["id"] == "cisa-kev", allow_selection=snapshot_version in (4, 5, 6, 7))
+
+
+def validate_index(index, wanted):
+    """The compact per-CVE rows in a schema 7 feed."""
+    keys(index, {"version", "fields", "rows"})
+    require(type(index["version"]) is int and index["version"] == 1 and index["fields"] == list(INDEX_FIELDS), "Unsupported brief index.")
+    rows = index["rows"]
+    require(isinstance(rows, dict) and set(rows) == wanted, "The brief index must exactly cover article mentions.")
+    for cve, row in rows.items():
+        require(CVE.fullmatch(cve) and isinstance(row, list) and len(row) == len(INDEX_FIELDS), "Invalid brief index row.")
+        state, status, guidance, action, score, version, added, weaknesses = row
+        require(state in RECORD_STATES and status in SOURCE_STATES and guidance in GUIDANCE_STATES and type(action) is bool, "Invalid brief index state.")
+        require(score is None or type(score) in (int, float) and math.isfinite(score) and 0 <= score <= 10, "Invalid brief index score.")
+        require(version is None or isinstance(version, str) and len(version) <= 20, "Invalid brief index score version.")
+        require(added is None or isinstance(added, str) and len(added) == 10 and published(added) == added, "Invalid brief index KEV date.")
+        require(isinstance(weaknesses, list) and len(weaknesses) <= 8 and len(set(weaknesses)) == len(weaknesses) and
+                all(isinstance(item, str) and CWE_ID.fullmatch(item) for item in weaknesses), "Invalid brief index weaknesses.")
+    return rows
 
 
 def validate_snapshot(value):
-    tree(value)
-    require(type(value) is dict and type(value.get("schema_version")) is int and value["schema_version"] in (3, 4, 5, 6), "Archive requires snapshot schema3,4,5 or6.")
-    modern = value["schema_version"] in (5, 6)
-    keys(value, TOP | {"intelligence"} if modern else TOP)
+    """Validate a snapshot: schema 3 to 6, a schema 7 feed file, or a schema 7 feed joined with its briefs."""
+    require(type(value) is dict and type(value.get("schema_version")) is int and value["schema_version"] in (3, 4, 5, 6, 7), "Archive requires snapshot schema3,4,5,6 or7.")
+    current = value["schema_version"] == 7
+    joined = current and "mitigations" in value
+    if current:
+        # Each public file is checked against the structure bounds on its own.
+        feed = {key: item for key, item in value.items() if key != "mitigations"}
+        tree(feed)
+        if joined:
+            tree(value["mitigations"])
+        require(len(public_bytes(feed)) <= FEED_MAX_BYTES, "The feed file exceeds its byte bound.")
+    else:
+        tree(value)
+    modern = value["schema_version"] in (5, 6, 7)
+    keys(value, TOP7 | {"mitigations"} if joined else TOP7 if current else TOP | {"intelligence"} if modern else TOP)
     stamp(value["generated_at"])
     reviewed = value["history_reviewed_at"]
     if isinstance(reviewed, str) and "T" not in reviewed:
@@ -166,9 +206,11 @@ def validate_snapshot(value):
         require(start.isoformat() == value["window"]["start"] and end.isoformat() == value["window"]["end"], "Schema5/6 coverage needs canonical dates.")
     for field in ("content_revision", "layout_revision"):
         require(isinstance(value[field], str) and DIGEST.fullmatch(value[field]), "Invalid supplied revision.")
-    require(isinstance(value["articles"], list) and 1 <= len(value["articles"]) <= 8000, "Invalid archive article count.")
+    # Schema 7 has no row count: the feed byte bound above limits it, and rows are never evicted.
+    require(isinstance(value["articles"], list) and 1 <= len(value["articles"]) and (current or len(value["articles"]) <= LEGACY_MAX_ARTICLES), "Invalid archive article count.")
     require(isinstance(value["sources"], list) and 1 <= len(value["sources"]) <= 97, "Invalid archive source count.")
-    require(isinstance(value["mitigations"], dict) and len(value["mitigations"]) <= 15000, "Invalid archive CVE count.")
+    if not current or joined:
+        require(isinstance(value["mitigations"], dict) and len(value["mitigations"]) <= 15000, "Invalid archive CVE count.")
     source_ids, identities, urls, wanted = set(), set(), set(), set()
     source_by_id = {}
     for source in value["sources"]:
@@ -180,7 +222,7 @@ def validate_snapshot(value):
         require(source["name"] and source["kind"] in {"research", "advisory", "reporting", "filing"} and safe_url(source["url"]), "Invalid source provenance.")
         if source["id"] == "cisa-kev":
             require(source["name"] == "CISA KEV" and source["kind"] == "advisory", "Invalid KEV ledger identity.")
-        require(type(source["articles"]) is int and 0 <= source["articles"] <= 8000, "Invalid retained source count.")
+        require(type(source["articles"]) is int and 0 <= source["articles"] <= (MAX_KEV_ROWS if current else LEGACY_MAX_ARTICLES), "Invalid retained source count.")
         validate_archive_source(source, value["schema_version"])
     for article in value["articles"]:
         keys(article, ARTICLE)
@@ -199,8 +241,10 @@ def validate_snapshot(value):
         identities.add(article["id"])
         urls.add(article["url"])
         wanted.update(article["cves"])
-    require(set(value["mitigations"]) == wanted, "CVE briefs must exactly cover article mentions.")
-    for cve, brief in value["mitigations"].items():
+    if not current or joined:
+        require(set(value["mitigations"]) == wanted, "CVE briefs must exactly cover article mentions.")
+    index = validate_index(value["brief_index"], wanted) if current else None
+    for cve, brief in (value["mitigations"].items() if not current or joined else ()):
         keys(brief, BRIEF | {"weaknesses", "weaknesses_status"} if modern else BRIEF)
         require(CVE.fullmatch(cve) and valid_projection(brief, cve, safe_url, published), "Invalid structured CVE provenance.")
         if modern:
@@ -236,16 +280,22 @@ def validate_snapshot(value):
             require(step["evidence_url"] is None or safe_url(step["evidence_url"]), "Invalid guidance link.")
         for limitation in analysis["limitations"]:
             strings(limitation)
+    if joined:
+        # Checked after the briefs themselves, so a malformed brief fails as a validation error.
+        require(value["brief_index"] == brief_index(value["mitigations"]), "The brief index differs from its briefs.")
+        require(len(public_bytes(split_publication(value)[1])) <= BRIEFS_MAX_BYTES, "The briefs file exceeds its byte bound.")
     for field in ("mitigation_coverage", "deduplication", "coverage", "refresh", "integrations"):
         require(isinstance(value[field], dict), "Invalid snapshot header.")
     metrics = value["mitigation_coverage"]
     keys(metrics, {"total", "cna_loaded", "cisa_actions", "publisher_guidance", "needs_review", "attempted_this_run"})
     require(all(type(item) is int and 0 <= item <= 15000 for item in metrics.values()) and
             metrics["total"] == len(wanted) and metrics["attempted_this_run"] <= 2000, "Invalid CVE coverage metrics.")
-    for field, count in (("cna_loaded", sum(item["source_status"] == "ok" for item in value["mitigations"].values())),
-                         ("cisa_actions", sum(bool(item["required_action"]) for item in value["mitigations"].values())),
-                         ("publisher_guidance", sum(item["analysis"]["guidance_status"] == "publisher-guidance" for item in value["mitigations"].values())),
-                         ("needs_review", sum(item["analysis"]["guidance_status"] == "needs-review" for item in value["mitigations"].values()))):
+    rows = list(index.values()) if current else [[None, item["source_status"], item["analysis"]["guidance_status"], bool(item["required_action"])]
+                                                  for item in value["mitigations"].values()]
+    for field, count in (("cna_loaded", sum(row[1] == "ok" for row in rows)),
+                         ("cisa_actions", sum(row[3] for row in rows)),
+                         ("publisher_guidance", sum(row[2] == "publisher-guidance" for row in rows)),
+                         ("needs_review", sum(row[2] == "needs-review" for row in rows))):
         require(metrics[field] == count, "CVE coverage metric differs from its records.")
     keys(value["deduplication"], {"url_duplicates_removed"})
     require(type(value["deduplication"]["url_duplicates_removed"]) is int and 0 <= value["deduplication"]["url_duplicates_removed"] <= 100000, "Invalid deduplication count.")
@@ -268,7 +318,7 @@ def validate_snapshot(value):
         strings(integration["message"])
     if modern:
         validate_intelligence(value["intelligence"], wanted, safe_url)
-    header = {key: item for key, item in value.items() if key not in {"articles", "sources", "mitigations"}}
+    header = {key: item for key, item in value.items() if key not in {"articles", "sources", "mitigations", "brief_index"}}
     require(len(encoded(header)) <= MAX_RECORD, "Snapshot header exceeds archive bound.")
     return header
 
@@ -390,7 +440,12 @@ def ingest(expected):
     raw = read_fixed(INBOX, MAX_INPUT)
     require(digest(raw) == expected, "Inbox bytes differ from the explicit operator pin.")
     value = decode(raw)
+    briefs_raw = b""
+    if isinstance(value, dict) and value.get("schema_version") == 7:
+        briefs_raw = read_fixed(BRIEFS_INBOX, MAX_INPUT)
+        value = join_publication(value, decode(briefs_raw))
     header = validate_snapshot(value)
+    require(value["schema_version"] != 7 or "mitigations" in value, "A schema 7 import needs its briefs file.")
     canonical = digest(encoded(value))
     existing_bytes = plain(DATABASE).st_size if DATABASE.exists() else 0
     require(shutil.disk_usage(HOME).free >= max(64 * 1024 * 1024, existing_bytes + 4 * len(raw)), "Insufficient free space for conservative archive growth and journal headroom.")
@@ -400,7 +455,7 @@ def ingest(expected):
             require(previous[0] == canonical, "Saved snapshot identity differs.")
             return {"status": "already-imported", "snapshot_sha256": expected, "new_snapshot": False}
         require(db.execute("SELECT count(*) FROM snapshots").fetchone()[0] < MAX_SNAPSHOTS, "Archive snapshot count reached its guard; no automatic pruning.")
-        db.execute("INSERT INTO snapshots VALUES(?,?,?,?,?,?,?,?,?)", (expected, canonical, value["generated_at"], now(), len(raw), encoded(header).decode("utf-8"), len(value["articles"]), len(value["mitigations"]), len(value["sources"])))
+        db.execute("INSERT INTO snapshots VALUES(?,?,?,?,?,?,?,?,?)", (expected, canonical, value["generated_at"], now(), len(raw) + len(briefs_raw), encoded(header).decode("utf-8"), len(value["articles"]), len(value["mitigations"]), len(value["sources"])))
         groups = (("source", [(item["id"], item) for item in value["sources"]]),
                   ("article", [(item["id"], item) for item in value["articles"]]),
                   ("cve", list(value["mitigations"].items())))
@@ -420,6 +475,7 @@ def ingest(expected):
                     db.executemany("INSERT OR IGNORE INTO article_cves VALUES(?,?,?)", ((entity, version, cve) for cve in record["cves"]))
         # Detect ordinary replacement while work was being prepared; not an adversarial filesystem guarantee.
         require(digest(read_fixed(INBOX, MAX_INPUT)) == expected, "Inbox changed before archive commit.")
+        require(not briefs_raw or read_fixed(BRIEFS_INBOX, MAX_INPUT) == briefs_raw, "Briefs inbox changed before archive commit.")
     return {"status": "imported", "snapshot_sha256": expected, "new_snapshot": True,
             "articles": len(value["articles"]), "cves": len(value["mitigations"]), "sources": len(value["sources"]), "new_versions": inserted}
 
@@ -478,7 +534,7 @@ def reconstruct(db, snapshot):
     require(isinstance(row[3], str) and len(row[3].encode("utf-8")) <= MAX_RECORD, "Saved header exceeds its bound.")
     value = decode(row[3].encode("utf-8"))
     total_bytes = len(row[3].encode("utf-8"))
-    for kind, field, maximum, expected in (("source", "sources", 97, row[6]), ("article", "articles", 8000, row[4]), ("cve", "mitigations", 15000, row[5])):
+    for kind, field, maximum, expected in (("source", "sources", 97, row[6]), ("article", "articles", 15000, row[4]), ("cve", "mitigations", 15000, row[5])):
         require(type(expected) is int and 0 <= expected <= maximum, "Invalid archived membership count.")
         records = db.execute("""SELECT m.entity_id,m.version_sha256,v.payload,m.position FROM members m
             JOIN versions v ON (v.kind,v.entity_id,v.sha256)=(m.kind,m.entity_id,m.version_sha256)
@@ -489,25 +545,27 @@ def reconstruct(db, snapshot):
             raw = payload.encode("utf-8")
             require(len(raw) <= MAX_RECORD and digest(raw) == version, "Archived record digest differs.")
             total_bytes += len(raw)
-            require(total_bytes <= MAX_INPUT, "Saved snapshot records exceed the export budget.")
+            require(total_bytes <= MAX_EXPORT, "Saved snapshot records exceed the export budget.")
             item = decode(raw)
             require(isinstance(item, dict) and item.get("cve" if kind == "cve" else "id") == entity, "Archived record identity differs.")
             items.append((entity, item))
         require(len(items) == expected, "Archived membership count differs.")
         value[field] = dict(items) if kind == "cve" else [item for _entity, item in items]
+    if value.get("schema_version") == 7:
+        value["brief_index"] = brief_index(value["mitigations"])
     validate_snapshot(value)
     require(digest(encoded(value)) == row[0], "Reconstructed snapshot differs from saved values.")
     return value
 
 
 def write_new(path, raw):
-    require(len(raw) <= MAX_INPUT, "Private export exceeds its byte bound.")
+    require(len(raw) <= MAX_EXPORT, "Private export exceeds its byte bound.")
     descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     with os.fdopen(descriptor, "wb") as stream:
         stream.write(raw)
         stream.flush()
         os.fsync(stream.fileno())
-    require(read_fixed(path, MAX_INPUT) == raw, "Private export readback differs; preserve partial output for review.")
+    require(read_fixed(path, MAX_EXPORT) == raw, "Private export readback differs; preserve partial output for review.")
 
 
 def export(snapshot):
@@ -516,7 +574,7 @@ def export(snapshot):
         value = reconstruct(db, snapshot)
     # Keep the saved mitigation member order; canonical validation already checked values and arrays.
     raw = (json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(",", ":")) + "\n").encode("utf-8")
-    require(len(raw) <= MAX_INPUT, "Reconstructed export exceeds its byte bound.")
+    require(len(raw) <= MAX_EXPORT, "Reconstructed export exceeds its byte bound.")
     directories(EXPORTS, create=True)
     require(shutil.disk_usage(EXPORTS).free >= 2 * len(raw) + 1024 * 1024, "Insufficient free space for the selected private export.")
     output = EXPORTS / (snapshot + ".private.json")
