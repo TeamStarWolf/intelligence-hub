@@ -2,9 +2,13 @@
 
 ## What a brief represents
 
-The collector writes a **schema 6** snapshot. The site reads schemas 2, 3, 4, 5
-and 6. Each of those snapshots has one `mitigations` entry for each unique CVE
-in its loaded articles' `cves` arrays, including KEV, feed and curated articles.
+The collector writes a **schema 7** snapshot. The site reads schemas 2 to 7. Each
+of those snapshots has one brief for each unique CVE in its loaded articles'
+`cves` arrays, including KEV, feed and curated articles. Schemas 2 to 6 carry the
+briefs inline under `mitigations`. Schema 7 keeps them in `data/briefs.json` and
+puts one compact row per CVE in the feed's `brief_index`; the site reads the
+briefs file the first time a reader opens a brief, opens the CVE register or
+searches, since CNA titles and vendor and product names are only in that file.
 This is not every CVE ever published, nor every identifier in full linked articles.
 The projection is deterministic; it makes no model call or device assessment.
 

@@ -3,12 +3,15 @@ from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from datetime import date, datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
+import gzip
 import hashlib
 import html
+import http.client
 import ipaddress
 import json
 from pathlib import Path
 import re
+import sys
 import time
 import urllib.error
 import urllib.parse
@@ -18,12 +21,31 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).absolute().parent.parent
 STATE = ROOT / ".state"
 CATALOG_URL = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
+# Default response bound for one publisher feed. A source may set its own
+# max_bytes in config/sources.json, never above FETCH_CEILING.
 MAX_BYTES = 3 * 1024 * 1024
-MAX_ARTICLES = 8000
+FETCH_CEILING = 16 * 1024 * 1024
+# Byte bounds for the two public data files. Rows are never evicted to fit:
+# a run that would cross a bound fails and the deployed publication stays.
+FEED_MAX_BYTES = 8 * 1024 * 1024
+BRIEFS_MAX_BYTES = 12 * 1024 * 1024
+# The feed's article-row ceiling is derived from its byte bound, so it is not a
+# second, hidden wall: the smallest live row is 363 bytes (publisher rows average
+# about 480, KEV rows about 794), so at real sizes the byte bound is crossed first.
+# It stays a structure guard for readers and is printed with its headroom every run.
+MIN_ROW_BYTES = 300
+MAX_FEED_ROWS = FEED_MAX_BYTES // MIN_ROW_BYTES
+MAX_CVE_BRIEFS = 15000  # mirrors mitigations.MAX_RECORDS
+SNAPSHOT_VERSION = 7
+LEGACY_MAX_ARTICLES = 8000
 HISTORY_START = date(1998, 1, 1)
 KINDS = {"advisory", "research", "reporting", "incident", "kev", "filing"}
 CVE = re.compile(r"\bCVE-[0-9]{4}-[0-9]{4,8}\b", re.I)
 PUBLIC_FEED = "https://teamstarwolf.github.io/intelligence-hub/data/feed.json"
+PUBLIC_BRIEFS = "https://teamstarwolf.github.io/intelligence-hub/data/briefs.json"
+ZONE_ASSUMED = ", zone not stated, read as UTC"
+NAMED_ZONES = {"CET": "+0100", "CEST": "+0200"}
+NAIVE_STAMP = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2})[T ]([0-9]{2}:[0-9]{2}(?::[0-9]{2})?)(?:\.[0-9]{1,9})?")
 RESPONSE_BYTE_LIMIT_REASON = "response_byte_limit_exceeded: source response exceeded its configured byte bound."
 
 
@@ -33,11 +55,11 @@ def require(value, message):
 
 
 def validate_window(start, end, snapshot_version):
-    require(type(snapshot_version) is int and snapshot_version in (1, 2, 3, 4, 5, 6), "Unsupported snapshot coverage version.")
-    maximum = {1: 3661, 2: 3661, 3: 3661, 4: 3661, 5: 7306, 6: 14610}[snapshot_version]
+    require(type(snapshot_version) is int and snapshot_version in (1, 2, 3, 4, 5, 6, 7), "Unsupported snapshot coverage version.")
+    maximum = {1: 3661, 2: 3661, 3: 3661, 4: 3661, 5: 7306, 6: 14610, 7: 14610}[snapshot_version]
     require(type(start) is date and type(end) is date and start <= end and (end - start).days <= maximum,
             "History window must be date-only and within its schema's span.")
-    require(snapshot_version != 6 or start >= HISTORY_START, "Schema 6 coverage must start on or after 1998-01-01.")
+    require(snapshot_version < 6 or start >= HISTORY_START, "Schema 6 and 7 coverage must start on or after 1998-01-01.")
 
 
 def now():
@@ -76,26 +98,54 @@ class ResponseByteLimitExceeded(ValueError):
     """The existing fetch loop crossed its configured response byte bound."""
 
 
-def fetch(url, maximum=MAX_BYTES):
+def fetch(url, maximum=MAX_BYTES, fresh=False):
     require(safe_url(url) == url, "Source URL must be a canonical public HTTPS URL.")
-    require(type(maximum) is int and 1 <= maximum <= 16 * 1024 * 1024, "Invalid bounded read size.")
+    require(type(maximum) is int and 1 <= maximum <= FETCH_CEILING, "Invalid bounded read size.")
     started = time.monotonic()
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
-    request = urllib.request.Request(url, headers={"User-Agent": "TeamStarWolf-IntelligenceHub/0.1 (public feed reader)", "Accept": "application/rss+xml, application/atom+xml, application/json, text/xml, application/xml", "Accept-Encoding": "identity"})
+    headers = {"User-Agent": "TeamStarWolf-IntelligenceHub/0.1 (public feed reader)", "Accept": "application/rss+xml, application/atom+xml, application/json, text/xml, application/xml", "Accept-Encoding": "identity"}
+    if fresh:
+        # The deployed files are served through a CDN cache; ask for the current copy.
+        headers.update({"Cache-Control": "no-cache", "Pragma": "no-cache"})
+    request = urllib.request.Request(url, headers=headers)
     chunks, size = [], 0
-    with opener.open(request, timeout=12) as response:
-        require(response.status == 200 and response.geturl() == url, "Unexpected publisher response.")
-        require(response.headers.get("Content-Encoding", "identity").lower() == "identity", "Compressed responses are not accepted.")
-        while True:
-            require(time.monotonic() - started < 30, "Source exceeded its read deadline.")
-            block = response.read(65536)
-            if not block:
-                break
-            size += len(block)
-            if size > maximum:
-                raise ResponseByteLimitExceeded("Source exceeded its bounded read limit.")
-            chunks.append(block)
+    try:
+        with opener.open(request, timeout=12) as response:
+            require(response.status == 200 and response.geturl() == url, "Unexpected publisher response.")
+            require(response.headers.get("Content-Encoding", "identity").lower() == "identity", "Compressed responses are not accepted.")
+            while True:
+                require(time.monotonic() - started < 30, "Source exceeded its read deadline.")
+                # read1 returns what the connection has delivered instead of waiting
+                # to fill 64 KiB, so the deadline above is checked between short reads.
+                block = response.read1(65536)
+                if not block:
+                    break
+                size += len(block)
+                if size > maximum:
+                    raise ResponseByteLimitExceeded("Source exceeded its bounded read limit.")
+                chunks.append(block)
+            if getattr(response, "length", None):
+                raise http.client.IncompleteRead(b"", response.length)
+    except http.client.HTTPException as error:
+        # http.client errors (a truncated chunked body, a dropped connection) are
+        # network failures: report them as OSError so every caller records them.
+        raise OSError(type(error).__name__ + ": the publisher response ended early or was malformed") from error
     return b"".join(chunks)
+
+
+def failure_reason(error, fallback):
+    """One short public reason for a failed request, naming its cause."""
+    if isinstance(error, ResponseByteLimitExceeded):
+        return RESPONSE_BYTE_LIMIT_REASON
+    if isinstance(error, urllib.error.HTTPError):
+        return "HTTP " + str(error.code)
+    detail = "".join(char for char in " ".join(str(error).split()) if ord(char) >= 32 and ord(char) != 127)[:300]
+    return type(error).__name__ + ": " + (detail or fallback)
+
+
+def public_bytes(value):
+    """The exact bytes write_json(compact=True) gives a public data file."""
+    return (json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(",", ":")) + "\n").encode("utf-8")
 
 
 def reject_constant(_value):
@@ -210,9 +260,13 @@ def apply_mitigation_context(briefs, entries):
 
 
 def write_json(path, value, compact=False):
-    path.parent.mkdir(parents=True, exist_ok=True)
     raw = (json.dumps(value, ensure_ascii=False, allow_nan=False, indent=None if compact else 2, separators=(",", ":") if compact else None) + "\n").encode("utf-8")
-    require(len(raw) <= 16 * 1024 * 1024, "Snapshot output exceeds its limit.")
+    write_raw(path, raw)
+
+
+def write_raw(path, raw):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    require(len(raw) <= FETCH_CEILING, "Snapshot output exceeds its limit.")
     temporary = path.with_name(path.name + ".pending")
     with temporary.open("xb") as stream:
         stream.write(raw)
@@ -224,20 +278,57 @@ def text(value, maximum=240):
     return " ".join(html.unescape(re.sub(r"<[^>]{0,2000}>", " ", value or "")).split())[:maximum]
 
 
-def published(value):
+def _parse_stamp(value):
+    value = value.strip()
+    if re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", value):
+        return date.fromisoformat(value)
     try:
-        value = value.strip()
-        if re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", value):
-            return date.fromisoformat(value).isoformat()
-        try:
-            stamp = datetime.fromisoformat(value.replace("Z", "+00:00"))
-        except ValueError:
-            stamp = parsedate_to_datetime(value)
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        pass
+    # email.utils knows the North American zone names but not the Central European
+    # ones that CERT-EU uses ("Fri, 23 Oct 2026 16:36:26 CEST").
+    named = re.fullmatch(r"(.+?)\s+(CET|CEST)", value)
+    if named:
+        value = named[1] + " " + NAMED_ZONES[named[2]]
+    return parsedate_to_datetime(value)
+
+
+def published(value):
+    """A UTC ISO stamp (or a bare ISO date), or None. Stamps without a zone are refused."""
+    try:
+        stamp = _parse_stamp(value)
+        if type(stamp) is date:
+            return stamp.isoformat()
         if stamp.tzinfo is None:
             return None
         return stamp.astimezone(timezone.utc).isoformat(timespec="seconds")
-    except (ValueError, TypeError, AttributeError, OverflowError):
+    except (ValueError, TypeError, AttributeError, OverflowError, IndexError):
         return None
+
+
+def feed_published(value):
+    """Publisher feed date: (UTC ISO stamp or None, True when no zone was given and UTC was assumed).
+
+    Cisco PSIRT writes "2026-11-02 21:16:10.0" with no zone. Such stamps are read as
+    UTC, and the caller marks the row's date basis so the assumption stays visible.
+    """
+    stamp = published(value)
+    if stamp is not None or not isinstance(value, str):
+        return stamp, False
+    value = value.strip()
+    try:
+        match = NAIVE_STAMP.fullmatch(value)
+        if match:
+            clock = match[2] if match[2].count(":") == 2 else match[2] + ":00"
+            naive = datetime.strptime(match[1] + " " + clock, "%Y-%m-%d %H:%M:%S")
+        else:
+            naive = parsedate_to_datetime(value)
+            if naive.tzinfo is not None:
+                return None, False
+    except (ValueError, TypeError, AttributeError, OverflowError, IndexError):
+        return None, False
+    return naive.replace(tzinfo=timezone.utc).isoformat(timespec="seconds"), True
 
 
 class BoundedTreeBuilder(ET.TreeBuilder):
@@ -347,8 +438,10 @@ def parse_feed(raw, source, *, selection_cutoff_date=None):
             intake["items_rejected"] += 1
             intake["rejection_reasons"]["invalid_link_or_title"] += 1
             continue
-        stamp = published(fields.get("pubDate") or fields.get("published") or fields.get("date") or fields.get("updated") or "")
+        stamp, zone_assumed = feed_published(fields.get("pubDate") or fields.get("published") or fields.get("date") or fields.get("updated") or "")
         basis = "publication" if (fields.get("pubDate") or fields.get("published") or fields.get("date")) else "publisher update" if fields.get("updated") else "unknown"
+        if stamp is not None and zone_assumed:
+            basis += ZONE_ASSUMED
         # Display titles stay bounded; mention counting uses the complete source fields.
         mention_text = fields.get("title", "") + " " + " ".join(fields.get(key, "") for key in ("description", "summary", "content", "encoded"))
         if source.get("include_terms") and not any(term.casefold() in text(mention_text, MAX_BYTES).casefold() for term in source["include_terms"]):
@@ -371,7 +464,7 @@ def update_source(source, cached, *, selection_cutoff_date=None):
     attempted = now()
     try:
         selection_context(source, selection_cutoff_date)
-        raw = fetch(source["url"])
+        raw = fetch(source["url"], source.get("max_bytes", MAX_BYTES))
         parsed = parse_feed(raw, source, selection_cutoff_date=selection_cutoff_date)
         incoming = parsed["articles"]
         intake = {**parsed["intake"], "attempted_at": attempted, "response_sha256": hashlib.sha256(raw).hexdigest()}
@@ -386,10 +479,7 @@ def update_source(source, cached, *, selection_cutoff_date=None):
         return {"status": "partial" if incomplete else "ok", "last_attempt": attempted, "last_success": now(), "error": None,
                 "sha256": intake["response_sha256"], "articles": articles, "intake": intake}
     except (OSError, ValueError, ET.ParseError) as error:
-        if isinstance(error, ResponseByteLimitExceeded):
-            reason = RESPONSE_BYTE_LIMIT_REASON
-        else:
-            reason = ("HTTP " + str(error.code)) if isinstance(error, urllib.error.HTTPError) else type(error).__name__ + ": source unavailable or rejected by intake policy"
+        reason = failure_reason(error, "source unavailable or rejected by intake policy")
         return {**cached, "status": "failed", "last_attempt": attempted, "last_success": cached.get("last_success"),
                 "error": reason, "articles": cached.get("articles", []), "intake": None}
 
@@ -403,10 +493,7 @@ def update_kev(cached):
         return {"status": "ok", "last_attempt": attempted, "last_success": now(), "error": None,
                 "sha256": hashlib.sha256(raw).hexdigest(), "catalog": catalog, "intake": None}
     except (OSError, ValueError) as error:
-        if isinstance(error, ResponseByteLimitExceeded):
-            reason = RESPONSE_BYTE_LIMIT_REASON
-        else:
-            reason = ("HTTP " + str(error.code)) if isinstance(error, urllib.error.HTTPError) else type(error).__name__ + ": catalog unavailable or rejected"
+        reason = failure_reason(error, "catalog unavailable or rejected")
         return {**cached, "status": "failed", "last_attempt": attempted, "last_success": cached.get("last_success"), "error": reason, "intake": None}
 
 
@@ -546,16 +633,65 @@ def validate_registry(registry):
         require(isinstance(source["article_hosts"], list) and 1 <= len(source["article_hosts"]) <= 8 and all(safe_url("https://" + host + "/") is not None for host in source["article_hosts"]), "Invalid publisher hosts.")
         if "include_terms" in source:
             require(isinstance(source["include_terms"], list) and 1 <= len(source["include_terms"]) <= 12 and all(isinstance(term, str) and 1 <= len(term) <= 80 for term in source["include_terms"]), "Invalid source selection terms.")
+        if "max_bytes" in source:
+            require(type(source["max_bytes"]) is int and 1 <= source["max_bytes"] <= FETCH_CEILING, "Invalid source byte bound.")
         source_selection(source)
     return registry["sources"]
 
 
+def wire_articles(articles):
+    """Group rows by origin and source for compression; readers sort rows themselves."""
+    by_date = sorted(articles, key=article_date, reverse=True)
+    return sorted(by_date, key=lambda article: (article["origin"], article["source_id"], " ".join(article["tags"]).casefold()))
+
+
+def bound_report(name, raw, limit):
+    compressed = len(gzip.compress(raw, compresslevel=6, mtime=0))
+    return {"file": name, "bytes": len(raw), "limit": limit, "headroom": limit - len(raw), "gzip_estimate": compressed}
+
+
+def rows_over_message(count):
+    return ("data/feed.json would hold " + format(count, ",") + " article rows, over its " + format(MAX_FEED_ROWS, ",") +
+            "-row ceiling (the " + format(FEED_MAX_BYTES, ",") + "-byte feed bound / " + str(MIN_ROW_BYTES) +
+            " bytes per row). Nothing was evicted; the deployed publication is preserved.")
+
+
+def cves_over_message(count):
+    return ("data/briefs.json would hold " + format(count, ",") + " CVE briefs, over its " + format(MAX_CVE_BRIEFS, ",") +
+            "-brief ceiling. Nothing was evicted; the deployed publication is preserved.")
+
+
+def check_rows(articles, cves):
+    """Print the row and CVE headroom every run, and refuse a publication that crosses either ceiling."""
+    reports = [{"file": "data/feed.json", "count": articles, "unit": "article rows", "limit": MAX_FEED_ROWS},
+               {"file": "data/briefs.json", "count": cves, "unit": "CVE briefs", "limit": MAX_CVE_BRIEFS}]
+    for report in reports:
+        report["headroom"] = report["limit"] - report["count"]
+        print("{file}: {count:,} of {limit:,} {unit}, {headroom:,} of headroom ({percent}% free)".format(
+            percent=max(0, report["headroom"]) * 100 // report["limit"], **report), file=sys.stderr)
+    require(articles <= MAX_FEED_ROWS, rows_over_message(articles))
+    require(cves <= MAX_CVE_BRIEFS, cves_over_message(cves))
+    return reports
+
+
+def check_bounds(feed_raw, briefs_raw):
+    """Refuse a publication whose data files cross their byte bounds; never drop rows to fit."""
+    reports = [bound_report("data/feed.json", feed_raw, FEED_MAX_BYTES), bound_report("data/briefs.json", briefs_raw, BRIEFS_MAX_BYTES)]
+    for report in reports:
+        print("{file}: {bytes:,} of {limit:,} bytes, {headroom:,} bytes of headroom ({percent}% free); gzip estimate {gzip_estimate:,} bytes".format(
+            percent=max(0, report["headroom"]) * 100 // report["limit"], **report), file=sys.stderr)
+    for report in reports:
+        require(report["headroom"] >= 0, report["file"] + " would be " + format(report["bytes"], ",") + " bytes, over its " +
+                format(report["limit"], ",") + "-byte bound. Nothing was evicted; the deployed publication is preserved.")
+    return reports
+
+
 def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=40):
-    from .mitigations import build_briefs, merge_retained
+    from .mitigations import brief_index, build_briefs, merge_retained, split_publication
     from .intelligence import compose_with_reports, load_inputs
     from .archive import validate_snapshot
 
-    validate_window(start, end, 6)
+    validate_window(start, end, SNAPSHOT_VERSION)
     intelligence_inputs = load_inputs(ROOT)
     require(type(enrich_limit) is int and 0 <= enrich_limit <= 2000, "CVE enrichment limit must be 0 to 2000.")
     context = load_mitigation_context(ROOT / "config/mitigation-context.json")
@@ -563,8 +699,9 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     cache_path = STATE / "public-cache.json"
     cache = read_json(cache_path) if cache_path.exists() else {"sources": {}, "kev": {}}
     validate_cache(cache, sources)
-    previous = resume_deployed(sources, cache) if resume_public else None
-    require(not resume_public or previous is not None, "The deployed snapshot could not be resumed safely; preserving the current publication.")
+    previous, resume_reason = resume_deployed(sources, cache) if resume_public else (None, None)
+    require(not resume_public or previous is not None,
+            "The deployed snapshot could not be resumed safely (" + str(resume_reason) + "); preserving the current publication.")
     cve_path = STATE / "cve-projections.json"
     retained = read_json(cve_path) if cve_path.exists() else {}
     require(isinstance(retained, dict) and len(retained) <= 15000, "Invalid retained CVE projections.")
@@ -580,6 +717,10 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
             cache = {"sources": {key: future.result() for key, future in futures.items()}, "kev": kev_future.result()}
         validate_cache(cache, sources)
         require(any(item.get("status") in {"ok", "partial"} for item in [*cache["sources"].values(), cache["kev"]]), "No live source succeeded; the previously deployed snapshot must remain available.")
+    failures = [{"id": key, "error": item.get("error")} for key, item in [*sorted(cache["sources"].items()), ("cisa-kev", cache["kev"])]
+                if item.get("status") == "failed"]
+    for failure in failures:
+        print("Source " + failure["id"] + " failed: " + str(failure["error"]), file=sys.stderr)
     health, articles = [], []
     for source in sources:
         observation = cache["sources"].get(source["id"], {})
@@ -635,7 +776,6 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
             article = {**article, "cves": sorted(set(article["cves"]) | set(selected[canonical]["cves"]))}
             validate_article(article)
         selected[canonical] = {**article, "url": canonical}
-    require(len(selected) <= MAX_ARTICLES, "Article collection exceeds its limit.")
     ordered = sorted(selected.values(), key=article_date, reverse=True)
     require(ordered, "No articles are available in the selected window; preserving the previous deployment.")
     require(len({article["id"] for article in ordered}) == len(ordered), "Article identities must be unique.")
@@ -645,7 +785,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     briefs = apply_mitigation_context(briefs, context)
     # Report inputs belong to the owner's desktop compiler; a bad catalog never blocks the feed.
     intelligence, reports = compose_with_reports(ROOT, briefs, safe_url, inputs=intelligence_inputs)
-    snapshot = {"schema_version": 6, "generated_at": now(), "window": {"start": start.isoformat(), "end": end.isoformat()},
+    snapshot = {"schema_version": SNAPSHOT_VERSION, "generated_at": now(), "window": {"start": start.isoformat(), "end": end.isoformat()},
         "articles": ordered, "sources": health, "history_reviewed_at": history.get("curated_at"),
         "mitigations": briefs, "mitigation_coverage": mitigation_stats, "deduplication": {"url_duplicates_removed": duplicates},
         "refresh": {"requested_minutes": 10, "mode": "scheduled-check", "status_url": "https://github.com/TeamStarWolf/intelligence-hub/actions/workflows/publish.yml",
@@ -658,31 +798,39 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     if reports["status"] == "unavailable":
         snapshot["coverage"]["notes"].append("Reports unavailable in this run: " + reports["reason"] + ". Feed collection continued without report listings.")
     snapshot["intelligence"] = intelligence
+    snapshot["brief_index"] = brief_index(briefs)
     snapshot["content_revision"] = content_revision(snapshot)
     snapshot["layout_revision"] = hashlib.sha256(b"".join((ROOT / "site" / name).read_bytes() for name in ("index.html", "styles.css", "app.js", "icon.svg"))).hexdigest()
     # Refuse before replacing either public output or newly collected caches.
+    rows = check_rows(len(snapshot["articles"]), len(snapshot["mitigations"]))
     validate_snapshot(snapshot)
-    require(len(json.dumps(snapshot, ensure_ascii=False, allow_nan=False, separators=(",", ":")).encode("utf-8")) <= 16 * 1024 * 1024,
-            "Snapshot exceeds its existing whole-input byte bound.")
     changed = previous is None or previous.get("content_revision") != snapshot["content_revision"] or previous.get("layout_revision") != snapshot["layout_revision"]
-    if refresh:
-        write_json(cache_path, cache)
-        write_json(cve_path, projections, compact=True)
     # Group final wire members for compression; canonical content meaning is unchanged.
     snapshot["mitigations"] = dict(sorted(snapshot["mitigations"].items(), key=lambda item: (
         " ".join(product.get("vendor", "") + " " + product.get("product", "")
                  for product in item[1]["products"]).casefold(), item[0])))
-    write_json(ROOT / "site/data/feed.json", snapshot, compact=True)
+    snapshot["articles"] = wire_articles(snapshot["articles"])
+    feed, briefs_file = split_publication(snapshot)
+    feed_raw, briefs_raw = public_bytes(feed), public_bytes(briefs_file)
+    bounds = check_bounds(feed_raw, briefs_raw)
+    if refresh:
+        write_json(cache_path, cache)
+        write_json(cve_path, projections, compact=True)
+    # Briefs first: a reader that sees the new feed can then also read its briefs.
+    write_raw(ROOT / "site/data/briefs.json", briefs_raw)
+    write_raw(ROOT / "site/data/feed.json", feed_raw)
     result = {"articles": len(ordered), "source_ok": sum(item["status"] == "ok" for item in health),
         "source_partial": sum(item["status"] == "partial" for item in health), "source_total": len(health),
-        "coverage": snapshot["coverage"], "mitigations": mitigation_stats, "reports": reports, "changed": changed, "generated_at": snapshot["generated_at"]}
+        "coverage": snapshot["coverage"], "mitigations": mitigation_stats, "reports": reports, "changed": changed, "generated_at": snapshot["generated_at"],
+        "schema_version": SNAPSHOT_VERSION, "publication": bounds, "rows": rows, "source_failures": failures[:100]}
     write_json(STATE / "collection-result.json", result)
     return result
 
 
 def content_revision(snapshot):
     # Retrieval clocks alone do not create a new public artifact or reset source freshness.
-    value = {key: item for key, item in snapshot.items() if key not in {"generated_at", "content_revision", "layout_revision"}}
+    # brief_index is derived from mitigations, so it adds nothing to the revision.
+    value = {key: item for key, item in snapshot.items() if key not in {"generated_at", "content_revision", "layout_revision", "brief_index"}}
     source_values = []
     for source in snapshot["sources"]:
         item = {key: value for key, value in source.items() if key not in {"last_attempt", "last_success", "sha256"}}
@@ -695,12 +843,39 @@ def content_revision(snapshot):
     return hashlib.sha256(json.dumps(value, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
 
 
+def deployed_files():
+    """Fetch the deployed feed and, for schema 7, its briefs file, joined into one snapshot.
+
+    Both are fetched with no-cache headers. If the CDN still hands back files from two
+    different runs (a deploy landed between the two reads), both are fetched once more.
+    """
+    from .mitigations import SNAPSHOT_MISMATCH, join_publication
+    for attempt in (1, 2):
+        raw = fetch(PUBLIC_FEED, FETCH_CEILING, fresh=True)
+        previous = json.loads(raw, parse_constant=reject_constant)
+        require(isinstance(previous, dict) and type(previous.get("schema_version")) is int and previous["schema_version"] in (1, 2, 3, 4, 5, 6, 7), "Unsupported deployed snapshot.")
+        if previous["schema_version"] != 7:
+            return previous
+        require(len(raw) <= FEED_MAX_BYTES, "The deployed feed exceeds its byte bound.")
+        briefs_raw = fetch(PUBLIC_BRIEFS, FETCH_CEILING, fresh=True)
+        require(len(briefs_raw) <= BRIEFS_MAX_BYTES, "The deployed briefs file exceeds its byte bound.")
+        try:
+            return join_publication(previous, json.loads(briefs_raw, parse_constant=reject_constant))
+        except ValueError as error:
+            if attempt == 2 or str(error) != SNAPSHOT_MISMATCH:
+                raise
+            print("Resume: the deployed feed and briefs came from different runs; fetching both once more.", file=sys.stderr)
+
+
 def resume_deployed(sources, cache):
-    """Use only this hub's fixed public snapshot as an additional, validated history input."""
+    """Use only this hub's fixed public snapshot as an additional, validated history input.
+
+    Returns (snapshot, None), or (None, reason) when the deployed files cannot be used.
+    A schema 7 snapshot is two files; both must load and belong to the same run.
+    """
     try:
-        previous = json.loads(fetch(PUBLIC_FEED, 16 * 1024 * 1024), parse_constant=reject_constant)
-        require(isinstance(previous, dict) and type(previous.get("schema_version")) is int and previous["schema_version"] in (1, 2, 3, 4, 5, 6), "Unsupported deployed snapshot.")
-        if previous["schema_version"] in (5, 6):
+        previous = deployed_files()
+        if previous["schema_version"] in (5, 6, 7):
             from .archive import validate_snapshot
             validate_snapshot(previous)
         else:
@@ -712,7 +887,7 @@ def resume_deployed(sources, cache):
             require(isinstance(window, dict) and set(window) == {"start", "end"}, "Missing legacy coverage window.")
             begin, finish = (date.fromisoformat(window[key]) for key in ("start", "end"))
             validate_window(begin, finish, previous["schema_version"])
-        require(isinstance(previous.get("articles"), list) and len(previous["articles"]) <= MAX_ARTICLES, "Invalid deployed articles.")
+        require(isinstance(previous.get("articles"), list) and (previous["schema_version"] == 7 or len(previous["articles"]) <= LEGACY_MAX_ARTICLES), "Invalid deployed articles.")
         require(isinstance(previous.get("sources"), list) and len(previous["sources"]) <= 100, "Invalid deployed source ledger.")
         registry = {source["id"]: source for source in sources}
         retained = {}
@@ -727,7 +902,7 @@ def resume_deployed(sources, cache):
             require(isinstance(observation, dict) and isinstance(observation.get("id"), str), "Invalid deployed source identity.")
             source_id = observation["id"]
             require(source_id not in observations, "Duplicate deployed source identity.")
-            if previous["schema_version"] in (4, 5, 6):
+            if previous["schema_version"] in (4, 5, 6, 7):
                 require("configured_selection" in observation, "Missing deployed selection configuration.")
                 configured = observation["configured_selection"]
                 if source_id == "cisa-kev":
@@ -743,7 +918,7 @@ def resume_deployed(sources, cache):
             # The initial schema did not publish response hashes; preserve dates without inventing a hash.
             if projected["status"] == "ok" and projected["sha256"] is None and previous["schema_version"] == 1:
                 projected["status"] = "not_fetched"
-            validate_observation(projected, source=registry.get(source_id), kev=source_id == "cisa-kev", allow_selection=previous["schema_version"] in (4, 5, 6))
+            validate_observation(projected, source=registry.get(source_id), kev=source_id == "cisa-kev", allow_selection=previous["schema_version"] in (4, 5, 6, 7))
             observations[source_id] = projected
         for source_id, articles in retained.items():
             old = cache["sources"].get(source_id, {})
@@ -755,6 +930,6 @@ def resume_deployed(sources, cache):
             proposed["sources"][source_id] = {**observation, "articles": sorted(combined.values(), key=article_date, reverse=True)[:600]}
         validate_cache(proposed, sources)
         cache.update(proposed)
-        return previous
-    except (OSError, ValueError, TypeError, KeyError, RecursionError):
-        return None
+        return previous, None
+    except (OSError, ValueError, TypeError, KeyError, RecursionError) as error:
+        return None, failure_reason(error, "deployed snapshot unavailable or rejected")

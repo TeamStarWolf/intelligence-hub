@@ -10,6 +10,7 @@ from .intelligence import CWE, plain, validate_weaknesses
 
 CVE_ID = re.compile(r"CVE-[0-9]{4}-[0-9]{4,8}")
 MAX_RECORDS = 15000
+SNAPSHOT_MISMATCH = "The briefs file belongs to a different feed snapshot."
 
 
 def reject_constant(_value):
@@ -225,8 +226,11 @@ def merge_retained(local, remote, cve, safe_url, normalize_date):
 
 def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, safe_url, normalize_date, stamp):
     wanted = sorted({cve for article in articles for cve in article["cves"]}, reverse=True)
-    if len(wanted) > MAX_RECORDS or not isinstance(retained, dict):
-        raise ValueError("CVE projection count exceeds its bound.")
+    if not isinstance(retained, dict):
+        raise ValueError("Invalid retained CVE projections.")
+    if len(wanted) > MAX_RECORDS:
+        raise ValueError("The articles link " + format(len(wanted), ",") + " CVEs, over the " + format(MAX_RECORDS, ",") +
+                         "-brief ceiling. Nothing was evicted; the deployed publication is preserved.")
     records = {cve: normalize_weaknesses(retained[cve], cve) if cve in retained and valid_projection(retained[cve], cve, safe_url, normalize_date) else blank(cve) for cve in wanted}
     current = datetime.fromisoformat(stamp)
 
@@ -302,3 +306,44 @@ def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, saf
         "needs_review": sum(value["analysis"]["guidance_status"] == "needs-review" for value in result.values()),
         "attempted_this_run": len(pending) if refresh else 0}
     return result, records, stats
+
+
+# The public site splits one snapshot into two files. data/feed.json keeps a
+# compact row per CVE for list views; data/briefs.json holds the full briefs and
+# is read only when a reader opens one.
+INDEX_FIELDS = ("record_state", "source_status", "guidance_status", "required_action",
+                "cvss_score", "cvss_version", "kev_date_added", "weaknesses")
+BRIEFS_KEYS = {"schema_version", "feed_schema_version", "generated_at", "content_revision", "briefs"}
+
+
+def index_row(brief):
+    cvss = brief.get("cvss") or {}
+    kev = brief.get("kev") or {}
+    return [brief["record_state"], brief["source_status"], brief["analysis"]["guidance_status"],
+            bool(brief["required_action"]), cvss.get("score"), cvss.get("version"), kev.get("date_added"),
+            [item["id"] for item in brief.get("weaknesses", [])]]
+
+
+def brief_index(briefs):
+    """The per-CVE fields that list views, filters and counts need, in CVE order."""
+    return {"version": 1, "fields": list(INDEX_FIELDS), "rows": {cve: index_row(briefs[cve]) for cve in sorted(briefs)}}
+
+
+def split_publication(snapshot):
+    """One validated snapshot becomes the feed file and the briefs file."""
+    feed = {key: value for key, value in snapshot.items() if key != "mitigations"}
+    briefs = {"schema_version": 1, "feed_schema_version": snapshot["schema_version"], "generated_at": snapshot["generated_at"],
+              "content_revision": snapshot["content_revision"], "briefs": snapshot["mitigations"]}
+    return feed, briefs
+
+
+def join_publication(feed, briefs):
+    """Rejoin the two public files of one run; files from different runs are refused."""
+    if not isinstance(feed, dict) or "mitigations" in feed or not isinstance(briefs, dict) or set(briefs) != BRIEFS_KEYS:
+        raise ValueError("Unexpected feed or briefs file fields.")
+    if type(briefs["schema_version"]) is not int or briefs["schema_version"] != 1 or not isinstance(briefs["briefs"], dict):
+        raise ValueError("Unsupported briefs file.")
+    if (briefs["feed_schema_version"] != feed.get("schema_version") or briefs["generated_at"] != feed.get("generated_at")
+            or briefs["content_revision"] != feed.get("content_revision")):
+        raise ValueError(SNAPSHOT_MISMATCH)
+    return {**feed, "mitigations": briefs["briefs"]}

@@ -4,6 +4,7 @@ import unittest
 
 import support
 from intelligence_hub.archive import validate_snapshot
+from intelligence_hub.mitigations import join_publication
 
 
 class FixtureTest(unittest.TestCase):
@@ -24,7 +25,12 @@ class FixtureTest(unittest.TestCase):
             kev = [article for article in feed["articles"] if article["origin"] == "cisa-kev"]
             self.assertEqual(sorted(article["cves"][0] for article in kev), ["CVE-2026-99991", "CVE-2026-99992"])
             self.assertEqual(result["coverage"]["kev_records"], 2)
-            self.assertIn("CVE-2026-99991", feed["mitigations"])
+            self.assertNotIn("mitigations", feed)
+            self.assertIn("CVE-2026-99991", feed["brief_index"]["rows"])
+            briefs = copy.briefs()
+            self.assertIn("CVE-2026-99991", briefs["briefs"])
+            validate_snapshot(join_publication(feed, briefs))
+            self.assertIn("data/feed.json: ", output)  # headroom is printed on every run
             self.assertTrue(all(article["summary"] == "" for article in feed["articles"] if article["origin"] == "publisher-feed"))
         finally:
             copy.close()

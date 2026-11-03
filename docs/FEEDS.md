@@ -1,8 +1,74 @@
 # Publisher feeds and bookmark intake
 
+## Schema 7: a separate briefs file, byte bounds and date zones
+
+The collector writes schema 7. Each run turns one validated snapshot into two
+public data files:
+
+- `data/feed.json` holds the articles, the source ledger, the curated context and
+  `brief_index`: one compact row per linked CVE with the fields that list views,
+  filters and counts use (`record_state`, `source_status`, `guidance_status`,
+  `required_action`, `cvss_score`, `cvss_version`, `kev_date_added` and
+  `weaknesses`).
+- `data/briefs.json` holds the full CVE briefs. Its `generated_at` and
+  `content_revision` match the feed it belongs to. CNA titles and
+  vendor and product names live only here, so the site reads it the first time
+  a reader opens a brief, opens the CVE register or searches; search results
+  gain those names once it has loaded, and an open register reads the new file
+  when a later snapshot arrives. The site refuses a briefs file from a
+  different run.
+
+The owner's separate desktop compiler read schema 6 feeds, which carried the
+briefs inline. From schema 7 it must read `data/briefs.json` as well, matched to
+the feed on `generated_at` and `content_revision`, or its report editions lose
+their CVE brief rows.
+
+There is no longer an 8,000-article abort. Each file has a byte bound instead:
+**8 MiB** for `data/feed.json` and **12 MiB** for `data/briefs.json`. Two count
+ceilings sit beside them. The feed holds at most **27,962 article rows**, a number
+derived from its byte bound (8,388,608 bytes / 300 bytes per row). The smallest
+live row is 363 bytes and the average is about 480, so at real sizes the byte
+bound is reached first. The briefs file holds at most **15,000 CVE briefs**. Every
+run prints each file's size, its byte headroom and a gzip estimate, then the row
+count and row headroom for both ceilings. A run that would cross a bound or a
+ceiling fails with a message that names it, and the deployed publication stays.
+No row is evicted to make room, because the deployed files are the only durable
+store of live rows, and KEV and curated rows are never trimmed. The site and the
+archive validator check the same bounds and ceilings.
+
+These bounds are the next wall, not a permanent one. A bounded run on
+3 November 2026 wrote 9,019,252 of the 12,582,912 briefs bytes (2,385 briefs,
+about 3,780 bytes each, 3,563,660 bytes free). New CVEs arrived at about 15 to
+21 a day in October and early November, which is about 55 to 80 KB of briefs a
+day, so the 12 MiB briefs bound is crossed between mid-December 2026 and early
+January 2027. The unchanged 21 MiB publish input cap (12,588,722 bytes for the
+feed, the briefs and the site on that run, growing about 100 to 150 KB a day) is
+crossed in January or February 2027. A run that crosses either fails and the
+site keeps its last publication, so the next data layout must land before
+mid-December.
+
+Publisher responses keep the **3 MiB** default bound. A source can set its own
+`max_bytes` in `config/sources.json`, up to a **16 MiB** fetch ceiling. The CISA
+all-advisories feed (5,897,554 bytes on 3 November 2026) and the CISA ICS
+advisories feed (6,176,856 bytes) carry 8 MiB. Reads use `read1`, so the
+30-second deadline is checked between short reads. A truncated chunked body or a
+body shorter than its declared length is a failed read for that source, not an
+aborted run. Each failure records its cause in the ledger and the run log, and a
+failed resume of the deployed snapshot names its reason.
+
+CET and CEST zone names, which CERT-EU uses, convert to UTC. A stamp with no zone
+at all (Cisco PSIRT writes `2026-11-02 21:16:10.0`) is read as UTC, and the row's
+date basis says so: `publication, zone not stated, read as UTC`. Rows retained
+from earlier runs keep the dates they were stored with, so a row stored undated
+before this change stays undated.
+
+The collector and the site still read a schema 6 feed, which carries its briefs
+inline under `mitigations`, so the first run after the change resumes from the
+deployed schema 6 snapshot.
+
 ## Schema 6 since 1998 window and unchanged source intake
 
-The current producer writes schema 6; its publisher ledgers and partial-intake
+Schema 6 was the producer format before schema 7; its publisher ledgers and partial-intake
 contract retain schema 4's exact selection/configuration/hash/time/count
 semantics. Other sources still use document order and F5 alone uses the reviewed
 bounded date ranking below. Rejected, filtered and duplicate entries consume
@@ -23,7 +89,8 @@ is fixed since 1998; the limit is a technical review horizon, not full coverage.
 Schema 5 keeps 7,306 days and older readers keep their 3,661-day profile. The existing 3 MiB publisher response, strict UTF-8, DTD/entity rejection,
 40,000-node/depth-48 XML, 100-CVE whole-entry rejection, 150 normalization,
 600 retained articles per source, 500 curation entries, 8,000 total articles,
-16 MiB resume, 3,000,000-byte package and one-day artifact-retention guards remain.
+16 MiB resume, 3,000,000-byte package and one-day artifact-retention guards applied
+to schema 6. Schema 7 replaces the 8,000-article limit with the per-file byte bounds above and the 27,962-row ceiling derived from the feed bound.
 Neither the broader window nor a source's accepted input proves complete history
 or timely reporting. Known modern schema 5/6 fields on legacy labels are refused;
 there is no metadata stripping or silent downconversion.
@@ -38,9 +105,9 @@ and manual runs add extra collections.
 
 ## What is configured
 
-The catalog contains **61 publisher RSS/Atom sources**, counting feed definitions rather than unique publishers. The first 29 comprise ten retained sources, sixteen additions from the repository owner's public [cybersecurity-resources bookmarks](https://github.com/TeamStarWolf/cybersecurity-resources/blob/f95fb4a3fae14acfa172c22507a1554339cb3655/LINKS.md), and three further requested publishers: watchTowr Labs, Dark Reading and the legacy Threatpost archive. A further 29 advisory, research and reporting feeds, one separately scoped Talos category feed, the Qualys Security Blog and a separately scoped CISA category feed are listed below. The fixed configuration is [sources.json](../config/sources.json). CISA KEV is a separate JSON catalog and is not included in this RSS count. Curated historical publications are also a separate input. SEC filings are not connected by this feed intake.
+The catalog contains **62 publisher RSS/Atom sources**, counting feed definitions rather than unique publishers. The first 29 comprise ten retained sources, sixteen additions from the repository owner's public [cybersecurity-resources bookmarks](https://github.com/TeamStarWolf/cybersecurity-resources/blob/f95fb4a3fae14acfa172c22507a1554339cb3655/LINKS.md), and three further requested publishers: watchTowr Labs, Dark Reading and the legacy Threatpost archive. A further 30 advisory, research and reporting feeds (including the CISA ICS advisories feed added with schema 7), one separately scoped Talos category feed, the Qualys Security Blog and a separately scoped CISA category feed are listed below. The fixed configuration is [sources.json](../config/sources.json). CISA KEV is a separate JSON catalog and is not included in this RSS count. Curated historical publications are also a separate input. SEC filings are not connected by this feed intake.
 
-Configured does not mean every source is currently healthy. The site records each collection attempt and last accepted input. The retained CISA advisory feed failed the initial production intake; its configured address is preserved and its failure remains visible. No replacement CISA advisory URL was established by this expansion. A failed source is not evidence that its publisher has no new advisories.
+Configured does not mean every source is currently healthy. The site records each collection attempt and last accepted input. The retained CISA advisory feed failed the initial production intake. Since schema 7 it is read under its own 8 MiB bound, and a run reports it as partial when it rejects entries that break the 100-CVE whole-entry rule. No replacement CISA advisory URL was established by this expansion. A failed source is not evidence that its publisher has no new advisories.
 
 The nineteen additions returned direct HTTPS 200 responses with bounded, parseable RSS/Atom and usable HTTPS article links during intake on **24 October 2026**. Threatpost's returned publication dates stop in August 2022: its live transport does not make its reporting current. These are dated transport and structure observations, not promises of continued availability, complete archives, publisher authenticity beyond the observed HTTPS endpoint, factual correctness or permission to reproduce full articles. Scheduled collection and browser behavior are separate evidence.
 
@@ -48,7 +115,8 @@ The nineteen additions returned direct HTTPS 200 responses with bounded, parseab
 
 | Publisher | Feed | Source role |
 | --- | --- | --- |
-| [CISA](https://www.cisa.gov/cybersecurity-advisories) | [RSS](https://www.cisa.gov/cybersecurity-advisories/all.xml) | Government advisories; initial production read failed |
+| [CISA](https://www.cisa.gov/cybersecurity-advisories) | [RSS](https://www.cisa.gov/cybersecurity-advisories/all.xml) | Government advisories; read under its own 8 MiB bound since schema 7 |
+| [CISA ICS advisories](https://www.cisa.gov/news-events/ics-advisories) | [RSS](https://www.cisa.gov/cybersecurity-advisories/ics-advisories.xml) | Government industrial control system advisories; added with schema 7 under an 8 MiB bound |
 | [CERT-EU](https://cert.europa.eu/publications/security-advisories/) | [RSS](https://cert.europa.eu/publications/security-advisories-rss) | Government/CERT advisories |
 | [Microsoft Security](https://www.microsoft.com/en-us/security/blog/) | [RSS](https://www.microsoft.com/en-us/security/blog/feed/) | Vendor research |
 | [Google Threat Intelligence](https://cloud.google.com/blog/topics/threat-intelligence) | [RSS](https://feeds.feedburner.com/threatintelligence/pvexyqv7v0v) | Vendor research; publisher-linked FeedBurner endpoint |
@@ -97,8 +165,8 @@ Exact article-host allowlists are recorded per source. Publisher feed and articl
 
 ### Partial intake and entry accounting
 
-New snapshots use schema 6. The site reads validated schemas 2, 3, 4, 5 and 6; the
-collector can resume validated schemas 1 through 6. Legacy observations without
+New snapshots use schema 7. The site reads validated schemas 2 to 7; the
+collector can resume validated schemas 1 through 7. Legacy observations without
 an intake report have **unknown entry-window coverage**. A legacy report without
 selection metadata has an **unrecorded selection basis**, even if its status was
 successful or it is retained inside a schema 4/5/6 snapshot. CISA KEV is a separate
@@ -192,7 +260,7 @@ coordinated release and rollback. Older collectors can ignore the new catalog
 option and retain document order; older site readers can reject schema 4. Do not
 silently strip selection fields, relabel new data as legacy or mix incompatible
 versions. Existing safeguards remain: 150 normalizations, 100 CVEs per entry,
-600 retained articles per source, 8,000 total articles, 16 MiB public-resume input,
+600 retained articles per source, the schema 7 per-file byte bounds, 16 MiB public-resume input,
 the 3,000,000-byte compressed artifact estimate guard and one-day artifact
 retention, alongside the whole-response/XML bounds above.
 
@@ -200,7 +268,8 @@ retention, alongside the whole-response/XML bounds above.
 
 The fixed reason `response_byte_limit_exceeded` identifies an attempt that
 crossed its configured response-byte bound before a complete input was accepted.
-The publisher-feed and KEV response cap remains **3 MiB**. A failed read does not
+The default publisher-feed and KEV response cap is **3 MiB**; a source's own
+`max_bytes` can raise it up to 16 MiB. A failed read does not
 establish the full response size, a complete-body hash, valid XML or admitted
 entries. The collector does not parse or admit a truncated prefix.
 
@@ -246,7 +315,7 @@ Source expansion authorizes no automatic remediation, network/device inspection,
 
 ## Further source expansion
 
-The owner requested broader coverage after the first 29-source intake. A further **29 feeds** passed bounded public HTTPS intake, bringing that checkpoint to **58 configured feeds**. The separately scoped Talos category brought the next checkpoint to **59**; Qualys brought it to **60**, and the separately scoped CISA category below brings the current total to **61**, plus the separate CISA KEV catalog. These are configured inputs, not a guarantee that all remain healthy or that their items are distinct incidents.
+The owner requested broader coverage after the first 29-source intake. A further **29 feeds** passed bounded public HTTPS intake, bringing that checkpoint to **58 configured feeds**. The separately scoped Talos category brought the next checkpoint to **59**; Qualys brought it to **60**, and the separately scoped CISA category below brought it to **61**, and the CISA ICS advisories feed added with schema 7 brings the current total to **62**, plus the separate CISA KEV catalog. These are configured inputs, not a guarantee that all remain healthy or that their items are distinct incidents.
 
 | Publisher | Feed | Role |
 | --- | --- | --- |

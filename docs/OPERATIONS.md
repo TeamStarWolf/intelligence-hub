@@ -25,7 +25,7 @@ are retained during background snapshot updates.
 
 ## Interpret evidence before action
 
-The configured inputs are **61 RSS/Atom publisher feeds**, CISA KEV and **74 curated
+The configured inputs are **62 RSS/Atom publisher feeds**, CISA KEV and **74 curated
 primary publications**. A configured feed is not necessarily healthy. Recent RSS,
 bounded retained items and manual curation do not form a complete historical archive.
 See [feed evidence](FEEDS.md) and [history coverage](SOURCES.md).
@@ -269,10 +269,11 @@ The package must contain exactly:
 - `app.js`
 - `icon.svg`
 - `data/feed.json`
+- `data/briefs.json`
 
 Symlinks, hard-linked files, other file types and unexpected directories are
 rejected. Actual file content must total at most **21 MiB**. The workflow builds
-an in-memory tar from those five contents and estimates compression using both
+an in-memory tar from those six contents and estimates compression using both
 gzip and zlib at level 6. If the larger estimate exceeds **3,000,000 bytes**, it
 fails before artifact upload. The previous live site remains in place.
 
@@ -398,7 +399,7 @@ than its bound (65,536 bytes for the catalog, 16,384 for the configuration) or
 invalid, the run still publishes the feed, the report listing is marked
 unavailable, and both a coverage note on the site and the `reports` field of
 `.state/collection-result.json` name the reason. No remote resume metadata becomes local configuration. The public report files remain
-GitHub-linked outside the unchanged five-file Pages artifact.
+GitHub-linked outside the six-file Pages artifact.
 
 The reporting policy has daily slots at **06:00, 14:00 and 22:00 America/Chicago**,
 covering the prior 24 elapsed hours on weekdays and 48 on weekends. It also

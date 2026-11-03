@@ -73,7 +73,7 @@ jobs:
           import tarfile
           import zlib
           from pathlib import Path
-          expected = {'index.html', 'styles.css', 'app.js', 'icon.svg', 'data/feed.json'}
+          expected = {'index.html', 'styles.css', 'app.js', 'icon.svg', 'data/feed.json', 'data/briefs.json'}
           root = Path('site')
           if not stat.S_ISDIR(root.lstat().st_mode) or root.is_symlink():
               raise SystemExit('The public site must be an ordinary directory.')
@@ -108,6 +108,7 @@ jobs:
                   with path.open('rb') as source:
                       content = source.read(maximum_input - total + 1)
                   total += len(content)
+                  print('Public file ' + name + ': ' + str(len(content)) + ' bytes')
                   if total > maximum_input:
                       raise SystemExit('The public site exceeds its package limit.')
                   info = tarfile.TarInfo('./' + name)
