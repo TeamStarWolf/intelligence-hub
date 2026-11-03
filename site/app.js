@@ -1021,7 +1021,7 @@
     } finally { clearTimeout(timeout); }
   }
 
-  // Briefs load once per snapshot, on the first brief opened or the first CVE register view.
+  // Briefs load once per snapshot, on the first brief opened, register view or search.
   function loadBriefs(saved) {
     if (saved.briefs) return Promise.resolve(saved.briefs);
     if (!saved.briefsRequest) saved.briefsRequest = readBriefs(saved).finally(() => { saved.briefsRequest = null; });
