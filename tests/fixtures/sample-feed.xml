@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Fixture feed for offline tests</title>
+    <link>https://www.cisa.gov/</link>
+    <description>Synthetic entries. Not a real publisher feed.</description>
+    <item>
+      <title>Fixture advisory one</title>
+      <link>https://www.cisa.gov/fixture/advisory-one</link>
+      <pubDate>Mon, 26 Oct 2026 14:00:00 GMT</pubDate>
+      <description>Synthetic entry that mentions CVE-2026-99991.</description>
+    </item>
+    <item>
+      <title>Fixture advisory two</title>
+      <link>https://www.cisa.gov/fixture/advisory-two?utm_source=feed</link>
+      <pubDate>2026-10-28T09:30:00Z</pubDate>
+      <description>Synthetic entry without a CVE mention.</description>
+    </item>
+    <item>
+      <title>Fixture entry with an off-allowlist link</title>
+      <link>https://elsewhere.invalid-host.org/fixture</link>
+      <pubDate>Tue, 27 Oct 2026 10:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

@@ -28,6 +28,14 @@ Neither the broader window nor a source's accepted input proves complete history
 or timely reporting. Known modern schema 5/6 fields on legacy labels are refused;
 there is no metadata stripping or silent downconversion.
 
+## How often feeds are read
+
+The publish workflow asks GitHub for a run every ten minutes, but GitHub starts
+scheduled runs only every few hours: between 30 October and 3 November 2026 the
+gaps were about 3 to 10 hours. Each run reads every configured feed once, so a
+new publisher item can take several hours to reach the site. Pushes to `main`
+and manual runs add extra collections.
+
 ## What is configured
 
 The catalog contains **61 publisher RSS/Atom sources**, counting feed definitions rather than unique publishers. The first 29 comprise ten retained sources, sixteen additions from the repository owner's public [cybersecurity-resources bookmarks](https://github.com/TeamStarWolf/cybersecurity-resources/blob/f95fb4a3fae14acfa172c22507a1554339cb3655/LINKS.md), and three further requested publishers: watchTowr Labs, Dark Reading and the legacy Threatpost archive. A further 29 advisory, research and reporting feeds, one separately scoped Talos category feed, the Qualys Security Blog and a separately scoped CISA category feed are listed below. The fixed configuration is [sources.json](../config/sources.json). CISA KEV is a separate JSON catalog and is not included in this RSS count. Curated historical publications are also a separate input. SEC filings are not connected by this feed intake.

@@ -3,8 +3,8 @@
 ## Read the desk
 
 Open the public GitHub Pages address in a desktop or phone browser. Reading does
-not require sign-in or a connection to the owner's home network. Actual rendering
-and assistive-technology behavior still require owner review.
+not require sign-in. Actual rendering and assistive-technology behavior still
+require owner review.
 
 Use **Intelligence explorer** to search; all entered words must match. Filter by
 Kind, Source, Exploitation or CVE guidance, then navigate calendar years/months or
@@ -66,11 +66,16 @@ not scan an environment, patch a device, execute commands or verify remediation.
 After any separately authorized change, verify the installed product/configuration
 against current vendor guidance and retain evidence.
 
-## Ten-minute checks and publication
+## Collection schedule and publication
 
 GitHub Actions requests collection at minutes **2, 12, 22, 32, 42 and 52** of every UTC hour,
 as well as on pushes to `main` and manual dispatch. Manual action:
 repository **Actions → Refresh and publish Intelligence Hub → Run workflow**.
+
+In practice GitHub starts the scheduled run only every few hours. Between
+30 October and 3 November 2026 the gaps between scheduled runs were about 3 to
+10 hours. Treat the ten-minute request as an upper bound on how often collection
+can happen, not as the real cadence.
 
 GitHub documents a five-minute minimum, default-branch execution, possible delays
 or dropped jobs under load, and disabling after 60 days of public-repository
@@ -284,7 +289,8 @@ tar/ZIP metadata or proof of actual billed storage. The
 [pinned official upload action](https://github.com/actions/upload-pages-artifact/blob/7b1f4a764d45c48632c6b24a0339c27f5614fb0b/action.yml)
 creates the real artifact, retained for **one day**.
 
-At 144 scheduled publications/day, the estimate budget corresponds to
+At the requested maximum of 144 scheduled publications/day (actual scheduled
+runs are far fewer), the estimate budget corresponds to
 **432 MB (about 412 MiB)** for those artifacts. Manual/push runs, existing artifacts, other
 repositories/Packages usage, actual compression and retention processing remain
 separate. GitHub documents a **500 MB** Free-plan artifact allowance shared with
@@ -316,11 +322,12 @@ CVE records and references are untrusted data and are treated as such.
 
 Only public source, source URLs and approved public curation belong in Git.
 Credentials, local machine paths, research receipts and personal account records
-remain outside Git and Pages. Clifford conversations, device/network inventory
-and private imported collections are separate; this site does not publish them.
+remain outside Git and Pages.
 
-Grok and personal X feeds/bookmarks are not connected. Future article sharing
-needs owner review, supported access and settled eligibility/billing; automatic
+The collector does not call Grok or xAI and does not read X timelines or
+bookmarks. Report editions come from a separate desktop compiler, which names
+its own tools in each edition. Future article sharing from the collector needs
+owner review, supported access and settled eligibility/billing; automatic
 posting is not enabled. API keys must never enter JavaScript.
 
 Direct SEC filing intake is pending after HTTP 403. The SEC filter is not evidence
@@ -384,8 +391,13 @@ was exercised.
 
 Schemas 5 and 6 carry reviewed local `reports/reporting.json`, `reports/catalog.json`
 and `config/intelligence-context.json` projections, with whole-file digests.
-Missing, unknown, malformed or oversized input refuses the candidate; no remote
-resume metadata becomes local configuration. The public report files remain
+A missing, unknown, malformed or oversized `config/intelligence-context.json`
+refuses the candidate. The two `reports/` inputs are written by the owner's
+separate desktop compiler, so they are tolerant: if either is missing, larger
+than its bound (65,536 bytes for the catalog, 16,384 for the configuration) or
+invalid, the run still publishes the feed, the report listing is marked
+unavailable, and both a coverage note on the site and the `reports` field of
+`.state/collection-result.json` name the reason. No remote resume metadata becomes local configuration. The public report files remain
 GitHub-linked outside the unchanged five-file Pages artifact.
 
 The reporting policy has daily slots at **06:00, 14:00 and 22:00 America/Chicago**,
@@ -402,8 +414,9 @@ recorded configuration says configured. It computes Chicago slots using the
 platform time-zone database, including daylight-saving changes; planned,
 paused or unavailable time-zone calculation is displayed explicitly. The
 configuration's observation time is not live scheduler or delivery proof.
-Browser polling and the separate requested ten-minute feed schedule remain
-distinct from reporting slots and source freshness.
+Browser polling and the separate feed schedule (requested every ten minutes,
+run by GitHub every few hours) remain distinct from reporting slots and source
+freshness.
 
 New intelligence-context URLs use the same conservative raw syntax in producer
 and client: lowercase ASCII DNS hosts with an alphabetic final label and no
