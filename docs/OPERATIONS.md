@@ -277,9 +277,13 @@ deploy job receives `pages: write` and `id-token: write`. Checkout does not reta
 credentials, official actions keep immutable commit pins, and no pull-request
 trigger executes untrusted fork code.
 
-The package must match `data/v7/index.json` exactly. Fixed files:
+The package must match `data/v7/index.json` and `site/files.json` exactly. Fixed files:
 
-- `index.html`, `styles.css`, `app.js` and `icon.svg`
+- `site/files.json` and every page file it lists: `index.html`, `styles.css`, `icon.svg`,
+  the `app.js` reload stub for pages cached before the routed shell, and the modules under
+  `js/`. Before packaging, `python -m intelligence_hub.site stamp site` appends the layout
+  revision to the stylesheet and module URLs, so a new deploy never runs with a module cached
+  from an earlier one.
 - `data/feed.json` and `data/briefs.json`, each with the bytes and sha256 the index lists
 - `data/v7/index.json`
 
