@@ -5,9 +5,13 @@ trailing newline, with its rows in a fixed order. The same inputs therefore give
 the same bytes, and a shard's sha256 changes only when that shard's content does.
 data/v7/index.json lists every shard with its path, rows, bytes and sha256, keeps
 the last published runs, and is the manifest that publish.yml checks the Pages
-package against (package_site below).
+package against (package_site below). When the analytics exports are published, index.json also lists
+every file under data/v7/exports/ (intelligence_hub/exports.py) under "exports".
 
-Article rows keep the v6 feed record unchanged; the tagged record arrives later.
+Article rows are the v6 feed record plus a "tagging" block: the controlled-vocabulary
+tags of intelligence_hub/tagging in the compact form that index.json's tagging.layout
+describes. index.json's tagging entry names the tagger version, the vocabulary versions
+and the pinned library commit, or says why tagging was unavailable in that run.
 """
 import gzip
 import hashlib
@@ -32,21 +36,35 @@ DIRECTORY = "data/v7"
 LIVE_MONTHS = 24
 RUNS_KEPT = 20
 REQUESTED_CRON = "7 */2 * * *"
-# Bounds already in force elsewhere: a shard never exceeds the feed's own byte bound,
-# and a resume never reads more index than that either.
-SHARD_MAX_BYTES = FEED_MAX_BYTES
 INDEX_MAX_BYTES = 1024 * 1024
 MAX_SHARDS = 1000
-# Today's Pages package caps (publish.yml). New cap numbers are an owner decision.
-PACKAGE_MAX_INPUT = 21 * 1024 * 1024
-PACKAGE_MAX_COMPRESSED = 3000000
+# Pages package caps (publish.yml runs package_site). These are the caps raised in
+# pull request #7: 192 MiB of input, at most 4,000 files, at most 4 MiB for every v7
+# shard or export file and a 48,000,000-byte compressed estimate. The v6
+# data/feed.json and data/briefs.json keep their own collector byte bounds
+# (FEED_MAX_BYTES, BRIEFS_MAX_BYTES); the per-file cap applies to files under
+# data/v7/ only.
+PACKAGE_MAX_INPUT = 192 * 1024 * 1024
+PACKAGE_MAX_COMPRESSED = 48000000
+PACKAGE_MAX_FILES = 4000
+V7_FILE_MAX_BYTES = 4 * 1024 * 1024
+# A shard never exceeds the feed's own byte bound or the package's per-file cap for v7
+# files, whichever is smaller, so the collector refuses an oversized shard with its own
+# shard-bound message before the package step would reject it.
+SHARD_MAX_BYTES = min(FEED_MAX_BYTES, V7_FILE_MAX_BYTES)
 # CVE brief buckets would copy every brief that data/briefs.json already carries
-# (about 9 MB), which crosses today's 21 MiB package input cap. They are built and
-# tested here but stay unpublished until the owner approves new caps or the v6
-# briefs file retires; cve-index.json says where each brief is read from.
+# (about 9 MB). They are built and tested here but stay unpublished until a later
+# package retires the v6 briefs file; cve-index.json says where each brief is read from.
 CVE_BUCKETS_PUBLISHED = False
-CVE_BUCKETS_PENDING = ("CVE brief buckets wait for the owner's package cap decision; "
+CVE_BUCKETS_PENDING = ("CVE brief buckets are not published yet; "
                        "full briefs are read from data/briefs.json until then.")
+# Analytics exports (intelligence_hub/exports.py) live in data/v7/exports/. A year is one
+# set of files, or one set per month when a year's file would pass V7_FILE_MAX_BYTES.
+EXPORT_DIRECTORY = "exports"
+EXPORT_NAME = re.compile(r"(?:articles-(?:[0-9]{4}(?:-(?:0[1-9]|1[0-2]))?|undated)\.(?:csv|jsonl)"
+                         r"|tags-(?:[0-9]{4}(?:-(?:0[1-9]|1[0-2]))?|undated)\.csv|manifest\.json|data-dictionary\.md)")
+MAX_EXPORT_FILES = 1000
+EXPORT_STATUS = {"ok", "unavailable"}
 TRIGGERS = {"schedule", "push", "workflow_dispatch", "local", "unrecorded"}
 # CISA writes "BOD 22-01", "ED 24-01", "Emergency Directive 26-03" and
 # "Emergency Directive (ED) 25-03"; every form is normalized to BOD or ED.
@@ -62,7 +80,7 @@ SHARD_PATH = re.compile(r"(?:sources|coverage|reports|cve-index)\.json"
                         r"|history/(?:[0-9]{4}|undated)\.json"
                         r"|kev/[0-9]{4}\.json"
                         r"|cve/[0-9]{4}/[0-9]{1,5}k\.json")
-SHARD_DIRECTORY = re.compile(r"live|history|kev|cve|cve/[0-9]{4}")
+SHARD_DIRECTORY = re.compile(r"live|history|kev|cve|cve/[0-9]{4}|exports")
 SITE_FILES = ("index.html", "styles.css", "app.js", "icon.svg")
 V6_FILES = ("data/feed.json", "data/briefs.json")
 INDEX_KEYS = {"schema_version", "generated_at", "content_date", "content_revision", "feed_content_revision",
@@ -312,7 +330,31 @@ def run_chain(previous_runs, generated_at, trigger, seed=None):
     return ([{"generated_at": generated_at, "trigger": trigger, "changed": True}] + earlier)[:RUNS_KEPT]
 
 
-def build_index(entries, *, generated_at, end, feed_content_revision, layout_revision, runs, counts, v6_files):
+def export_path(path):
+    """True for a path, relative to data/v7, that names an analytics export file."""
+    return (isinstance(path, str) and path.startswith(EXPORT_DIRECTORY + "/") and
+            EXPORT_NAME.fullmatch(path[len(EXPORT_DIRECTORY) + 1:]) is not None)
+
+
+def exports_entry(files=None, reason=None):
+    """index.json's exports entry: every export file with bytes and sha256, or why there are none."""
+    if files:
+        return {"status": "ok", "reason": None,
+                "files": [file_entry(EXPORT_DIRECTORY + "/" + name, files[name]) for name in sorted(files)]}
+    return {"status": "unavailable", "reason": (reason or "exports not built in this run")[:300], "files": []}
+
+
+def exports_changed(previous, entry):
+    """True when this run's export files differ from the ones the previous index listed."""
+    def listing(value):
+        block = value.get("exports") if isinstance(value, dict) else None
+        files = block.get("files", []) if isinstance(block, dict) else []
+        return {item["path"]: item["sha256"] for item in files}
+    return listing(previous) != listing({"exports": entry} if entry is not None else None)
+
+
+def build_index(entries, *, generated_at, end, feed_content_revision, layout_revision, runs, counts, v6_files, tagging=None,
+                exports=None):
     days = [entry["to"] for entry in entries if entry["to"] and (entry["path"].startswith(("live/", "history/")))]
     content_date = max((day for day in days if day <= end.isoformat()), default=None)
     return {"schema_version": SCHEMA_VERSION, "generated_at": generated_at, "content_date": content_date,
@@ -322,7 +364,8 @@ def build_index(entries, *, generated_at, end, feed_content_revision, layout_rev
             "runs": runs, "observed_interval_hours": observed_interval(runs), "requested_cron": REQUESTED_CRON,
             "counts": counts, "shards": entries, "v6_files": v6_files,
             "cve_buckets": {"published": CVE_BUCKETS_PUBLISHED, "note": None if CVE_BUCKETS_PUBLISHED else CVE_BUCKETS_PENDING},
-            "notices": NOTICES}
+            "notices": NOTICES, **({"tagging": tagging} if tagging is not None else {}),
+            **({"exports": exports} if exports is not None else {})}
 
 
 def file_entry(path, raw):
@@ -331,8 +374,9 @@ def file_entry(path, raw):
 
 def validate_index(index):
     """Check an index read back from disk or from the deployed site before anything trusts it."""
-    require(type(index) is dict and set(index) == INDEX_KEYS and type(index["schema_version"]) is int and
-            index["schema_version"] == SCHEMA_VERSION, "Unsupported v7 index.")
+    # tagging and exports are optional, so an index written before either existed still resumes.
+    require(type(index) is dict and INDEX_KEYS <= set(index) <= INDEX_KEYS | {"tagging", "exports"} and
+            type(index["schema_version"]) is int and index["schema_version"] == SCHEMA_VERSION, "Unsupported v7 index.")
     require(isinstance(index["generated_at"], str) and published(index["generated_at"]) and "T" in index["generated_at"], "Invalid v7 index clock.")
     for field in ("content_revision", "feed_content_revision", "layout_revision"):
         require(isinstance(index[field], str) and HEX.fullmatch(index[field]), "Invalid v7 index revision.")
@@ -355,6 +399,24 @@ def validate_index(index):
             require(entry[field] is None or isinstance(entry[field], str) and DAY.fullmatch(entry[field]), "Invalid v7 shard dates.")
         seen.add(entry["path"])
     require(all(name in seen for name in NAMED), "The v7 index is missing a named file.")
+    if "tagging" in index:
+        tagging = index["tagging"]
+        require(type(tagging) is dict and tagging.get("status") in {"ok", "unavailable"} and isinstance(tagging.get("tagger_version"), str),
+                "Invalid v7 tagging entry.")
+    if "exports" in index:
+        block = index["exports"]
+        require(type(block) is dict and set(block) == {"status", "reason", "files"} and block["status"] in EXPORT_STATUS and
+                (block["reason"] is None or isinstance(block["reason"], str) and len(block["reason"]) <= 300) and
+                type(block["files"]) is list and len(block["files"]) <= MAX_EXPORT_FILES and
+                (block["status"] == "ok") == bool(block["files"]), "Invalid v7 exports entry.")
+        names = set()
+        for item in block["files"]:
+            require(type(item) is dict and set(item) == {"path", "bytes", "sha256"} and export_path(item["path"]) and
+                    item["path"] not in names and type(item["bytes"]) is int and 0 < item["bytes"] <= V7_FILE_MAX_BYTES and
+                    isinstance(item["sha256"], str) and HEX.fullmatch(item["sha256"]), "Invalid v7 export file entry.")
+            names.add(item["path"])
+        require(not names or {EXPORT_DIRECTORY + "/manifest.json", EXPORT_DIRECTORY + "/data-dictionary.md"} <= names,
+                "The v7 exports entry is missing its manifest or dictionary.")
     require(type(index["v6_files"]) is list and [item.get("path") for item in index["v6_files"] if type(item) is dict] == list(V6_FILES), "Invalid v6 file list.")
     for item in index["v6_files"]:
         require(set(item) == {"path", "bytes", "sha256"} and type(item["bytes"]) is int and item["bytes"] > 0 and
@@ -380,13 +442,17 @@ def local_index(site):
         return None
 
 
-def write_v7(site, raw, index_raw, write_raw):
-    """Write the shards, then index.json, then remove v7 files the new index no longer lists."""
+def write_v7(site, raw, index_raw, write_raw, keep_also=()):
+    """Write the shards, then index.json, then remove v7 files the new index no longer lists.
+
+    keep_also names further files under data/v7 that the index lists and another writer
+    has already written (the analytics exports, which rewrite only changed files).
+    """
     base = Path(site) / DIRECTORY
     for path in sorted(raw):
         write_raw(base / path, raw[path])
     write_raw(base / "index.json", index_raw)
-    keep = set(raw) | {"index.json"}
+    keep = set(raw) | {"index.json"} | set(keep_also)
     for directory, folders, names in os.walk(base, topdown=False):
         for name in names:
             relative = (Path(directory) / name).relative_to(base).as_posix()
@@ -405,12 +471,16 @@ def _refuse(condition, message):
         raise PackageError(message)
 
 
-def package_site(site, max_input=PACKAGE_MAX_INPUT, max_compressed=PACKAGE_MAX_COMPRESSED, out=None):
+def package_site(site, max_input=PACKAGE_MAX_INPUT, max_compressed=PACKAGE_MAX_COMPRESSED, max_files=PACKAGE_MAX_FILES,
+                 max_v7_file=V7_FILE_MAX_BYTES, out=None):
     """Check the site directory against data/v7/index.json, then tar it and estimate its compressed size.
 
     Fixed files: the four page files, the two v6 data files and data/v7/index.json.
-    Data files: exactly the shards the index lists, each with the listed bytes and
-    sha256. No links, no hard links, no other directories. Returns a report dict.
+    Data files: exactly the shards and export files the index lists, each with the
+    listed bytes and sha256. No links, no hard links, no other directories. Caps: the
+    file count, the per-file cap for every file under data/v7/ (the v6 files keep their
+    own collector bounds), the total input and the compressed estimate. Returns a report
+    dict and prints every cap with its headroom.
     """
     out = out or sys.stdout
     root = Path(site)
@@ -441,14 +511,19 @@ def package_site(site, max_input=PACKAGE_MAX_INPUT, max_compressed=PACKAGE_MAX_C
         raise PackageError("The v7 manifest is invalid: " + str(error)) from error
     listed = {DIRECTORY + "/" + entry["path"]: entry for entry in index["shards"]}
     listed.update({item["path"]: item for item in index["v6_files"]})
+    listed.update({DIRECTORY + "/" + item["path"]: item for item in index.get("exports", {}).get("files", [])})
     expected = set(SITE_FILES) | {index_path} | set(listed)
     for name in sorted(files):
         _refuse(name in SITE_FILES or name in V6_FILES or name == index_path or
-                (name.startswith(DIRECTORY + "/") and SHARD_PATH.fullmatch(name[len(DIRECTORY) + 1:])),
+                (name.startswith(DIRECTORY + "/") and (SHARD_PATH.fullmatch(name[len(DIRECTORY) + 1:]) or
+                                                       export_path(name[len(DIRECTORY) + 1:]))),
                 "A file outside the allowlisted patterns would be published: " + name)
     _refuse(not files - expected, "Files not listed in the manifest would be published: " + ", ".join(sorted(files - expected)))
     _refuse(not expected - files, "Files listed in the manifest are missing: " + ", ".join(sorted(expected - files)))
+    _refuse(len(expected) <= max_files, "The public site has " + format(len(expected), ",") + " files, more than its " +
+            format(max_files, ",") + "-file cap.")
     total = 0
+    largest_v7 = 0
     archive = io.BytesIO()
     with tarfile.open(fileobj=archive, mode="w", format=tarfile.USTAR_FORMAT) as tar:
         for directory in ["."] + sorted(directories):
@@ -463,6 +538,9 @@ def package_site(site, max_input=PACKAGE_MAX_INPUT, max_compressed=PACKAGE_MAX_C
                 content = source.read(max_input - total + 1)
             total += len(content)
             _refuse(total <= max_input, "The public site exceeds its " + format(max_input, ",") + "-byte package input cap.")
+            if name.startswith(DIRECTORY + "/"):
+                _refuse(len(content) <= max_v7_file, "A v7 file exceeds the " + format(max_v7_file, ",") + "-byte per-file cap: " + name)
+                largest_v7 = max(largest_v7, len(content))
             if name in listed:
                 _refuse(len(content) == listed[name]["bytes"], "Byte count differs from the manifest: " + name)
                 _refuse(sha256(content) == listed[name]["sha256"], "sha256 differs from the manifest: " + name)
@@ -474,9 +552,14 @@ def package_site(site, max_input=PACKAGE_MAX_INPUT, max_compressed=PACKAGE_MAX_C
     # Its actual tar/ZIP metadata and account-wide storage remain separate.
     tar_bytes = archive.getvalue()
     estimate = max(len(gzip.compress(tar_bytes, compresslevel=6, mtime=0)), len(zlib.compress(tar_bytes, level=6)))
-    report = {"files": len(expected), "input_bytes": total, "input_cap": max_input, "input_headroom": max_input - total,
+    report = {"files": len(expected), "files_cap": max_files, "files_headroom": max_files - len(expected),
+              "exports": len(index.get("exports", {}).get("files", [])),
+              "largest_v7_file": largest_v7, "v7_file_cap": max_v7_file, "v7_file_headroom": max_v7_file - largest_v7,
+              "input_bytes": total, "input_cap": max_input, "input_headroom": max_input - total,
               "compressed_estimate": estimate, "compressed_cap": max_compressed, "compressed_headroom": max_compressed - estimate}
-    print("Public files: {files:,} (all match data/v7/index.json)".format(**report), file=out)
+    print("Public files: {files:,} of {files_cap:,} ({files_headroom:,} of headroom; all match data/v7/index.json; "
+          "{exports:,} export files)".format(**report), file=out)
+    print("Largest v7 file: {largest_v7_file:,} of {v7_file_cap:,} bytes ({v7_file_headroom:,} of headroom)".format(**report), file=out)
     print("Public input bytes: {input_bytes:,} of {input_cap:,} ({input_headroom:,} of headroom)".format(**report), file=out)
     print("Estimated compressed artifact bytes: {compressed_estimate:,} of {compressed_cap:,} ({compressed_headroom:,} of headroom)".format(**report), file=out)
     _refuse(estimate <= max_compressed, "The estimated compressed artifact exceeds the " + format(max_compressed, ",") +

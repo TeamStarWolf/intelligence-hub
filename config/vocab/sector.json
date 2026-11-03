@@ -1,0 +1,272 @@
+{
+  "vocab": "sector",
+  "version": "2026.11.1",
+  "multi": true,
+  "description": "The sector a headline concerns. Values are the library's sector ids (data/vocab/entities.jsonl, type sector) without the 'sector:' prefix; labels come from the library. Terms match whole words, ignoring case, at medium confidence.",
+  "values": [
+    {
+      "value": "chemical",
+      "label": "Chemical",
+      "terms": [
+        "chemical plant",
+        "chemical plants",
+        "chemical company",
+        "chemical industry"
+      ]
+    },
+    {
+      "value": "commercial-facilities",
+      "label": "Commercial Facilities",
+      "terms": [
+        "hotel",
+        "hotels",
+        "casino",
+        "casinos",
+        "stadium",
+        "stadiums",
+        "theme park"
+      ]
+    },
+    {
+      "value": "communications",
+      "label": "Communications",
+      "terms": [
+        "telecom",
+        "telecoms",
+        "telecommunications",
+        "telco",
+        "telcos",
+        "ISP",
+        "ISPs",
+        "mobile operator",
+        "mobile carrier",
+        "broadband provider",
+        "satellite operator"
+      ]
+    },
+    {
+      "value": "critical-manufacturing",
+      "label": "Critical Manufacturing",
+      "terms": [
+        "manufacturing",
+        "manufacturer",
+        "manufacturers",
+        "automotive",
+        "carmaker",
+        "carmakers",
+        "manufacturing plant",
+        "manufacturing plants"
+      ]
+    },
+    {
+      "value": "dams",
+      "label": "Dams",
+      "terms": [
+        "dam",
+        "dams"
+      ]
+    },
+    {
+      "value": "defense-industrial-base",
+      "label": "Defense Industrial Base",
+      "terms": [
+        "defense contractor",
+        "defense contractors",
+        "defence contractor",
+        "defence contractors",
+        "defense industry",
+        "defence industry",
+        "defense industrial base",
+        "military contractor"
+      ]
+    },
+    {
+      "value": "emergency-services",
+      "label": "Emergency Services",
+      "terms": [
+        "emergency services",
+        "first responders",
+        "fire department",
+        "911 system",
+        "911 service"
+      ]
+    },
+    {
+      "value": "energy",
+      "label": "Energy",
+      "terms": [
+        "energy sector",
+        "energy company",
+        "energy companies",
+        "power grid",
+        "power plant",
+        "power plants",
+        "electric utility",
+        "electric utilities",
+        "oil and gas",
+        "pipeline operator",
+        "solar inverter",
+        "solar inverters"
+      ]
+    },
+    {
+      "value": "financial-services",
+      "label": "Financial Services",
+      "terms": [
+        "banks",
+        "banking",
+        "financial institution",
+        "financial institutions",
+        "financial services",
+        "financial sector",
+        "credit union",
+        "credit unions",
+        "insurer",
+        "insurers",
+        "brokerage",
+        "stock exchange",
+        "bank customers",
+        "bank accounts",
+        "central bank"
+      ]
+    },
+    {
+      "value": "food-agriculture",
+      "label": "Food and Agriculture",
+      "terms": [
+        "agriculture",
+        "agricultural",
+        "food company",
+        "food maker",
+        "food supply",
+        "farmers",
+        "agribusiness"
+      ]
+    },
+    {
+      "value": "government-facilities",
+      "label": "Government Services and Facilities",
+      "terms": [
+        "government agency",
+        "government agencies",
+        "federal agency",
+        "federal agencies",
+        "ministry",
+        "ministries",
+        "municipal",
+        "municipality",
+        "city council",
+        "county government",
+        "state agency",
+        "state agencies",
+        "embassy",
+        "embassies",
+        "parliament",
+        "diplomatic",
+        "diplomats"
+      ]
+    },
+    {
+      "value": "healthcare-public-health",
+      "label": "Healthcare and Public Health",
+      "terms": [
+        "hospital",
+        "hospitals",
+        "healthcare",
+        "health care",
+        "health system",
+        "health systems",
+        "medical",
+        "patient",
+        "patients",
+        "pharmacy",
+        "pharmacies",
+        "pharmaceutical",
+        "clinic",
+        "clinics",
+        "NHS",
+        "health plan",
+        "health insurer"
+      ]
+    },
+    {
+      "value": "information-technology",
+      "label": "Information Technology",
+      "terms": [
+        "managed service provider",
+        "managed service providers",
+        "MSP",
+        "MSPs",
+        "IT services",
+        "IT service provider"
+      ]
+    },
+    {
+      "value": "nuclear",
+      "label": "Nuclear Reactors, Materials, and Waste",
+      "terms": [
+        "nuclear"
+      ]
+    },
+    {
+      "value": "transportation",
+      "label": "Transportation Systems",
+      "terms": [
+        "airline",
+        "airlines",
+        "airport",
+        "airports",
+        "aviation",
+        "railway",
+        "railways",
+        "rail operator",
+        "shipping",
+        "maritime",
+        "logistics",
+        "transit"
+      ]
+    },
+    {
+      "value": "water-wastewater",
+      "label": "Water and Wastewater",
+      "terms": [
+        "water utility",
+        "water utilities",
+        "water treatment",
+        "wastewater",
+        "water system",
+        "water systems",
+        "water sector"
+      ]
+    },
+    {
+      "value": "education",
+      "label": "Education",
+      "terms": [
+        "university",
+        "universities",
+        "school",
+        "schools",
+        "school district",
+        "college",
+        "colleges",
+        "students",
+        "education sector"
+      ]
+    },
+    {
+      "value": "retail",
+      "label": "Retail",
+      "terms": [
+        "retail",
+        "retailer",
+        "retailers",
+        "e-commerce",
+        "ecommerce",
+        "online store",
+        "online stores",
+        "shoppers"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "vocab": "event_type",
+  "version": "2026.11.1",
+  "multi": true,
+  "description": "What happened, from the row's kind, source and headline. A row can carry several. analysis and unclassified exist so that no label is forced.",
+  "values": [
+    {
+      "value": "disclosure",
+      "label": "Disclosure",
+      "definition": "A weakness is disclosed: every advisory, bulletin and note by kind, or a headline naming a vulnerability.",
+      "terms": [
+        "vulnerability",
+        "vulnerabilities",
+        "flaw",
+        "flaws",
+        "security bug",
+        "security bugs",
+        "security advisory",
+        "security advisories",
+        "disclosed",
+        "discloses"
+      ]
+    },
+    {
+      "value": "exploitation",
+      "label": "Exploitation",
+      "definition": "The row's exploitation tag is known or reported."
+    },
+    {
+      "value": "patch",
+      "label": "Patch",
+      "definition": "A fix or update is released: every vendor-primary advisory, or a headline about a patch.",
+      "terms": [
+        "patch",
+        "patches",
+        "patched",
+        "patching",
+        "Patch Tuesday",
+        "fixes",
+        "fixed",
+        "security update",
+        "security updates",
+        "hotfix",
+        "remediates",
+        "remediated"
+      ]
+    },
+    {
+      "value": "breach",
+      "label": "Breach",
+      "definition": "A headline reports a compromise, intrusion or data theft at a named or unnamed organization.",
+      "terms": [
+        "breach",
+        "breaches",
+        "breached",
+        "data leak",
+        "data leaks",
+        "leaked",
+        "stolen data",
+        "data theft",
+        "hacked",
+        "hack of",
+        "intrusion",
+        "ransomware attack",
+        "cyberattack",
+        "cyber attack",
+        "extortion",
+        "exposed data",
+        "data exposure",
+        "leak",
+        "leaks"
+      ]
+    },
+    {
+      "value": "outage",
+      "label": "Outage",
+      "definition": "A headline reports a service outage or disruption.",
+      "terms": [
+        "outage",
+        "outages",
+        "disruption",
+        "disruptions",
+        "disrupted",
+        "downtime",
+        "taken offline",
+        "knocked offline",
+        "DDoS"
+      ]
+    },
+    {
+      "value": "takedown",
+      "label": "Takedown",
+      "definition": "A headline reports law enforcement action: arrests, charges, seizures or infrastructure takedowns.",
+      "terms": [
+        "takedown",
+        "taken down",
+        "seized",
+        "seizes",
+        "seizure",
+        "dismantled",
+        "dismantles",
+        "arrested",
+        "arrests",
+        "arrest",
+        "charged",
+        "indicted",
+        "indictment",
+        "extradited",
+        "sentenced",
+        "pleads guilty",
+        "pleaded guilty",
+        "sinkholed",
+        "indicts",
+        "extradites",
+        "sentences",
+        "take down",
+        "took down"
+      ]
+    },
+    {
+      "value": "policy",
+      "label": "Policy",
+      "definition": "A headline reports law, regulation, sanctions, government strategy or official guidance.",
+      "terms": [
+        "regulation",
+        "regulations",
+        "regulator",
+        "regulators",
+        "legislation",
+        "bill",
+        "laws",
+        "executive order",
+        "sanctions",
+        "sanctioned",
+        "ban",
+        "bans",
+        "banned",
+        "directive",
+        "fined",
+        "lawmakers",
+        "regulatory",
+        "new law"
+      ]
+    },
+    {
+      "value": "analysis",
+      "label": "Analysis",
+      "definition": "A research row with none of the values above: analysis, tooling or a technical write-up."
+    },
+    {
+      "value": "unclassified",
+      "label": "Unclassified",
+      "definition": "No rule applied. The row is not forced into a label."
+    }
+  ]
+}

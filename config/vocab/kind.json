@@ -1,0 +1,48 @@
+{
+  "vocab": "kind",
+  "version": "2026.11.1",
+  "multi": false,
+  "description": "What the row is, set by its source. One value per row.",
+  "values": [
+    {
+      "value": "advisory",
+      "label": "Advisory",
+      "definition": "A security advisory or alert from a vendor, CERT or government agency."
+    },
+    {
+      "value": "research",
+      "label": "Research",
+      "definition": "A research team's post: analysis, findings or a technical write-up."
+    },
+    {
+      "value": "reporting",
+      "label": "Reporting",
+      "definition": "A news outlet's or commentator's report."
+    },
+    {
+      "value": "incident",
+      "label": "Incident",
+      "definition": "A first-party statement about an incident at the publishing organization."
+    },
+    {
+      "value": "kev",
+      "label": "KEV entry",
+      "definition": "An entry in CISA's Known Exploited Vulnerabilities catalog, dated by catalog addition."
+    },
+    {
+      "value": "filing",
+      "label": "Filing",
+      "definition": "A regulatory filing. No filing source is connected today, so no row carries this value yet."
+    },
+    {
+      "value": "bulletin",
+      "label": "Bulletin",
+      "definition": "A vendor security bulletin from a history adapter (for example Microsoft MS98 to MS17)."
+    },
+    {
+      "value": "note",
+      "label": "Vulnerability note",
+      "definition": "A CERT/CC vulnerability note from a history adapter."
+    }
+  ]
+}

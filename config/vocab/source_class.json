@@ -1,0 +1,159 @@
+{
+  "vocab": "source_class",
+  "version": "2026.11.1",
+  "multi": false,
+  "description": "Who publishes the row. Set per source in config/sources.json, or below for KEV and curated source ids. Never inferred from a headline.",
+  "values": [
+    {
+      "value": "vendor-primary",
+      "label": "Vendor primary",
+      "definition": "A vendor's own advisory, bulletin or first-party statement channel."
+    },
+    {
+      "value": "government-cert",
+      "label": "Government or CERT",
+      "definition": "A government cyber agency, national or regional CERT, or law enforcement agency."
+    },
+    {
+      "value": "researcher",
+      "label": "Researcher",
+      "definition": "A research team, vendor-run or independent. A vendor's research blog is a researcher with publisher_vendor set."
+    },
+    {
+      "value": "press",
+      "label": "Press",
+      "definition": "A news outlet, newsletter or commentary site."
+    }
+  ],
+  "sources": {
+    "cisa-kev": {
+      "source_class": "government-cert",
+      "country": "US"
+    },
+    "microsoft-msrc": {
+      "source_class": "vendor-primary",
+      "publisher_vendor": "vendor:microsoft",
+      "country": "US"
+    },
+    "microsoft-browser-research": {
+      "source_class": "researcher",
+      "publisher_vendor": "vendor:microsoft"
+    },
+    "google-project-zero": {
+      "source_class": "researcher",
+      "publisher_vendor": "vendor:google"
+    },
+    "kaspersky": {
+      "source_class": "researcher"
+    },
+    "eset": {
+      "source_class": "researcher"
+    },
+    "chainalysis": {
+      "source_class": "researcher"
+    },
+    "stepsecurity": {
+      "source_class": "researcher"
+    },
+    "aquasecurity": {
+      "source_class": "researcher",
+      "publisher_vendor": "vendor:aqua-security"
+    },
+    "sysdig": {
+      "source_class": "researcher",
+      "publisher_vendor": "vendor:sysdig"
+    },
+    "cloudflare": {
+      "source_class": "researcher",
+      "publisher_vendor": "vendor:cloudflare"
+    },
+    "github": {
+      "source_class": "vendor-primary"
+    },
+    "drupal": {
+      "source_class": "vendor-primary",
+      "publisher_vendor": "vendor:drupal"
+    },
+    "anthropic": {
+      "source_class": "vendor-primary"
+    },
+    "litellm": {
+      "source_class": "vendor-primary"
+    },
+    "meta": {
+      "source_class": "vendor-primary"
+    },
+    "kubernetes": {
+      "source_class": "vendor-primary"
+    },
+    "x": {
+      "source_class": "vendor-primary"
+    },
+    "codecov": {
+      "source_class": "vendor-primary"
+    },
+    "okta": {
+      "source_class": "vendor-primary",
+      "publisher_vendor": "vendor:okta"
+    },
+    "twilio": {
+      "source_class": "vendor-primary"
+    },
+    "uber": {
+      "source_class": "vendor-primary"
+    },
+    "red-hat": {
+      "source_class": "vendor-primary",
+      "publisher_vendor": "vendor:red-hat"
+    },
+    "crowdstrike": {
+      "source_class": "vendor-primary",
+      "publisher_vendor": "vendor:crowdstrike"
+    },
+    "f5": {
+      "source_class": "vendor-primary",
+      "publisher_vendor": "vendor:f5"
+    },
+    "gitlab": {
+      "source_class": "vendor-primary",
+      "publisher_vendor": "vendor:gitlab"
+    },
+    "react": {
+      "source_class": "vendor-primary"
+    },
+    "oracle": {
+      "source_class": "vendor-primary",
+      "publisher_vendor": "vendor:oracle"
+    },
+    "hugging-face": {
+      "source_class": "vendor-primary"
+    },
+    "adobe-security": {
+      "source_class": "vendor-primary",
+      "publisher_vendor": "vendor:adobe"
+    },
+    "openssl": {
+      "source_class": "vendor-primary"
+    },
+    "singapore-csa": {
+      "source_class": "government-cert",
+      "country": "SG"
+    },
+    "fbi": {
+      "source_class": "government-cert",
+      "country": "US"
+    },
+    "fbi-ic3": {
+      "source_class": "government-cert",
+      "country": "US"
+    },
+    "us-doj": {
+      "source_class": "government-cert",
+      "country": "US"
+    },
+    "us-joint-advisories": {
+      "source_class": "government-cert",
+      "country": "US"
+    }
+  }
+}

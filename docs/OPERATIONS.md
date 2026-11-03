@@ -161,9 +161,15 @@ bytes and sha256, and never reads `data/feed.json`. If the index is missing or a
 file differs from it after one retry, the run resumes from the feed instead.
 
 CVE brief buckets (`cve/YYYY/NNNk.json`) are built and tested but not published:
-they would copy every brief in `data/briefs.json` and push the package past its
-21 MiB input cap. They wait for the owner's cap decision, and `cve-index.json`
-names `data/briefs.json` as the brief source until then.
+they would copy every brief in `data/briefs.json` (about 9 MB). They stay off until
+a later change retires the v6 briefs file, and `cve-index.json` names
+`data/briefs.json` as the brief source until then.
+
+The analytics exports (`data/v7/exports/`: per-year CSV and JSON Lines files, their
+`manifest.json` and `data-dictionary.md`) are published, and `index.json` lists each
+under `exports` with its bytes and sha256. A run whose tagging is unavailable, or
+whose exports cannot be kept under the per-file cap, publishes the feed and shards
+without exports and records `exports.status: unavailable` with the reason.
 
 ## Failure and retention behavior
 
@@ -277,16 +283,21 @@ The package must match `data/v7/index.json` exactly. Fixed files:
 - `data/feed.json` and `data/briefs.json`, each with the bytes and sha256 the index lists
 - `data/v7/index.json`
 
-Data files: every path the index lists under `shards`, each with its listed bytes
-and sha256, and nothing else. `python -m intelligence_hub.shards package site`
+Data files: every path the index lists under `shards` and under `exports`, each
+with its listed bytes and sha256, and nothing else. `python -m intelligence_hub.shards package site`
 checks that every file matches an allowlisted pattern, that the set of files
 equals the manifest set, and that each byte count and sha256 agree. Symlinks,
 hard-linked files, other file types and unexpected directories are rejected.
-Actual file content must total at most **21 MiB**. The check builds an in-memory
-tar and estimates compression using both gzip and zlib at level 6. If the larger
-estimate exceeds **3,000,000 bytes**, it fails before artifact upload, and it
-prints the headroom for both caps on every run. The previous live site remains in
-place. New cap numbers are the owner's decision.
+The package holds at most **4,000 files**; every file under `data/v7/` (shards and
+exports) is at most **4 MiB**, while `data/feed.json` and `data/briefs.json` keep
+the collector's own byte bounds (8 MiB and 12 MiB). Actual file content must total
+at most **192 MiB**. The check builds an in-memory tar and estimates compression
+using both gzip and zlib at level 6. If the larger estimate exceeds **48,000,000
+bytes**, it fails before artifact upload, and it prints every cap with its headroom
+on every run. The previous live site remains in place. The package caps (192 MiB
+input, 4,000 files, 4 MiB per v7 file, 48,000,000-byte estimate) were raised in pull
+request #7; a further change needs the owner's approval in the pull request that
+makes it.
 
 Final JSON serialization groups CVE-map members by their recorded vendor/product
 text, with the CVE identifier as a tie-breaker, to improve compression. This only
@@ -376,7 +387,7 @@ Before appending, all matching briefs are copied and checked against the existin
 100-step/100-limitation detail caps and JavaScript UTF-16 field limits. A later
 failure leaves original briefs, CNA projections and cache evidence untouched.
 Context changes participate in the existing content revision. Original intake,
-retention and the 3,000,000-byte artifact/one-day storage guards remain unchanged;
+retention and the 48,000,000-byte artifact/one-day storage guards remain unchanged;
 an oversized publication stays blocked rather than widening those guards.
 
 ## Evidence and troubleshooting

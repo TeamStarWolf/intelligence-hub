@@ -1,0 +1,155 @@
+{
+  "vocab": "matching",
+  "version": "2026.11.1",
+  "description": "Rules for matching library entity names in headlines. Matching is case-sensitive on whole words. The library's own stop_aliases and ambiguous_aliases are never matched; the rules below add to them.",
+  "min_length": 5,
+  "min_length_rule": "An actor or malware name shorter than min_length matches only when it contains a digit or a capital after its first letter (FIN7, QBot, BRc4), or is listed in allow_short.",
+  "allow_short": [
+    "Clop",
+    "Ryuk",
+    "Duqu",
+    "Dyre",
+    "Pysa",
+    "Sogu"
+  ],
+  "stop": [
+    {
+      "alias": "Chromium",
+      "reason": "browser engine name; the actor alias is CHROMIUM and stays stopped"
+    },
+    {
+      "alias": "Edge",
+      "reason": "browser name and ordinary word"
+    }
+  ],
+  "actor_malware": {
+    "rule": "When one name resolves to both an actor and a malware entity, the actor is tagged and the malware is tagged only when one of malware_words is in the headline. Names listed in both are tagged as both.",
+    "malware_words": [
+      "backdoor",
+      "botnet",
+      "downloader",
+      "dropper",
+      "implant",
+      "infostealer",
+      "loader",
+      "malware",
+      "payload",
+      "RAT",
+      "ransomware",
+      "rootkit",
+      "spyware",
+      "stealer",
+      "trojan",
+      "variant",
+      "worm"
+    ],
+    "both": [
+      {
+        "alias": "Akira",
+        "reason": "the Akira group and its ransomware share one name, and headlines use it for both"
+      }
+    ]
+  },
+  "context": [
+    {
+      "id": "malware:S0274",
+      "alias": "Calisto",
+      "words": [
+        "backdoor",
+        "macOS",
+        "Mac",
+        "OSX",
+        "trojan"
+      ]
+    },
+    {
+      "id": "malware:S0335",
+      "alias": "Carbon",
+      "words": [
+        "backdoor",
+        "Turla"
+      ]
+    },
+    {
+      "id": "malware:S0279",
+      "alias": "Proton",
+      "words": [
+        "RAT",
+        "backdoor",
+        "trojan"
+      ]
+    },
+    {
+      "id": "malware:S0504",
+      "alias": "Anchor",
+      "words": [
+        "backdoor",
+        "TrickBot",
+        "AnchorDNS"
+      ]
+    },
+    {
+      "id": "malware:S0543",
+      "alias": "Spark",
+      "words": [
+        "malware",
+        "backdoor",
+        "RAT"
+      ]
+    },
+    {
+      "id": "actor:G0091",
+      "alias": "Silence",
+      "words": [
+        "group",
+        "gang",
+        "hackers",
+        "APT"
+      ]
+    },
+    {
+      "id": "actor:G1002",
+      "alias": "Bitter",
+      "words": [
+        "APT",
+        "group",
+        "hackers",
+        "espionage"
+      ]
+    },
+    {
+      "id": "actor:G1002",
+      "alias": "BITTER",
+      "words": [
+        "APT",
+        "group",
+        "hackers",
+        "espionage"
+      ]
+    },
+    {
+      "id": "malware:S0591",
+      "alias": "ConnectWise",
+      "words": [
+        "abuse",
+        "abused",
+        "abusing",
+        "RMM",
+        "remote access tool",
+        "remote access tools"
+      ]
+    },
+    {
+      "id": "malware:S0591",
+      "alias": "ScreenConnect",
+      "words": [
+        "abuse",
+        "abused",
+        "abusing",
+        "RMM",
+        "remote access tool",
+        "remote access tools"
+      ]
+    }
+  ]
+}

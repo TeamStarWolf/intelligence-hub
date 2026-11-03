@@ -41,11 +41,11 @@ These bounds are the next wall, not a permanent one. A bounded run on
 about 3,780 bytes each, 3,563,660 bytes free). New CVEs arrived at about 15 to
 21 a day in October and early November, which is about 55 to 80 KB of briefs a
 day, so the 12 MiB briefs bound is crossed between mid-December 2026 and early
-January 2027. The unchanged 21 MiB publish input cap (12,588,722 bytes for the
-feed, the briefs and the site on that run, growing about 100 to 150 KB a day) is
-crossed in January or February 2027. A run that crosses either fails and the
-site keeps its last publication, so the next data layout must land before
-mid-December.
+January 2027. The publish input cap was raised to 192 MiB in pull request #7
+(the whole package, with the v7 shards and the exports, was 32,216,955 bytes on
+3 November 2026), so the 12 MiB briefs bound is the wall that binds first. A
+run that crosses it fails and the site keeps its last publication, so the next
+data layout must land before mid-December.
 
 Publisher responses keep the **3 MiB** default bound. A source can set its own
 `max_bytes` in `config/sources.json`, up to a **16 MiB** fetch ceiling. The CISA
@@ -89,7 +89,7 @@ is fixed since 1998; the limit is a technical review horizon, not full coverage.
 Schema 5 keeps 7,306 days and older readers keep their 3,661-day profile. The existing 3 MiB publisher response, strict UTF-8, DTD/entity rejection,
 40,000-node/depth-48 XML, 100-CVE whole-entry rejection, 150 normalization,
 600 retained articles per source, 500 curation entries, 8,000 total articles,
-16 MiB resume, 3,000,000-byte package and one-day artifact-retention guards applied
+16 MiB resume, compressed package estimate (now 48,000,000 bytes) and one-day artifact-retention guards applied
 to schema 6. Schema 7 replaces the 8,000-article limit with the per-file byte bounds above and the 27,962-row ceiling derived from the feed bound.
 Neither the broader window nor a source's accepted input proves complete history
 or timely reporting. Known modern schema 5/6 fields on legacy labels are refused;
@@ -262,7 +262,7 @@ option and retain document order; older site readers can reject schema 4. Do not
 silently strip selection fields, relabel new data as legacy or mix incompatible
 versions. Existing safeguards remain: 150 normalizations, 100 CVEs per entry,
 600 retained articles per source, the schema 7 per-file byte bounds, 16 MiB public-resume input,
-the 3,000,000-byte compressed artifact estimate guard and one-day artifact
+the 48,000,000-byte compressed artifact estimate guard and one-day artifact
 retention, alongside the whole-response/XML bounds above.
 
 ### Response byte-limit failures

@@ -143,12 +143,14 @@ a syntax check of `site/app.js` and an em-dash lint. New code needs tests.
   an unchanged run can succeed without a newer snapshot. Check the
   [workflow history](https://github.com/TeamStarWolf/intelligence-hub/actions/workflows/publish.yml)
   when the desk looks stale.
-- **Package budget.** Only six allowlisted files enter Pages. A changed
-  publication must fit **21 MiB of input** and a **3,000,000-byte** level-6
-  compressed-size estimate, and the artifact is kept for one day. At the
-  requested maximum of 144 scheduled publications a day that is at most
-  **432 MB (about 412 MiB)**; actual scheduled runs are far fewer. This bounds the
-  project's estimated footprint, not account-wide billing.
+- **Package budget.** Only allowlisted files that `data/v7/index.json` lists
+  enter Pages: the four page files, `data/feed.json`, `data/briefs.json`, the v7
+  shards and the analytics exports. A changed publication must fit **192 MiB of
+  input**, at most **4,000 files**, at most **4 MiB** for each v7 shard or export
+  file and a **48,000,000-byte** level-6 compressed-size estimate, and the
+  artifact is kept for one day. At the requested twelve scheduled publications a
+  day that is at most **576 MB** a day; actual scheduled runs are fewer. This
+  bounds the project's estimated footprint, not account-wide billing.
   [GitHub documents separate runner and storage allowances](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
 - **Read-only.** The public site has no accounts, trackers or paid API fallback.
   Owner changes to sources, curation, scheduling or publication happen through

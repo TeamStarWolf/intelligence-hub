@@ -77,8 +77,10 @@ jobs:
       - name: Package only the files the v7 manifest lists
         if: steps.result.outputs.changed == 'true'
         # Checks every file against data/v7/index.json (allowlisted patterns, the exact
-        # set, sha256 and bytes, no links), then the 21 MiB input and 3,000,000-byte
-        # compressed caps. The checks live in intelligence_hub/shards.py with tests.
+        # set of shards and exports, sha256 and bytes, no links), then the caps: 4,000
+        # files, 4 MiB per v7 shard or export file, 192 MiB input and a 48,000,000-byte
+        # compressed estimate, each printed with its headroom. The checks and the cap
+        # numbers live in intelligence_hub/shards.py with tests.
         run: python3 -m intelligence_hub.shards package site
       - name: Upload public site
         if: steps.result.outputs.changed == 'true'
