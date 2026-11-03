@@ -3,7 +3,8 @@
 status is one of:
 - complete: every item the source lists for that year is a row;
 - filtered: the adapter's stated filter (or the 1,500-row yearly cap) chose the rows;
-- partial: some listed items could not be read;
+- partial: some listed items could not be read, link to pages that no longer resolve, or
+  carry only a later posting date (the reason says how many of each);
 - sample: a fixed sample by design;
 - gap: no items that year (the source had not started, the series had ended, or the
   adapter is not built yet, which the reason says);
@@ -35,6 +36,13 @@ def adapter_rows(module, stats, counts, years, checked_at, end_year=END_YEAR):
             continue
         upstream = (stats.get("upstream") or {}).get(year, 0)
         missing = (stats.get("missing") or {}).get(year, 0)
+        held = [(count, text) for count, text in (
+            (missing, ("listed item could not be read", "listed items could not be read")),
+            ((stats.get("dead") or {}).get(year, 0), ("listed item links to a page that no longer resolves",
+                                                     "listed items link to pages that no longer resolve")),
+            ((stats.get("undated") or {}).get(year, 0), ("listed item carries only a later posting date, not its publication date",
+                                                        "listed items carry only a later posting date, not their publication date")))
+            if count]
         capped = (stats.get("capped") or {}).get(year, 0)
         admitted = counts.get(year, 0)
         row = {"source_id": module.SOURCE_ID, "adapter": module.ID, "year": year, "upstream_count": upstream,
@@ -43,10 +51,10 @@ def adapter_rows(module, stats, counts, years, checked_at, end_year=END_YEAR):
             row.update(status="gap", upstream_count=0, filter=None, reason="the source's first item is from " + str(module.FIRST_YEAR))
         elif module.LAST_YEAR and year > module.LAST_YEAR:
             row.update(status="gap", upstream_count=0, filter=None, reason="the series ended in " + str(module.LAST_YEAR))
-        elif upstream == 0 and admitted == 0 and missing == 0:
+        elif upstream == 0 and admitted == 0 and not held:
             row.update(status="gap", filter=None, reason="the source lists no items for this year")
-        elif missing:
-            row.update(status="partial", reason=format(missing, ",") + (" listed item could not be read" if missing == 1 else " listed items could not be read"))
+        elif held:
+            row.update(status="partial", reason="; ".join(format(count, ",") + " " + text[count != 1] for count, text in held))
         elif module.FILTER or capped:
             row.update(status="filtered", reason=(format(capped, ",") + (" row" if capped == 1 else " rows") + " over the 1,500-row yearly cap " + ("was" if capped == 1 else "were") + " left out") if capped else None)
         else:

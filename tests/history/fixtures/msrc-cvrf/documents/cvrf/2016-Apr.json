@@ -28,10 +28,56 @@
       ],
       "Name": "Microsoft Office",
       "Type": 3
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "17000",
+        "Value": "cbl2 man-db 2.10.2-1 on CBL Mariner 2.0"
+       }
+      ],
+      "Name": "Mariner",
+      "Type": 3
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "17001",
+        "Value": "azl3 kernel 6.6.57.1-1 on Azure Linux 3.0"
+       }
+      ],
+      "Name": "Open Source Software",
+      "Type": 3
      }
     ],
     "Name": "Microsoft",
     "Type": 0
+   }
+  ],
+  "FullProductName": [
+   {
+    "ProductID": "10735",
+    "Value": "Windows 10 for x64-based Systems"
+   },
+   {
+    "ProductID": "10670",
+    "Value": "Microsoft Office 2016"
+   },
+   {
+    "ProductID": "17000",
+    "Value": "cbl2 man-db 2.10.2-1 on CBL Mariner 2.0"
+   },
+   {
+    "ProductID": "17001",
+    "Value": "azl3 kernel 6.6.57.1-1 on Azure Linux 3.0"
+   },
+   {
+    "ProductID": "17002",
+    "Value": "cbl2 kernel 5.15.180.1-1"
+   },
+   {
+    "ProductID": "10483",
+    "Value": "Windows Server 2012 R2"
    }
   ]
  },
@@ -170,6 +216,144 @@
    ],
    "Title": {
     "Value": "Libgcrypt elliptic-curve side channel"
+   }
+  },
+  {
+   "CVE": "CVE-2015-1000",
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "17000"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "10735"
+     ],
+     "Type": 3
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:Yes;Latest Software Release:Exploitation Detected"
+     },
+     "ProductID": [
+      "10735"
+     ],
+     "Type": 1
+    }
+   ],
+   "Title": {
+    "Value": "man-db package update"
+   }
+  },
+  {
+   "CVE": "CVE-2015-1001",
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "17001",
+      "17002"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "10735"
+     ],
+     "Type": 3
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Detected"
+     },
+     "ProductID": [
+      "10735"
+     ],
+     "Type": 1
+    }
+   ],
+   "Title": {
+    "Value": "In the Linux kernel, a flaw in a driver was resolved"
+   }
+  },
+  {
+   "CVE": "CVE-2016-0150",
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "10483"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "10735"
+     ],
+     "Type": 3
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Detected"
+     },
+     "ProductID": [
+      "10735"
+     ],
+     "Type": 1
+    }
+   ],
+   "Title": {
+    "Value": "HTTP.sys Denial of Service Vulnerability"
+   }
+  },
+  {
+   "CVE": "CVE-2016-0151",
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "10735",
+      "17000"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "10735"
+     ],
+     "Type": 3
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Detected"
+     },
+     "ProductID": [
+      "10735"
+     ],
+     "Type": 1
+    }
+   ],
+   "Title": {
+    "Value": "It was discovered that a shared parser mishandled input"
    }
   }
  ]

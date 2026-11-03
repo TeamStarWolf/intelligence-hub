@@ -119,20 +119,37 @@ def msrc_cvrf():
 
     tree = {"Branch": [{"Type": 0, "Name": "Microsoft", "Items": [
         {"Type": 3, "Name": "Windows", "Items": [{"ProductID": "10735", "Value": "Windows 10 for x64-based Systems"}]},
-        {"Type": 3, "Name": "Microsoft Office", "Items": [{"ProductID": "10670", "Value": "Microsoft Office 2016"}]}]}]}
+        {"Type": 3, "Name": "Microsoft Office", "Items": [{"ProductID": "10670", "Value": "Microsoft Office 2016"}]},
+        {"Type": 3, "Name": "Mariner", "Items": [{"ProductID": "17000", "Value": "cbl2 man-db 2.10.2-1 on CBL Mariner 2.0"}]},
+        {"Type": 3, "Name": "Open Source Software", "Items": [{"ProductID": "17001", "Value": "azl3 kernel 6.6.57.1-1 on Azure Linux 3.0"}]}]}],
+            # Products listed only here have no family: one Azure Linux package, one Microsoft product.
+            "FullProductName": [{"ProductID": "10735", "Value": "Windows 10 for x64-based Systems"},
+                                {"ProductID": "10670", "Value": "Microsoft Office 2016"},
+                                {"ProductID": "17000", "Value": "cbl2 man-db 2.10.2-1 on CBL Mariner 2.0"},
+                                {"ProductID": "17001", "Value": "azl3 kernel 6.6.57.1-1 on Azure Linux 3.0"},
+                                {"ProductID": "17002", "Value": "cbl2 kernel 5.15.180.1-1"},
+                                {"ProductID": "10483", "Value": "Windows Server 2012 R2"}]}
     april = {"DocumentTitle": {"Value": "April 2016 Security Updates"},
              "DocumentTracking": {"InitialReleaseDate": "2016-04-12T07:00:00Z"}, "ProductTree": tree, "Vulnerability": [
                  vulnerability("CVE-2016-0135", "Secondary Logon Elevation of Privilege Vulnerability", "Important"),
                  vulnerability("CVE-2016-0167", "Win32k Elevation of Privilege Vulnerability", "Important", exploited="Yes"),
                  vulnerability("CVE-2016-0127", "Microsoft Office Memory Corruption Vulnerability", "Critical", products=("10670",)),
-                 vulnerability("CVE-2015-7511", "Libgcrypt elliptic-curve side channel", "Low")]}
+                 vulnerability("CVE-2015-7511", "Libgcrypt elliptic-curve side channel", "Low"),
+                 # Azure Linux package CVEs filed inside a regular monthly document.
+                 vulnerability("CVE-2015-1000", "man-db package update", "Critical", exploited="Yes", products=("17000",)),
+                 vulnerability("CVE-2015-1001", "In the Linux kernel, a flaw in a driver was resolved", "Important", products=("17001", "17002")),
+                 # A Microsoft product the tree lists without a family.
+                 vulnerability("CVE-2016-0150", "HTTP.sys Denial of Service Vulnerability", "Important", products=("10483",)),
+                 # A CVE that affects both: kept, but its upstream description is not a headline.
+                 vulnerability("CVE-2016-0151", "It was discovered that a shared parser mishandled input", "Important",
+                               products=("10735", "17000"))]}
     mariner = {"DocumentTitle": {"Value": "Mariner Release Notes"}, "DocumentTracking": {"InitialReleaseDate": "1999-09-02T00:00:00Z"},
                "ProductTree": tree, "Vulnerability": [vulnerability("CVE-1999-0236", "Mariner package update", "Critical", exploited="Yes")]}
     mariner_2024 = dict(mariner, DocumentTracking={"InitialReleaseDate": "2024-07-09T07:00:00Z"},
                         Vulnerability=[vulnerability("CVE-2024-0001", "Mariner package update", "Critical")])
     write("msrc-cvrf", (2016, 2026), {"updates.json": dump(updates), "cvrf/2016-Apr.json": dump(april),
                                       "cvrf/1999-Sep.json": dump(mariner), "cvrf/2024-Jul.json": dump(mariner_2024)},
-          stats={"capped": {}, "upstream": {"2016": 4}})
+          stats={"capped": {}, "upstream": {"2016": 8}})
 
 
 def certcc():
@@ -229,8 +246,19 @@ def oracle():
             "<link>http://www.oracle.com/technetwork/topics/security/cpujul2005-090619.html</link>"
             "<pubDate>Tue, 12 Jul 2005 12:46:55 -0700</pubDate></item>"
             "<item><title>Unsafe link</title><link>ftp://example.org/x</link><pubDate>Tue, 12 Jul 2005 12:46:55 -0700</pubDate></item>"
+            "<item><title>Critical Patch Update - January 2005</title>"
+            "<link>http://www.oracle.com/technology/deploy/security/pdf/cpu-jan-2005_advisory.pdf</link>"
+            "<pubDate>Tue, 18 Oct 2005 12:00:00 -0700</pubDate></item>"
+            "<item><title>Critical Patch Update - April 2005</title>"
+            "<link>http://www.oracle.com/security-alerts/example-apr2005.html</link>"
+            "<pubDate>Tue, 18 Oct 2005 12:00:00 -0700</pubDate></item>"
+            "<item><title>Critical Patch Update - January 2009</title>"
+            "<link>http://www.oracle.com/technetwork/topics/security/cpujan2009-097901.html</link>"
+            "<pubDate>Tue, 14 Apr 2009 12:00:00 -0700</pubDate></item>"
             "</channel></rss>").encode("utf-8")
-    write("oracle-cpu", (2005, 2026), {"feed.xml": feed}, stats={"missing": {"2005": 1}, "upstream": {"2005": 2, "2026": 1}})
+    write("oracle-cpu", (2005, 2026), {"feed.xml": feed},
+          stats={"dead": {"2005": 1, "2009": 1}, "missing": {"2005": 1}, "undated": {"2005": 1},
+                 "upstream": {"2005": 4, "2009": 1, "2026": 1}})
 
 
 def nvd():

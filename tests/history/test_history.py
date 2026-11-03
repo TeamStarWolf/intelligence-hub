@@ -78,6 +78,41 @@ class MarinerTest(unittest.TestCase):
         rows, seen = msrc_cvrf.rows_from(self.documents["cvrf/1999-Sep.json"], "1999-09-02", None)
         self.assertEqual((rows, seen), ([], 0))
 
+    def test_mariner_cves_inside_a_normal_monthly_document_are_excluded(self):
+        rows, seen = msrc_cvrf.rows_from(self.documents["cvrf/2016-Apr.json"], "2016-04-12", None)
+        ids = {row["native_id"] for row in rows}
+        # CVE-2015-1000 affects only a Mariner-family package (and is marked exploited);
+        # CVE-2015-1001 affects an Open Source Software package and an unfamilied cbl2 package.
+        self.assertNotIn("CVE-2015-1000", ids)
+        self.assertNotIn("CVE-2015-1001", ids)
+        self.assertEqual(seen, 8)
+        for row in rows:
+            self.assertFalse(set(row["product_raw"]) & msrc_cvrf.THIRD_PARTY_FAMILIES, row["id"])
+
+    def test_a_microsoft_product_listed_without_a_family_is_kept(self):
+        rows, _seen = msrc_cvrf.rows_from(self.documents["cvrf/2016-Apr.json"], "2016-04-12", None)
+        row = next(row for row in rows if row["native_id"] == "CVE-2016-0150")
+        self.assertEqual((row["title"], row["product_raw"]), ("HTTP.sys Denial of Service Vulnerability", []))
+
+    def test_an_upstream_description_is_not_used_as_the_title(self):
+        rows, _seen = msrc_cvrf.rows_from(self.documents["cvrf/2016-Apr.json"], "2016-04-12", None)
+        row = next(row for row in rows if row["native_id"] == "CVE-2016-0151")
+        self.assertEqual((row["title"], row["product_raw"]), ("CVE-2016-0151: Windows", ["Windows"]))
+        for title in ("It was discovered that x", "A flaw was found in the Linux kernel", "In the Linux kernel, the following",
+                      "An issue was discovered in libfoo", "A crafted input file could crash it", "x" * 161, "Ends like a sentence."):
+            self.assertEqual(msrc_cvrf.headline(title, "CVE-2026-0001", {"Windows"}), "CVE-2026-0001: Windows", title)
+        self.assertEqual(msrc_cvrf.headline("Chromium: CVE-2026-0899 Out of bounds memory access in V8", "CVE-2026-0899", set()),
+                         "Chromium: CVE-2026-0899 Out of bounds memory access in V8")
+        self.assertEqual(msrc_cvrf.headline("A flaw was found", "CVE-2026-0002", set()), "CVE-2026-0002")
+
+    def test_product_classification(self):
+        families = {"1": "Windows", "2": "Mariner", "3": "Azure", "4": "Open Source Software"}
+        names = {"5": "azl3 qemu 8.2.0-16 on Azure Linux 3.0", "6": "cm1 rust 1.47.0-3", "7": "Visual Studio Code",
+                 "8": "None Available", "3": "Azure Linux Guest Agent"}
+        verdict = {ident: msrc_cvrf.microsoft_product(ident, families, names) for ident in "123456789"}
+        self.assertEqual(verdict, {"1": True, "2": False, "3": True, "4": False, "5": False, "6": False, "7": True,
+                                   "8": False, "9": False})
+
     def test_low_and_unrated_cves_are_filtered_and_exploited_ones_flagged(self):
         rows, _stats = msrc_cvrf.parse(self.documents, self.years, {})
         self.assertNotIn("CVE-2015-7511", {row["native_id"] for row in rows})
@@ -134,6 +169,34 @@ class OracleLinkTest(unittest.TestCase):
     def test_the_retired_content_host_is_replaced(self):
         self.assertEqual(oracle_cpu.link("http://www-content.oracle.com/technetwork/security-advisory/cpuapr2016v3-2985753.html"),
                          "https://www.oracle.com/technetwork/security-advisory/cpuapr2016v3-2985753.html")
+
+    def test_moved_and_dead_retired_links(self):
+        module, documents, years, context, _stats = check.load_fixture(FIXTURES / "oracle-cpu")
+        rows, stats = oracle_cpu.parse(documents, years, context)
+        urls = {row["native_id"]: row["url"] for row in rows}
+        self.assertEqual(urls["cpujul2005-090619"], "https://www.oracle.com/security-alerts/cpujul2005.html")
+        self.assertNotIn("cpu-jan-2005_advisory", urls)
+        self.assertNotIn("cpujan2009-097901", urls)
+        self.assertEqual(stats["dead"], {2005: 1, 2009: 1})
+        for url in urls.values():
+            self.assertNotIn(url, oracle_cpu.DEAD)
+            self.assertNotIn(url, oracle_cpu.MOVED)
+
+    def test_an_item_listed_after_its_month_is_not_dated_by_the_feed(self):
+        self.assertTrue(oracle_cpu.listed_later("Critical Patch Update - April 2005", "2005-10-18"))
+        self.assertFalse(oracle_cpu.listed_later("Critical Patch Update - October 2005", "2005-10-18"))
+        self.assertFalse(oracle_cpu.listed_later("Oracle Security Alert for CVE-2011-3192", "2011-09-15"))
+        module, documents, years, context, _stats = check.load_fixture(FIXTURES / "oracle-cpu")
+        rows, stats = oracle_cpu.parse(documents, years, context)
+        self.assertNotIn("example-apr2005", {row["native_id"] for row in rows})
+        self.assertEqual(stats["undated"], {2005: 1})
+
+    def test_coverage_names_each_kind_of_held_item(self):
+        rows = coverage.adapter_rows(oracle_cpu, {"upstream": {2005: 5}, "missing": {2005: 1}, "dead": {2005: 2}, "undated": {2005: 1}},
+                                     {2005: 1}, {2005}, "2026-11-03")
+        self.assertEqual((rows[0]["status"], rows[0]["reason"]), (
+            "partial", "1 listed item could not be read; 2 listed items link to pages that no longer resolve; "
+                       "1 listed item carries only a later posting date, not its publication date"))
 
     def test_other_links_are_left_to_the_https_upgrade(self):
         self.assertEqual(oracle_cpu.link(" http://www.oracle.com/security-alerts/cpujan2025.html "),

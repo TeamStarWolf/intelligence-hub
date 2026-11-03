@@ -4,6 +4,14 @@ One row per CVE that Microsoft rated Critical or Important, or marked exploited,
 monthly security update document. The update list also carries documents labelled
 "Mariner Release Notes" under ids such as 1999-Sep: they describe Azure Linux
 packages, not Windows-era updates, and are excluded by title and by date.
+
+The regular monthly documents also list third-party CVEs that Microsoft ships in Azure
+Linux (formerly CBL-Mariner) packages, under the families "Mariner", "Azure Linux" and
+"Open Source Software". A CVE becomes a row only when at least one product it affects
+is a Microsoft product: a product in any other family, or a product the document lists
+without a family whose name is not an Azure Linux or CBL-Mariner package. For those
+third-party CVEs Microsoft's Title field holds the upstream description, so a title
+that reads like a description is replaced by the CVE id and its Microsoft families.
 """
 import json
 import re
@@ -23,12 +31,23 @@ LAST_YEAR = None
 HOME = "https://msrc.microsoft.com/update-guide/"
 HOSTS = ("api.msrc.microsoft.com",)
 MAX_BYTES = 64 * 1024 * 1024
-FILTER = ("Microsoft severity Critical or Important, or Exploited:Yes in the CVE's exploitability threat; "
+FILTER = ("Microsoft severity Critical or Important, or Exploited:Yes in the CVE's exploitability threat, "
+          "for CVEs that affect at least one Microsoft product (Azure Linux, CBL-Mariner and open-source package CVEs are left out); "
           "the first 1,500 a year by exploited, severity and CVE id")
 LICENCE = "MSRC CVRF API; CVE ids, Microsoft titles, severities, product families, dates and links only."
 UPDATES = "https://api.msrc.microsoft.com/cvrf/v3.0/updates"
 FIRST_DOCUMENT = (2016, 4)
 EXCLUDED_TITLES = {"mariner release notes"}
+# Families that hold third-party packages, not Microsoft products.
+THIRD_PARTY_FAMILIES = {"Mariner", "Azure Linux", "Open Source Software"}
+# A product listed without a family is a third-party package when its name says so
+# ("cbl2 kernel 5.15.180.1-1", "azl3 qemu 8.2.0-16 on Azure Linux 3.0").
+THIRD_PARTY_PRODUCT = re.compile(r"\b(?:CBL[- ]?Mariner|Azure Linux)\b|^(?:cm1|cbl2|azl3)\s", re.I)
+NO_PRODUCT = {"", "none available"}
+# Upstream descriptions that Microsoft files as the Title of a third-party CVE.
+DESCRIPTION = re.compile(r"(?:It was discovered|A flaw (?:was found|in)|In the Linux kernel|An issue was discovered|"
+                         r"A crafted|An? (?:[\w-]+ ){0,6}(?:issue|vulnerability|flaw|bug) (?:was|in|exists))\b", re.I)
+MAX_HEADLINE = 160
 MONTHS = {name: number for number, name in enumerate(
     ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"), 1)}
 RANK = {"critical": 0, "important": 1}
@@ -74,11 +93,33 @@ def _families(tree):
     return families
 
 
+def _names(tree):
+    return {str(item["ProductID"]): str(item.get("Value") or "") for item in (tree or {}).get("FullProductName") or []
+            if isinstance(item, dict) and item.get("ProductID")}
+
+
+def microsoft_product(ident, families, names):
+    """True for a Microsoft product, False for a third-party package or an unnamed product."""
+    family = families.get(ident)
+    if family:
+        return family not in THIRD_PARTY_FAMILIES
+    name = names.get(ident, "").strip()
+    return name.lower() not in NO_PRODUCT and not THIRD_PARTY_PRODUCT.search(name)
+
+
+def headline(title, cve, families):
+    """Microsoft's title, or "CVE id: families" when the title is an upstream description."""
+    if title and len(title) <= MAX_HEADLINE and not title.endswith(".") and not DESCRIPTION.match(title):
+        return title
+    return cve + (": " + ", ".join(sorted(families)) if families else "")
+
+
 def rows_from(document, month_day, raw):
     value = json.loads(document.raw)
     if str(value.get("DocumentTitle", {}).get("Value", "")).strip().lower() in EXCLUDED_TITLES:
         return [], 0
     families = _families(value.get("ProductTree"))
+    names = _names(value.get("ProductTree"))
     rows, seen = [], 0
     for item in value.get("Vulnerability") or []:
         cve = str(item.get("CVE") or "")
@@ -95,14 +136,18 @@ def rows_from(document, month_day, raw):
         severity = min(severities, key=lambda name: RANK.get(name.lower(), 9), default=None)
         if not exploited and (severity or "").lower() not in RANK:
             continue
-        affected = set()
+        products = set()
         for status in item.get("ProductStatuses") or []:
             if status.get("Type") == 3:
-                affected.update(families.get(str(ident), "") for ident in status.get("ProductID") or [])
-        title = base.text((item.get("Title") or {}).get("Value"))
+                products.update(str(ident) for ident in status.get("ProductID") or [])
+        microsoft = {ident for ident in products if microsoft_product(ident, families, names)}
+        if not microsoft:
+            continue
+        affected = {families.get(ident, "") for ident in microsoft} - {""}
+        title = headline(base.text((item.get("Title") or {}).get("Value"), maximum=400), cve, affected)
         rows.append(base.make_row(
-            THIS, native_id=cve, title=title or cve, url="https://msrc.microsoft.com/update-guide/vulnerability/" + cve,
-            published=month_day, cve=[cve], severity=severity, vendor_raw=["Microsoft"], product_raw=affected - {""},
+            THIS, native_id=cve, title=base.text(title), url="https://msrc.microsoft.com/update-guide/vulnerability/" + cve,
+            published=month_day, cve=[cve], severity=severity, vendor_raw=["Microsoft"], product_raw=affected,
             exploited_flag=exploited, retrieved=document.fetched_at, raw_sha256=document.sha256))
     return rows, seen
 

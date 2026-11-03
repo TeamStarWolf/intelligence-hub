@@ -10,7 +10,7 @@
  "stats": {
   "capped": {},
   "upstream": {
-   "2016": 4
+   "2016": 8
   }
  },
  "years": [
