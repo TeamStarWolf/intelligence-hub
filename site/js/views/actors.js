@@ -7,12 +7,13 @@ import { count, node, routeLink } from "../util.js";
 import { pageSize } from "../limits.js";
 import { label, libraryDoor, loadLibrary, pager, resultCard, section } from "./common.js";
 import { historyYears } from "./history.js";
+import { entityDoor } from "./tags.js";
 
 const KINDS = { actor: { title: "Actors", key: "actor", noun: "actor" }, malware: { title: "Malware and tools", key: "malware", noun: "malware family or tool" } };
 
 function attackId(id) { return /^[GS]\d{4}$/.test(id) ? id : null; }
 
-function entityTable(kind, map, lib) {
+function entityTable(kind, map, lib, year = null) {
   const spec = KINDS[kind];
   const table = node("table", "data-table");
   table.append(node("caption", "", spec.title + " named on loaded entries, by how many entries carry the tag. Names are matched case-sensitively from the library vocabulary; see Method for the confidence of each match."));
@@ -22,7 +23,7 @@ function entityTable(kind, map, lib) {
   const body = node("tbody");
   for (const [id, entry] of [...map].sort((a, b) => b[1].count - a[1].count || label(a[1].label).localeCompare(label(b[1].label)))) {
     const tr = node("tr");
-    const name = node("th"); name.scope = "row"; name.append(routeLink(label(entry.label), formatRoute({ view: kind, id, query: {} })));
+    const name = node("th"); name.scope = "row"; name.append(routeLink(label(entry.label), entityDoor(kind, id, year ? { year } : {})));
     const door = node("td");
     const link = libraryDoor(lib, entry.label, "Library page");
     door.append(link || node("span", "muted", "No library page"));
@@ -48,7 +49,7 @@ export async function renderActors(ctx) {
   form.append(choose);
   form.addEventListener("submit", event => event.preventDefault());
   target.replaceChildren(node("h1", "view-title", "Actors and malware"),
-    node("p", "view-intro", "Threat groups, malware and tools that entries name, each with its entries and a link to its page in the TeamStarWolf library. A name in a headline is a mention, not attribution."), form, status);
+    node("p", "view-intro", "Threat groups, malware and tools that entries name, each with its entries and a link to its page in the TeamStarWolf library. " + (route.query.year ? "A name opens the Explorer filtered to it in " + route.query.year + ". " : "") + "A name in a headline is a mention, not attribution."), form, status);
   const paths = store.articlePaths({ view: "explore", id: null, query: route.query.year ? { year: route.query.year } : {} });
   const [lib] = await Promise.all([loadLibrary(), store.ensure(paths, () => { if (ctx.current()) status.textContent = "Still reading."; })]);
   if (!ctx.current()) return;
@@ -56,7 +57,7 @@ export async function renderActors(ctx) {
   const parts = [];
   for (const kind of ["actor", "malware"]) {
     const block = section(KINDS[kind].title);
-    if (found[kind].size) block.append(entityTable(kind, found[kind], lib));
+    if (found[kind].size) block.append(entityTable(kind, found[kind], lib, route.query.year || null));
     else block.append(node("p", "muted", "No loaded entry names one in this scope."));
     parts.push(block);
   }

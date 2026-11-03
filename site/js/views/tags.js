@@ -1,7 +1,9 @@
 // Tags (#/tags): every vocabulary value that tags at least one loaded entry, with its count and
-// a door: a page for vendors, actors and malware, otherwise the Explorer filter for that value.
-// Values with no entry in the scope are not listed. The scope is the live window, or one year
-// (that year's live months and history rows) with ?year=.
+// a door: in the live window, a page for vendors, actors and malware, otherwise the Explorer
+// filter for that value. With ?year= (that year's live months and history rows) every value,
+// vendors, actors and malware included, opens the Explorer filtered to it in that year, because
+// the vendor, actor and malware pages list only the live window. Values with no entry in the
+// scope are not listed.
 import { formatRoute, withQuery } from "../router.js";
 import { facets, kevLinked } from "../filters.js";
 import { count, node, routeLink } from "../util.js";
@@ -9,6 +11,8 @@ import { EXPLOITATION_LABELS, KIND_LABELS, label } from "./common.js";
 import { historyYears } from "./history.js";
 
 const explore = query => formatRoute({ view: "explore", id: null, query });
+// An entity page in the live window; the Explorer filter for that year when a year is chosen.
+export const entityDoor = (view, value, year = {}) => year.year ? explore({ [view]: value, ...year }) : formatRoute({ view, id: value, query: {} });
 
 // Field, heading, how a value reads, and where it leads.
 export const TAG_FIELDS = [
@@ -16,10 +20,10 @@ export const TAG_FIELDS = [
   ["class", "Source class", value => label("class:" + value), (value, year) => explore({ class: value, ...year })],
   ["event", "Event type", value => label("event:" + value), (value, year) => explore({ event: value, ...year })],
   ["exp", "Exploitation", value => EXPLOITATION_LABELS[value] || value, (value, year) => explore({ exp: value, ...year })],
-  ["vendor", "Vendor", value => label("vendor:" + value), value => formatRoute({ view: "vendor", id: value, query: {} })],
+  ["vendor", "Vendor", value => label("vendor:" + value), (value, year) => entityDoor("vendor", value, year)],
   ["product", "Product", value => label("product:" + value), (value, year) => explore({ product: value, ...year })],
-  ["actor", "Actor", value => label("actor:" + value), value => formatRoute({ view: "actor", id: value, query: {} })],
-  ["malware", "Malware and tools", value => label("malware:" + value), value => formatRoute({ view: "malware", id: value, query: {} })],
+  ["actor", "Actor", value => label("actor:" + value), (value, year) => entityDoor("actor", value, year)],
+  ["malware", "Malware and tools", value => label("malware:" + value), (value, year) => entityDoor("malware", value, year)],
   ["sector", "Sector", value => label("sector:" + value), (value, year) => explore({ sector: value, ...year })],
   ["region", "Region", value => label("region:" + value), (value, year) => explore({ region: value, ...year })],
   ["cwe", "Weakness (CWE)", value => value, (value, year) => explore({ cwe: value, ...year })],
@@ -57,7 +61,7 @@ export async function renderTags(ctx) {
   form.append(choose);
   form.addEventListener("submit", event => event.preventDefault());
   target.replaceChildren(node("h1", "view-title", "Tags"),
-    node("p", "view-intro", "Every tag value on at least one entry, with its count. Vendors, actors and malware open their own page; every other value opens the Explorer filtered to it. Values with no entry in this scope are not listed."), form, status);
+    node("p", "view-intro", route.query.year ? "Every tag value on at least one entry in " + route.query.year + ", with its count. Every value opens the Explorer filtered to it in " + route.query.year + ". Values with no entry in this scope are not listed." : "Every tag value on at least one entry, with its count. Vendors, actors and malware open their own page; every other value opens the Explorer filtered to it. Values with no entry in this scope are not listed."), form, status);
   const paths = store.articlePaths({ view: "explore", id: null, query: route.query.year ? { year: route.query.year } : {} });
   const [cveIndex] = await Promise.all([store.cveIndex().catch(() => null), store.ensure(paths, () => { if (ctx.current()) status.textContent = "Still reading."; })]);
   if (!ctx.current()) return;

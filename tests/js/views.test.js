@@ -42,6 +42,14 @@ function site({ reports = null } = {}) {
       row("h-ms98-002", { ...MSRC, published_at: "1998-06-25", title: "MS98-002: Error in Admin Rights in Microsoft Windows NT" }),
       row("hist-curated-1998", { source_id: "curated", source_name: "Curated history", kind: "incident", origin: "library-curation", published_at: "1998-07-15", title: "A curated 1998 event",
         references: [{ label: "Pinned library discovery reference", url: PINNED_EVIDENCE }], tagging: { source_class: "researcher", event_type: [["analysis", "kind-default", "high"]], exploitation: ["unknown", "none", "high"] } })
+    ] },
+    // A history year whose rows carry a vendor, an actor and a malware tag, none of them in the
+    // live window, so a year-scoped door that drops the year finds nothing.
+    "history/2010.json": { schema_version: 7, kind: "articles", period: "2010", rows: [
+      row("h-ms10-046", { ...MSRC, published_at: "2010-08-02", title: "MS10-046: Vulnerability in Windows Shell Could Allow Remote Code Execution" }),
+      row("hist-curated-2010", { source_id: "curated", source_name: "Curated history", kind: "incident", origin: "library-curation", published_at: "2010-07-15", title: "A curated 2010 event",
+        tagging: { source_class: "researcher", event_type: [["analysis", "kind-default", "high"]], exploitation: ["unknown", "none", "high"], vendor: [["vendor:microsoft", "title-alias", "medium"]],
+          actor: [["actor:G0016", "title-alias", "medium"]], malware: [["malware:S0154", "title-alias", "medium"]] } })
     ] }
   };
   if (reports) extra["reports.json"] = reports;
@@ -175,6 +183,50 @@ test("every tag value has a page or a filter that finds its entries, and zero co
   const scoped = await go(shell, "#/tags?year=1998");
   assert.ok(scoped.textContent.includes("Microsoft Security Bulletins 2"));
   assert.ok(scoped.querySelector("a[href='#/explore?kind=bulletin&year=1998']"), "a value's filter keeps the chosen year");
+});
+
+// The Explorer's entry cards for hash, without the empty-state line.
+async function explorerEntries(shell, hash) {
+  await go(shell, hash);
+  assert.equal(shell.doc.querySelector("#explore").hidden, false, hash + " opens the Explorer");
+  return [...shell.doc.querySelectorAll("#results li")].filter(item => item.getAttribute("class") !== "empty");
+}
+
+test("with a year chosen, every tag value, vendors, actors and malware included, links to that year's entries", async () => {
+  const shell = await boot();
+  const view = await go(shell, "#/tags?year=2010");
+  const fields = [...view.querySelectorAll(".tag-group")].map(group => group.getAttribute("data-field"));
+  for (const field of ["vendor", "actor", "malware"]) assert.ok(fields.includes(field), field + " has a value in 2010");
+  const links = [...view.querySelectorAll(".tag-group a.chip")].map(anchor => [anchor.closest(".tag-group").getAttribute("data-field"), anchor.getAttribute("href"), Number(anchor.textContent.split(" ").pop())]);
+  assert.ok(links.length >= 8, links.length);
+  for (const [field] of [["vendor"], ["actor"], ["malware"]]) assert.ok(links.some(([name]) => name === field), field);
+  assert.ok(links.some(([, href]) => href === "#/explore?vendor=microsoft&year=2010"), "the vendor door keeps the year");
+  assert.ok(links.some(([, href]) => href === "#/explore?actor=G0016&year=2010"), "the actor door keeps the year");
+  assert.ok(links.some(([, href]) => href === "#/explore?malware=S0154&year=2010"), "the malware door keeps the year");
+  for (const [field, href, shown] of links) {
+    const route = parseRoute(href, "");
+    assert.equal(route.view, "explore", field + " " + href + " opens the Explorer");
+    assert.equal(route.query.year, "2010", href + " keeps the year");
+    const entries = await explorerEntries(shell, href);
+    assert.ok(entries.length >= 1, href + " finds at least one entry");
+    assert.equal(entries.length, shown, href + " finds the entries the tag page counted");
+  }
+  const live = await go(shell, "#/tags");
+  assert.ok(live.querySelector("a[href='#/vendor/fortinet']"), "without a year, a vendor still opens its own page");
+});
+
+test("with a year chosen, each actor and malware row links to that year's entries", async () => {
+  const shell = await boot();
+  const view = await go(shell, "#/actors?year=2010");
+  const rows = [...view.querySelectorAll("tbody tr")].map(tr => [tr.querySelector("th a").getAttribute("href"), Number(tr.querySelectorAll("td")[1].textContent)]);
+  assert.deepEqual(rows.map(([href]) => href).sort(), ["#/explore?actor=G0016&year=2010", "#/explore?malware=S0154&year=2010"]);
+  for (const [href, shown] of rows) {
+    const entries = await explorerEntries(shell, href);
+    assert.ok(entries.length >= 1, href);
+    assert.equal(entries.length, shown, href + " finds the entries the row counted");
+  }
+  const live = await go(shell, "#/actors");
+  assert.ok(live.querySelector("tbody a[href='#/actor/G0016']"), "without a year, an actor still opens its own page");
 });
 
 test("the tag alias route opens the Explorer filtered to that value", async () => {
