@@ -3,14 +3,60 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { VIEWS, formatRoute, parseRoute, withQuery } from "../../site/js/router.js";
+import { ID_VIEWS, VIEWS, formatRoute, parseRoute, withQuery } from "../../site/js/router.js";
 
 const roundTrip = hash => formatRoute(parseRoute(hash, ""));
 
 test("every view round-trips", () => {
-  for (const view of VIEWS.filter(name => name !== "cve")) assert.equal(roundTrip("#/" + view), "#/" + view);
+  for (const view of VIEWS.filter(name => !(Object.hasOwn(ID_VIEWS, name) && ID_VIEWS[name].fallback))) assert.equal(roundTrip("#/" + view), "#/" + view);
   assert.equal(roundTrip("#/cve/CVE-2026-118527"), "#/cve/CVE-2026-118527");
   assert.deepEqual(parseRoute("#/cve/CVE-2026-118527", ""), { view: "cve", id: "CVE-2026-118527", query: {}, rewrite: false });
+  for (const hash of ["#/history/1998", "#/history/2026", "#/vendor/palo-alto-networks", "#/actor/G0016", "#/actor/storm-0940", "#/malware/S0154"]) assert.equal(roundTrip(hash), hash);
+  assert.deepEqual(parseRoute("#/history/2003", ""), { view: "history", id: "2003", query: {}, rewrite: false });
+});
+
+test("a view that needs an id falls back to its index, and a bad id is never reflected", () => {
+  assert.equal(roundTrip("#/vendor"), "#/vendors");
+  assert.equal(roundTrip("#/actor"), "#/actors");
+  assert.equal(roundTrip("#/malware/"), "#/actors");
+  assert.equal(roundTrip("#/vendor/%3Cscript%3E"), "#/vendors");
+  assert.equal(roundTrip("#/vendor/Fortinet"), "#/vendors", "vendor ids are lowercase slugs");
+  assert.equal(roundTrip("#/actor/G0016%22onload"), "#/actors");
+  assert.equal(roundTrip("#/history/1997"), "#/history");
+  assert.equal(roundTrip("#/history/2003/extra"), "#/history");
+  assert.equal(parseRoute("#/vendor", "").rewrite, true);
+});
+
+test("history, vendor, tag and actor views keep only their own keys", () => {
+  assert.equal(roundTrip("#/history/2003?month=07&source=microsoft-bulletins&page=2"), "#/history/2003?source=microsoft-bulletins&month=07&page=2");
+  assert.equal(roundTrip("#/history?month=07&source=x&page=2"), "#/history", "the year index reads no key");
+  assert.equal(roundTrip("#/history/2003?q=x&kind=advisory&year=2004"), "#/history/2003");
+  assert.equal(roundTrip("#/vendor/fortinet?page=3&kind=kev"), "#/vendor/fortinet?page=3");
+  assert.equal(roundTrip("#/tags?year=2003&vendor=x"), "#/tags?year=2003");
+  assert.equal(roundTrip("#/actors?year=1999"), "#/actors?year=1999");
+  assert.equal(roundTrip("#/method?q=x"), "#/method");
+  assert.equal(roundTrip("#/explore?cwe=CWE-79&tech=T1059.001"), "#/explore?cwe=CWE-79&tech=T1059.001");
+  assert.equal(roundTrip("#/explore?cwe=79&tech=T1059.1"), "#/explore", "malformed CWE and technique ids are dropped");
+});
+
+test("#/tag/<field>/<value> is rewritten to the Explorer filter for that value", () => {
+  const cases = [
+    ["#/tag/vendor/fortinet", "#/explore?vendor=fortinet"],
+    ["#/tag/event_type/breach", "#/explore?event=breach"],
+    ["#/tag/source_class/press", "#/explore?class=press"],
+    ["#/tag/exploitation/known", "#/explore?exp=known"],
+    ["#/tag/attack/T1190", "#/explore?tech=T1190"],
+    ["#/tag/cwe/CWE-787?year=2024", "#/explore?cwe=CWE-787&year=2024"],
+    ["#/tag/region/US", "#/explore?region=US"],
+    ["#/tag/vendor/%3Cx%3E", "#/explore"],
+    ["#/tag/password/hunter2", "#/explore"],
+    ["#/tag/vendor", "#/explore"]
+  ];
+  for (const [hash, expected] of cases) {
+    const route = parseRoute(hash, "");
+    assert.equal(route.rewrite, true, hash);
+    assert.equal(formatRoute(route), expected, hash);
+  }
 });
 
 test("every list filter, sort, page and open record round-trips in canonical order", () => {
@@ -71,7 +117,7 @@ test("A4 query keys and old anchors are accepted as legacy aliases and rewritten
     [["", "?view=feed&kind=advisory"], "#/explore?kind=advisory"],
     [["", "?cve=CVE-2021-44228"], "#/cve/CVE-2021-44228"],
     [["#reports", ""], "#/reports"],
-    [["#method", ""], "#/about"],
+    [["#method", ""], "#/method"],
     [["#knowledge", ""], "#/about"],
     [["", "?tag=vendor:%3Cx%3E&cve=nope&view=../../"], "#/explore"]
   ];

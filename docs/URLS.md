@@ -26,13 +26,29 @@ server rewrite is needed. Values are percent-encoded; a space in `q` may be writ
 | `#/news` | The Explorer limited to press sources | last 7 days |
 | `#/cves` | The CVE register: every CVE a saved entry mentions | none |
 | `#/cve/<CVE-id>` | The register with that CVE's saved brief open in a dialog | none |
-| `#/reports` | Report editions from the validated report catalog | none |
-| `#/sources` | The run record and the source ledger | none |
-| `#/data` | Per-year analytics exports, the manifest and the data dictionary | none |
-| `#/about` | What the Hub is, its method and limits, and the notices | none |
+| `#/history` | The year index from 1998: history rows, the sources that supplied them and the coverage statuses for each year | none |
+| `#/history/<year>` | One year: the per-source coverage statements first, then rows per month and per source, oldest first | none |
+| `#/vendors` | Every vendor with an entry in the live window or in the KEV catalog, with its library pages | live window |
+| `#/vendor/<id>` | One vendor: its library pages, its KEV entries by year added, products and entries | live window |
+| `#/tags` | Every tag value on at least one entry, with its count and a page or Explorer filter | live window, or `year` |
+| `#/actors` | Threat groups, malware and tools named on entries, with their library pages | live window, or `year` |
+| `#/actor/<id>`, `#/malware/<id>` | One actor or one piece of software: its library page and entries | live window |
+| `#/reports` | Every report edition from the validated report catalog, the collector's run record and the catalog's review notes | none |
+| `#/sources` | The run record, the history coverage matrix by source and year, and the source ledger | none |
+| `#/method` | Evidence rules, confidence levels, coverage statuses, dates and scores, and the licence and notice table | none |
+| `#/data` | Per-year analytics exports, the manifest, the data dictionary and the licence table | none |
+| `#/about` | What the Hub is, what it covers, how fresh it is, and the notices | none |
 
-A `<CVE-id>` matches `CVE-YYYY-NNNN` with 4 to 19 digits after the year. Any other path opens
-the Explorer, and `#/cve` with no valid id opens the register.
+A `<CVE-id>` matches `CVE-YYYY-NNNN` with 4 to 19 digits after the year. A `<year>` is `1998` to
+`2099`. A vendor `<id>` is a vocabulary vendor id without its prefix (`fortinet`); an actor or
+malware `<id>` is an ATT&CK id (`G0016`, `S0154`) or a vocabulary slug (`storm-0940`). Any other
+path opens the Explorer; `#/cve`, `#/vendor`, `#/actor` and `#/malware` with no valid id open
+their index view, and `#/history/<year>` with an invalid year opens the year index.
+
+`#/tag/<field>/<value>` is an alias: the page rewrites it to the Explorer filter for that value,
+so `#/tag/vendor/fortinet` becomes `#/explore?vendor=fortinet`. `<field>` is a query key from the
+table below or the field's name in a row's tagging block (`source_class`, `event_type`,
+`exploitation`, `attack`).
 
 ## Query keys
 
@@ -52,16 +68,18 @@ are dropped.
 | `product` | list | a product id without its prefix, such as `pan-os` | product tag `product:<value>` |
 | `actor` | list | an actor id without its prefix, such as `G0016` | actor tag `actor:<value>` |
 | `malware` | list | a malware id without its prefix, such as `S0154` | malware tag `malware:<value>` |
+| `cwe` | list | a CWE id, such as `CWE-787` | weakness tag |
+| `tech` | list | an ATT&CK technique id, such as `T1190` or `T1059.001` | technique tag (reached through CWE and CAPEC, low confidence) |
 | `sector` | list | a sector id without its prefix, such as `healthcare-public-health` | sector tag `sector:<value>` |
 | `region` | list | an ISO 3166-1 alpha-2 code, `EU`, or `M49-` and three digits | region tag |
-| `source` | list | a source id from `config/sources.json`, such as `cisa-advisories` | one source |
-| `year` | list, `kev` | `1998` to `2099` | that calendar year; on a list view it also reads that year's history rows |
-| `month` | list | `01` to `12`, with `year` | that month |
+| `source` | list, `history/<year>` | a source id from `config/sources.json` or a history source id from `data/v7/coverage.json`, such as `cisa-advisories` or `microsoft-bulletins` | one source |
+| `year` | list, `kev`, `tags`, `actors` | `1998` to `2099` | that calendar year; on a list view, `tags` and `actors` it also reads that year's history rows |
+| `month` | list, `history/<year>` | `01` to `12`, with `year` on a list view | that month |
 | `range` | list, `kev` | `3`, `7`, `30`, `90`, `365`, `all` | the last N days ending on the content date; `year` replaces it |
 | `sort` | list | `date-desc`, `date-asc`, `title-asc`, `title-desc`, `source-asc`, `source-desc`, `cve-asc`, `cve-desc`, `cvss-desc`, `cvss-asc` | result order |
 | `sort` | `kev` | `added-desc`, `added-asc`, `due-asc`, `due-desc`, `cve-desc`, `cve-asc` | ledger order |
 | `sort` | `cves` | `cve-desc`, `cve-asc`, `cvss-desc`, `cvss-asc`, `kev-desc` | register order |
-| `page` | list, `kev`, `cves` | `1` to `9999` | result page, 25 rows each |
+| `page` | list, `kev`, `cves`, `history/<year>`, `vendor`, `actor`, `malware` | `1` to `9999` | result page, 25 rows each |
 | `open` | list | an entry id, such as `feed-3f41d3f2c16c88f054f7` | opens that entry's detail dialog |
 
 The page writes keys in the order of this table and leaves out default values (`sort` at its
@@ -94,7 +112,8 @@ address to the hash route and drops the query string.
 | `?cve=<CVE-id>` | `#/cve/<CVE-id>` |
 | `#briefing`, `#timeline`, `#top` | `#/explore` |
 | `#reports` | `#/reports` |
-| `#method`, `#knowledge` | `#/about` |
+| `#method` | `#/method` |
+| `#knowledge` | `#/about` |
 
 ## Examples
 
@@ -105,7 +124,11 @@ address to the hash route and drops the query string.
 | A year, history rows included | `https://teamstarwolf.github.io/intelligence-hub/#/explore?year=2003` |
 | Reporting in one year | `https://teamstarwolf.github.io/intelligence-hub/#/explore?kind=reporting&year=2025` |
 | One CVE's brief | `https://teamstarwolf.github.io/intelligence-hub/#/cve/CVE-2021-44228` |
-| An actor | `https://teamstarwolf.github.io/intelligence-hub/#/explore?actor=G0016` |
+| An actor's entries in the Explorer | `https://teamstarwolf.github.io/intelligence-hub/#/explore?actor=G0016` |
+| An actor's page | `https://teamstarwolf.github.io/intelligence-hub/#/actor/G0016` |
+| A vendor's page | `https://teamstarwolf.github.io/intelligence-hub/#/vendor/fortinet` |
+| One year of history with its coverage | `https://teamstarwolf.github.io/intelligence-hub/#/history/1998` |
+| Every tag value in one year | `https://teamstarwolf.github.io/intelligence-hub/#/tags?year=2024` |
 | KEV additions in the last 90 days | `https://teamstarwolf.github.io/intelligence-hub/#/kev?range=90` |
 
 A change to this contract changes `site/js/router.js`, its tests and this page in the same pull

@@ -54,6 +54,8 @@ export function rowMatches(row, query, { view = "explore", cveIndex = null, wind
   if (query.product && !has(row.t.product, "product:" + query.product)) return false;
   if (query.actor && !has(row.t.actor, "actor:" + query.actor)) return false;
   if (query.malware && !has(row.t.malware, "malware:" + query.malware)) return false;
+  if (query.cwe && !has(row.t.cwe, query.cwe)) return false;
+  if (query.tech && !row.t.attack.includes(query.tech)) return false;
   if (query.sector && !has(row.t.sector, "sector:" + query.sector)) return false;
   if (query.region && !row.t.region.some(item => item[0] === query.region)) return false;
   if (query.source && row.source_id !== query.source) return false;
@@ -89,7 +91,7 @@ export function filterRows(rows, route, { cveIndex = null, contentDate = null } 
 
 // Value counts for every filter over rows (the loaded scope under the view's fixed constraint).
 export function facets(rows, view = "explore") {
-  const result = { kind: new Map(), class: new Map(), event: new Map(), exp: new Map(), vendor: new Map(), product: new Map(), actor: new Map(), malware: new Map(), sector: new Map(), region: new Map(), source: new Map() };
+  const result = { kind: new Map(), class: new Map(), event: new Map(), exp: new Map(), vendor: new Map(), product: new Map(), actor: new Map(), malware: new Map(), cwe: new Map(), tech: new Map(), sector: new Map(), region: new Map(), source: new Map() };
   const add = (map, key, label) => { const entry = map.get(key); if (entry) entry.count++; else map.set(key, { count: 1, label }); };
   const constraint = LIST_VIEWS[view];
   for (const row of rows) {
@@ -101,6 +103,8 @@ export function facets(rows, view = "explore") {
       for (const id of new Set(row.t[field].map(item => item[0]))) add(target, id.replace(/^[a-z]+:/, ""), id);
     }
     for (const code of new Set(row.t.region.map(item => item[0]))) add(result.region, code);
+    for (const id of new Set(row.t.cwe.map(item => item[0]))) add(result.cwe, id);
+    for (const id of new Set(row.t.attack)) add(result.tech, id);
   }
   return result;
 }

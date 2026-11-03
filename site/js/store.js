@@ -4,7 +4,7 @@
 // drops only the shards whose bytes changed.
 import { maximumBriefsBytes, maximumIndexBytes, maximumLegacyFeedBytes, maximumShardBytes } from "./limits.js";
 import { HttpError } from "./fetcher.js";
-import { normalizeArticleShard, normalizeBriefsFile, normalizeBucket, normalizeCveIndex, normalizeIndex, normalizeKevShard, normalizeRecent, normalizeReports, normalizeSources } from "./validate.js";
+import { normalizeArticleShard, normalizeBriefsFile, normalizeBucket, normalizeCoverage, normalizeCveIndex, normalizeIndex, normalizeKevShard, normalizeRecent, normalizeReports, normalizeSources } from "./validate.js";
 import { addDays, monthsBetween } from "./util.js";
 import { dateWindow } from "./filters.js";
 
@@ -113,6 +113,7 @@ export function createStore(fetcher) {
     kev: (value, path) => normalizeKevShard(value, path),
     "cve-index.json": value => normalizeCveIndex(value),
     "sources.json": value => normalizeSources(value),
+    "coverage.json": value => normalizeCoverage(value),
     "reports.json": value => normalizeReports(value),
     "recent.json": value => normalizeRecent(value)
   };
@@ -168,6 +169,15 @@ export function createStore(fetcher) {
     try { return await load("reports.json"); }
     catch (error) { if (error.format) return { status: "unavailable", reason: "The report catalog file did not validate: " + error.message, reports: [], indexes: [], notes: [], review: null, updated_at: null }; throw error; }
   }
+  // The history coverage statements. A missing, stub or invalid file reads as unavailable, so
+  // the History and Sources views still render their other parts.
+  async function coverage() {
+    const unavailable = reason => ({ status: "unavailable", note: reason, first_year: null, end_year: null, sources: [], rows: [], held_back: [] });
+    if (state.mode !== "v7") return unavailable("The schema 6 fallback does not carry history coverage.");
+    if (!entry("coverage.json")) return unavailable("This index lists no coverage file.");
+    try { return await load("coverage.json"); }
+    catch (error) { if (error.format) return unavailable("The coverage file did not validate: " + error.message); throw error; }
+  }
   function cached(path) { return files.get(path)?.value || null; }
 
   // One CVE brief: from its bucket when buckets are published, otherwise from data/briefs.json.
@@ -197,5 +207,5 @@ export function createStore(fetcher) {
     return briefs.map.get(cve) || null;
   }
 
-  return { state, loadIndex, articlePaths, todayPaths, kevPaths, ensure, loaded, rows, kevRows, cveIndex, sources, reports, brief, feed, contentDate, cached, listed, entry };
+  return { state, loadIndex, articlePaths, todayPaths, kevPaths, ensure, loaded, rows, kevRows, cveIndex, sources, reports, coverage, brief, feed, contentDate, cached, listed, entry };
 }

@@ -313,6 +313,35 @@ export function normalizeReports(raw) {
   return { status: "available", reason: null, reports, indexes, notes: textList(catalog.notes || [], 40, 1200), review, updated_at: timestamp(catalog.updated_at ?? null) };
 }
 
+export const COVERAGE_STATUSES = ["complete", "filtered", "partial", "sample", "gap", "unreachable"];
+
+// data/v7/coverage.json: one statement per history source and year. A stub (no history in this
+// run) carries no rows and is shown as "coverage not published", never as a claim.
+export function normalizeCoverage(raw) {
+  requireValue(isObject(raw) && raw.schema_version === 7 && raw.kind === "coverage" && ["ok", "stub"].includes(raw.status));
+  if (raw.status === "stub") return { status: "stub", note: optionalText(raw.note ?? null, 600), first_year: null, end_year: null, sources: [], rows: [], held_back: [] };
+  requireValue(Number.isSafeInteger(raw.first_year) && Number.isSafeInteger(raw.end_year) && raw.first_year >= 1998 && raw.first_year <= raw.end_year && raw.end_year <= 2100);
+  requireValue(Array.isArray(raw.statuses) && raw.statuses.every(status => COVERAGE_STATUSES.includes(status)));
+  const ids = new Set();
+  const sources = list(raw.sources, 200).map(item => {
+    requireValue(isObject(item) && typeof item.source_id === "string" && /^[a-z0-9][a-z0-9-]{0,79}$/.test(item.source_id) && !ids.has(item.source_id));
+    ids.add(item.source_id);
+    return { source_id: item.source_id, name: boundedText(item.name, 240), adapter: optionalText(item.adapter, 80), home: optionalText(item.home, 4000),
+      first_year: item.first_year === null || item.first_year === undefined ? null : nonnegative(item.first_year), last_year: item.last_year === null || item.last_year === undefined ? null : nonnegative(item.last_year),
+      filter: optionalText(item.filter, 600), licence: optionalText(item.licence, 600) };
+  });
+  const seen = new Set();
+  const rows = list(raw.rows, 20000).map(item => {
+    requireValue(isObject(item) && ids.has(item.source_id) && Number.isSafeInteger(item.year) && item.year >= raw.first_year && item.year <= raw.end_year && COVERAGE_STATUSES.includes(item.status));
+    const key = item.source_id + " " + item.year; requireValue(!seen.has(key)); seen.add(key);
+    return { source_id: item.source_id, year: item.year, status: item.status, admitted: nonnegative(item.admitted),
+      upstream_count: item.upstream_count === null ? null : nonnegative(item.upstream_count), filter: optionalText(item.filter, 600), reason: optionalText(item.reason, 600),
+      checked_at: item.checked_at == null ? null : calendarDay(item.checked_at), licence: optionalText(item.licence, 600) };
+  });
+  const held_back = list(raw.held_back || [], 200).map(item => { requireValue(isObject(item)); return { path: boundedText(item.path, 80), adapter: boundedText(item.adapter, 80), rows: nonnegative(item.rows) }; });
+  return { status: "ok", note: null, first_year: raw.first_year, end_year: raw.end_year, sources, rows, held_back };
+}
+
 // One full CVE brief, schema 7 shape.
 export function normalizeBrief(value, key) {
   requireValue(isObject(value) && CVE.test(key) && value.cve === key && ["ok", "failed", "pending"].includes(value.source_status) && ["PUBLISHED", "REJECTED", "UNKNOWN"].includes(value.record_state));
