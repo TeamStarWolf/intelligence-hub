@@ -18,6 +18,11 @@ public data files:
   when a later snapshot arrives. The site refuses a briefs file from a
   different run.
 
+The owner's separate desktop compiler read schema 6 feeds, which carried the
+briefs inline. From schema 7 it must read `data/briefs.json` as well, matched to
+the feed on `generated_at` and `content_revision`, or its report editions lose
+their CVE brief rows.
+
 There is no longer an 8,000-article abort. Each file has a byte bound instead:
 **8 MiB** for `data/feed.json` and **12 MiB** for `data/briefs.json`. Two count
 ceilings sit beside them. The feed holds at most **27,962 article rows**, a number
@@ -30,6 +35,17 @@ ceiling fails with a message that names it, and the deployed publication stays.
 No row is evicted to make room, because the deployed files are the only durable
 store of live rows, and KEV and curated rows are never trimmed. The site and the
 archive validator check the same bounds and ceilings.
+
+These bounds are the next wall, not a permanent one. A bounded run on
+3 November 2026 wrote 9,019,252 of the 12,582,912 briefs bytes (2,385 briefs,
+about 3,780 bytes each, 3,563,660 bytes free). New CVEs arrived at about 15 to
+21 a day in October and early November, which is about 55 to 80 KB of briefs a
+day, so the 12 MiB briefs bound is crossed between mid-December 2026 and early
+January 2027. The unchanged 21 MiB publish input cap (12,588,722 bytes for the
+feed, the briefs and the site on that run, growing about 100 to 150 KB a day) is
+crossed in January or February 2027. A run that crosses either fails and the
+site keeps its last publication, so the next data layout must land before
+mid-December.
 
 Publisher responses keep the **3 MiB** default bound. A source can set its own
 `max_bytes` in `config/sources.json`, up to a **16 MiB** fetch ceiling. The CISA

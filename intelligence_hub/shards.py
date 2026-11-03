@@ -51,7 +51,11 @@ CVE_BUCKETS_PUBLISHED = False
 CVE_BUCKETS_PENDING = ("CVE brief buckets wait for the owner's package cap decision; "
                        "full briefs are read from data/briefs.json until then.")
 TRIGGERS = {"schedule", "push", "workflow_dispatch", "local", "unrecorded"}
-DIRECTIVE = re.compile(r"\b(BOD|ED)\s?([0-9]{2}-[0-9]{2})\b")
+# CISA writes "BOD 22-01", "ED 24-01", "Emergency Directive 26-03" and
+# "Emergency Directive (ED) 25-03"; every form is normalized to BOD or ED.
+DIRECTIVE = re.compile(r"\b(?:(?P<short>BOD|ED)|(?P<long>Binding Operational Directive|Emergency Directive))"
+                       r"(?:\s*\((?P<paren>BOD|ED)\))?\s?(?P<number>[0-9]{2}-[0-9]{2})\b")
+DIRECTIVE_PREFIX = {"Binding Operational Directive": "BOD", "Emergency Directive": "ED"}
 KEV_CWE = re.compile(r"CWE-[1-9][0-9]{0,5}|NVD-CWE-(?:noinfo|Other)")
 HEX = re.compile(r"[a-f0-9]{64}")
 DAY = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
@@ -115,15 +119,23 @@ def row_order(article):
     return (article_date(article), article["id"])
 
 
+def _directive_name(match):
+    prefix = match["short"] or DIRECTIVE_PREFIX[match["long"]]
+    return prefix + " " + match["number"]
+
+
 def parse_directive(value):
     """The directive a KEV entry cites in its own requiredAction text, or None.
 
-    "BOD 22-01" and "BOD 26-04" are the common cases; an entry that cites more than
-    one distinct directive gets them sorted and joined with "; ".
+    "BOD 22-01" and "BOD 26-04" are the common cases. Emergency Directives are
+    written out ("Emergency Directive 26-03", "Emergency Directive (ED) 25-03") and
+    come back as "ED 26-03". An entry that cites more than one distinct directive
+    gets them sorted and joined with "; ", so the Cisco SD-WAN entries give
+    "BOD 22-01; ED 26-03".
     """
     if not isinstance(value, str):
         return None
-    found = sorted({match[1] + " " + match[2] for match in DIRECTIVE.finditer(value)})
+    found = sorted({_directive_name(match) for match in DIRECTIVE.finditer(value)})
     return "; ".join(found) or None
 
 
