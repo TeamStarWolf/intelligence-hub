@@ -2,6 +2,7 @@
 import hashlib
 import json
 from pathlib import Path
+import sqlite3
 import tempfile
 import unittest
 from unittest import mock
@@ -12,6 +13,8 @@ from intelligence_hub.mitigations import join_publication
 import test_publication
 
 
+# The archive sets SQLite limits with Connection.setlimit, which Python added in 3.11.
+@unittest.skipUnless(hasattr(sqlite3.Connection, "setlimit"), "the private archive needs Python 3.11 or later")
 class ArchiveSchema7Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
