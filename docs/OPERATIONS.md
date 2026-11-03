@@ -146,7 +146,7 @@ collector writes `site/data/v7/`:
 | `index.json` | Schema, clocks, content date, the run record, counts, and every shard with path, rows, bytes, sha256 and date span |
 | `live/YYYY-MM.json` | Publisher and KEV rows whose primary date falls in that month, for the current month and the 23 before it; `live/undated.json` holds rows without a date |
 | `history/YYYY.json` | Rows older than the live window, plus every curated archive row for that year |
-| `kev/YYYY.json` | The whole KEV catalog by `dateAdded` year: due date, the directive parsed from `requiredAction` (for example BOD 22-01 or BOD 26-04, or null), ransomware use, forensic triage, CWE and CISA's own text |
+| `kev/YYYY.json` | The whole KEV catalog by `dateAdded` year: due date, the directive parsed from `requiredAction` (for example BOD 22-01, BOD 26-04 or an Emergency Directive such as ED 26-03, which CISA writes out as "Emergency Directive 26-03" or "Emergency Directive (ED) 25-03"; several are joined as "BOD 22-01; ED 26-03"; null when none is cited), ransomware use, forensic triage, CWE and CISA's own text |
 | `cve-index.json` | One row per CVE with the list-view fields and where its full brief is read |
 | `sources.json` | The source ledger |
 | `coverage.json` | A stub that makes no coverage claim until the history adapters add rows |

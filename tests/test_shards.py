@@ -77,6 +77,20 @@ class KevLedgerTest(unittest.TestCase):
         self.assertIsNone(shards.parse_directive("Apply updates per vendor instructions."))
         self.assertIsNone(shards.parse_directive(None))
         self.assertEqual(shards.parse_directive("Follow BOD 26-04 and ED 24-01."), "BOD 26-04; ED 24-01")
+        # The real requiredAction text of CVE-2026-20182 and CVE-2025-20362 (KEV catalogVersion 2026.10.30).
+        self.assertEqual(shards.parse_directive(
+            "Please adhere to CISA\u2019s guidelines to assess exposure and mitigate risks associated with Cisco SD-WAN devices as "
+            "outlined in CISA\u2019s Emergency Directive 26-03 (URL listed below in Notes) and CISA\u2019s Hunt & Hardening Guidance "
+            "for Cisco SD-WAN Devices (URL listed below in Notes). Adhere to the applicable BOD 22-01 guidance for cloud services "
+            "or discontinue use of the product if mitigations are not available."), "BOD 22-01; ED 26-03")
+        self.assertEqual(shards.parse_directive(
+            "The KEV due date refers to the deadline by which FCEB agencies are expected to review and begin implementing the "
+            "guidance outlined in Emergency Directive (ED) 25-03 (URL listed below in Notes). Agencies must follow the mitigation "
+            "steps provided by CISA (URL listed below in Notes) and vendor\u2019s instructions (URL listed below in Notes). Adhere "
+            "to the applicable BOD 22-01 guidance for cloud services or discontinue use of the product if mitigations are not "
+            "available."), "BOD 22-01; ED 25-03")
+        self.assertEqual(shards.parse_directive("Binding Operational Directive (BOD) 23-02 applies."), "BOD 23-02")
+        self.assertIsNone(shards.parse_directive("An Emergency Directive may follow."))
 
     def test_ledger_keeps_every_entry_by_date_added(self):
         entries = [kev_entry("CVE-2026-10002", "2026-10-30", "Follow BOD 26-04 guidance.", knownRansomwareCampaignUse="Known", forensicTriage="Yes",
