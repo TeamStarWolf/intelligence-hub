@@ -11,7 +11,14 @@ FIXTURES = ROOT / "tests" / "fixtures"
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-SITE_FILES = ("index.html", "styles.css", "app.js", "icon.svg")
+
+
+def site_files():
+    """The page files site/files.json lists, plus files.json itself."""
+    value = json.loads((ROOT / "site" / "files.json").read_text(encoding="utf-8"))
+    return ("files.json", *value["files"])
+
+
 WINDOW = ("--start", "1998-01-01", "--end", "2026-11-01")
 
 
@@ -27,7 +34,7 @@ def source(source_id):
 class BuildCopy:
     """A throwaway copy of the repository inputs for one offline --cached build.
 
-    Only the collector, config/, the four site files, the two report inputs and the
+    Only the collector, config/, the page files site/files.json lists, the two report inputs and the
     committed fixture cache are copied. Nothing under the real reports/ or .state/
     is read or written.
     """
@@ -39,7 +46,8 @@ class BuildCopy:
                         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
         shutil.copytree(ROOT / "config", self.root / "config")
         (self.root / "site").mkdir()
-        for name in SITE_FILES:
+        for name in site_files():
+            (self.root / "site" / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / "site" / name, self.root / "site" / name)
         (self.root / "reports").mkdir()
         for name in ("reporting.json", "catalog.json"):

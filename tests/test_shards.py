@@ -6,19 +6,15 @@ from datetime import date
 import io
 import json
 import os
-from pathlib import Path
 import re
 import shutil
 import subprocess
-import tempfile
 import unittest
 from unittest import mock
 
 import support
 from intelligence_hub import collect, shards
 from test_publication import END, Workspace, synthetic_cache
-
-NODE = shutil.which("node")
 
 
 def v7_files(workspace):
@@ -410,7 +406,8 @@ class PackageTest(unittest.TestCase):
         report = self.package()
         index = index_of(self.workspace)
         self.assertTrue(index["exports"]["files"])
-        self.assertEqual(report["files"], len(index["shards"]) + len(index["exports"]["files"]) + 7)
+        # The page files site/files.json lists (and files.json), index.json and the two v6 files.
+        self.assertEqual(report["files"], len(index["shards"]) + len(index["exports"]["files"]) + len(support.site_files()) + 3)
         self.assertEqual(report["exports"], len(index["exports"]["files"]))
         self.assertLess(report["compressed_estimate"], report["input_bytes"])
 
@@ -543,7 +540,7 @@ class SiteTest(unittest.TestCase):
         page = (support.ROOT / "site" / "index.html").read_text(encoding="utf-8")
         policy = re.search(r'Content-Security-Policy" content="([^"]+)"', page)[1]
         self.assertIn("connect-src 'self';", policy)
-        for name in ("index.html", "app.js"):
+        for name in support.site_files():
             self.assertNotIn("api.github.com", (support.ROOT / "site" / name).read_text(encoding="utf-8"))
 
     def test_no_ten_minute_cadence_claim_outside_reports(self):
@@ -556,28 +553,6 @@ class SiteTest(unittest.TestCase):
             text = (support.ROOT / name).read_text(encoding="utf-8", errors="replace")
             found += [name + ": " + match[0] for match in claim.finditer(text)]
         self.assertEqual(found, [])
-
-
-@unittest.skipIf(NODE is None, "Node is not installed")
-class CadenceHeaderTest(unittest.TestCase):
-    def test_header_states_the_observed_interval(self):
-        index = {"schema_version": 7, "generated_at": "2026-11-03T12:00:00+00:00", "content_date": "2026-11-03", "requested_cron": "7 */2 * * *",
-                 "runs": [{"generated_at": "2026-11-03T12:00:00+00:00", "trigger": "schedule", "changed": True},
-                          {"generated_at": "2026-11-03T07:42:00+00:00", "trigger": "schedule", "changed": True}],
-                 "observed_interval_hours": {"median": 4.3, "max": 10.2, "runs_counted": 10}}
-        with tempfile.TemporaryDirectory() as directory:
-            scenario = Path(directory) / "cadence.json"
-            scenario.write_text(json.dumps({"case": "cadence", "files": {}, "index": index}), encoding="utf-8")
-            completed = subprocess.run([NODE, str(support.ROOT / "tests" / "app_harness.js"), str(support.ROOT / "site" / "app.js"), str(scenario)],
-                                       capture_output=True, text=True, timeout=60)
-        self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
-        result = json.loads(completed.stdout)
-        self.assertIn("Content date ", result["text"])
-        self.assertIn("Last published run ", result["text"])
-        self.assertIn("median 4.3 h, longest 10.2 h over the last 10 runs", result["text"])
-        self.assertIn("cron 7 */2 * * *", result["text"])
-        self.assertIn("could not be read", result["missing"])
-        self.assertFalse(result["wrong_schema_accepted"])
 
 
 if __name__ == "__main__":

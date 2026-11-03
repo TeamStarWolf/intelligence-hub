@@ -30,6 +30,7 @@ from datetime import date, datetime
 from .collect import (FEED_MAX_BYTES, article_date, published, reject_constant, require,
                       safe_url as collector_safe_url)
 from .mitigations import CVE_ID, index_row, INDEX_FIELDS
+from .site import FILES_JSON, SiteError, page_directories, site_files
 
 SCHEMA_VERSION = 7
 DIRECTORY = "data/v7"
@@ -81,7 +82,7 @@ SHARD_PATH = re.compile(r"(?:sources|coverage|reports|cve-index)\.json"
                         r"|kev/[0-9]{4}\.json"
                         r"|cve/[0-9]{4}/[0-9]{1,5}k\.json")
 SHARD_DIRECTORY = re.compile(r"live|history|kev|cve|cve/[0-9]{4}|exports")
-SITE_FILES = ("index.html", "styles.css", "app.js", "icon.svg")
+# The page files are the ones site/files.json lists (intelligence_hub/site.py), plus that list.
 V6_FILES = ("data/feed.json", "data/briefs.json")
 INDEX_KEYS = {"schema_version", "generated_at", "content_date", "content_revision", "feed_content_revision",
               "layout_revision", "window", "runs", "observed_interval_hours", "requested_cron", "counts",
@@ -480,7 +481,8 @@ def package_site(site, max_input=PACKAGE_MAX_INPUT, max_compressed=PACKAGE_MAX_C
                  max_v7_file=V7_FILE_MAX_BYTES, out=None):
     """Check the site directory against data/v7/index.json, then tar it and estimate its compressed size.
 
-    Fixed files: the four page files, the two v6 data files and data/v7/index.json.
+    Fixed files: site/files.json and every page file it lists, the two v6 data files and
+    data/v7/index.json.
     Data files: exactly the shards and export files the index lists, each with the
     listed bytes and sha256. No links, no hard links, no other directories. Caps: the
     file count, the per-file cap for every file under data/v7/ (the v6 files keep their
@@ -491,6 +493,11 @@ def package_site(site, max_input=PACKAGE_MAX_INPUT, max_compressed=PACKAGE_MAX_C
     root = Path(site)
     info = os.lstat(root)
     _refuse(stat.S_ISDIR(info.st_mode) and not stat.S_ISLNK(info.st_mode), "The public site must be an ordinary directory.")
+    try:
+        page = set(site_files(root)) | {FILES_JSON}
+    except (OSError, ValueError, SiteError) as error:
+        raise PackageError("site/files.json is missing or invalid: " + str(error)) from error
+    page_dirs = page_directories(page)
     files, directories = set(), set()
     for directory, folders, names in os.walk(root):
         for name in folders + names:
@@ -499,7 +506,7 @@ def package_site(site, max_input=PACKAGE_MAX_INPUT, max_compressed=PACKAGE_MAX_C
             detail = os.lstat(path)
             _refuse(not stat.S_ISLNK(detail.st_mode), "Links are not permitted in the site artifact: " + relative)
             if stat.S_ISDIR(detail.st_mode):
-                _refuse(relative in {"data", DIRECTORY} or (relative.startswith(DIRECTORY + "/") and
+                _refuse(relative in {"data", DIRECTORY} or relative in page_dirs or (relative.startswith(DIRECTORY + "/") and
                         SHARD_DIRECTORY.fullmatch(relative[len(DIRECTORY) + 1:])), "The public artifact contains an unexpected directory: " + relative)
                 directories.add(relative)
             elif stat.S_ISREG(detail.st_mode) and detail.st_nlink == 1:
@@ -517,9 +524,9 @@ def package_site(site, max_input=PACKAGE_MAX_INPUT, max_compressed=PACKAGE_MAX_C
     listed = {DIRECTORY + "/" + entry["path"]: entry for entry in index["shards"]}
     listed.update({item["path"]: item for item in index["v6_files"]})
     listed.update({DIRECTORY + "/" + item["path"]: item for item in index.get("exports", {}).get("files", [])})
-    expected = set(SITE_FILES) | {index_path} | set(listed)
+    expected = page | {index_path} | set(listed)
     for name in sorted(files):
-        _refuse(name in SITE_FILES or name in V6_FILES or name == index_path or
+        _refuse(name in page or name in V6_FILES or name == index_path or
                 (name.startswith(DIRECTORY + "/") and (SHARD_PATH.fullmatch(name[len(DIRECTORY) + 1:]) or
                                                        export_path(name[len(DIRECTORY) + 1:]))),
                 "A file outside the allowlisted patterns would be published: " + name)
