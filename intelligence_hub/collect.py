@@ -37,7 +37,7 @@ def validate_window(start, end, snapshot_version):
     maximum = {1: 3661, 2: 3661, 3: 3661, 4: 3661, 5: 7306, 6: 14610}[snapshot_version]
     require(type(start) is date and type(end) is date and start <= end and (end - start).days <= maximum,
             "History window must be date-only and within its schema's span.")
-    require(snapshot_version != 6 or start >= HISTORY_START, "Schema6 coverage must start on or after 1998-01-01.")
+    require(snapshot_version != 6 or start >= HISTORY_START, "Schema 6 coverage must start on or after 1998-01-01.")
 
 
 def now():
@@ -552,12 +552,12 @@ def validate_registry(registry):
 
 def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=40):
     from .mitigations import build_briefs, merge_retained
-    from .intelligence import compose, load_inputs
+    from .intelligence import compose_with_reports, load_inputs
     from .archive import validate_snapshot
 
     validate_window(start, end, 6)
     intelligence_inputs = load_inputs(ROOT)
-    require(type(enrich_limit) is int and 0 <= enrich_limit <= 2000, "CVE enrichment limit must be0..2000.")
+    require(type(enrich_limit) is int and 0 <= enrich_limit <= 2000, "CVE enrichment limit must be 0 to 2000.")
     context = load_mitigation_context(ROOT / "config/mitigation-context.json")
     sources = validate_registry(read_json(ROOT / "config/sources.json", 128 * 1024))
     cache_path = STATE / "public-cache.json"
@@ -643,17 +643,21 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     prepared_at = now()
     briefs, projections, mitigation_stats = build_briefs(ordered, kev.get("catalog", {}), retained, refresh, enrich_limit, fetch, text, safe_url, published, prepared_at)
     briefs = apply_mitigation_context(briefs, context)
+    # Report inputs belong to the owner's desktop compiler; a bad catalog never blocks the feed.
+    intelligence, reports = compose_with_reports(ROOT, briefs, safe_url, inputs=intelligence_inputs)
     snapshot = {"schema_version": 6, "generated_at": now(), "window": {"start": start.isoformat(), "end": end.isoformat()},
         "articles": ordered, "sources": health, "history_reviewed_at": history.get("curated_at"),
         "mitigations": briefs, "mitigation_coverage": mitigation_stats, "deduplication": {"url_duplicates_removed": duplicates},
         "refresh": {"requested_minutes": 10, "mode": "scheduled-check", "status_url": "https://github.com/TeamStarWolf/intelligence-hub/actions/workflows/publish.yml",
-            "notes": ["GitHub requests collection every ten minutes; scheduling can be delayed, dropped or disabled after repository inactivity.", "The visible page checks the saved snapshot every ten minutes. This is not a guaranteed ten-minute news delivery service.", "Snapshot and source dates describe the last published collection; unchanged checks can complete without republishing. Latest workflow outcomes are linked separately."]},
+            "notes": ["The workflow asks GitHub for a run every ten minutes, but GitHub starts scheduled runs only every few hours in practice. Runs can also be delayed, dropped or disabled after repository inactivity.", "The visible page checks the saved snapshot every ten minutes. A new item can take several hours to appear; this is not a timed news delivery service.", "Snapshot and source dates describe the last published collection; unchanged checks can complete without republishing. Latest workflow outcomes are linked separately."]},
         "coverage": {"kev_records": counts["cisa-kev"], "curated_events": counts["library-curation"], "feed_articles": counts["publisher-feed"],
-            "notes": ["This is a selected collection within the declared date window, not every cyber incident, article or vulnerability.", "KEV dates indicate catalog addition, not first disclosure or first exploitation.", "RSS usually exposes recent posts; historical curation and legacy feeds do not form a complete historical archive.", "Unknown dates remain explicit. Failed sources retain last-good input when available; public snapshot resume helps retain prior publisher items.", "Per-feed retained history is bounded to600articles. Missing, evicted or changed inputs can leave coverage gaps.", "Publisher intake reports describe only the latest bounded response selection window of at most150processed entries. Rejected or unprocessed entries are not newly admitted; unprocessed entries may include recent items, and older retained versions may remain.", "Last accepted input is not exhaustive publisher coverage. Legacy observations without intake reports have unknown window completeness.", "Canonical article URLs are deduplicated; distinct publishers covering one CVE remain separate evidence.", "CVE mentions can come from RSS metadata/body text; they do not mean every mentioned CVE was exploited.", "Headlines link to publishers; full article bodies are not copied. No environment exposure is inferred.", "Threatpost is a legacy archive with observed August2022 items; a successful fetch does not imply current reporting.", "SEC direct filing access is pending after HTTP403; news reporting about filings is not complete Item1.05/8.01 coverage."]},
-        "integrations": {"xai": {"status": "not_connected", "message": "Grok X Search is a separate supported API route; access and zero-additional-spend eligibility are not established. No model calls are enabled."},
-                         "x": {"status": "not_connected", "message": "Personal X timeline/bookmarks are not connected or published. Future article sharing is recorded for owner review; no automatic posts are enabled."},
-                         "sec": {"status": "not_connected", "message": "Direct SEC filing-feed intake returned HTTP403. Operational contact and accepted access/schema remain prerequisites; no direct filings are claimed."}}}
-    snapshot["intelligence"] = compose(ROOT, briefs, safe_url, inputs=intelligence_inputs)
+            "notes": ["This is a selected collection within the declared date window, not every cyber incident, article or vulnerability.", "KEV dates indicate catalog addition, not first disclosure or first exploitation.", "RSS usually exposes recent posts; historical curation and legacy feeds do not form a complete historical archive.", "Unknown dates remain explicit. Failed sources retain last-good input when available; public snapshot resume helps retain prior publisher items.", "Per-feed retained history is bounded to 600 articles. Missing, evicted or changed inputs can leave coverage gaps.", "Publisher intake reports describe only the latest bounded response selection window of at most 150 processed entries. Rejected or unprocessed entries are not newly admitted; unprocessed entries may include recent items, and older retained versions may remain.", "Last accepted input is not exhaustive publisher coverage. Legacy observations without intake reports have unknown window completeness.", "Canonical article URLs are deduplicated; distinct publishers covering one CVE remain separate evidence.", "CVE mentions can come from RSS metadata/body text; they do not mean every mentioned CVE was exploited.", "Headlines link to publishers; full article bodies are not copied. No environment exposure is inferred.", "Threatpost is a legacy archive with observed August 2022 items; a successful fetch does not imply current reporting.", "SEC direct filing access is pending after HTTP 403; news reporting about filings is not complete Item 1.05 or 8.01 coverage."]},
+        "integrations": {"xai": {"status": "not_connected", "message": "The collector makes no Grok or xAI calls and runs no model. Report editions come from a separate desktop compiler and name their own tools."},
+                         "x": {"status": "not_connected", "message": "The collector reads no X timeline or bookmarks and posts nothing to X. Any future article sharing needs the owner's review."},
+                         "sec": {"status": "not_connected", "message": "The collector has no direct SEC filing intake: the filing feed returned HTTP 403. No direct filings are claimed."}}}
+    if reports["status"] == "unavailable":
+        snapshot["coverage"]["notes"].append("Reports unavailable in this run: " + reports["reason"] + ". Feed collection continued without report listings.")
+    snapshot["intelligence"] = intelligence
     snapshot["content_revision"] = content_revision(snapshot)
     snapshot["layout_revision"] = hashlib.sha256(b"".join((ROOT / "site" / name).read_bytes() for name in ("index.html", "styles.css", "app.js", "icon.svg"))).hexdigest()
     # Refuse before replacing either public output or newly collected caches.
@@ -671,7 +675,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     write_json(ROOT / "site/data/feed.json", snapshot, compact=True)
     result = {"articles": len(ordered), "source_ok": sum(item["status"] == "ok" for item in health),
         "source_partial": sum(item["status"] == "partial" for item in health), "source_total": len(health),
-        "coverage": snapshot["coverage"], "mitigations": mitigation_stats, "changed": changed, "generated_at": snapshot["generated_at"]}
+        "coverage": snapshot["coverage"], "mitigations": mitigation_stats, "reports": reports, "changed": changed, "generated_at": snapshot["generated_at"]}
     write_json(STATE / "collection-result.json", result)
     return result
 

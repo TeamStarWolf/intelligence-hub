@@ -139,7 +139,7 @@ def reject_number(_value):
 
 
 def read_input(path, maximum):
-    # Missing input refuses production; no remote catalog/configuration is adopted.
+    # No remote catalog/configuration is adopted. Callers decide whether a failure is fatal.
     with path.open("rb") as stream:
         raw = stream.read(maximum + 1)
     require(len(raw) <= maximum, "Intelligence input exceeds its byte bound.")
@@ -383,23 +383,125 @@ def validate_intelligence(value, admitted, safe_url):
     return value
 
 
+# reports/ is written by the owner's separate desktop compiler. A missing, oversize
+# or invalid report input makes the report listing unavailable; it never blocks the feed.
+REPORT_CONFIGURATION = ("reports/reporting.json", 16384)
+REPORT_CATALOG = ("reports/catalog.json", 65536)
+REPORT_FAILURES = (ValueError, TypeError, KeyError, AttributeError, RecursionError)
+INPUT_TOO_LARGE = "Intelligence input exceeds its byte bound."
+
+
+def file_digest(path):
+    digest = hashlib.sha256()
+    try:
+        with path.open("rb") as stream:
+            for block in iter(lambda: stream.read(65536), b""):
+                digest.update(block)
+    except OSError:
+        return hashlib.sha256(b"").hexdigest()
+    return digest.hexdigest()
+
+
+def read_report_input(root, spec):
+    """Return (value, sha256, reason); reason is None when the input was read."""
+    name, maximum = spec
+    path = root / name
+    try:
+        value, digest = read_input(path, maximum)
+        return value, digest, None
+    except FileNotFoundError:
+        return None, hashlib.sha256(b"").hexdigest(), name + " is missing"
+    except OSError:
+        return None, hashlib.sha256(b"").hexdigest(), name + " could not be read"
+    except UnicodeDecodeError:
+        return None, file_digest(path), name + " is not UTF-8 text"
+    except json.JSONDecodeError:
+        return None, file_digest(path), name + " is not valid JSON"
+    except REPORT_FAILURES as error:
+        if str(error) == INPUT_TOO_LARGE:
+            return None, file_digest(path), name + " exceeds its " + format(maximum, ",") + "-byte bound"
+        if str(error) == "Duplicate intelligence JSON member.":
+            return None, file_digest(path), name + " has duplicate JSON members"
+        return None, file_digest(path), name + " exceeds the input structure bounds"
+
+
 def load_inputs(root):
     return (read_input(root / "config/intelligence-context.json", 131072),
-            read_input(root / "reports/reporting.json", 16384),
-            read_input(root / "reports/catalog.json", 65536))
+            read_report_input(root, REPORT_CONFIGURATION),
+            read_report_input(root, REPORT_CATALOG))
+
+
+def unavailable_configuration():
+    return {"schema_version": 1, "timezone": "America/Chicago", "daily_hours": [6, 14, 22],
+            "weekday_lookback_hours": 24, "weekend_lookback_hours": 48, "weekend_iso_days": [6, 7],
+            "periodic_hour": 6, "weekly_iso_day": 1, "fortnight_anchor_start": "2026-10-19",
+            "fortnight_days": 14, "rolling_months": 6, "cadences": list(CADENCES),
+            "schedule_state": "planned", "schedule_observed_at": None,
+            "notes": ["The reporting configuration was unavailable in this run, so no report schedule is claimed."]}
+
+
+def unavailable_catalog(reason):
+    return {"schema_version": 1, "updated_at": None, "reports": [], "indexes": [],
+            "revision_review": {"lookback_hours": 96, "priority_hours": 48, "max_sources": 12,
+                                "min_success_interval_hours": 8, "min_failure_interval_hours": 24,
+                                "state": "not_run", "report_id": None, "recorded_at": None, "nominal_cutoff": None,
+                                "records": [], "notes": []},
+            "notes": ["Report catalog unavailable in this snapshot: " + reason + ". The feed was built without report listings; "
+                      "report editions in the repository are unchanged."]}
+
+
+def checked_catalog(value, safe_url):
+    keys(value, {"schema_version", "updated_at", "reports", "indexes", "revision_review", "notes"})
+    require(type(value["schema_version"]) is int and value["schema_version"] == 1, "Unsupported report catalog schema.")
+    clock(value["updated_at"], nullable=True)
+    reports = validate_reports(value["reports"], value["indexes"], safe_url)
+    notes(value["notes"])
+    validate_revisions(value["revision_review"], reports, safe_url)
+    return value
+
+
+def assemble(context, context_sha, configuration, config_sha, catalog, catalog_sha):
+    return {"schema_version": 1,
+            "catalog": {"version": context["catalog_version"], "reviewed_at": context["reviewed_at"], "source_sha256": context_sha,
+                        "status": "unreviewed" if context["reviewed_at"] is None else "review_recorded",
+                        "entities": context["entities"], "relationships": context["relationships"], "notes": context["notes"]},
+            "reporting": {"config_sha256": config_sha, "catalog_sha256": catalog_sha, "catalog_updated_at": catalog["updated_at"],
+                          "configuration": configuration, "latest_reports": catalog["reports"], "indexes": catalog["indexes"], "notes": catalog["notes"]},
+            "revisions": catalog["revision_review"], "notes": []}
+
+
+def compose_with_reports(root, admitted, safe_url, *, inputs=None):
+    """Compose the intelligence wire and return it with the report listing status."""
+    (context, context_sha), (configuration, config_sha, config_reason), (catalog, catalog_sha, catalog_reason) = load_inputs(root) if inputs is None else inputs
+    # The curated context is reviewed repository configuration, so it stays strict.
+    keys(context, {"schema_version", "catalog_version", "reviewed_at", "entities", "relationships", "notes"})
+    require(type(context["schema_version"]) is int and context["schema_version"] == 1)
+    if config_reason is None:
+        try:
+            validate_configuration(configuration)
+        except REPORT_FAILURES:
+            config_reason = REPORT_CONFIGURATION[0] + " does not match the reporting schema"
+    if catalog_reason is None:
+        try:
+            checked_catalog(catalog, safe_url)
+        except REPORT_FAILURES:
+            catalog_reason = REPORT_CATALOG[0] + " does not match the report catalog schema"
+    if config_reason is not None:
+        configuration = unavailable_configuration()
+    if catalog_reason is not None:
+        catalog = unavailable_catalog(catalog_reason)
+    try:
+        value = validate_intelligence(assemble(context, context_sha, configuration, config_sha, catalog, catalog_sha), admitted, safe_url)
+    except REPORT_FAILURES:
+        if catalog_reason is not None:
+            raise
+        # A valid but large catalog can still push the wire past its bound.
+        catalog_reason = REPORT_CATALOG[0] + " pushes the intelligence wire past its byte bound"
+        catalog = unavailable_catalog(catalog_reason)
+        value = validate_intelligence(assemble(context, context_sha, configuration, config_sha, catalog, catalog_sha), admitted, safe_url)
+    reasons = [reason for reason in (config_reason, catalog_reason) if reason is not None]
+    return value, {"status": "unavailable" if reasons else "available", "reason": "; ".join(reasons) or None}
 
 
 def compose(root, admitted, safe_url, *, inputs=None):
-    (context, context_sha), (configuration, config_sha), (catalog, catalog_sha) = load_inputs(root) if inputs is None else inputs
-    keys(context, {"schema_version", "catalog_version", "reviewed_at", "entities", "relationships", "notes"})
-    keys(catalog, {"schema_version", "updated_at", "reports", "indexes", "revision_review", "notes"})
-    require(type(context["schema_version"]) is int and context["schema_version"] == 1 and
-            type(catalog["schema_version"]) is int and catalog["schema_version"] == 1)
-    value = {"schema_version": 1,
-             "catalog": {"version": context["catalog_version"], "reviewed_at": context["reviewed_at"], "source_sha256": context_sha,
-                         "status": "unreviewed" if context["reviewed_at"] is None else "review_recorded",
-                         "entities": context["entities"], "relationships": context["relationships"], "notes": context["notes"]},
-             "reporting": {"config_sha256": config_sha, "catalog_sha256": catalog_sha, "catalog_updated_at": catalog["updated_at"],
-                           "configuration": configuration, "latest_reports": catalog["reports"], "indexes": catalog["indexes"], "notes": catalog["notes"]},
-             "revisions": catalog["revision_review"], "notes": []}
-    return validate_intelligence(value, admitted, safe_url)
+    return compose_with_reports(root, admitted, safe_url, inputs=inputs)[0]
