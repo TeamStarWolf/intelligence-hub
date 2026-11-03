@@ -25,7 +25,7 @@ import statistics
 import sys
 import tarfile
 import zlib
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from .collect import (FEED_MAX_BYTES, article_date, published, reject_constant, require,
                       safe_url as collector_safe_url)
@@ -57,6 +57,16 @@ SHARD_MAX_BYTES = min(FEED_MAX_BYTES, V7_FILE_MAX_BYTES)
 # (about 9 MB). They are built and tested here but stay unpublished until a later
 # package retires the v6 briefs file; cve-index.json says where each brief is read from.
 CVE_BUCKETS_PUBLISHED = False
+# recent.json is the Today view's one data file, so its size follows a few days of
+# traffic instead of a whole month or a whole KEV year. The windows match the page's
+# Today constants in site/js/filters.js (TODAY_DAYS, KEV_STRIP_DAYS, ACT_WITHIN_DAYS);
+# tests/test_shards.py holds the two in step. Article rows carry one extra day on each
+# side, because the page counts a row's day in UTC and the collector reads the date as
+# written; the page applies the exact window itself.
+RECENT_PATH = "recent.json"
+RECENT_DAYS = 3
+RECENT_KEV_DAYS = 7
+RECENT_DUE_DAYS = 14
 CVE_BUCKETS_PENDING = ("CVE brief buckets are not published yet; "
                        "full briefs are read from data/briefs.json until then.")
 # Analytics exports (intelligence_hub/exports.py) live in data/v7/exports/. A year is one
@@ -76,7 +86,7 @@ KEV_CWE = re.compile(r"CWE-[1-9][0-9]{0,5}|NVD-CWE-(?:noinfo|Other)")
 HEX = re.compile(r"[a-f0-9]{64}")
 DAY = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
 NAMED = ("sources.json", "coverage.json", "reports.json", "cve-index.json")
-SHARD_PATH = re.compile(r"(?:sources|coverage|reports|cve-index)\.json"
+SHARD_PATH = re.compile(r"(?:sources|coverage|reports|cve-index|recent)\.json"
                         r"|live/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json"
                         r"|history/(?:[0-9]{4}|undated)\.json"
                         r"|kev/[0-9]{4}\.json"
@@ -238,6 +248,47 @@ def coverage_stub():
             "note": "Per-source and per-year coverage rows arrive with the history adapters. This file makes no coverage claim yet."}
 
 
+def content_day(spans, end):
+    """The content date: the latest last day of a live or history shard that is not after end.
+
+    spans is (path, last day or None) per shard. build_index and recent_shard both use it,
+    so the Today file and the index name the same day.
+    """
+    days = [last for path, last in spans if last and path.startswith(("live/", "history/"))]
+    return max((day for day in days if day <= end.isoformat()), default=None)
+
+
+def recent_shard(shards, end):
+    """recent.json: the rows, KEV entries and CVE index rows the Today view reads.
+
+    Live article rows dated from the content date back RECENT_DAYS days (plus one day of
+    margin each side); KEV entries added in the last RECENT_KEV_DAYS days or due within
+    RECENT_DUE_DAYS days of the content date, from the whole catalog; and the CVE index
+    rows for the CVEs those article rows name. None when the file would pass the shard
+    bound, so the page reads the month shards instead and the run still publishes.
+    """
+    day = content_day(((path, _span(value)[1]) for path, value in shards.items() if path.startswith(("live/", "history/"))), end)
+    current = date.fromisoformat(day) if day else end
+    day = current.isoformat()
+    first = (current - timedelta(days=RECENT_DAYS)).isoformat()
+    last = (current + timedelta(days=1)).isoformat()
+    kev_first = (current - timedelta(days=RECENT_KEV_DAYS - 1)).isoformat()
+    due_until = (current + timedelta(days=RECENT_DUE_DAYS)).isoformat()
+    rows = []
+    for path in sorted(shards):
+        if path.startswith("live/") and path != "live/undated.json":
+            rows.extend(row for row in shards[path]["rows"] if (row_day(row) is not None and first <= row_day(row).isoformat() <= last))
+    kev = [row for path in sorted(shards) if path.startswith("kev/") for row in shards[path]["rows"]
+           if kev_first <= row["date_added"] <= day or (row["due_date"] is not None and day <= row["due_date"] <= due_until)]
+    named = {cve for row in rows for cve in row["cves"]}
+    index = shards["cve-index.json"]
+    value = {"schema_version": SCHEMA_VERSION, "kind": "recent", "content_date": day, "from": first, "to": last,
+             "kev_from": kev_first, "due_until": due_until, "rows": sorted(rows, key=row_order),
+             "kev": sorted(kev, key=lambda row: (row["date_added"], row["cve"])),
+             "cve_fields": index["fields"], "cves": [row for row in index["rows"] if row[0] in named]}
+    return value if len(canonical(value)) <= SHARD_MAX_BYTES else None
+
+
 def build_shards(articles, sources, catalog, briefs, reports, end, safe_url=collector_safe_url, coverage=None):
     """Every v7 shard except index.json, as {relative path: value}.
 
@@ -259,6 +310,9 @@ def build_shards(articles, sources, catalog, briefs, reports, end, safe_url=coll
     shards["sources.json"] = {"schema_version": SCHEMA_VERSION, "kind": "sources", "rows": sources}
     shards["coverage.json"] = coverage if coverage is not None else coverage_stub()
     shards["reports.json"] = reports
+    recent = recent_shard(shards, end)
+    if recent is not None:
+        shards[RECENT_PATH] = recent
     for path in shards:
         require(SHARD_PATH.fullmatch(path), "Unexpected v7 shard path " + path + ".")
     return shards
@@ -361,8 +415,7 @@ def exports_changed(previous, entry):
 
 def build_index(entries, *, generated_at, end, feed_content_revision, layout_revision, runs, counts, v6_files, tagging=None,
                 exports=None):
-    days = [entry["to"] for entry in entries if entry["to"] and (entry["path"].startswith(("live/", "history/")))]
-    content_date = max((day for day in days if day <= end.isoformat()), default=None)
+    content_date = content_day(((entry["path"], entry["to"]) for entry in entries), end)
     return {"schema_version": SCHEMA_VERSION, "generated_at": generated_at, "content_date": content_date,
             "content_revision": content_revision(entries), "feed_content_revision": feed_content_revision,
             "layout_revision": layout_revision,

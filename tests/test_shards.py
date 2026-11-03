@@ -302,6 +302,62 @@ class BuildTest(unittest.TestCase):
         self.assertEqual("".join(pieces), shards.SHARD_PATH.pattern)
 
 
+class RecentTest(unittest.TestCase):
+    """recent.json is the Today view's bounded data file."""
+
+    def test_recent_file_holds_exactly_what_today_reads(self):
+        workspace = Workspace(synthetic_cache(publisher_rows=900, kev_rows=200))
+        try:
+            workspace.build()
+            files = v7_files(workspace)
+            index = index_of(workspace)
+            recent = json.loads(files["recent.json"])
+            entry = next(item for item in index["shards"] if item["path"] == "recent.json")
+            self.assertEqual((entry["rows"], entry["from"], entry["to"]), (len(recent["rows"]), None, None))
+            day = date.fromisoformat(index["content_date"])
+            self.assertEqual(recent["content_date"], index["content_date"])
+            self.assertEqual((recent["from"], recent["to"]), (str(day.fromordinal(day.toordinal() - 3)), str(day.fromordinal(day.toordinal() + 1))))
+            self.assertEqual((recent["kev_from"], recent["due_until"]), (str(day.fromordinal(day.toordinal() - 6)), str(day.fromordinal(day.toordinal() + 14))))
+            live = [row for path, raw in files.items() if path.startswith("live/") and path != "live/undated.json" for row in json.loads(raw)["rows"]]
+            wanted = sorted(row["id"] for row in live if recent["from"] <= shards.row_day(row).isoformat() <= recent["to"])
+            self.assertTrue(wanted, "the synthetic cache has rows in the last days")
+            self.assertEqual(sorted(row["id"] for row in recent["rows"]), wanted)
+            self.assertLess(len(recent["rows"]), len(live))
+            ledger = [row for path, raw in files.items() if path.startswith("kev/") for row in json.loads(raw)["rows"]]
+            kev = sorted(row["cve"] for row in ledger if recent["kev_from"] <= row["date_added"] <= recent["content_date"] or
+                         (row["due_date"] and recent["content_date"] <= row["due_date"] <= recent["due_until"]))
+            self.assertEqual(sorted(row["cve"] for row in recent["kev"]), kev)
+            cve_index = json.loads(files["cve-index.json"])
+            self.assertEqual(recent["cve_fields"], cve_index["fields"])
+            named = {cve for row in recent["rows"] for cve in row["cves"]}
+            self.assertEqual(recent["cves"], [row for row in cve_index["rows"] if row[0] in named])
+        finally:
+            workspace.close()
+
+    def test_an_oversized_recent_file_is_left_out_and_the_run_still_builds(self):
+        workspace = Workspace(synthetic_cache(publisher_rows=300, kev_rows=60))
+        try:
+            real = shards.canonical
+            with mock.patch.object(shards, "canonical", side_effect=lambda value: (b"x" * (shards.SHARD_MAX_BYTES + 1)) if isinstance(value, dict) and value.get("kind") == "recent" else real(value)):
+                workspace.build()
+            self.assertNotIn("recent.json", v7_files(workspace))
+            self.assertNotIn("recent.json", [entry["path"] for entry in index_of(workspace)["shards"]])
+        finally:
+            workspace.close()
+
+    def test_the_windows_match_the_page_constants(self):
+        page = (support.ROOT / "site" / "js" / "filters.js").read_text(encoding="utf-8")
+        constants = {name: int(value) for name, value in re.findall(r"export const ([A-Z_]+) = (\d+);", page)}
+        self.assertEqual(constants["TODAY_DAYS"], shards.RECENT_DAYS)
+        self.assertEqual(constants["KEV_STRIP_DAYS"], shards.RECENT_KEV_DAYS)
+        self.assertEqual(constants["ACT_WITHIN_DAYS"], shards.RECENT_DUE_DAYS)
+
+    def test_an_index_without_recent_still_validates(self):
+        # A deployed index written before recent.json existed must still resume.
+        self.assertNotIn("recent.json", shards.NAMED)
+        self.assertTrue(shards.SHARD_PATH.fullmatch("recent.json"))
+
+
 class ResumeV7Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
