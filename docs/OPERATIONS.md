@@ -3,25 +3,38 @@
 ## Read the desk
 
 Open the public GitHub Pages address in a desktop or phone browser. Reading does
-not require sign-in. Actual rendering and assistive-technology behavior still
-require owner review.
+not require sign-in.
 
-Use **Intelligence explorer** to search; all entered words must match. Filter by
-Kind, Source, Exploitation or CVE guidance, then navigate calendar years/months or
-a date preset. Presets use the snapshot window's end, not a promise that its data
-is current to the device's clock. The selected archive's boundary years and months can be
-partial.
+The page opens on the **Intelligence Explorer**: a search box (all entered words
+must match), a filter rail (behind **Filters** on narrow screens), ten sort
+choices and the results, 25 to a page, over the live window. Choose a year to add
+that year's history rows; date presets count back from the content date, not from
+the device's clock. Every filter, sort, page and open entry is kept in the
+address, so Back and Forward work and a copied link reopens the same view
+([URLS.md](URLS.md)).
 
-Ten sort choices cover newest/oldest date, title, source, CVE and CVSS direction.
+Every other view is a tab in the strip under the brand bar and an entry in the
+**Panels** sidebar, which starts closed: Today, Advisories, Known exploited,
+Research, News, CVEs, History, Vendors, Tags, Actors and malware, Reports, Data,
+Sources, Method and About. Nothing from those views is drawn above the Explorer
+on the default route.
+
+- **CVEs** lists every CVE an entry mentions. A CVE opens its saved brief in a
+  dialog with a link to its CVE.org record. One CVE can have several publisher
+  accounts, and a mention is not evidence that the incident exploited that CVE.
+- **History** has one page per year from 1998. A year page opens with that
+  year's coverage statement for each history source, then rows per month and per
+  source, oldest first.
+- **Vendors**, **Tags** and **Actors and malware** count tags on the loaded
+  entries and link each vendor, actor and malware entity to its TeamStarWolf
+  library page where the vocabulary names one ([METHOD.md](METHOD.md)).
+- **Reports** lists every report edition and the collector's run record;
+  **Sources** adds the coverage matrix and the source ledger of recorded
+  collection outcomes; **Method** holds the evidence rules and the licence table.
+
 Unknown scores remain unknown, and different CVSS versions are not normalized.
-The CVE register collects referenced identifiers across articles; one CVE can
-have several publisher accounts. A CVE mention is not evidence that the
-article's entire incident exploited that CVE.
-
-Open **CVE guidance** for an attributed brief and **Source ledger** for recorded
-collection outcomes. An open dialog keeps its original snapshot and date; close
-and reopen it to inspect newer saved data. Search choices and loaded-page count
-are retained during background snapshot updates.
+An open dialog keeps the data it was opened with; close and reopen it to read a
+newer snapshot.
 
 ## Interpret evidence before action
 
@@ -95,30 +108,17 @@ as one `unrecorded` entry. `observed_interval_hours` gives the median and the
 longest gap between the recorded runs, and `requested_cron` repeats the request.
 
 Only published runs are recorded: a run that finds nothing new does not publish,
-so it leaves no entry, and the gaps measure time between publications. The page
-header reads the content date, the last published run and the observed median
-from this file. The site makes no request to the GitHub API.
+so it leaves no entry, and the gaps measure time between publications. The
+Explorer's status line shows the content date; the sidebar's Snapshot panel
+shows the last published run and the observed median and longest gap, and the
+Reports and Sources tabs also list the recorded runs, all read from this file. The site makes
+no request to the GitHub API.
 
-The browser rechecks this site's saved snapshot while the page stays visible.
-Refreshing the browser does not start publisher collection. Publisher cadence,
-the workflow, collection duration, deployment and browser visibility all affect
-arrival time. This is not continuous monitoring or a delivery SLA. The snapshot
-badge shows its age in minutes independently of the latest browser read; reading
-the same saved file never claims a new publisher collection.
-
-On its first successful read, the page says **published snapshot loaded**. An
-identical saved file says **same saved snapshot**. A different file says
-**different saved snapshot** and whether the browser detects a later generation
-time, an earlier one, or no difference at its timestamp precision, compared with
-the snapshot previously displayed in this page session. No detected difference
-does not establish exact timestamp equality. These labels compare saved files
-and clocks, not newly collected intelligence. An earlier generation can still be
-displayed with its original time.
-
-The snapshot marker changes when its generation time is more than 24 hours old
-or more than five minutes ahead of the device clock. This is an age/clock warning,
-not an assessment of workflow health or source freshness. A normal marker does
-not establish that collection is current.
+While the page stays open and visible it asks this site whether `index.json`
+changed, with a conditional request; a hidden tab reads nothing. Refreshing the
+browser does not start publisher collection. Publisher cadence, the workflow,
+collection duration, deployment and browser visibility all affect arrival time.
+This is not continuous monitoring or a delivery promise.
 
 ### The publication decision
 
@@ -245,8 +245,8 @@ dependency is required.
 python -m intelligence_hub
 ```
 
-This makes real bounded public HTTPS reads, with a rolling ten-year UTC window,
-and writes the generated public snapshot plus local public caches. For a fixed
+This makes real bounded public HTTPS reads over a window from 1 January 1998 to
+today (UTC), and writes the generated public snapshot plus local public caches. For a fixed
 window and no additional CNA lookups:
 
 ```sh

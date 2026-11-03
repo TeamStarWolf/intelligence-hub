@@ -1,167 +1,135 @@
 # TeamStarWolf Intelligence Hub
 
-A free, public security news desk for defenders. It gathers current publisher
-headlines, CISA's Known Exploited Vulnerabilities (KEV), source-linked CVE briefs
-and dated report editions in one place, and every item links back to the
-publisher that wrote it.
+Open security news, advisories, and known exploited vulnerabilities for the community, linked to
+their original sources. Every item links back to the publisher that wrote it, and every tag says
+how it was found and how far to trust it.
 
 **Site:** <https://teamstarwolf.github.io/intelligence-hub/>
 
 ## What you can do here
 
-- Read headlines from **62 configured publisher RSS/Atom feeds** plus CISA's KEV
-  catalog. The count is feed definitions, not unique publishers. Feeds can fail,
-  and every outcome stays visible in the source ledger.
-- Browse by year and month or a date preset, filter by source, kind, exploitation
-  and guidance, and sort ten ways by date, title, source, CVE and CVSS.
-- Open a CVE brief with CISA's required action where one exists, the CNA's
-  product and version data, guidance excerpts and the original references.
-- Look back through selected history since 1998: curated primary publications,
-  starting with the 1 June 1998 MS98-001 bulletin, with the gaps listed openly.
-- Read the daily, weekly, monthly and longer [report editions](reports/README.md).
+The page opens on the **Intelligence Explorer**: one search box, a filter rail, ten sort orders
+and the results, over the live window (the last 24 months). Choose a year to add that year's
+history rows, back to 1998. Everything else is a tab, and every tab is also listed in the
+**Panels** sidebar, which starts closed:
 
-What the site shows is a publisher headline and link, CISA's own KEV text, or an
-original summary written for this project. Full article bodies are not copied.
+| Tab | What it holds |
+| --- | --- |
+| Explore | Search, filters (kind, source class, event type, exploitation, KEV-linked, CISA required action, sector, region, vendor, product, actor, malware, CWE, ATT&CK technique, source, year, month, date range), sort and results. |
+| Today | KEV additions by calendar day, KEV entries due in the next 14 days, then the last three days of advisories, research and press. |
+| Advisories, Research, News | The Explorer limited to vendor and government sources, research teams, or the press. |
+| Known exploited | CISA's KEV ledger by date added, with the directive each required action cites. |
+| CVEs | Every CVE an entry mentions, with its guidance label, KEV state and CVSS; a CVE opens its source-led brief and its CVE.org record. |
+| History | One page per year from 1998. Each year opens with its per-source coverage statements, so a quiet year is never read as a year when nothing happened. |
+| Vendors | Every vendor with entries or KEV entries, its KEV entries by year added, its products, and its TeamStarWolf library pages. |
+| Tags | Every tag value on at least one entry, with its count and a page or Explorer filter. Values with no entry are not listed. |
+| Actors and malware | Threat groups, malware and tools that entries name, each linking back to its library page. |
+| Reports | Every report edition, the collector's run record and cadence, and the catalog's review notes. |
+| Data | Per-year CSV and JSON Lines exports, the manifest, the data dictionary and the licence table. |
+| Sources | The run record, the history coverage matrix by source and year, and the source ledger. |
+| Method | The evidence rules, confidence levels, coverage statuses and licence notices. |
+| About | What the Hub is and what it covers. |
+
+Every view, filter, page and open entry has its own address; [docs/URLS.md](docs/URLS.md) is the
+route contract that the TeamStarWolf library's links follow.
+
+What the site shows is a publisher headline and link, CISA's own KEV text, or an original summary
+written for this project. Full article bodies are not copied.
 
 ## How it works
 
-A Python collector (standard library only, in `intelligence_hub/`) runs in GitHub
-Actions. It reads the configured feeds and the KEV catalog under strict size,
-time and format bounds, enriches mentioned CVEs from official CVE records, and
-writes one snapshot that the static site in `site/` renders. The browser never
-contacts publishers.
+A Python collector (standard library only, in `intelligence_hub/`) runs in GitHub Actions. It
+reads 62 configured RSS and Atom feeds and the CISA KEV catalog under strict size, time and format
+bounds, enriches mentioned CVEs from the CVE Program's records, tags every row from controlled
+vocabularies, merges the committed history files, and writes static files that the page in `site/`
+reads. Your browser reads only those files, from this site; it never contacts publishers or the
+GitHub API.
 
-The publish workflow asks GitHub for a run every two hours (`7 */2 * * *`).
-GitHub does not guarantee scheduled runs: between 30 October and 3 November 2026
-they came about every 3 to 10 hours, so a new item can take several hours to
-appear. Pushes to `main` and manual runs add extra collections. The page header
-shows the content date, the last published run and the observed gap between
-published runs, all read from `data/v7/index.json`.
+- `data/v7/index.json` lists every data file with its size and sha256, the content date and the
+  collector's run record. Views read only the files they need: the Explorer reads the live months,
+  a History year reads that year's file, and Vendors reads the KEV ledger.
+- History rows from 1998 come from adapters under `intelligence_hub/history/` that run locally and
+  are committed under `history/`; each source has a coverage statement for every year
+  ([SOURCES.md](docs/SOURCES.md), [METHOD.md](docs/METHOD.md)).
+- Tags come from `config/vocab/` and a pinned copy of the library's shared vocabulary
+  ([TAGGING.md](docs/TAGGING.md)). Links to the TeamStarWolf library are generated from that
+  vocabulary into `site/js/library.js`; the page builds no library link by hand.
+- Report editions in `reports/` come from a separate desktop compiler that the owner runs; the
+  collector only lists them. If the report catalog is missing, too large or invalid, the data still
+  publishes and the Reports tab says the catalog is unavailable.
 
-Report editions in `reports/` come from a separate desktop compiler that the
-owner runs; the collector only lists them. Requested daily slots are
-**06:00, 14:00 and 22:00 America/Chicago**, with 24-hour weekday or 48-hour
-weekend lookbacks. Weekly, weekend, fortnightly, monthly, quarterly and rolling
-six-completed-month editions follow the [calendar method](reports/REPORTING.md).
-If the report catalog is missing, too large or invalid, the feed still publishes
-and the report listing says it is unavailable.
+The publish workflow asks GitHub for a run every two hours (`7 */2 * * *`), and pushes to `main` and
+manual runs add more. GitHub starts scheduled runs late or skips them, so a new item can take
+several hours to appear. The content date is the only freshness promise; the Reports and Sources
+tabs and the sidebar show the last published runs and the observed gap between them.
 
-Schemas 5 and 6 carry bounded, source-led context for CWE weaknesses, CAPEC
-taxonomy, actors and campaigns, products and mitigations. CVE-to-CWE links come
-only from the CNA's structured problemTypes, and official CWE-to-CAPEC links are
-taxonomy, not observed attacks. No CVE is guessed from a headline, and a KEV
-match does not rewrite an entry's own exploitation label. The 48 to 96-hour
-citation review stays `not_run` until a separately recorded pass.
-
-Publishing fails closed. Official GitHub actions are pinned to commits, checkout
-has read-only access without persisted credentials, and only a separate deploy
-job can write to Pages. Failed collection, invalid output or a package budget
-failure blocks that publication and keeps the previous live site. The collector
-rejects redirects, DTDs and entities, oversized inputs and article links outside
-each publisher's allowlist.
+Publishing fails closed. Official GitHub actions are pinned to commits, checkout has read-only
+access without persisted credentials, and only a separate deploy job can write to Pages. A failed
+collection, invalid output or a package-budget failure blocks that publication and keeps the
+previous live site.
 
 ## Run the collector locally
 
 Python 3.10 or newer, standard library only. From the repository folder:
 
 ```sh
-python -m intelligence_hub
+python -m intelligence_hub                                       # 1 January 1998 to today, live reads
+python -m intelligence_hub --start 1998-01-01 --end 2026-11-01   # a fixed window
+python -m intelligence_hub --cached                              # rebuild from local caches, no network
 ```
 
-An explicit historical window:
-
-```sh
-python -m intelligence_hub --start 1998-01-01 --end 2026-10-26
-```
-
-These commands make bounded public HTTPS reads and write the snapshot to
-`site/data/feed.json` and its CVE briefs to `site/data/briefs.json`. CI adds `--resume-public` to recover retained history and
-CNA progress from this hub's own fixed, validated public snapshot; that is not an
-arbitrary URL import. `--cached` rebuilds from retained local public inputs
-without network access and cannot be combined with `--resume-public`.
-
-The default CNA enrichment budget is **40 official CVE record requests per run**.
-Scheduled and manual CI runs keep that limit; push-triggered runs use a
-**2,000-request bootstrap budget** through `--enrich-limit`, and
-`--enrich-limit 0` disables the lookups. The collection job has a 15-minute
-timeout. Neither budget means every CVE has been enriched.
-
-Run the unit tests. They include offline `--cached` builds in a throwaway copy
-of the repository, so they never touch your own `.state/` or `reports/`:
-
-```sh
-python -I -m unittest discover -s tests
-```
-
-See [historical sources](docs/SOURCES.md), [feed intake](docs/FEEDS.md),
-[CVE guidance](docs/MITIGATIONS.md) and the [operator guide](docs/OPERATIONS.md)
-for evidence states, retention and commands. Local caches and research receipts
-stay outside Git.
+The collector writes `site/data/`. CI adds `--resume-public` to recover retained history and CNA
+progress from this Hub's own published snapshot; `--cached` cannot be combined with it. The default
+CNA enrichment budget is 40 CVE record requests per run; push-triggered CI runs use 2,000, and
+`--enrich-limit 0` turns the lookups off. See the [operator guide](docs/OPERATIONS.md),
+[feed intake](docs/FEEDS.md) and [CVE guidance](docs/MITIGATIONS.md).
 
 ## Contributing
 
-Every change arrives as a pull request and is squash-merged by someone other
-than its author after review; [AGENTS.md](AGENTS.md) holds the full rules. The
-pull-request check runs the unit tests, an offline build on a committed fixture,
-the page-file and stamping check, a syntax check of every module in `site/files.json`,
-the site tests (`node --test`, no npm), a contrast check of both themes, the 12 px type
-floor and an em-dash lint. New code needs tests. Hub links follow the route contract in
-[docs/URLS.md](docs/URLS.md).
+Every change arrives as a pull request and is squash-merged by someone other than its author after
+review; [AGENTS.md](AGENTS.md) holds the full rules and the local gates. The pull-request check runs
+the unit tests, the fixture and history checks, an offline build on a committed fixture, the
+page-file and stamping check, the generated label and library-link modules, a syntax check of every
+module in `site/files.json`, the site tests (`node --test`, no npm), a contrast check of both
+themes, the 12 px type floor and an em-dash lint. New code needs tests.
 
 ## Limits
 
-- **Selected, not complete.** The hub is a selected collection within its date
-  window, not every incident, article or vulnerability. The schema 6 and 7 window runs
-  from 1 January 1998 to the run date, within a 14,610-day technical review
-  horizon; that is not forty years of coverage. Schema 5 keeps its 7,306-day
-  profile and legacy schemas 2 to 4 keep 3,661 days.
-- **Bounded intake.** Each accepted feed response yields at most **150 entries**.
-  An invalid link or title, or more than **100 unique CVE mentions**, rejects that
-  whole entry. `data/feed.json` is bounded at **8 MiB** and `data/briefs.json` at
-  **12 MiB**; a run that would cross either bound fails without evicting rows. **Partial** means some safe input was accepted with a gap, not
-  that the publisher's archive is complete. See
-  [intake accounting](docs/FEEDS.md#partial-intake-and-entry-accounting) and the
-  [F5 date ranking](docs/FEEDS.md#f5-date-ranking-and-selection-provenance).
+- **Selected, not complete.** The Hub is a selected collection, not every incident, article or
+  vulnerability. History coverage differs by source and year, and each year page says how.
+- **Bounded intake.** Each accepted feed response yields at most 150 entries, and an entry with an
+  invalid link or title or more than 100 unique CVE mentions is rejected whole. Partial means some
+  safe input was accepted with a gap. See
+  [intake accounting](docs/FEEDS.md#partial-intake-and-entry-accounting).
 - **Subsets are subsets.** The
-  [Talos Threat Advisory category](docs/FEEDS.md#talos-threat-advisory-category-subset),
-  the [CISA Cybersecurity Advisories category](docs/FEEDS.md#cisa-cybersecurity-advisories-category-subset)
-  and the [Qualys Security Blog](docs/FEEDS.md#qualys-security-blog-dated-partial-admission)
-  are separate inputs that do not establish complete coverage of those
-  publishers. Threatpost is a **legacy archive with observed August 2022 items**;
-  a successful fetch does not make those stories current.
-- **Dates mean different things.** Publication, update, incident and CISA
-  catalog-addition dates stay distinct. KEV dates mark catalog addition, not first
-  disclosure or first exploitation.
-- **Briefs are not patch orders.** Affected version ranges are not fixed
-  versions, and CVSS versions are not normalized into an environment risk score.
-  A CVE mention does not prove exploitation or device exposure. Where no
-  solution or workaround is established, the brief says **Needs review** and
-  links the original material. Rejected CVE records need reconciliation before
-  older claims are treated as active.
-- **Collector integrations.** The collector makes no Grok or xAI calls, reads no
-  X timeline or bookmarks and posts nothing to X. Direct SEC filing intake is
-  **pending after HTTP 403**, so news coverage of filings is not complete
-  Item 1.05 or 8.01 coverage.
-- **No delivery promise.** GitHub can delay, drop or disable scheduled runs, and
-  an unchanged run can succeed without a newer snapshot. Check the
+  [Talos Threat Advisory category](docs/FEEDS.md#talos-threat-advisory-category-subset), the
+  [CISA Cybersecurity Advisories category](docs/FEEDS.md#cisa-cybersecurity-advisories-category-subset)
+  and the [Qualys Security Blog](docs/FEEDS.md#qualys-security-blog-dated-partial-admission) do
+  not establish complete coverage of those publishers. Threatpost is a legacy archive with observed
+  August 2022 items.
+- **Dates mean different things.** Publication, update, event and CISA catalog-addition dates stay
+  distinct. A KEV date marks catalog addition, not first disclosure or first exploitation.
+- **Tags are evidence, not verdicts.** Unknown exploitation never means safe. A name in a headline
+  is a mention, not attribution. ATT&CK techniques reached through CWE and CAPEC are taxonomy, not
+  observed behaviour.
+- **Briefs are not patch orders.** Affected version ranges are not fixed versions, CVSS versions
+  are not merged, and no entry proves that a device is exposed. CISA's federal due dates are not
+  your deadlines.
+- **Collector integrations.** The collector makes no Grok or xAI calls, reads no X timeline or
+  bookmarks and posts nothing to X. Direct SEC filing intake is pending after HTTP 403.
+- **No delivery promise.** GitHub can delay, drop or disable scheduled runs. Check the
   [workflow history](https://github.com/TeamStarWolf/intelligence-hub/actions/workflows/publish.yml)
-  when the desk looks stale.
-- **Package budget.** Only allowlisted files that `data/v7/index.json` lists
-  enter Pages: the four page files, `data/feed.json`, `data/briefs.json`, the v7
-  shards and the analytics exports. A changed publication must fit **192 MiB of
-  input**, at most **4,000 files**, at most **4 MiB** for each v7 shard or export
-  file and a **48,000,000-byte** level-6 compressed-size estimate, and the
-  artifact is kept for one day. At the requested twelve scheduled publications a
-  day that is at most **576 MB** a day; actual scheduled runs are fewer. This
-  bounds the project's estimated footprint, not account-wide billing.
-  [GitHub documents separate runner and storage allowances](https://docs.github.com/en/billing/concepts/product-billing/github-actions).
-- **Read-only.** The public site has no accounts, trackers or paid API fallback.
-  Owner changes to sources, curation, scheduling or publication happen through
-  this repository. Never put credentials or private social material into the
-  public site.
+  when the content date looks old.
+- **Package budget.** Only the page files `site/files.json` lists and the data files
+  `data/v7/index.json` lists enter Pages. A publication must fit 192 MiB of input, at most 4,000
+  files, at most 4 MiB for each v7 file and a 48,000,000-byte compressed-size estimate, and the
+  artifact is kept for one day.
+- **Read-only.** The site has no accounts, trackers or paid API fallback.
 
-## License
+## Licences and notices
 
-The original implementation is MIT licensed. Publisher headlines, articles,
-trademarks and linked material keep their owners' rights. This project is not
-affiliated with Nintendo or with any news publisher.
+The Hub's code is MIT-licensed. Publisher headlines and links belong to their publishers; KEV
+entries are CISA's text, which CISA distributes under CC0 1.0; CVE record fields are used under the
+CVE Program Terms of Use; curated summaries are original paraphrases. MITRE ATT&CK, CWE and CAPEC
+content carries the designations in [METHOD.md](docs/METHOD.md#licences-and-notices). This project
+is not affiliated with MITRE, with Nintendo or with any news publisher.
