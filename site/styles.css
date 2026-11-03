@@ -1,32 +1,32 @@
-/* Intelligence Hub styles. Colours are the TeamStarWolf library's --tsw-* tokens: dark is the
+/* Intelligence Hub styles. Colours are --tsw-* tokens in the Hub's own green palette (the owner's choice over the library's navy): dark is the
    default, light follows prefers-color-scheme until a reader picks a theme, and data-theme
    holds that pick. tests/check_contrast.py measures every text pair below in both themes, and
    tests/check_font_size.py fails any font size under 12 px. Components use tokens only. */
 :root, :root[data-theme="dark"] {
   color-scheme: dark;
-  --tsw-bg:            #0b1220;
-  --tsw-bg-alt:        #0d1526;
-  --tsw-surface:       #111a2e;
-  --tsw-surface-2:     #16223b;
-  --tsw-border:        #26334f;
-  --tsw-border-strong: #64759c;
-  --tsw-text:          #e6ebf7;
-  --tsw-text-muted:    #a9b4cd;
-  --tsw-heading:       #f4f7fd;
-  --tsw-link:          #8fb0ff;
-  --tsw-link-hover:    #c3d3ff;
+  --tsw-bg:            #10151b;
+  --tsw-bg-alt:        #121920;
+  --tsw-surface:       #171e25;
+  --tsw-surface-2:     #1d262e;
+  --tsw-border:        #303b43;
+  --tsw-border-strong: #6f8279;
+  --tsw-text:          #e7ecec;
+  --tsw-text-muted:    #9fb0b4;
+  --tsw-heading:       #f2f6f4;
+  --tsw-link:          #9ccba6;
+  --tsw-link-hover:    #c4e3ca;
   --tsw-red:           #fc0604;
-  --tsw-red-text:      #ff4d4d;
+  --tsw-red-text:      #ff5c5c;
   --tsw-green:         #acdf55;
   --tsw-amber-text:    #f2c14e;
-  --tsw-focus:         #acdf55;
+  --tsw-focus:         #9ccba6;
   --tsw-btn-bg:        #de0303;
   --tsw-btn-fg:        #ffffff;
-  --tsw-chip-bg:       #172341;
-  --tsw-chip-fg:       #c9d7ff;
-  --tsw-tint:          rgba(143, 176, 255, .08);
+  --tsw-chip-bg:       #15221d;
+  --tsw-chip-fg:       #cfe3d4;
+  --tsw-tint:          rgba(156, 203, 166, .08);
   --tsw-shadow:        rgba(0, 0, 0, .45);
-  --tsw-backdrop:      rgba(3, 6, 12, .72);
+  --tsw-backdrop:      rgba(6, 10, 9, .72);
   --tsw-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
   --tsw-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
   --text-xs: 0.75rem;
@@ -38,56 +38,56 @@
 /* Light, picked by the reader. The same values follow below for prefers-color-scheme. */
 :root[data-theme="light"] {
   color-scheme: light;
-  --tsw-bg:            #f6f7fb;
-  --tsw-bg-alt:        #eef1f7;
+  --tsw-bg:            #f4f7f5;
+  --tsw-bg-alt:        #e9efeb;
   --tsw-surface:       #ffffff;
-  --tsw-surface-2:     #edf0f6;
-  --tsw-border:        #cdd5e3;
-  --tsw-border-strong: #76829c;
-  --tsw-text:          #141c2e;
-  --tsw-text-muted:    #3f4a63;
-  --tsw-heading:       #0b1220;
-  --tsw-link:          #1f48c8;
-  --tsw-link-hover:    #15338f;
+  --tsw-surface-2:     #e6ede8;
+  --tsw-border:        #c9d5cd;
+  --tsw-border-strong: #6f8278;
+  --tsw-text:          #152019;
+  --tsw-text-muted:    #3e4f45;
+  --tsw-heading:       #0f1813;
+  --tsw-link:          #1f6b3a;
+  --tsw-link-hover:    #164d2a;
   --tsw-red:           #c40202;
   --tsw-red-text:      #b80d0d;
   --tsw-green:         #2f6a12;
   --tsw-amber-text:    #7a4f00;
-  --tsw-focus:         #1f48c8;
+  --tsw-focus:         #1f6b3a;
   --tsw-btn-bg:        #c40202;
   --tsw-btn-fg:        #ffffff;
-  --tsw-chip-bg:       #e6ebf7;
-  --tsw-chip-fg:       #1c2a4d;
-  --tsw-tint:          rgba(31, 72, 200, .06);
-  --tsw-shadow:        rgba(20, 28, 46, .14);
-  --tsw-backdrop:      rgba(20, 28, 46, .45);
+  --tsw-chip-bg:       #e3ece6;
+  --tsw-chip-fg:       #1b3324;
+  --tsw-tint:          rgba(31, 107, 58, .06);
+  --tsw-shadow:        rgba(21, 32, 25, .14);
+  --tsw-backdrop:      rgba(21, 32, 25, .45);
 }
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
     color-scheme: light;
-    --tsw-bg:            #f6f7fb;
-    --tsw-bg-alt:        #eef1f7;
+    --tsw-bg:            #f4f7f5;
+    --tsw-bg-alt:        #e9efeb;
     --tsw-surface:       #ffffff;
-    --tsw-surface-2:     #edf0f6;
-    --tsw-border:        #cdd5e3;
-    --tsw-border-strong: #76829c;
-    --tsw-text:          #141c2e;
-    --tsw-text-muted:    #3f4a63;
-    --tsw-heading:       #0b1220;
-    --tsw-link:          #1f48c8;
-    --tsw-link-hover:    #15338f;
+    --tsw-surface-2:     #e6ede8;
+    --tsw-border:        #c9d5cd;
+    --tsw-border-strong: #6f8278;
+    --tsw-text:          #152019;
+    --tsw-text-muted:    #3e4f45;
+    --tsw-heading:       #0f1813;
+    --tsw-link:          #1f6b3a;
+    --tsw-link-hover:    #164d2a;
     --tsw-red:           #c40202;
     --tsw-red-text:      #b80d0d;
     --tsw-green:         #2f6a12;
     --tsw-amber-text:    #7a4f00;
-    --tsw-focus:         #1f48c8;
+    --tsw-focus:         #1f6b3a;
     --tsw-btn-bg:        #c40202;
     --tsw-btn-fg:        #ffffff;
-    --tsw-chip-bg:       #e6ebf7;
-    --tsw-chip-fg:       #1c2a4d;
-    --tsw-tint:          rgba(31, 72, 200, .06);
-    --tsw-shadow:        rgba(20, 28, 46, .14);
-    --tsw-backdrop:      rgba(20, 28, 46, .45);
+    --tsw-chip-bg:       #e3ece6;
+    --tsw-chip-fg:       #1b3324;
+    --tsw-tint:          rgba(31, 107, 58, .06);
+    --tsw-shadow:        rgba(21, 32, 25, .14);
+    --tsw-backdrop:      rgba(21, 32, 25, .45);
   }
 }
 
