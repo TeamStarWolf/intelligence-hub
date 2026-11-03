@@ -54,10 +54,10 @@ The v6 feed keeps its own `exploitation` field unchanged; the evidence rule appl
 Vendor, product, actor and malware names match case-sensitively, as whole words, using the `match` names in the library vocabulary. The library already removes ordinary words (Silence, Carbon, Bitter, Proton, Anchor, Spark), command names and names two entities share. The Hub adds:
 
 - a stop list (`matching.json` `stop`) for names that are also product or browser words, such as Chromium and Edge;
-- context rules (`matching.json` `context`): a weak name matches only beside one of its context words, at low confidence. ConnectWise and ScreenConnect tag ATT&CK software S0591 only when the headline talks about abuse of the remote access tool, never when ConnectWise the company is the subject;
+- context rules (`matching.json` `context`): a weak name matches only beside one of its context words, at low confidence. ConnectWise and ScreenConnect tag ATT&CK software S0591 only when the headline talks about abuse of the remote access tool, never when ConnectWise the company is the subject. Calisto tags the macOS backdoor S0274 only beside words such as backdoor or macOS, because headlines also use Calisto for the intrusion set better known as Star Blizzard;
 - a short-name rule: an actor or malware name shorter than five characters matches only when it has a digit or an inner capital (FIN7, QBot), or is on the `allow_short` list (Clop, Ryuk, Duqu, Dyre, Pysa, Sogu).
 
-Where two entities of one type share a matched name, neither is tagged. A product tag also tags its vendor. Vendor, product, CWE and CVSS facts from KEV and from CVE records take precedence over headline matches, because they are structured.
+Where two entities of one type share a matched name, neither is tagged. Where one name belongs to both an actor and a malware entity (Sednit, Sofacy, Carbanak, StrongPity and others in the library), the actor is tagged and the malware only when the headline also has one of the `matching.json` `actor_malware.malware_words` (backdoor, trojan, implant, ransomware and so on). Names listed in `actor_malware.both`, such as Akira, are used for both in headlines and tag both. A product tag also tags its vendor. Vendor, product, CWE and CVSS facts from KEV and from CVE records take precedence over headline matches, because they are structured.
 
 ## Fields
 

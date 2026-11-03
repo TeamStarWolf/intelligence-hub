@@ -218,6 +218,11 @@ def check_hub_file(name, value):
         for item in value.get("context", []):
             need(isinstance(item, dict) and ENTITY_ID.fullmatch(str(item.get("id"))) and isinstance(item.get("alias"), str) and
                  _strings(item.get("words"), 40, 20) and item["words"], "matching.json has an invalid context entry.")
+        dual = value.get("actor_malware")
+        need(isinstance(dual, dict) and _strings(dual.get("malware_words"), 40, 60) and dual["malware_words"] and
+             isinstance(dual.get("both", []), list), "matching.json needs an actor_malware block with malware_words.")
+        for item in dual.get("both", []):
+            need(isinstance(item, dict) and isinstance(item.get("alias"), str) and isinstance(item.get("reason"), str), "matching.json has an invalid actor_malware.both entry.")
         return
     values = value.get("values")
     need(isinstance(values, list) and values and type(value.get("multi")) is bool, "config/vocab/" + name + ".json has no values.")

@@ -67,6 +67,7 @@ class FalsePositiveTest(unittest.TestCase):
         "Apache Spark patches a deserialization bug",
         "The spark that lit the ransomware economy",
         "ConnectWise customers hit by supply-chain attack",
+        "French NGO reporters without borders targeted by Calisto",
     ]
 
     def test_ordinary_words_tag_no_actor_or_malware(self):
@@ -81,6 +82,29 @@ class FalsePositiveTest(unittest.TestCase):
         self.assertEqual(len(carbon), 1)
         self.assertEqual(carbon[0]["confidence"], "low")
         self.assertIn("actor:G0010", values(block, "actor"))
+
+    def test_calisto_the_backdoor_needs_a_malware_word(self):
+        block = tag_row(row("Calisto backdoor for macOS found in a fake installer"), CONTEXT)
+        self.assertEqual([(item["value"], item["confidence"]) for item in block["malware"]], [("malware:S0274", "low")])
+
+    def test_a_group_name_shared_with_its_malware_tags_the_group(self):
+        for title in ("Sednit reloaded: Back in the trenches", "Sofacy targets European government agencies"):
+            with self.subTest(title=title):
+                block = tag_row(row(title), CONTEXT)
+                self.assertEqual([(item["value"], item["confidence"]) for item in block["actor"]], [("actor:G0007", "medium")])
+                self.assertEqual(values(block, "malware"), [])
+
+    def test_a_shared_name_with_a_malware_word_tags_both(self):
+        block = tag_row(row("Sednit adds a new backdoor to its toolkit"), CONTEXT)
+        self.assertEqual(values(block, "actor"), ["actor:G0007"])
+        self.assertEqual(values(block, "malware"), ["malware:S0044"])
+        block = tag_row(row("Sofacy trojan spreads through phishing"), CONTEXT)
+        self.assertEqual(values(block, "malware"), ["malware:S0137"])
+
+    def test_a_name_allowed_as_both_tags_both(self):
+        block = tag_row(row("Akira hits a regional hospital network"), CONTEXT)
+        self.assertEqual(values(block, "actor"), ["actor:G1024"])
+        self.assertEqual(values(block, "malware"), ["malware:S1129"])
 
     def test_matching_is_case_sensitive(self):
         self.assertIn("actor:G1017", values(tag_row(row("Volt Typhoon returns"), CONTEXT), "actor"))

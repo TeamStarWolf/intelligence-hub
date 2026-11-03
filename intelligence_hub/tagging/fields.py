@@ -79,16 +79,25 @@ def tag_event_type(row, context, exploitation):
     return found
 
 
-def _entity_tags(matches, context, kinds, method, confidence):
+def _entity_tags(matches, context, kinds, method, confidence, text):
     found = []
+    dual = context.vocab.hub["matching"]["actor_malware"]
+    both = {item["alias"] for item in dual.get("both", [])}
+    present = words(text)
+    lowered = (text or "").casefold()
+    malware_word = any((word.casefold() in present) if " " not in word else (word.casefold() in lowered) for word in dual["malware_words"])
     for phrase, ids, weak in matches:
         typed = {}
         for ident in ids:
             typed.setdefault(ident.split(":", 1)[0], []).append(ident)
-        for kind, members in typed.items():
-            # Two entities of one type behind one name: ambiguous, so neither is tagged.
-            if kind in kinds and len(members) == 1:
-                found.append(tag(members[0], method, "low" if weak else confidence))
+        # Two entities of one type behind one name: ambiguous, so neither is tagged.
+        single = {kind: members[0] for kind, members in typed.items() if len(members) == 1}
+        if "actor" in single and "malware" in single and " ".join(phrase) not in both and not malware_word:
+            # One name for a group and its tool (Sednit, Sofacy): the group is meant unless the headline says malware.
+            del single["malware"]
+        for kind, ident in single.items():
+            if kind in kinds:
+                found.append(tag(ident, method, "low" if weak else confidence))
     return found
 
 
@@ -129,7 +138,7 @@ def tag_entities(row, context):
                     found["vendor"].append(tag(ident, "cna-affected", "high"))
                 for ident in _structured_products(context, affected.get("vendor"), affected.get("product")):
                     found["product"].append(tag(ident, "cna-affected", "high"))
-    for field, items in _split(_entity_tags(context.find(row["title"]), context, set(found), "title-match", "medium")).items():
+    for field, items in _split(_entity_tags(context.find(row["title"]), context, set(found), "title-match", "medium", row["title"])).items():
         found[field].extend(items)
     # A product names its vendor.
     for item in list(found["product"]):

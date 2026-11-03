@@ -22,7 +22,46 @@
       "reason": "browser name and ordinary word"
     }
   ],
+  "actor_malware": {
+    "rule": "When one name resolves to both an actor and a malware entity, the actor is tagged and the malware is tagged only when one of malware_words is in the headline. Names listed in both are tagged as both.",
+    "malware_words": [
+      "backdoor",
+      "botnet",
+      "downloader",
+      "dropper",
+      "implant",
+      "infostealer",
+      "loader",
+      "malware",
+      "payload",
+      "RAT",
+      "ransomware",
+      "rootkit",
+      "spyware",
+      "stealer",
+      "trojan",
+      "variant",
+      "worm"
+    ],
+    "both": [
+      {
+        "alias": "Akira",
+        "reason": "the Akira group and its ransomware share one name, and headlines use it for both"
+      }
+    ]
+  },
   "context": [
+    {
+      "id": "malware:S0274",
+      "alias": "Calisto",
+      "words": [
+        "backdoor",
+        "macOS",
+        "Mac",
+        "OSX",
+        "trojan"
+      ]
+    },
     {
       "id": "malware:S0335",
       "alias": "Carbon",
