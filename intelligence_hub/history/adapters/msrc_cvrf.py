@@ -50,7 +50,10 @@ DESCRIPTION = re.compile(r"(?:It was discovered|A flaw (?:was found|in)|In the L
 MAX_HEADLINE = 160
 MONTHS = {name: number for number, name in enumerate(
     ("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"), 1)}
-RANK = {"critical": 0, "important": 1}
+# Microsoft's severity ratings, highest first. Only Critical and Important admit a row on
+# their own; the full order picks one rating when a CVE carries several, the same way every run.
+RANK = {"critical": 0, "important": 1, "moderate": 2, "low": 3}
+ADMITTED = {"critical", "important"}
 THIS = sys.modules[__name__]
 
 
@@ -114,6 +117,36 @@ def headline(title, cve, families):
     return cve + (": " + ", ".join(sorted(families)) if families else "")
 
 
+def severity_order(name):
+    """Sort key for a severity: Microsoft's rank, then the name, so ties never depend on set order."""
+    return (RANK.get((name or "").lower(), 9), name or "")
+
+
+def highest(severities):
+    """Microsoft's highest rating among severities, or None."""
+    return min((name for name in severities if name), key=severity_order, default=None)
+
+
+def combine(rows):
+    """One row per CVE listed in several monthly documents.
+
+    The earliest listing keeps its date, id, title and links; the CVE is flagged exploited
+    when any listing says so and carries the highest severity any listing gives it.
+    """
+    groups = {}
+    for row in rows:
+        groups.setdefault(row["id"], []).append(row)
+    combined = []
+    for items in groups.values():
+        items.sort(key=base.order)
+        row = dict(items[0])
+        if any(item["exploited_flag"] is True for item in items):
+            row["exploited_flag"] = True
+        row["severity"] = highest({item["severity"] for item in items})
+        combined.append(row)
+    return combined
+
+
 def rows_from(document, month_day, raw):
     value = json.loads(document.raw)
     if str(value.get("DocumentTitle", {}).get("Value", "")).strip().lower() in EXCLUDED_TITLES:
@@ -133,8 +166,8 @@ def rows_from(document, month_day, raw):
                 severities.add(description.strip())
             elif threat.get("Type") == 1 and re.search(r"(?:^|;)\s*Exploited:\s*Yes\b", description, re.I):
                 exploited = True
-        severity = min(severities, key=lambda name: RANK.get(name.lower(), 9), default=None)
-        if not exploited and (severity or "").lower() not in RANK:
+        severity = highest(severities)
+        if not exploited and (severity or "").lower() not in ADMITTED:
             continue
         products = set()
         for status in item.get("ProductStatuses") or []:
@@ -166,7 +199,7 @@ def parse(documents, years, context):
         found, seen = rows_from(document, initial, document.raw)
         upstream[month[0]] = upstream.get(month[0], 0) + seen
         rows.extend(found)
-    # A CVE listed again in a later month keeps its first month.
-    rows = base.unique(rows)
+    # A CVE listed again in a later month keeps its first month, with what any month adds.
+    rows = base.unique(combine(rows))
     kept, dropped = base.cap(rows, priority)
     return kept, {"upstream": upstream, "capped": dropped}

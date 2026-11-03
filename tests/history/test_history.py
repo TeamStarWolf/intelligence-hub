@@ -2,10 +2,14 @@
 coverage agreement, the polite fetcher, and the publish step's merge into the v7 shards."""
 import contextlib
 import copy
+import importlib
 import io
 import json
+import os
 from pathlib import Path
 import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 from unittest import mock
@@ -13,7 +17,9 @@ from unittest import mock
 import support
 from intelligence_hub import collect, shards
 from intelligence_hub.history import ADAPTERS, STATIC_SOURCES, base, canonical, check, coverage, publish, registry
-from intelligence_hub.history.adapters import msrc_bulletins, msrc_cvrf, nvd_cve, oracle_cpu
+from intelligence_hub.history.adapters import certcc_ca, msrc_bulletins, msrc_cvrf, nvd_cve, oracle_cpu
+
+history_cli = importlib.import_module("intelligence_hub.history.__main__")
 
 FIXTURES = support.ROOT / "tests" / "history" / "fixtures"
 YEARS = range(coverage.FIRST_YEAR, coverage.END_YEAR + 1)
@@ -118,6 +124,167 @@ class MarinerTest(unittest.TestCase):
         self.assertNotIn("CVE-2015-7511", {row["native_id"] for row in rows})
         flagged = {row["native_id"] for row in rows if row["exploited_flag"]}
         self.assertEqual(flagged, {"CVE-2016-0167"})
+
+
+FETCHED = "2026-11-03T00:00:00Z"
+
+
+def cvrf_document(title, released, vulnerabilities):
+    """A minimal MSRC CVRF monthly document: one Windows product and the given CVEs."""
+    return {"DocumentTitle": {"Value": title}, "DocumentTracking": {"InitialReleaseDate": released},
+            "ProductTree": {"Branch": [{"Name": "Microsoft", "Type": 0, "Items": [
+                {"Name": "Windows", "Type": 3, "Items": [{"ProductID": "10735", "Value": "Windows 10 for x64-based Systems"}]}]}],
+                "FullProductName": [{"ProductID": "10735", "Value": "Windows 10 for x64-based Systems"}]},
+            "Vulnerability": vulnerabilities}
+
+
+def cvrf_vulnerability(cve, severities, exploited=False):
+    threats = [{"Type": 3, "Description": {"Value": name}, "ProductID": ["10735"]} for name in severities]
+    threats.append({"Type": 1, "ProductID": ["10735"], "Description": {
+        "Value": "Publicly Disclosed:No;Exploited:" + ("Yes" if exploited else "No") + ";Latest Software Release:Exploitation Detected"}})
+    return {"CVE": cve, "Title": {"Value": "Win32k Elevation of Privilege Vulnerability"},
+            "ProductStatuses": [{"Type": 3, "ProductID": ["10735"]}], "Threats": threats}
+
+
+def cvrf_documents(months):
+    """updates.json plus one document per (id, title, release date, vulnerabilities)."""
+    updates = {"value": [{"ID": ident, "Alias": ident, "DocumentTitle": title, "InitialReleaseDate": released,
+                          "CvrfUrl": "https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/" + ident} for ident, title, released, _items in months]}
+    documents = {"updates.json": base.Document(json.dumps(updates).encode("utf-8"), FETCHED)}
+    for ident, title, released, items in months:
+        documents["cvrf/" + ident + ".json"] = base.Document(json.dumps(cvrf_document(title, released, items)).encode("utf-8"), FETCHED)
+    return documents
+
+
+SEED_PROBE = """import sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+from intelligence_hub.history import base
+from intelligence_hub.history.adapters import msrc_cvrf
+document = base.Document(Path(sys.argv[2]).read_bytes(), "2026-11-03T00:00:00Z")
+rows, _seen = msrc_cvrf.rows_from(document, "2016-04-12", None)
+print(rows[0]["severity"])
+"""
+
+
+class MsrcSeverityTest(unittest.TestCase):
+    """A CVE rated Low for one product and Moderate for another carries Moderate, in every process."""
+
+    def test_the_highest_rating_wins(self):
+        self.assertEqual(msrc_cvrf.highest({"Low", "Moderate"}), "Moderate")
+        self.assertEqual(msrc_cvrf.highest({"Moderate", "Important", "Low"}), "Important")
+        self.assertEqual(msrc_cvrf.highest({"Critical", "Important"}), "Critical")
+        self.assertEqual(msrc_cvrf.highest({"", "Low"}), "Low")
+        self.assertIsNone(msrc_cvrf.highest(set()))
+
+    def test_moderate_and_low_alone_admit_no_row_unless_exploited(self):
+        documents = cvrf_documents([("2016-Apr", "April 2016 Security Updates", "2016-04-12T07:00:00Z", [
+            cvrf_vulnerability("CVE-2016-0901", ["Low", "Moderate"]), cvrf_vulnerability("CVE-2016-0902", ["Moderate", "Important"]),
+            cvrf_vulnerability("CVE-2016-0903", ["Low", "Moderate"], exploited=True)])])
+        rows, _stats = msrc_cvrf.parse(documents, {2016}, {})
+        self.assertEqual([(row["native_id"], row["severity"]) for row in rows],
+                         [("CVE-2016-0902", "Important"), ("CVE-2016-0903", "Moderate")])
+
+    def test_the_choice_does_not_depend_on_the_hash_seed(self):
+        with tempfile.TemporaryDirectory(prefix="hub-seed-") as folder:
+            path = Path(folder) / "2016-Apr.json"
+            path.write_text(json.dumps(cvrf_document("April 2016 Security Updates", "2016-04-12T07:00:00Z", [
+                cvrf_vulnerability("CVE-2016-0162", ["Low", "Moderate"], exploited=True)])), encoding="utf-8")
+            # The child runs with -s but without -E or -I, which would ignore PYTHONHASHSEED.
+            environment = {key: value for key, value in os.environ.items() if not key.startswith("PYTHON")}
+            for seed in ("1", "2", "3", "4", "5", "6"):
+                environment["PYTHONHASHSEED"] = seed
+                result = subprocess.run([sys.executable, "-s", "-c", SEED_PROBE, str(support.ROOT), str(path)], env=environment,
+                                        capture_output=True, text=True, check=True)
+                self.assertEqual(result.stdout.strip(), "Moderate", "PYTHONHASHSEED=" + seed)
+
+
+class MsrcRepeatTest(unittest.TestCase):
+    """A CVE listed in several monthly documents keeps its first month and what any month adds."""
+
+    def test_a_later_exploited_flag_and_higher_rating_are_kept(self):
+        documents = cvrf_documents([
+            ("2016-Apr", "April 2016 Security Updates", "2016-04-12T07:00:00Z", [cvrf_vulnerability("CVE-2016-0165", ["Important"])]),
+            ("2016-May", "May 2016 Security Updates", "2016-05-10T07:00:00Z",
+             [cvrf_vulnerability("CVE-2016-0165", ["Critical"], exploited=True)])])
+        rows, _stats = msrc_cvrf.parse(documents, {2016}, {})
+        self.assertEqual(len(rows), 1)
+        row = rows[0]
+        self.assertEqual((row["id"], row["published"], row["exploited_flag"], row["severity"]),
+                         ("h-msrc-cvrf-CVE-2016-0165", "2016-04-12", True, "Critical"))
+        base.validate_row(row, ADAPTERS)
+
+    def test_a_later_listing_never_lowers_what_the_first_one_said(self):
+        documents = cvrf_documents([
+            ("2016-Apr", "April 2016 Security Updates", "2016-04-12T07:00:00Z",
+             [cvrf_vulnerability("CVE-2016-0165", ["Critical"], exploited=True)]),
+            ("2016-May", "May 2016 Security Updates", "2016-05-10T07:00:00Z", [cvrf_vulnerability("CVE-2016-0165", ["Important"])])])
+        rows, _stats = msrc_cvrf.parse(documents, {2016}, {})
+        self.assertEqual([(row["published"], row["exploited_flag"], row["severity"]) for row in rows],
+                         [("2016-04-12", True, "Critical")])
+
+
+class FixtureFetcher:
+    """Stands in for base.Fetcher: serves fixed documents by URL and records every URL asked for."""
+
+    documents = {}
+    asked = []
+
+    def __init__(self, cache, adapter, hosts, offline=False, refresh=False, log=None, **options):
+        self.requests = 0
+
+    def get(self, url, max_bytes=None, accept="*/*", optional=False, head=False):
+        FixtureFetcher.asked.append(url)
+        if url in self.documents:
+            return base.Document(self.documents[url], FETCHED)
+        if optional:
+            return None
+        raise base.MissingRaw("not in the test documents: " + url)
+
+
+class CertccPartialBuildTest(unittest.TestCase):
+    """CA rows come from notes of later years, so a build of a few years must still read every note year."""
+
+    NOTES = {100001: ("CA-1998-01", "1998-01-05T00:00:00Z", "CVE-1999-0001"),
+             100002: ("CA-1999-02", "1999-02-10T00:00:00Z", "CVE-1999-0002")}
+
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory(prefix="hub-certcc-")
+        self.addCleanup(self.directory.cleanup)
+        self.root = Path(self.directory.name)
+        summary = {"count": len(self.NOTES), "notes": ["VU#" + str(number) for number in self.NOTES]}
+        documents = {"https://kb.cert.org/vuls/api/2000/summary/": json.dumps(summary).encode("utf-8")}
+        for number, (advisory, public, cve) in self.NOTES.items():
+            documents["https://kb.cert.org/vuls/api/" + str(number) + "/"] = json.dumps({
+                "name": "Example note " + str(number), "certadvisory": advisory, "publicdate": public,
+                "datefirstpublished": "2000-12-15T20:00:29Z", "cveids": [cve]}).encode("utf-8")
+        FixtureFetcher.documents, FixtureFetcher.asked = documents, []
+        patcher = mock.patch.object(base, "Fetcher", FixtureFetcher)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def build(self, years):
+        history_cli.build(self.root, {"certcc-ca"}, set(years), out=lambda message: None)
+        folder = self.root / "history" / "certcc-ca"
+        return {path.name: path.read_bytes() for path in sorted(folder.glob("*.jsonl"))}
+
+    def test_every_note_year_is_read_for_any_built_years(self):
+        certcc_ca.fetch(FixtureFetcher(None, "certcc-ca", ()), {1998, 1999}, {})
+        summaries = {url for url in FixtureFetcher.asked if url.endswith("/summary/")}
+        self.assertEqual(summaries, {"https://kb.cert.org/vuls/api/" + str(year) + "/summary/"
+                                     for year in range(2000, coverage.END_YEAR + 1)})
+
+    def test_a_1998_to_1999_build_keeps_its_rows(self):
+        full = self.build(range(1998, 2005))
+        self.assertEqual(sorted(full), ["1998.jsonl", "1999.jsonl"])
+        partial = self.build(range(1998, 2000))
+        self.assertEqual(partial, full)
+        ids = [json.loads(line)["native_id"] for name in sorted(partial) for line in partial[name].decode("utf-8").splitlines()]
+        self.assertEqual(ids, ["CA-1998-01", "CA-1999-02"])
+        rows = [row for row in canonical.read_coverage(self.root)["rows"]
+                if row["source_id"] == certcc_ca.SOURCE_ID and row["year"] in (1998, 1999)]
+        self.assertEqual(sorted((row["year"], row["admitted"]) for row in rows), [(1998, 1), (1999, 1)])
+        self.assertNotIn("gap", {row["status"] for row in rows})
 
 
 class BulletinPageTest(unittest.TestCase):

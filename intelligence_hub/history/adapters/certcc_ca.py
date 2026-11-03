@@ -33,8 +33,14 @@ THIS = sys.modules[__name__]
 
 
 def fetch(fetcher, years, context):
-    # Every note year can cite an older CA id, so read every note year the VU adapter covers.
-    return certcc_vu.fetch(fetcher, set(range(certcc_vu.FIRST_YEAR, max(years) + 1)) | set(years), context)
+    # A note of any year can cite a CA id of any year, so every note year is read whatever
+    # years are built; a partial build must not lose rows that a later note supplies.
+    return certcc_vu.fetch(fetcher, note_years(), context)
+
+
+def note_years():
+    from .. import coverage  # here, not at the top: coverage imports the adapter registry
+    return set(range(certcc_vu.FIRST_YEAR, coverage.END_YEAR + 1))
 
 
 def parse(documents, years, context):
