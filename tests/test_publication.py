@@ -217,9 +217,11 @@ class BoundTest(unittest.TestCase):
         from intelligence_hub.mitigations import INDEX_FIELDS
         self.assertIn("const indexFields = " + json.dumps(list(INDEX_FIELDS)) + ";", app)
         workflow = (support.ROOT / ".github" / "workflows" / "publish.yml").read_text(encoding="utf-8")
-        self.assertIn("'data/feed.json', 'data/briefs.json'}", workflow)
-        # Both files plus the site stay inside the workflow's 21 MiB package input cap.
-        self.assertLess(collect.FEED_MAX_BYTES + collect.BRIEFS_MAX_BYTES + 512 * 1024, 21 * 1024 * 1024)
+        # The package check, with its allowlist and caps, lives in intelligence_hub/shards.py.
+        self.assertIn("run: python3 -m intelligence_hub.shards package site", workflow)
+        from intelligence_hub import shards
+        self.assertEqual((shards.PACKAGE_MAX_INPUT, shards.PACKAGE_MAX_COMPRESSED), (21 * 1024 * 1024, 3000000))
+        self.assertLess(collect.FEED_MAX_BYTES + collect.BRIEFS_MAX_BYTES + 512 * 1024, shards.PACKAGE_MAX_INPUT)
 
 
 class BriefsFileTest(unittest.TestCase):
@@ -326,7 +328,8 @@ class ResumeTest(unittest.TestCase):
             previous, reason = self.resume()
         self.assertIsNone(reason)
         self.assertIn("mitigations", previous)
-        self.assertEqual(fetch.call_count, 4)
+        # One read of the undeployed v7 index, then the feed and briefs twice.
+        self.assertEqual(fetch.call_count, 5)
         self.assertIn("fetching both once more", log.getvalue())
 
     def test_fresh_reads_send_no_cache_headers(self):
@@ -369,7 +372,7 @@ class ResumeTest(unittest.TestCase):
             previous, reason = self.resume()
         self.assertIsNone(reason)
         self.assertIn("mitigations", previous)
-        fetch.assert_called_once()
+        self.assertEqual([call.args[0] for call in fetch.call_args_list], [collect.PUBLIC_V7 + "index.json", collect.PUBLIC_FEED])
 
     def test_build_reports_why_the_resume_failed(self):
         workspace = Workspace()
