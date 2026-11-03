@@ -5,10 +5,12 @@ from datetime import date, datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 import hashlib
 import html
+import http.client
 import ipaddress
 import json
 from pathlib import Path
 import re
+import sys
 import time
 import urllib.error
 import urllib.parse
@@ -18,12 +20,18 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).absolute().parent.parent
 STATE = ROOT / ".state"
 CATALOG_URL = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
+# Default response bound for one publisher feed. A source may set its own
+# max_bytes in config/sources.json, never above FETCH_CEILING.
 MAX_BYTES = 3 * 1024 * 1024
-MAX_ARTICLES = 8000
+FETCH_CEILING = 16 * 1024 * 1024
+LEGACY_MAX_ARTICLES = 8000
 HISTORY_START = date(1998, 1, 1)
 KINDS = {"advisory", "research", "reporting", "incident", "kev", "filing"}
 CVE = re.compile(r"\bCVE-[0-9]{4}-[0-9]{4,8}\b", re.I)
 PUBLIC_FEED = "https://teamstarwolf.github.io/intelligence-hub/data/feed.json"
+ZONE_ASSUMED = ", zone not stated, read as UTC"
+NAMED_ZONES = {"CET": "+0100", "CEST": "+0200"}
+NAIVE_STAMP = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2})[T ]([0-9]{2}:[0-9]{2}(?::[0-9]{2})?)(?:\.[0-9]{1,9})?")
 RESPONSE_BYTE_LIMIT_REASON = "response_byte_limit_exceeded: source response exceeded its configured byte bound."
 
 
@@ -33,11 +41,11 @@ def require(value, message):
 
 
 def validate_window(start, end, snapshot_version):
-    require(type(snapshot_version) is int and snapshot_version in (1, 2, 3, 4, 5, 6), "Unsupported snapshot coverage version.")
-    maximum = {1: 3661, 2: 3661, 3: 3661, 4: 3661, 5: 7306, 6: 14610}[snapshot_version]
+    require(type(snapshot_version) is int and snapshot_version in (1, 2, 3, 4, 5, 6, 7), "Unsupported snapshot coverage version.")
+    maximum = {1: 3661, 2: 3661, 3: 3661, 4: 3661, 5: 7306, 6: 14610, 7: 14610}[snapshot_version]
     require(type(start) is date and type(end) is date and start <= end and (end - start).days <= maximum,
             "History window must be date-only and within its schema's span.")
-    require(snapshot_version != 6 or start >= HISTORY_START, "Schema 6 coverage must start on or after 1998-01-01.")
+    require(snapshot_version < 6 or start >= HISTORY_START, "Schema 6 and 7 coverage must start on or after 1998-01-01.")
 
 
 def now():
@@ -78,24 +86,43 @@ class ResponseByteLimitExceeded(ValueError):
 
 def fetch(url, maximum=MAX_BYTES):
     require(safe_url(url) == url, "Source URL must be a canonical public HTTPS URL.")
-    require(type(maximum) is int and 1 <= maximum <= 16 * 1024 * 1024, "Invalid bounded read size.")
+    require(type(maximum) is int and 1 <= maximum <= FETCH_CEILING, "Invalid bounded read size.")
     started = time.monotonic()
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
     request = urllib.request.Request(url, headers={"User-Agent": "TeamStarWolf-IntelligenceHub/0.1 (public feed reader)", "Accept": "application/rss+xml, application/atom+xml, application/json, text/xml, application/xml", "Accept-Encoding": "identity"})
     chunks, size = [], 0
-    with opener.open(request, timeout=12) as response:
-        require(response.status == 200 and response.geturl() == url, "Unexpected publisher response.")
-        require(response.headers.get("Content-Encoding", "identity").lower() == "identity", "Compressed responses are not accepted.")
-        while True:
-            require(time.monotonic() - started < 30, "Source exceeded its read deadline.")
-            block = response.read(65536)
-            if not block:
-                break
-            size += len(block)
-            if size > maximum:
-                raise ResponseByteLimitExceeded("Source exceeded its bounded read limit.")
-            chunks.append(block)
+    try:
+        with opener.open(request, timeout=12) as response:
+            require(response.status == 200 and response.geturl() == url, "Unexpected publisher response.")
+            require(response.headers.get("Content-Encoding", "identity").lower() == "identity", "Compressed responses are not accepted.")
+            while True:
+                require(time.monotonic() - started < 30, "Source exceeded its read deadline.")
+                # read1 returns what the connection has delivered instead of waiting
+                # to fill 64 KiB, so the deadline above is checked between short reads.
+                block = response.read1(65536)
+                if not block:
+                    break
+                size += len(block)
+                if size > maximum:
+                    raise ResponseByteLimitExceeded("Source exceeded its bounded read limit.")
+                chunks.append(block)
+            if getattr(response, "length", None):
+                raise http.client.IncompleteRead(b"", response.length)
+    except http.client.HTTPException as error:
+        # http.client errors (a truncated chunked body, a dropped connection) are
+        # network failures: report them as OSError so every caller records them.
+        raise OSError(type(error).__name__ + ": the publisher response ended early or was malformed") from error
     return b"".join(chunks)
+
+
+def failure_reason(error, fallback):
+    """One short public reason for a failed request, naming its cause."""
+    if isinstance(error, ResponseByteLimitExceeded):
+        return RESPONSE_BYTE_LIMIT_REASON
+    if isinstance(error, urllib.error.HTTPError):
+        return "HTTP " + str(error.code)
+    detail = "".join(char for char in " ".join(str(error).split()) if ord(char) >= 32 and ord(char) != 127)[:300]
+    return type(error).__name__ + ": " + (detail or fallback)
 
 
 def reject_constant(_value):
@@ -210,9 +237,13 @@ def apply_mitigation_context(briefs, entries):
 
 
 def write_json(path, value, compact=False):
-    path.parent.mkdir(parents=True, exist_ok=True)
     raw = (json.dumps(value, ensure_ascii=False, allow_nan=False, indent=None if compact else 2, separators=(",", ":") if compact else None) + "\n").encode("utf-8")
-    require(len(raw) <= 16 * 1024 * 1024, "Snapshot output exceeds its limit.")
+    write_raw(path, raw)
+
+
+def write_raw(path, raw):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    require(len(raw) <= FETCH_CEILING, "Snapshot output exceeds its limit.")
     temporary = path.with_name(path.name + ".pending")
     with temporary.open("xb") as stream:
         stream.write(raw)
@@ -224,20 +255,57 @@ def text(value, maximum=240):
     return " ".join(html.unescape(re.sub(r"<[^>]{0,2000}>", " ", value or "")).split())[:maximum]
 
 
-def published(value):
+def _parse_stamp(value):
+    value = value.strip()
+    if re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", value):
+        return date.fromisoformat(value)
     try:
-        value = value.strip()
-        if re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", value):
-            return date.fromisoformat(value).isoformat()
-        try:
-            stamp = datetime.fromisoformat(value.replace("Z", "+00:00"))
-        except ValueError:
-            stamp = parsedate_to_datetime(value)
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        pass
+    # email.utils knows the North American zone names but not the Central European
+    # ones that CERT-EU uses ("Fri, 23 Oct 2026 16:36:26 CEST").
+    named = re.fullmatch(r"(.+?)\s+(CET|CEST)", value)
+    if named:
+        value = named[1] + " " + NAMED_ZONES[named[2]]
+    return parsedate_to_datetime(value)
+
+
+def published(value):
+    """A UTC ISO stamp (or a bare ISO date), or None. Stamps without a zone are refused."""
+    try:
+        stamp = _parse_stamp(value)
+        if type(stamp) is date:
+            return stamp.isoformat()
         if stamp.tzinfo is None:
             return None
         return stamp.astimezone(timezone.utc).isoformat(timespec="seconds")
-    except (ValueError, TypeError, AttributeError, OverflowError):
+    except (ValueError, TypeError, AttributeError, OverflowError, IndexError):
         return None
+
+
+def feed_published(value):
+    """Publisher feed date: (UTC ISO stamp or None, True when no zone was given and UTC was assumed).
+
+    Cisco PSIRT writes "2026-11-02 21:16:10.0" with no zone. Such stamps are read as
+    UTC, and the caller marks the row's date basis so the assumption stays visible.
+    """
+    stamp = published(value)
+    if stamp is not None or not isinstance(value, str):
+        return stamp, False
+    value = value.strip()
+    try:
+        match = NAIVE_STAMP.fullmatch(value)
+        if match:
+            clock = match[2] if match[2].count(":") == 2 else match[2] + ":00"
+            naive = datetime.strptime(match[1] + " " + clock, "%Y-%m-%d %H:%M:%S")
+        else:
+            naive = parsedate_to_datetime(value)
+            if naive.tzinfo is not None:
+                return None, False
+    except (ValueError, TypeError, AttributeError, OverflowError, IndexError):
+        return None, False
+    return naive.replace(tzinfo=timezone.utc).isoformat(timespec="seconds"), True
 
 
 class BoundedTreeBuilder(ET.TreeBuilder):
@@ -347,8 +415,10 @@ def parse_feed(raw, source, *, selection_cutoff_date=None):
             intake["items_rejected"] += 1
             intake["rejection_reasons"]["invalid_link_or_title"] += 1
             continue
-        stamp = published(fields.get("pubDate") or fields.get("published") or fields.get("date") or fields.get("updated") or "")
+        stamp, zone_assumed = feed_published(fields.get("pubDate") or fields.get("published") or fields.get("date") or fields.get("updated") or "")
         basis = "publication" if (fields.get("pubDate") or fields.get("published") or fields.get("date")) else "publisher update" if fields.get("updated") else "unknown"
+        if stamp is not None and zone_assumed:
+            basis += ZONE_ASSUMED
         # Display titles stay bounded; mention counting uses the complete source fields.
         mention_text = fields.get("title", "") + " " + " ".join(fields.get(key, "") for key in ("description", "summary", "content", "encoded"))
         if source.get("include_terms") and not any(term.casefold() in text(mention_text, MAX_BYTES).casefold() for term in source["include_terms"]):
@@ -371,7 +441,7 @@ def update_source(source, cached, *, selection_cutoff_date=None):
     attempted = now()
     try:
         selection_context(source, selection_cutoff_date)
-        raw = fetch(source["url"])
+        raw = fetch(source["url"], source.get("max_bytes", MAX_BYTES))
         parsed = parse_feed(raw, source, selection_cutoff_date=selection_cutoff_date)
         incoming = parsed["articles"]
         intake = {**parsed["intake"], "attempted_at": attempted, "response_sha256": hashlib.sha256(raw).hexdigest()}
@@ -386,10 +456,7 @@ def update_source(source, cached, *, selection_cutoff_date=None):
         return {"status": "partial" if incomplete else "ok", "last_attempt": attempted, "last_success": now(), "error": None,
                 "sha256": intake["response_sha256"], "articles": articles, "intake": intake}
     except (OSError, ValueError, ET.ParseError) as error:
-        if isinstance(error, ResponseByteLimitExceeded):
-            reason = RESPONSE_BYTE_LIMIT_REASON
-        else:
-            reason = ("HTTP " + str(error.code)) if isinstance(error, urllib.error.HTTPError) else type(error).__name__ + ": source unavailable or rejected by intake policy"
+        reason = failure_reason(error, "source unavailable or rejected by intake policy")
         return {**cached, "status": "failed", "last_attempt": attempted, "last_success": cached.get("last_success"),
                 "error": reason, "articles": cached.get("articles", []), "intake": None}
 
@@ -403,10 +470,7 @@ def update_kev(cached):
         return {"status": "ok", "last_attempt": attempted, "last_success": now(), "error": None,
                 "sha256": hashlib.sha256(raw).hexdigest(), "catalog": catalog, "intake": None}
     except (OSError, ValueError) as error:
-        if isinstance(error, ResponseByteLimitExceeded):
-            reason = RESPONSE_BYTE_LIMIT_REASON
-        else:
-            reason = ("HTTP " + str(error.code)) if isinstance(error, urllib.error.HTTPError) else type(error).__name__ + ": catalog unavailable or rejected"
+        reason = failure_reason(error, "catalog unavailable or rejected")
         return {**cached, "status": "failed", "last_attempt": attempted, "last_success": cached.get("last_success"), "error": reason, "intake": None}
 
 
@@ -546,6 +610,8 @@ def validate_registry(registry):
         require(isinstance(source["article_hosts"], list) and 1 <= len(source["article_hosts"]) <= 8 and all(safe_url("https://" + host + "/") is not None for host in source["article_hosts"]), "Invalid publisher hosts.")
         if "include_terms" in source:
             require(isinstance(source["include_terms"], list) and 1 <= len(source["include_terms"]) <= 12 and all(isinstance(term, str) and 1 <= len(term) <= 80 for term in source["include_terms"]), "Invalid source selection terms.")
+        if "max_bytes" in source:
+            require(type(source["max_bytes"]) is int and 1 <= source["max_bytes"] <= FETCH_CEILING, "Invalid source byte bound.")
         source_selection(source)
     return registry["sources"]
 
@@ -635,7 +701,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
             article = {**article, "cves": sorted(set(article["cves"]) | set(selected[canonical]["cves"]))}
             validate_article(article)
         selected[canonical] = {**article, "url": canonical}
-    require(len(selected) <= MAX_ARTICLES, "Article collection exceeds its limit.")
+    require(len(selected) <= LEGACY_MAX_ARTICLES, "Article collection exceeds its limit.")
     ordered = sorted(selected.values(), key=article_date, reverse=True)
     require(ordered, "No articles are available in the selected window; preserving the previous deployment.")
     require(len({article["id"] for article in ordered}) == len(ordered), "Article identities must be unique.")
@@ -712,7 +778,7 @@ def resume_deployed(sources, cache):
             require(isinstance(window, dict) and set(window) == {"start", "end"}, "Missing legacy coverage window.")
             begin, finish = (date.fromisoformat(window[key]) for key in ("start", "end"))
             validate_window(begin, finish, previous["schema_version"])
-        require(isinstance(previous.get("articles"), list) and len(previous["articles"]) <= MAX_ARTICLES, "Invalid deployed articles.")
+        require(isinstance(previous.get("articles"), list) and len(previous["articles"]) <= LEGACY_MAX_ARTICLES, "Invalid deployed articles.")
         require(isinstance(previous.get("sources"), list) and len(previous["sources"]) <= 100, "Invalid deployed source ledger.")
         registry = {source["id"]: source for source in sources}
         retained = {}

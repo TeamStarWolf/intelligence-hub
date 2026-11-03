@@ -1,7 +1,8 @@
 {
   "schema_version": 1,
   "sources": [
-    {"id":"cisa-advisories","name":"CISA Advisories","kind":"advisory","url":"https://www.cisa.gov/cybersecurity-advisories/all.xml","home":"https://www.cisa.gov/cybersecurity-advisories","article_hosts":["www.cisa.gov","cisa.gov"]},
+    {"id":"cisa-advisories","name":"CISA Advisories","kind":"advisory","url":"https://www.cisa.gov/cybersecurity-advisories/all.xml","home":"https://www.cisa.gov/cybersecurity-advisories","article_hosts":["www.cisa.gov","cisa.gov"],"max_bytes":8388608},
+    {"id":"cisa-ics-advisories","name":"CISA ICS Advisories","kind":"advisory","url":"https://www.cisa.gov/cybersecurity-advisories/ics-advisories.xml","home":"https://www.cisa.gov/news-events/ics-advisories","article_hosts":["www.cisa.gov"],"max_bytes":8388608},
     {"id":"cisa-cybersecurity-advisories","name":"CISA Cybersecurity Advisories (category subset)","kind":"advisory","url":"https://www.cisa.gov/cybersecurity-advisories/cybersecurity-advisories.xml","home":"https://www.cisa.gov/","article_hosts":["www.cisa.gov"]},
     {"id":"cert-eu","name":"CERT-EU","kind":"advisory","url":"https://cert.europa.eu/publications/security-advisories-rss","home":"https://cert.europa.eu/publications/security-advisories/","article_hosts":["cert.europa.eu"]},
     {"id":"microsoft-security","name":"Microsoft Security","kind":"research","url":"https://www.microsoft.com/en-us/security/blog/feed/","home":"https://www.microsoft.com/en-us/security/blog/","article_hosts":["www.microsoft.com"]},
