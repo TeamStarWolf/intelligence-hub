@@ -7,7 +7,10 @@ data/v7/index.json lists every shard with its path, rows, bytes and sha256, keep
 the last published runs, and is the manifest that publish.yml checks the Pages
 package against (package_site below).
 
-Article rows keep the v6 feed record unchanged; the tagged record arrives later.
+Article rows are the v6 feed record plus a "tagging" block: the controlled-vocabulary
+tags of intelligence_hub/tagging in the compact form that index.json's tagging.layout
+describes. index.json's tagging entry names the tagger version, the vocabulary versions
+and the pinned library commit, or says why tagging was unavailable in that run.
 """
 import gzip
 import hashlib
@@ -300,7 +303,7 @@ def run_chain(previous_runs, generated_at, trigger, seed=None):
     return ([{"generated_at": generated_at, "trigger": trigger, "changed": True}] + earlier)[:RUNS_KEPT]
 
 
-def build_index(entries, *, generated_at, end, feed_content_revision, layout_revision, runs, counts, v6_files):
+def build_index(entries, *, generated_at, end, feed_content_revision, layout_revision, runs, counts, v6_files, tagging=None):
     days = [entry["to"] for entry in entries if entry["to"] and (entry["path"].startswith(("live/", "history/")))]
     content_date = max((day for day in days if day <= end.isoformat()), default=None)
     return {"schema_version": SCHEMA_VERSION, "generated_at": generated_at, "content_date": content_date,
@@ -310,7 +313,7 @@ def build_index(entries, *, generated_at, end, feed_content_revision, layout_rev
             "runs": runs, "observed_interval_hours": observed_interval(runs), "requested_cron": REQUESTED_CRON,
             "counts": counts, "shards": entries, "v6_files": v6_files,
             "cve_buckets": {"published": CVE_BUCKETS_PUBLISHED, "note": None if CVE_BUCKETS_PUBLISHED else CVE_BUCKETS_PENDING},
-            "notices": NOTICES}
+            "notices": NOTICES, **({"tagging": tagging} if tagging is not None else {})}
 
 
 def file_entry(path, raw):
@@ -319,7 +322,8 @@ def file_entry(path, raw):
 
 def validate_index(index):
     """Check an index read back from disk or from the deployed site before anything trusts it."""
-    require(type(index) is dict and set(index) == INDEX_KEYS and type(index["schema_version"]) is int and
+    # tagging is optional, so an index written before tagging existed still resumes.
+    require(type(index) is dict and set(index) in (INDEX_KEYS, INDEX_KEYS | {"tagging"}) and type(index["schema_version"]) is int and
             index["schema_version"] == SCHEMA_VERSION, "Unsupported v7 index.")
     require(isinstance(index["generated_at"], str) and published(index["generated_at"]) and "T" in index["generated_at"], "Invalid v7 index clock.")
     for field in ("content_revision", "feed_content_revision", "layout_revision"):
@@ -343,6 +347,10 @@ def validate_index(index):
             require(entry[field] is None or isinstance(entry[field], str) and DAY.fullmatch(entry[field]), "Invalid v7 shard dates.")
         seen.add(entry["path"])
     require(all(name in seen for name in NAMED), "The v7 index is missing a named file.")
+    if "tagging" in index:
+        tagging = index["tagging"]
+        require(type(tagging) is dict and tagging.get("status") in {"ok", "unavailable"} and isinstance(tagging.get("tagger_version"), str),
+                "Invalid v7 tagging entry.")
     require(type(index["v6_files"]) is list and [item.get("path") for item in index["v6_files"] if type(item) is dict] == list(V6_FILES), "Invalid v6 file list.")
     for item in index["v6_files"]:
         require(set(item) == {"path", "bytes", "sha256"} and type(item["bytes"]) is int and item["bytes"] > 0 and
