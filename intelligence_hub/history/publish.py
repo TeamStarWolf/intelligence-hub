@@ -95,7 +95,12 @@ def article(row):
 
 
 def articles(root, existing_urls=()):
-    """(v7 article rows, summary). A row whose URL is already a feed, KEV or curated row is left to that row."""
+    """(v7 article rows, summary). A row whose URL is already a feed, KEV or curated row is left to that row.
+
+    History rows never displace each other by URL: their ids are unique, and several of
+    them can share one link by design (every CA-series row of a year links to that year's
+    compiled advisories page).
+    """
     if not HISTORY_PUBLISHED:
         return [], {"status": "unpublished", "reason": "HISTORY_PUBLISHED is off; committed rows are checked but not published"}
     rows, reason = load(root)
@@ -107,7 +112,6 @@ def articles(root, existing_urls=()):
         if row["url"] in taken:
             duplicates += 1
             continue
-        taken.add(row["url"])
         out.append(article(row))
     by_adapter = {}
     for row in out:

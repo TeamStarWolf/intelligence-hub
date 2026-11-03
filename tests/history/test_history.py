@@ -417,6 +417,25 @@ class PublishTest(unittest.TestCase):
         self.assertFalse([row for row in previous["articles"] if row["origin"].startswith("history:")])
 
 
+class SharedLinkTest(unittest.TestCase):
+    """History rows that share a link (every CA-series row of a year links to that year's page) all publish."""
+
+    def test_history_rows_never_displace_each_other_by_url(self):
+        first = golden("certcc-ca")[0]
+        second = dict(first, native_id="CA-2000-03", id="h-certcc-ca-CA-2000-03", cve=[])
+        folder = Path(tempfile.mkdtemp())
+        try:
+            write_history(folder, {"certcc-ca": [first, second]})
+            rows, summary = publish.articles(folder)
+            self.assertEqual(sorted(row["id"] for row in rows), [first["id"], second["id"]])
+            self.assertEqual(summary["duplicates_left_to_other_rows"], 0)
+            # A feed, KEV or curated row with the same link still takes precedence over both.
+            rows, summary = publish.articles(folder, {first["url"]})
+            self.assertEqual((rows, summary["duplicates_left_to_other_rows"]), ([], 2))
+        finally:
+            shutil.rmtree(folder)
+
+
 class FitTest(unittest.TestCase):
     """A year's history shard never passes the shard byte bound because of adapter rows."""
 
