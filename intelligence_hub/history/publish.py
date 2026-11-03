@@ -6,7 +6,9 @@ row with origin "history:<adapter>" and an empty summary, tags it with the same 
 as every other row, and the shard writer files it under history/YYYY.json.
 
 A missing, unreadable or invalid history/ never blocks the feed: the run continues
-without adapter rows and records why.
+without adapter rows and records why. Nor can the adapter rows push a year's shard past
+the shard byte bound: fit() holds back that year's lowest-priority adapter rows until
+the shard fits, and the v7 coverage file says how many were held back.
 """
 from . import ADAPTERS, base, canonical, check, coverage
 
@@ -14,10 +16,56 @@ from . import ADAPTERS, base, canonical, check, coverage
 # measured either way; publishing them is a package-cap question (see the PR that sets it).
 HISTORY_PUBLISHED = True
 ORIGIN_PREFIX = "history:"
+# When a year's shard would pass its byte bound, adapter rows are held back in this order:
+# NVD metadata rows first (their CVEs are already cited by another row), then the filtered
+# Ubuntu notices, then the per-CVE Microsoft rows; publisher, KEV and curated rows never.
+HOLD_BACK_ORDER = ("nvd-cve", "ubuntu-usn", "msrc-cvrf", "cisa-alerts", "certcc-vu", "cisa-ics-csaf", "mozilla-mfsa",
+                   "certcc-ca", "oracle-cpu", "msrc-bulletins")
+SEVERITY_RANK = {"critical": 4, "high": 3, "important": 3, "moderate": 2, "medium": 2, "low": 1}
 
 
 def is_history(row):
     return isinstance(row, dict) and str(row.get("origin", "")).startswith(ORIGIN_PREFIX)
+
+
+def hold_back_order(row):
+    """Rows that sort first are held back first: by adapter, then unexploited before known, lower severity first."""
+    adapter = row["origin"][len(ORIGIN_PREFIX):]
+    rank = HOLD_BACK_ORDER.index(adapter) if adapter in HOLD_BACK_ORDER else len(HOLD_BACK_ORDER)
+    severity = str(row.get("severity") or "").split(" ", 1)[0].lower()
+    return (rank, row.get("exploitation") == "known", SEVERITY_RANK.get(severity, 0), row["id"])
+
+
+def fit(files, limit, encode):
+    """Hold back adapter rows from every history year shard whose encode() bytes pass limit.
+
+    files is the shard map from shards.build_shards and is changed in place. Returns
+    [{"path", "adapter", "rows"}] for every adapter with rows held back. A shard that is
+    still over the bound with no adapter rows left is left for the shard writer to refuse.
+    """
+    held = []
+    for path in sorted(files):
+        value = files[path]
+        if not path.startswith("history/") or not isinstance(value, dict) or value.get("kind") != "articles":
+            continue
+        size = len(encode(value))
+        if size <= limit:
+            continue
+        dropped = set()
+        for row in sorted((row for row in value["rows"] if is_history(row)), key=hold_back_order):
+            if size <= limit:
+                break
+            # A row costs its canonical bytes plus one separator; encode() adds one newline, so they cancel.
+            size -= len(encode(row))
+            dropped.add(row["id"])
+        counts = {}
+        for row in value["rows"]:
+            if row["id"] in dropped:
+                adapter = row["origin"][len(ORIGIN_PREFIX):]
+                counts[adapter] = counts.get(adapter, 0) + 1
+        value["rows"] = [row for row in value["rows"] if row["id"] not in dropped]
+        held.extend({"path": path, "adapter": adapter, "rows": count} for adapter, count in sorted(counts.items()))
+    return held
 
 
 def load(root):
@@ -80,4 +128,6 @@ def coverage_file(root, schema_version):
                 "note": "History coverage is unavailable in this run: " + (str(error) or type(error).__name__)[:300]}
     return {"schema_version": schema_version, "kind": "coverage", "status": "ok", "published_rows": HISTORY_PUBLISHED,
             "first_year": value["first_year"], "end_year": value["end_year"], "statuses": value["statuses"],
-            "sources": value["sources"], "rows": value["rows"]}
+            "sources": value["sources"], "rows": value["rows"],
+            # Filled by the collector: adapter rows held back to keep a year shard inside its bound (fit).
+            "held_back": []}

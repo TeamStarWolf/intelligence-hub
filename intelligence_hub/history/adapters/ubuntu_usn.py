@@ -23,8 +23,9 @@ LAST_YEAR = None
 HOME = "https://ubuntu.com/security/notices"
 HOSTS = ("ubuntu.com",)
 MAX_BYTES = 16 * 1024 * 1024
-PAGE_SIZE = 100
-MAX_PAGES = 400
+# notices.json answers HTTP 422 to any limit above 20 (checked 2026-11-03).
+PAGE_SIZE = 20
+MAX_PAGES = 1000
 REFERENCE_FILTER = True
 FILTER = "a CVE id in the CISA KEV catalog or cited by another history adapter's row (notices.json has no priority field)"
 LICENCE = "Canonical, ubuntu.com; notice ids, titles, dates, CVE ids and links only."

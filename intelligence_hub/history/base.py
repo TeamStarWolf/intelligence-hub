@@ -39,7 +39,9 @@ DEFAULT_MAX_BYTES = 8 * 1024 * 1024
 FETCH_CEILING = 128 * 1024 * 1024
 MIN_INTERVAL = 1.0
 READ_DEADLINE = 900
-RETRY_PAUSES = (10, 60)
+# Pauses before each retry: rate limits, server errors and network faults (a resolver
+# outage on the build host ended two earlier builds after 70 seconds).
+RETRY_PAUSES = (10, 60, 300, 900)
 ROW_KEYS = ("id", "adapter", "source_id", "source_class", "kind", "native_id", "title", "url", "published",
             "date_basis", "updated", "cve", "severity", "vendor_raw", "product_raw", "exploited_flag", "retrieved",
             "raw_sha256")
@@ -78,7 +80,7 @@ def text(value, maximum=240):
 
     An em dash (U+2014) becomes a spaced hyphen: the repository carries none outside reports/.
     """
-    value = html.unescape(re.sub(r"<[^>]*>", " ", str(value or ""))).replace("—", " - ")
+    value = html.unescape(re.sub(r"<[^>]*>", " ", str(value or ""))).replace("\u2014", " - ")
     value = re.sub(r"\s+", " ", value).strip()
     return value if len(value) <= maximum else value[:maximum - 1].rstrip() + "…"
 
@@ -96,16 +98,29 @@ def day(value):
         return None
 
 
+def month_number(name):
+    """1 to 12 for a full month name or its three-letter (or "Sept") abbreviation, else None."""
+    name = name.lower().rstrip(".")
+    if name in MONTHS:
+        return MONTHS[name]
+    if name == "sept":
+        return 9
+    return next((number for full, number in MONTHS.items() if len(name) == 3 and full.startswith(name)), None)
+
+
 def long_date(value):
-    """'June 01, 1998' or '1 June 1998' as YYYY-MM-DD, or None."""
-    match = re.search(r"\b([A-Za-z]+)\s+([0-9]{1,2}),?\s+([0-9]{4})\b", value or "")
-    if match and match.group(1).lower() in MONTHS:
-        month, number, year = MONTHS[match.group(1).lower()], int(match.group(2)), int(match.group(3))
+    """'June 01, 1998', 'May 6th, 2021', 'Sep 3, 2024' or '1 June 1998' as YYYY-MM-DD, or None.
+
+    A month and year without a day ('August, 2018') is not a date.
+    """
+    match = re.search(r"\b([A-Za-z]+\.?)\s+([0-9]{1,2})(?:st|nd|rd|th)?,?\s+([0-9]{4})\b", value or "")
+    if match and month_number(match.group(1)):
+        month, number, year = month_number(match.group(1)), int(match.group(2)), int(match.group(3))
     else:
-        match = re.search(r"\b([0-9]{1,2})\s+([A-Za-z]+)\s+([0-9]{4})\b", value or "")
-        if not match or match.group(2).lower() not in MONTHS:
+        match = re.search(r"\b([0-9]{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+\.?)\s+([0-9]{4})\b", value or "")
+        if not match or not month_number(match.group(2)):
             return None
-        month, number, year = MONTHS[match.group(2).lower()], int(match.group(1)), int(match.group(3))
+        month, number, year = month_number(match.group(2)), int(match.group(1)), int(match.group(3))
     try:
         return date(year, month, number).isoformat()
     except ValueError:
@@ -140,13 +155,17 @@ def canonical_row(row):
 
 def make_row(adapter, *, native_id, title, url, published, kind=None, cve=(), severity=None, vendor_raw=(), product_raw=(),
              exploited_flag=None, updated=None, retrieved, raw_sha256, date_basis="publication"):
-    """A history row in its canonical shape; the adapter module supplies the fixed fields."""
+    """A history row in its canonical shape; the adapter module supplies the fixed fields.
+
+    A CVE id dated after the retrieval year cannot exist yet and is a publisher typo
+    (Microsoft's MS07-029 data lists CVE-2077-1748), so it is dropped.
+    """
     products = sorted({text(value, 100) for value in product_raw if text(value, 100)})
     row = {"id": "h-" + adapter.ID + "-" + native_id, "adapter": adapter.ID, "source_id": adapter.SOURCE_ID,
            "source_class": adapter.SOURCE_CLASS, "kind": kind or adapter.KIND, "native_id": native_id,
            "title": text(title), "url": url, "published": published, "date_basis": date_basis,
            "updated": updated if updated and updated > published else None,
-           "cve": sorted(set(cve))[:100], "severity": text(severity, 40) or None,
+           "cve": sorted({value for value in cve if int(value[4:8]) <= int(retrieved[:4])})[:100], "severity": text(severity, 40) or None,
            "vendor_raw": sorted({text(value, 100) for value in vendor_raw if text(value, 100)})[:20],
            "product_raw": products[:20], "exploited_flag": True if exploited_flag is True else None,
            "retrieved": retrieved, "raw_sha256": raw_sha256}
@@ -174,7 +193,8 @@ def validate_row(row, adapters=None):
     require(row["updated"] is None or isinstance(row["updated"], str) and day(row["updated"]) == row["updated"] and
             row["updated"] > row["published"], "Invalid history update date in " + ident + ".")
     require(isinstance(row["cve"], list) and len(row["cve"]) <= 100 and row["cve"] == sorted(set(row["cve"])) and
-            all(isinstance(value, str) and CVE_ID.fullmatch(value) for value in row["cve"]), "Invalid history CVE list in " + ident + ".")
+            all(isinstance(value, str) and CVE_ID.fullmatch(value) and isinstance(row["retrieved"], str) and
+                value[4:8] <= row["retrieved"][:4] for value in row["cve"]), "Invalid history CVE list in " + ident + ".")
     require(row["severity"] is None or isinstance(row["severity"], str) and 1 <= len(row["severity"]) <= 40, "Invalid history severity in " + ident + ".")
     for field in ("vendor_raw", "product_raw"):
         require(isinstance(row[field], list) and len(row[field]) <= 20 and row[field] == sorted(set(row[field])) and

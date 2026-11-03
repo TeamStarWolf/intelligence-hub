@@ -22,7 +22,6 @@ PUBLISHER_VENDOR = None
 COUNTRY = "US"
 KIND = "note"
 FIRST_YEAR = 1998
-FIRST_CVE_YEAR = 1999
 LAST_YEAR = None
 HOME = "https://nvd.nist.gov/"
 HOSTS = ("nvd.nist.gov",)
@@ -32,22 +31,24 @@ FILTER = ("CVE ids cited by another history adapter's row only (never a bulk CVE
           "the first 1,500 a year by KEV addition, CVSS base score and CVE id")
 LICENCE = "NVD data, a US Government work; this product uses data from the NVD API but is not endorsed or certified by the NVD."
 FEED = "https://nvd.nist.gov/feeds/json/cve/2.0/nvdcve-2.0-{year}.json.gz"
+# The 2002 feed carries every CVE year from 1999 to 2002; no earlier yearly feed exists.
+FIRST_FEED_YEAR = 2002
 THIS = sys.modules[__name__]
 SEPARATORS = re.compile(r"[\s,]*")
 METRICS = ("cvssMetricV40", "cvssMetricV31", "cvssMetricV30", "cvssMetricV2")
 
 
-def cve_years(referenced):
-    return sorted({int(cve[4:8]) for cve in referenced if base.CVE_ID.fullmatch(cve)})
+def feed_years(referenced):
+    """The yearly feeds that hold the referenced CVEs (CVE years 1999 to 2001 are in the 2002 feed)."""
+    return sorted({max(int(cve[4:8]), FIRST_FEED_YEAR) for cve in referenced if base.CVE_ID.fullmatch(cve)})
 
 
 def fetch(fetcher, years, context):
     documents = {}
-    for year in cve_years(context.get("referenced") or ()):
-        if year >= FIRST_CVE_YEAR:
-            document = fetcher.get(FEED.format(year=year), MAX_BYTES, accept="application/gzip", optional=True)
-            if document is not None:
-                documents["nvdcve-2.0-" + str(year) + ".json.gz"] = document
+    for year in feed_years(context.get("referenced") or ()):
+        document = fetcher.get(FEED.format(year=year), MAX_BYTES)  # the feed host answers 406 to Accept: application/gzip
+        if document is not None:
+            documents["nvdcve-2.0-" + str(year) + ".json.gz"] = document
     return documents
 
 

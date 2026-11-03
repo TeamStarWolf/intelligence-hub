@@ -122,25 +122,38 @@ def from_workbook(raw):
     return found
 
 
+# The posted date in the forms the bulletin pages use, newest form first: "Published:
+# <date> | Updated: <date>", "Originally posted: <date>", "**Issued:** <date>", and the
+# first revision line, "V1.0 (<date>): Bulletin published".
+POSTED = (re.compile(r"Published:\s*([A-Za-z]+ [0-9]{1,2}, [0-9]{4})"),
+          re.compile(r"Originally posted:?\**:?\s*([A-Za-z]+ [0-9]{1,2}, [0-9]{4})", re.I),
+          re.compile(r"Issued:\**:?\s*([A-Za-z]+ [0-9]{1,2}, [0-9]{4})"),
+          re.compile(r"\bV1\.0 \(([A-Za-z]+ [0-9]{1,2}, [0-9]{4})\):\s*Bulletin published"))
+UPDATED = (re.compile(r"Published:\s*[A-Za-z]+ [0-9]{1,2}, [0-9]{4}\s*\|\s*Updated:\s*([A-Za-z]+ [0-9]{1,2}, [0-9]{4})"),
+           re.compile(r"^Updated:\s*([A-Za-z]+ [0-9]{1,2}, [0-9]{4})", re.M),
+           re.compile(r"Updated:\**:?\s*([A-Za-z]+ [0-9]{1,2}, [0-9]{4})"))
+
+
+def _first(patterns, body):
+    for pattern in patterns:
+        match = pattern.search(body)
+        if match and base.long_date(match.group(1)):
+            return base.long_date(match.group(1))
+    return None
+
+
 def from_page(raw):
-    """{published, updated, title, severity, cves} from a bulletin page in Markdown form."""
+    """{published, updated, title, severity, cves} from a bulletin page in Markdown form, or None."""
     value = raw.decode("utf-8", "replace")
     # Only the front matter is cut: bulletin bodies have their own "---" table rules.
     body = value.split("\n---", 1)[-1] if value.startswith("---") else value
     heading = re.search(r"^#\s+Microsoft Security Bulletin\s+(MS[0-9]{2}-[0-9]{3})(?:\s*-\s*([A-Za-z]+))?", body, re.M)
     title = re.search(r"^##\s+(.+)$", body, re.M)
-    stamp = re.search(r"Published:\s*([A-Za-z]+ [0-9]{1,2}, [0-9]{4})(?:\s*\|\s*Updated:\s*([A-Za-z]+ [0-9]{1,2}, [0-9]{4}))?", body)
-    if heading and title and not stamp:
-        # Older pages say "Originally posted: <date>" and give only a later "Updated:" line.
-        posted = re.search(r"Originally posted:?\**:?\s*([A-Za-z]+ [0-9]{1,2}, [0-9]{4})", body, re.I)
-        updated = re.search(r"^Updated:\s*([A-Za-z]+ [0-9]{1,2}, [0-9]{4})", body, re.M)
-        if posted:
-            return {"published": base.long_date(posted.group(1)), "updated": base.long_date(updated.group(1)) if updated else None,
-                    "title": base.text(title.group(1)), "severity": heading.group(2), "cves": set(base.cves(body))}
-    if not (heading and title and stamp):
+    published = _first(POSTED, body)
+    if not (heading and title and published):
         return None
-    return {"published": base.long_date(stamp.group(1)), "updated": base.long_date(stamp.group(2)) if stamp.group(2) else None,
-            "title": base.text(title.group(1)), "severity": heading.group(2), "cves": set(base.cves(body))}
+    return {"published": published, "updated": _first(UPDATED, body), "title": base.text(title.group(1)),
+            "severity": heading.group(2), "cves": set(base.cves(body))}
 
 
 def fetch(fetcher, years, context):

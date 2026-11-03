@@ -46,9 +46,9 @@ def adapter_rows(module, stats, counts, years, checked_at, end_year=END_YEAR):
         elif upstream == 0 and admitted == 0 and missing == 0:
             row.update(status="gap", filter=None, reason="the source lists no items for this year")
         elif missing:
-            row.update(status="partial", reason=format(missing, ",") + " listed items could not be read")
+            row.update(status="partial", reason=format(missing, ",") + (" listed item could not be read" if missing == 1 else " listed items could not be read"))
         elif module.FILTER or capped:
-            row.update(status="filtered", reason=(format(capped, ",") + " rows over the 1,500-row yearly cap were left out") if capped else None)
+            row.update(status="filtered", reason=(format(capped, ",") + (" row" if capped == 1 else " rows") + " over the 1,500-row yearly cap " + ("was" if capped == 1 else "were") + " left out") if capped else None)
         else:
             base.require(admitted == upstream, module.ID + " " + str(year) + ": admitted rows differ from the upstream count without a filter.")
             row.update(status="complete")

@@ -992,6 +992,14 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
     files = shards.build_shards(rows + history_rows, snapshot["sources"], catalog, snapshot["mitigations"],
                                 shards.reports_file(reports, catalog_value, catalog_sha), end,
                                 coverage=history_publish.coverage_file(ROOT, shards.SCHEMA_VERSION))
+    # Adapter rows never push a year's history shard past its byte bound; any held back are named.
+    held = history_publish.fit(files, shards.SHARD_MAX_BYTES, shards.canonical)
+    if files["coverage.json"].get("status") == "ok":
+        files["coverage.json"]["held_back"] = held
+    if held:
+        history_summary["held_back"] = held
+        print("History: " + format(sum(item["rows"] for item in held), ",") + " adapter rows held back to keep " +
+              ", ".join(sorted({item["path"] for item in held})) + " inside the shard bound", file=sys.stderr)
     raw, entries = shards.serialize(files)
     previous_index = previous.get("v7_index") if previous is not None else shards.local_index(ROOT / "site")
     changed_shards, removed_shards = shards.compare(previous_index, entries)
@@ -1004,7 +1012,7 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
               "live_rows": sum(entry["rows"] for entry in entries if entry["path"].startswith("live/")),
               "history_rows": sum(entry["rows"] for entry in entries if entry["path"].startswith("history/")),
               "curated_rows": sum(article["origin"] == "library-curation" for article in articles),
-              "history_adapter_rows": len(history_rows),
+              "history_adapter_rows": len(history_rows) - sum(item["rows"] for item in held),
               "kev": sum(entry["rows"] for entry in entries if entry["path"].startswith("kev/")),
               "kev_catalog_version": version if isinstance(version, str) and len(version) <= 40 else None,
               "cves": len(snapshot["mitigations"]), "sources": len(snapshot["sources"]), "shards": len(entries)}

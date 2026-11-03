@@ -13,7 +13,7 @@ from unittest import mock
 import support
 from intelligence_hub import collect, shards
 from intelligence_hub.history import ADAPTERS, STATIC_SOURCES, base, canonical, check, coverage, publish, registry
-from intelligence_hub.history.adapters import msrc_cvrf
+from intelligence_hub.history.adapters import msrc_bulletins, msrc_cvrf, nvd_cve, oracle_cpu
 
 FIXTURES = support.ROOT / "tests" / "history" / "fixtures"
 YEARS = range(coverage.FIRST_YEAR, coverage.END_YEAR + 1)
@@ -85,6 +85,75 @@ class MarinerTest(unittest.TestCase):
         self.assertEqual(flagged, {"CVE-2016-0167"})
 
 
+class BulletinPageTest(unittest.TestCase):
+    """Bulletin pages state their posted date in four forms; every one must give the original date."""
+
+    PAGE = ("---\ntitle: x\n---\n# Microsoft Security Bulletin MS05-002 - Critical\n\n"
+            "## Vulnerability in Cursor and Icon Format Handling (891711)\n\n{stamp}\n\nCVE-2004-1049 is addressed.\n")
+
+    def parsed(self, stamp):
+        return msrc_bulletins.from_page(self.PAGE.format(stamp=stamp).encode("utf-8"))
+
+    def test_published_and_updated(self):
+        item = self.parsed("Published: January 11, 2005 | Updated: December 09, 2008")
+        self.assertEqual((item["published"], item["updated"], item["severity"]), ("2005-01-11", "2008-12-09", "Critical"))
+        self.assertEqual(item["cves"], {"CVE-2004-1049"})
+
+    def test_originally_posted(self):
+        item = self.parsed("Updated: December 09, 2008\n\nOriginally posted: January 11, 2005")
+        self.assertEqual((item["published"], item["updated"]), ("2005-01-11", "2008-12-09"))
+
+    def test_issued(self):
+        item = self.parsed("Updated: December 09, 2008\n\n**Issued:** January 11, 2005**Updated:** December 9, 2008**Version:** 2.1")
+        self.assertEqual((item["published"], item["updated"]), ("2005-01-11", "2008-12-09"))
+
+    def test_first_revision_line(self):
+        item = self.parsed("Updated: November 08, 2006\n\n- V1.0 (October 10, 2006): Bulletin published.\n- V2.0 (November 8, 2006): Re-offered.")
+        self.assertEqual((item["published"], item["updated"]), ("2006-10-10", "2006-11-08"))
+
+    def test_a_page_without_a_posted_date_is_unreadable(self):
+        self.assertIsNone(self.parsed("Updated: November 08, 2006"))
+
+
+class DateFormTest(unittest.TestCase):
+    def test_publisher_date_forms(self):
+        cases = {"June 01, 1998": "1998-06-01", "1 June 1998": "1998-06-01", "May 6th, 2021": "2021-05-06",
+                 "January 23rd, 2024": "2024-01-23", "Sep 3, 2024": "2024-09-03", "Sept 6, 2024": "2024-09-06",
+                 "Oct. 29, 2024": "2024-10-29", "2nd March 2003": "2003-03-02"}
+        for value, expected in cases.items():
+            with self.subTest(value=value):
+                self.assertEqual(base.long_date(value), expected)
+
+    def test_a_month_without_a_day_or_an_unknown_month_is_not_a_date(self):
+        for value in ("August, 2018", "Foo 3, 2024", "February 30, 2024", "Ma 3, 2024"):
+            with self.subTest(value=value):
+                self.assertIsNone(base.long_date(value))
+
+
+class OracleLinkTest(unittest.TestCase):
+    def test_the_retired_content_host_is_replaced(self):
+        self.assertEqual(oracle_cpu.link("http://www-content.oracle.com/technetwork/security-advisory/cpuapr2016v3-2985753.html"),
+                         "https://www.oracle.com/technetwork/security-advisory/cpuapr2016v3-2985753.html")
+
+    def test_other_links_are_left_to_the_https_upgrade(self):
+        self.assertEqual(oracle_cpu.link(" http://www.oracle.com/security-alerts/cpujan2025.html "),
+                         "http://www.oracle.com/security-alerts/cpujan2025.html")
+
+
+class NvdFeedTest(unittest.TestCase):
+    def test_cve_years_before_2002_are_read_from_the_2002_feed(self):
+        self.assertEqual(nvd_cve.feed_years({"CVE-1999-0001", "CVE-2001-0002", "CVE-2002-0003", "CVE-2017-0144", "not-a-cve"}),
+                         [2002, 2017])
+
+    def test_feeds_are_fetched_without_an_accept_type_the_host_refuses(self):
+        fetcher = mock.Mock()
+        fetcher.get.return_value = base.Document(b"x", "2026-11-03T00:00:00Z")
+        documents = nvd_cve.fetch(fetcher, set(YEARS), {"referenced": {"CVE-1999-0001"}})
+        self.assertEqual(list(documents), ["nvdcve-2.0-2002.json.gz"])
+        self.assertEqual(fetcher.get.call_args.args[0], nvd_cve.FEED.format(year=2002))
+        self.assertNotIn("accept", fetcher.get.call_args.kwargs)
+
+
 class RowRuleTest(unittest.TestCase):
     def setUp(self):
         self.row = golden("msrc-bulletins")[0]
@@ -122,6 +191,13 @@ class RowRuleTest(unittest.TestCase):
         self.rejected(cve=["CVE-99-1"])
         self.rejected(product_raw=["b", "a"])
         self.rejected(vendor_raw=["v" + str(number) for number in range(21)])
+
+    def test_a_cve_id_dated_after_retrieval_is_a_typo_and_is_dropped(self):
+        self.rejected(cve=["CVE-2077-1748"])
+        row = base.make_row(ADAPTERS["msrc-bulletins"], native_id="MS07-029", title="DNS RPC", url=self.row["url"],
+                            published="2007-05-08", cve=["CVE-2077-1748", "CVE-2007-1748"],
+                            retrieved="2026-11-03T00:00:00Z", raw_sha256=self.row["raw_sha256"])
+        self.assertEqual(row["cve"], ["CVE-2007-1748"])
 
     def test_a_row_over_four_kilobytes_is_refused_and_make_row_trims_products_to_fit(self):
         long_names = ["Product " + str(number) + " " + "x" * 90 for number in range(40)]
@@ -339,6 +415,76 @@ class PublishTest(unittest.TestCase):
         self.assertIsNone(reason)
         self.assertTrue(index["counts"]["history_adapter_rows"])
         self.assertFalse([row for row in previous["articles"] if row["origin"].startswith("history:")])
+
+
+class FitTest(unittest.TestCase):
+    """A year's history shard never passes the shard byte bound because of adapter rows."""
+
+    @staticmethod
+    def row(ident, origin, severity=None, exploitation="unknown"):
+        value = {"id": ident, "origin": origin, "exploitation": exploitation, "title": "x" * 200, "published_at": "2020-01-01"}
+        if severity:
+            value["severity"] = severity
+        return value
+
+    def files(self):
+        rows = [self.row("publisher-1", "publisher-feed"), self.row("curated-1", "library-curation"),
+                self.row("h-msrc-cvrf-CVE-2020-0001", "history:msrc-cvrf", "Critical"),
+                self.row("h-msrc-cvrf-CVE-2020-0002", "history:msrc-cvrf", "Important"),
+                self.row("h-nvd-cve-CVE-2020-0003", "history:nvd-cve", "Critical 9.8", "known"),
+                self.row("h-nvd-cve-CVE-2020-0004", "history:nvd-cve", "Low 2.1"),
+                self.row("h-nvd-cve-CVE-2020-0005", "history:nvd-cve", "High 7.5")]
+        return {"history/2020.json": {"kind": "articles", "rows": rows}, "live/2026-10.json": {"kind": "articles", "rows": rows[:1] * 50},
+                "history/1998.json": {"kind": "articles", "rows": rows[2:3]}}
+
+    def test_a_shard_inside_its_bound_is_untouched(self):
+        files = self.files()
+        before = copy.deepcopy(files)
+        self.assertEqual(publish.fit(files, len(shards.canonical(files["history/2020.json"])), shards.canonical), [])
+        self.assertEqual(files, before)
+
+    def test_nvd_rows_go_first_lowest_severity_first_and_known_last(self):
+        files = self.files()
+        size = len(shards.canonical(files["history/2020.json"]))
+        # One byte more than the lowest-priority row frees, so exactly two rows must go.
+        lowest = next(row for row in files["history/2020.json"]["rows"] if row["id"] == "h-nvd-cve-CVE-2020-0004")
+        limit = size - len(shards.canonical(lowest)) - 1
+        held = publish.fit(files, limit, shards.canonical)
+        self.assertEqual(held, [{"path": "history/2020.json", "adapter": "nvd-cve", "rows": 2}])
+        kept = [row["id"] for row in files["history/2020.json"]["rows"]]
+        self.assertNotIn("h-nvd-cve-CVE-2020-0004", kept)
+        self.assertNotIn("h-nvd-cve-CVE-2020-0005", kept)
+        self.assertIn("h-nvd-cve-CVE-2020-0003", kept)
+        self.assertLessEqual(len(shards.canonical(files["history/2020.json"])), limit)
+
+    def test_live_publisher_and_curated_rows_are_never_held_back(self):
+        files = self.files()
+        held = publish.fit(files, 10, shards.canonical)
+        self.assertEqual({item["adapter"] for item in held}, {"msrc-cvrf", "nvd-cve"})
+        self.assertEqual([row["id"] for row in files["history/2020.json"]["rows"]], ["publisher-1", "curated-1"])
+        self.assertEqual(len(files["live/2026-10.json"]["rows"]), 50)
+
+    def test_the_collector_names_held_back_rows_in_the_published_coverage(self):
+        from test_publication import Workspace
+        workspace = Workspace()
+        real = publish.fit
+        try:
+            write_history(workspace.root, {name: golden(name) for name in ADAPTERS})
+
+            def tight(files, limit, encode):
+                return real(files, len(encode(files["history/2016.json"])) - 1, encode)
+            with mock.patch.object(publish, "HISTORY_PUBLISHED", True), mock.patch.object(publish, "fit", side_effect=tight):
+                result = workspace.build()
+            v7 = workspace.root / "site" / "data" / "v7"
+            value = json.loads((v7 / "coverage.json").read_text(encoding="utf-8"))
+            self.assertTrue(value["held_back"])
+            self.assertEqual(value["held_back"], result["v7"]["history"]["held_back"])
+            index = json.loads((v7 / "index.json").read_text(encoding="utf-8"))
+            published = sum(1 for path in v7.glob("history/*.json")
+                            for row in json.loads(path.read_text(encoding="utf-8"))["rows"] if row["origin"].startswith("history:"))
+            self.assertEqual(index["counts"]["history_adapter_rows"], published)
+        finally:
+            workspace.close()
 
 
 class TolerantPublishTest(unittest.TestCase):

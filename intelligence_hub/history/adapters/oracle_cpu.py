@@ -20,6 +20,9 @@ FIRST_YEAR = 2005
 LAST_YEAR = None
 HOME = "https://www.oracle.com/security-alerts/"
 HOSTS = ("www.oracle.com",)
+# One feed link names www-content.oracle.com, which no longer resolves; the same path on
+# www.oracle.com redirects to the advisory (checked 2026-11-03).
+RETIRED_HOSTS = {"http://www-content.oracle.com/": "https://www.oracle.com/"}
 MAX_BYTES = 4 * 1024 * 1024
 FILTER = None
 LICENCE = "Oracle; titles, dates and links only."
@@ -36,6 +39,15 @@ def rss_day(value):
     return base.day("{}-{:02d}-{:02d}".format(match.group(3), MONTH[match.group(2).lower()], int(match.group(1))))
 
 
+def link(value):
+    """The feed link, with a retired Oracle host replaced by www.oracle.com."""
+    value = (value or "").strip()
+    for old, new in RETIRED_HOSTS.items():
+        if value.startswith(old) or value.startswith("https://" + old[len("http://"):]):
+            return new + value.split("/", 3)[3]
+    return value
+
+
 def fetch(fetcher, years, context):
     return {"feed.xml": fetcher.get(FEED, MAX_BYTES, accept="application/rss+xml")}
 
@@ -45,7 +57,7 @@ def parse(documents, years, context):
     rows, upstream, missing = [], {}, {}
     for item in base.xml(document.raw).iter("item"):
         title = base.text(item.findtext("title"))
-        url = base.https(item.findtext("link"), set(HOSTS))
+        url = base.https(link(item.findtext("link")), set(HOSTS))
         published = rss_day(item.findtext("pubDate"))
         if not published or int(published[:4]) not in years:
             continue
