@@ -17,9 +17,16 @@ sorted and joined with ";", CSV uses RFC 4180 quoting, UTF-8 and LF, and nothing
 any file is a clock. A year whose rows did not change keeps byte-identical files, and
 write_exports() rewrites only the files whose bytes differ.
 
-Publication: the exports do not fit today's Pages package caps (21 MiB input, 3,000,000
-bytes compressed). Until the owner approves new caps (decision G-H01), EXPORTS_PUBLISHED
-is False and the files are written to dist/exports/ for local analysis only.
+Every file stays under the package's per-file cap for v7 files (shards.V7_FILE_MAX_BYTES,
+4 MiB). A year whose files would pass it is written as one set per month instead
+(articles-YYYY-MM.csv, articles-YYYY-MM.jsonl, tags-YYYY-MM.csv); the manifest gives every
+file its year and month. A month or an undated set that still passes the cap is an error,
+and the collector then publishes the feed without exports.
+
+Publication: EXPORTS_PUBLISHED is True since the package caps were raised (decision O2,
+closing gate G-H01), so the collector writes the files to site/data/v7/exports/ and lists
+every one in data/v7/index.json, which the Pages package is checked against. With the flag
+off, a run writes them to dist/exports/ for local analysis only.
 """
 import csv
 import hashlib
@@ -29,12 +36,13 @@ import os
 from pathlib import Path
 import re
 
+from .shards import EXPORT_NAME, V7_FILE_MAX_BYTES  # noqa: F401  (EXPORT_NAME is part of this module's interface)
 from .tagging import TAGGER_VERSION, export_fields, long_tags
 
-EXPORTS_PUBLISHED = False
+EXPORTS_PUBLISHED = True
 PUBLISHED_DIRECTORY = "site/data/v7/exports"
+PUBLIC_URL = "https://teamstarwolf.github.io/intelligence-hub/data/v7/exports/"
 LOCAL_DIRECTORY = "dist/exports"
-EXPORT_NAME = re.compile(r"(?:articles-(?:[0-9]{4}|undated)\.(?:csv|jsonl)|tags-(?:[0-9]{4}|undated)\.csv|manifest\.json|data-dictionary\.md)")
 SCHEMA_VERSION = 1
 FORMULA_START = ("=", "+", "-", "@", "\t", "\r")
 
@@ -149,7 +157,14 @@ def record(article, block, source_class):
     return out
 
 
-def year_files(year, articles, blocks):
+def month_of(article):
+    value = published(article)
+    return value[:7] if re.fullmatch(r"[0-9]{4}-(?:0[1-9]|1[0-2])", value[:7]) else None
+
+
+def year_files(year, articles, blocks, label=None):
+    """The three files for one year (label = the year) or one month of a split year (label = YYYY-MM)."""
+    label = label or year
     rows = sorted(articles, key=lambda article: (published(article), article["id"]))
     wide, long_rows, lines = [], [], []
     header = [name for name, _ in ARTICLE_COLUMNS]
@@ -168,10 +183,32 @@ def year_files(year, articles, blocks):
             long_rows.append([article["id"], date, field, value, confidence, method, path])
         lines.append(json_line(record(article, block, view["source_class"])))
     return {
-        "articles-" + year + ".csv": csv_bytes(header, wide),
-        "articles-" + year + ".jsonl": ("".join(line + "\n" for line in lines)).encode("utf-8"),
-        "tags-" + year + ".csv": csv_bytes([name for name, _ in TAG_COLUMNS], long_rows),
+        "articles-" + label + ".csv": csv_bytes(header, wide),
+        "articles-" + label + ".jsonl": ("".join(line + "\n" for line in lines)).encode("utf-8"),
+        "tags-" + label + ".csv": csv_bytes([name for name, _ in TAG_COLUMNS], long_rows),
     }, len(rows), len(long_rows)
+
+
+def period_files(year, articles, blocks, limit=None):
+    """[(month or None, files, rows, tag rows)]: the year as one set, or one set per month when a file passes the cap."""
+    limit = V7_FILE_MAX_BYTES if limit is None else limit
+    built, rows, tag_rows = year_files(year, articles, blocks)
+    if all(len(data) <= limit for data in built.values()):
+        return [(None, built, rows, tag_rows)]
+    months = {}
+    for article in articles:
+        month = month_of(article)
+        if year == "undated" or month is None:
+            raise ValueError("The " + year + " exports pass the " + format(limit, ",") + "-byte per-file cap and cannot be split by month.")
+        months.setdefault(month, []).append(article)
+    periods = []
+    for month in sorted(months):
+        built, rows, tag_rows = year_files(year, months[month], blocks, label=month)
+        for name, data in built.items():
+            if len(data) > limit:
+                raise ValueError("The export " + name + " passes the " + format(limit, ",") + "-byte per-file cap.")
+        periods.append((month, built, rows, tag_rows))
+    return periods
 
 
 def dictionary():
@@ -185,8 +222,10 @@ def dictionary():
              "Publisher rows carry headlines and links only, never article bodies. KEV text is CISA's. Curated summaries are "
              "original paraphrases. Tags come from controlled vocabularies (config/vocab/ and the library's shared vocabulary); "
              "each records how it was found (method) and how far to trust it (confidence).", "",
-             "Until the owner approves new Pages package caps, the exports are written to `dist/exports/` by a local run and "
-             "are not published on the site.", "",
+             "The files are published at `data/v7/exports/` on the site (" + PUBLIC_URL + "manifest.json lists them), and "
+             "`data/v7/index.json` lists each one with its bytes and sha256. Every file is at most 4 MiB: a year whose files "
+             "would pass that is written as one set per month instead (`articles-YYYY-MM.csv`, `articles-YYYY-MM.jsonl`, "
+             "`tags-YYYY-MM.csv`).", "",
              "## articles-YYYY.csv", "", "| Column | Meaning |", "| --- | --- |"]
     lines += ["| `" + name + "` | " + text + " |" for name, text in ARTICLE_COLUMNS]
     lines += ["", "## tags-YYYY.csv", "", "| Column | Meaning |", "| --- | --- |"]
@@ -194,7 +233,8 @@ def dictionary():
     lines += ["", "## articles-YYYY.jsonl", "", "One JSON object per line, keys sorted.", "", "| Keys | Meaning |", "| --- | --- |"]
     lines += ["| " + ", ".join("`" + key.strip() + "`" for key in names.split(",")) + " | " + text + " |" for names, text in JSONL_FIELDS]
     lines += ["", "## manifest.json", "",
-              "`files` lists every export with its year, row count, bytes and sha256. `sources` gives each source id its name, "
+              "`files` lists every export with its year, its month (`YYYY-MM` for a year split by month, otherwise null), row count, "
+              "bytes and sha256. `sources` gives each source id its name, "
               "source_class and licence note. `vocabulary` records the tagger version, the Hub vocabulary versions and the pinned "
               "library commit. `notices` carries the designations for MITRE ATT&CK, CWE and CAPEC content.", "",
               "## Notices", ""]
@@ -212,19 +252,24 @@ def source_notes(articles, registry):
     return [seen[key] for key in sorted(seen)]
 
 
-def build_exports(articles, blocks, registry, vocabulary_info, source_classes=None):
-    """{file name: bytes} for every export, the manifest and the dictionary."""
+def build_exports(articles, blocks, registry, vocabulary_info, source_classes=None, limit=None):
+    """{file name: bytes} for every export, the manifest and the dictionary.
+
+    Raises ValueError when a file cannot be kept under the per-file cap (limit, by default
+    V7_FILE_MAX_BYTES); the collector then publishes the feed without exports.
+    """
+    limit = V7_FILE_MAX_BYTES if limit is None else limit
     years = {}
     for article in articles:
         years.setdefault(year_of(article), []).append(article)
     files, entries = {}, []
     for year in sorted(years):
-        built, rows, tag_rows = year_files(year, years[year], blocks)
-        for name in sorted(built):
-            data = built[name]
-            files[name] = data
-            entries.append({"name": name, "year": year, "rows": tag_rows if name.startswith("tags-") else rows,
-                            "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()})
+        for month, built, rows, tag_rows in period_files(year, years[year], blocks, limit):
+            for name in sorted(built):
+                data = built[name]
+                files[name] = data
+                entries.append({"name": name, "year": year, "month": month, "rows": tag_rows if name.startswith("tags-") else rows,
+                                "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()})
     files["data-dictionary.md"] = dictionary()
     sources = source_notes(articles, registry)
     for item in sources:
@@ -236,6 +281,9 @@ def build_exports(articles, blocks, registry, vocabulary_info, source_classes=No
                 "sources": sources, "vocabulary": vocabulary_info, "notices": NOTICES,
                 "published": EXPORTS_PUBLISHED}
     files["manifest.json"] = (json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=1) + "\n").encode("utf-8")
+    for name in ("manifest.json", "data-dictionary.md"):
+        if len(files[name]) > V7_FILE_MAX_BYTES:
+            raise ValueError("The export " + name + " passes the " + format(V7_FILE_MAX_BYTES, ",") + "-byte per-file cap.")
     return files
 
 

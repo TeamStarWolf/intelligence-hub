@@ -827,19 +827,25 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     feed, briefs_file = split_publication(snapshot)
     feed_raw, briefs_raw = public_bytes(feed), public_bytes(briefs_file)
     bounds = check_bounds(feed_raw, briefs_raw)
-    v7 = build_v7(snapshot, previous, kev.get("catalog"), reports, intelligence_inputs, end, feed_raw, briefs_raw, tagged)
+    # Exports are built (never written) before the index, so the index can list every export file.
+    export_files, exported = build_analytics_exports(snapshot["articles"], tagged, sources)
+    v7 = build_v7(snapshot, previous, kev.get("catalog"), reports, intelligence_inputs, end, feed_raw, briefs_raw, tagged,
+                  exports_index(export_files, exported))
     # sources.json carries every run's attempt clocks, so on its own it never republishes;
-    # the v6 content revision above ignores those clocks in the same way.
-    changed = changed or v7["removed_shards"] != [] or any(path != "sources.json" for path in v7["changed_shards"])
+    # the v6 content revision above ignores those clocks in the same way. A change in the
+    # published export files (for example a new dictionary) republishes too.
+    changed = (changed or v7["removed_shards"] != [] or any(path != "sources.json" for path in v7["changed_shards"]) or
+               v7["exports_changed"])
     if refresh:
         write_json(cache_path, cache)
         write_json(cve_path, projections, compact=True)
-    # v7 first, then briefs: a reader that sees the new feed can then also read its briefs.
+    # Exports, then v7, then briefs: a reader that sees the new feed can then also read its
+    # briefs, and the v7 clean-up keeps exactly the export files the new index lists.
+    exported = write_analytics_exports(export_files, exported)
     from .shards import write_v7
-    write_v7(ROOT / "site", v7["raw"], v7["index_raw"], write_raw)
+    write_v7(ROOT / "site", v7["raw"], v7["index_raw"], write_raw, keep_also=v7["export_paths"])
     write_raw(ROOT / "site/data/briefs.json", briefs_raw)
     write_raw(ROOT / "site/data/feed.json", feed_raw)
-    exported = write_analytics_exports(snapshot["articles"], tagged, sources)
     result = {"articles": len(ordered), "source_ok": sum(item["status"] == "ok" for item in health),
         "source_partial": sum(item["status"] == "partial" for item in health), "source_total": len(health),
         "coverage": snapshot["coverage"], "mitigations": mitigation_stats, "reports": reports, "changed": changed, "generated_at": snapshot["generated_at"],
@@ -894,17 +900,49 @@ def tag_snapshot(articles, sources, catalog, briefs, root=None):
             "summary": {"status": "ok", **info, "rows_with": tagged_rows, "tags": dict(sorted(counts.items()))}}
 
 
-def write_analytics_exports(articles, tagged, sources):
-    """Per-year CSV and JSONL exports. A failure is reported and never blocks publication."""
+def build_analytics_exports(articles, tagged, sources):
+    """(files, report): the per-year CSV and JSONL exports, built in memory and not written.
+
+    files is None when tagging was unavailable or the build failed (for example a file that
+    cannot be kept under the per-file cap); the feed is then published without exports.
+    """
     from . import exports
     if not tagged.get("blocks"):
-        return {"status": "skipped", "reason": "tagging unavailable in this run"}
+        return None, {"status": "skipped", "reason": "tagging unavailable in this run"}
     try:
         classes = {key: value["source_class"] for key, value in tagged["context"].vocab.hub["source_class"].get("sources", {}).items()}
         files = exports.build_exports(articles, tagged["blocks"], sources, tagged["vocabulary"], classes)
-        directory = ROOT / (exports.PUBLISHED_DIRECTORY if exports.EXPORTS_PUBLISHED else exports.LOCAL_DIRECTORY)
+    except (ValueError, TypeError, KeyError, AttributeError) as error:
+        reason = (str(error) or type(error).__name__)[:300]
+        print("Exports: not built (" + reason + ").", file=sys.stderr)
+        return None, {"status": "failed", "reason": reason}
+    return files, {"status": "ok"}
+
+
+def exports_index(files, report):
+    """index.json's exports entry when the exports are published, else None (no entry)."""
+    from . import exports, shards
+    if not exports.EXPORTS_PUBLISHED:
+        return None
+    return shards.exports_entry(files, None if files else report.get("reason"))
+
+
+def write_analytics_exports(files, report):
+    """Write the built exports (only files whose bytes changed) and return the run report.
+
+    Published exports go to site/data/v7/exports/, which data/v7/index.json lists, so a write
+    failure there fails the run like any other public write. Unpublished exports go to
+    dist/exports/ and a failure there is only reported.
+    """
+    from . import exports
+    if files is None:
+        return report
+    directory = ROOT / (exports.PUBLISHED_DIRECTORY if exports.EXPORTS_PUBLISHED else exports.LOCAL_DIRECTORY)
+    try:
         written, removed = exports.write_exports(directory, files)
-    except (OSError, ValueError, TypeError, KeyError) as error:
+    except (OSError, ValueError) as error:
+        if exports.EXPORTS_PUBLISHED:
+            raise
         reason = (str(error) or type(error).__name__)[:300]
         print("Exports: not written (" + reason + ").", file=sys.stderr)
         return {"status": "failed", "reason": reason}
@@ -915,7 +953,7 @@ def write_analytics_exports(articles, tagged, sources):
             "files": len(files), "bytes": total, "written": len(written), "removed": len(removed)}
 
 
-def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs_raw, tagged=None):
+def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs_raw, tagged=None, exports_entry=None):
     """The schema 7 shards and index for this run, compared with the previous index. Nothing is written here."""
     from . import shards
     from .tagging.engine import compact
@@ -942,7 +980,7 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
     index = shards.build_index(entries, generated_at=snapshot["generated_at"], end=end, feed_content_revision=snapshot["content_revision"],
                                layout_revision=snapshot["layout_revision"], runs=runs, counts=counts,
                                v6_files=[shards.file_entry("data/feed.json", feed_raw), shards.file_entry("data/briefs.json", briefs_raw)],
-                               tagging=(tagged or {}).get("index"))
+                               tagging=(tagged or {}).get("index"), exports=exports_entry)
     index_raw = shards.canonical(index)
     shards.read_index(index_raw)
     total = sum(len(item) for item in raw.values()) + len(index_raw)
@@ -950,8 +988,10 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
         len(entries), total, len(changed_shards), len(removed_shards)), file=sys.stderr)
     summary = {"shards": len(entries), "bytes": total, "content_revision": index["content_revision"],
                "observed_interval_hours": index["observed_interval_hours"], "runs_recorded": len(runs)}
+    export_paths = [item["path"] for item in (exports_entry or {}).get("files", [])]
     return {"raw": raw, "index_raw": index_raw, "index": index, "changed_shards": changed_shards,
-            "removed_shards": removed_shards, "summary": summary}
+            "removed_shards": removed_shards, "summary": summary, "export_paths": export_paths,
+            "exports_changed": shards.exports_changed(previous_index, exports_entry)}
 
 
 def content_revision(snapshot):

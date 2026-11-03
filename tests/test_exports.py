@@ -86,7 +86,8 @@ class ExportTest(unittest.TestCase):
         self.assertEqual(notes["cisa-kev"]["source_class"], "government-cert")
         self.assertIn("CC0", notes["cisa-kev"]["licence"])
         self.assertIn("Headline and link only", notes["bleepingcomputer"]["licence"])
-        self.assertFalse(manifest["published"])
+        self.assertTrue(manifest["published"])
+        self.assertTrue(all(entry["month"] is None for entry in manifest["files"]), "small years stay one set of files")
         self.assertTrue(any("MITRE" in notice for notice in manifest["notices"]))
 
     def test_an_unchanged_year_stays_byte_identical(self):
@@ -132,6 +133,37 @@ class ExportTest(unittest.TestCase):
         for line in long_rows:
             self.assertIn(line[4], {"high", "medium", "low"})
 
+    def test_a_year_past_the_per_file_cap_is_split_by_month(self):
+        rows = ROWS + [article("feed-e", "November headline", "2026-11-02T00:00:00+00:00")]
+        ctx = tagging.build_context(VOCAB, REGISTRY, KEV, {})
+        blocks = tagging.tag_rows(rows, ctx)
+        whole = exports.build_exports(rows, blocks, REGISTRY, INFO, {"cisa-kev": "government-cert"})
+        limit = max(len(whole[name]) for name in whole if "2026" in name) - 1
+        self.assertGreaterEqual(limit, max(len(whole[name]) for name in whole if "2025" in name))
+        split = exports.build_exports(rows, blocks, REGISTRY, INFO, {"cisa-kev": "government-cert"}, limit=limit)
+        names = sorted(name for name in split if "2026" in name)
+        self.assertEqual(names, ["articles-2026-10.csv", "articles-2026-10.jsonl", "articles-2026-11.csv", "articles-2026-11.jsonl",
+                                 "tags-2026-10.csv", "tags-2026-11.csv"])
+        for name in ("articles-2025.csv", "articles-2025.jsonl", "tags-2025.csv", "articles-undated.csv"):
+            self.assertEqual(split[name], whole[name], name)
+        self.assertTrue(all(len(data) <= limit for name, data in split.items() if name != "data-dictionary.md" and name != "manifest.json"))
+        manifest = json.loads(split["manifest.json"])
+        months = {entry["name"]: (entry["year"], entry["month"]) for entry in manifest["files"]}
+        self.assertEqual(months["articles-2026-10.csv"], ("2026", "2026-10"))
+        self.assertEqual(months["articles-2025.csv"], ("2025", None))
+        october = parse(split["articles-2026-10.csv"])
+        self.assertEqual({line[2] for line in october[1:]}, {"2026"})
+        self.assertEqual(sum(len(parse(split[name])) - 1 for name in names if name.startswith("articles-") and name.endswith(".csv")),
+                         len(parse(whole["articles-2026.csv"])) - 1)
+        for name in split:
+            self.assertTrue(exports.EXPORT_NAME.fullmatch(name), name)
+
+    def test_a_set_that_cannot_fit_the_cap_is_an_error(self):
+        ctx = tagging.build_context(VOCAB, REGISTRY, KEV, {})
+        blocks = tagging.tag_rows(ROWS, ctx)
+        with self.assertRaisesRegex(ValueError, "per-file cap"):
+            exports.build_exports(ROWS, blocks, REGISTRY, INFO, limit=100)
+
     def test_unexpected_file_names_are_refused(self):
         with tempfile.TemporaryDirectory() as directory:
             with self.assertRaises(ValueError):
@@ -146,7 +178,8 @@ class BuildTest(unittest.TestCase):
             self.assertEqual(code, 0, output)
             self.assertEqual(result["tagging"]["status"], "ok")
             self.assertEqual(result["exports"]["status"], "ok")
-            self.assertEqual(result["exports"]["directory"], "dist/exports")
+            self.assertEqual(result["exports"]["directory"], "site/data/v7/exports")
+            self.assertTrue(result["exports"]["published"])
             self.assertIn("Tagging: ", output)
             index = json.loads((copy.root / "site/data/v7/index.json").read_text(encoding="utf-8"))
             self.assertEqual(index["tagging"]["status"], "ok")
@@ -167,11 +200,22 @@ class BuildTest(unittest.TestCase):
                     self.assertTrue(VOCAB.resolves("region", value[0]), value)
             kev = [item for item in rows if item["origin"] == "cisa-kev"]
             self.assertTrue(kev and all(item["tagging"]["exploitation"] == ["known", "kev", "high"] for item in kev))
-            manifest = json.loads((copy.root / "dist/exports/manifest.json").read_text(encoding="utf-8"))
+            base = copy.root / "site/data/v7/exports"
+            manifest = json.loads((base / "manifest.json").read_text(encoding="utf-8"))
             for entry in manifest["files"]:
-                data = (copy.root / "dist/exports" / entry["name"]).read_bytes()
+                data = (base / entry["name"]).read_bytes()
                 self.assertEqual(hashlib.sha256(data).hexdigest(), entry["sha256"])
-            self.assertFalse((copy.root / "site/data/v7/exports").exists(), "exports stay unpublished until new caps are approved")
+            self.assertFalse((copy.root / "dist/exports").exists(), "published exports are not also written to dist/")
+            # index.json lists every export file, and the Pages package check accepts the site.
+            self.assertEqual(index["exports"]["status"], "ok")
+            listed = {item["path"]: item for item in index["exports"]["files"]}
+            self.assertEqual(set(listed), {"exports/" + path.name for path in base.iterdir()})
+            for path, item in listed.items():
+                data = (copy.root / "site/data/v7" / path).read_bytes()
+                self.assertEqual((item["bytes"], item["sha256"]), (len(data), hashlib.sha256(data).hexdigest()))
+            from intelligence_hub import shards
+            report = shards.package_site(copy.root / "site", out=io.StringIO())
+            self.assertEqual(report["exports"], len(listed))
             feed = copy.feed()
             for item in feed["articles"]:
                 self.assertNotIn("tagging", item)
@@ -196,8 +240,58 @@ class BuildTest(unittest.TestCase):
                     self.assertTrue(all(item["tags"] == [] for item in feed["articles"] if item["origin"] == "publisher-feed"))
                     index = json.loads((copy.root / "site/data/v7/index.json").read_text(encoding="utf-8"))
                     self.assertEqual(index["tagging"]["status"], "unavailable")
+                    self.assertEqual((index["exports"]["status"], index["exports"]["files"]), ("unavailable", []))
+                    self.assertFalse((copy.root / "site/data/v7/exports").exists())
                 finally:
                     copy.close()
+
+
+class PublishedExportsTest(unittest.TestCase):
+    def test_exports_past_the_cap_do_not_block_the_feed(self):
+        from intelligence_hub import shards
+        copy = support.BuildCopy()
+        try:
+            # The build runs in a subprocess on the copy, so the copy's cap is lowered on disk.
+            path = copy.root / "intelligence_hub" / "shards.py"
+            source = path.read_text(encoding="utf-8")
+            self.assertIn("V7_FILE_MAX_BYTES = 4 * 1024 * 1024", source)
+            path.write_text(source.replace("V7_FILE_MAX_BYTES = 4 * 1024 * 1024", "V7_FILE_MAX_BYTES = 100"), encoding="utf-8")
+            code, result, output = copy.run()
+            self.assertEqual(code, 0, output)
+            self.assertEqual(result["tagging"]["status"], "ok")
+            self.assertEqual(result["exports"]["status"], "failed")
+            self.assertIn("per-file cap", result["exports"]["reason"])
+            index = json.loads((copy.root / "site/data/v7/index.json").read_text(encoding="utf-8"))
+            self.assertEqual(index["exports"]["status"], "unavailable")
+            self.assertIn("per-file cap", index["exports"]["reason"])
+            self.assertFalse((copy.root / "site/data/v7/exports").exists())
+            self.assertTrue(copy.feed()["articles"])
+            shards.package_site(copy.root / "site", out=io.StringIO())
+        finally:
+            copy.close()
+
+    def test_a_second_build_rewrites_no_export_file(self):
+        copy = support.BuildCopy()
+        try:
+            code, first, output = copy.run()
+            self.assertEqual(code, 0, output)
+            base = copy.root / "site/data/v7/exports"
+            stamps = {path.name: path.stat().st_mtime_ns for path in base.iterdir()}
+            code, second, output = copy.run()
+            self.assertEqual(code, 0, output)
+            self.assertEqual(second["exports"]["written"], 0)
+            self.assertEqual({path.name: path.stat().st_mtime_ns for path in base.iterdir()}, stamps)
+        finally:
+            copy.close()
+
+    def test_an_index_without_exports_republishes(self):
+        from intelligence_hub import shards
+        entry = shards.exports_entry({"manifest.json": b"{}\n", "data-dictionary.md": b"# d\n"})
+        self.assertTrue(shards.exports_changed(None, entry))
+        self.assertTrue(shards.exports_changed({"shards": []}, entry))
+        self.assertFalse(shards.exports_changed({"exports": entry}, entry))
+        self.assertFalse(shards.exports_changed({"shards": []}, None))
+        self.assertTrue(shards.exports_changed({"exports": entry}, shards.exports_entry(None, "tagging unavailable")))
 
 
 class ResumeTest(unittest.TestCase):

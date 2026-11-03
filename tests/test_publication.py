@@ -220,7 +220,11 @@ class BoundTest(unittest.TestCase):
         # The package check, with its allowlist and caps, lives in intelligence_hub/shards.py.
         self.assertIn("run: python3 -m intelligence_hub.shards package site", workflow)
         from intelligence_hub import shards
-        self.assertEqual((shards.PACKAGE_MAX_INPUT, shards.PACKAGE_MAX_COMPRESSED), (21 * 1024 * 1024, 3000000))
+        # The caps approved in decision O2 (gate G-H01).
+        self.assertEqual((shards.PACKAGE_MAX_INPUT, shards.PACKAGE_MAX_COMPRESSED, shards.PACKAGE_MAX_FILES, shards.V7_FILE_MAX_BYTES),
+                         (192 * 1024 * 1024, 48000000, 4000, 4 * 1024 * 1024))
+        for text in ("4,000", "4 MiB per v7 shard or export file", "192 MiB input", "48,000,000-byte"):
+            self.assertIn(text, workflow)
         self.assertLess(collect.FEED_MAX_BYTES + collect.BRIEFS_MAX_BYTES + 512 * 1024, shards.PACKAGE_MAX_INPUT)
 
 

@@ -73,11 +73,11 @@ Where two entities of one type share a matched name, neither is tagged. Where on
 
 - **v7 shards**: every article row in `site/data/v7/live/` and `history/` carries a `tagging` block in the compact form that `index.json` describes under `tagging.layout`. `index.json` also records the tagger version, the Hub vocabulary versions and the pinned library commit.
 - **v6 feed**: `data/feed.json` keeps its record shape. Its `tags` now hold vocabulary labels (for example "Microsoft", "Citrix NetScaler", "Volt Typhoon") after the row's own tags, so the page shows and searches them. KEV vendor and product strings and curated topic words are folded so that spellings that differ only in case appear once: a vocabulary label wins, then the KEV catalog's most frequent spelling. Products fold within their vendor, so Cisco IOS and Apple iOS stay apart.
-- **Exports**: per-year CSV and JSON Lines files with a data dictionary, described in [DATA-DICTIONARY.md](DATA-DICTIONARY.md). They do not fit today's Pages package caps, so until the owner approves new caps a run writes them to `dist/exports/` for local analysis only.
+- **Exports**: per-year CSV and JSON Lines files with a data dictionary, described in [DATA-DICTIONARY.md](DATA-DICTIONARY.md), published at `data/v7/exports/` ([manifest](https://teamstarwolf.github.io/intelligence-hub/data/v7/exports/manifest.json)). `data/v7/index.json` lists every export file with its bytes and sha256, and the Pages package is checked against that list. A year whose files would pass the 4 MiB per-file cap is written as one set per month.
 
 ## When a vocabulary is broken
 
-A missing, changed or malformed vocabulary never blocks publication. The collector reports the reason, rows keep their raw tags (publisher rows have none), the v7 rows carry no tagging block, `index.json` records `tagging.status` as `unavailable`, and no exports are written in that run.
+A missing, changed or malformed vocabulary never blocks publication. The collector reports the reason, rows keep their raw tags (publisher rows have none), the v7 rows carry no tagging block, `index.json` records `tagging.status` as `unavailable`, and that run publishes no exports (`exports.status` is `unavailable` with the reason). The same holds when an export cannot be kept under the per-file cap.
 
 ## Tests
 

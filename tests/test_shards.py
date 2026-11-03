@@ -21,8 +21,10 @@ NODE = shutil.which("node")
 
 
 def v7_files(workspace):
+    """Every v7 shard and index.json on disk; the analytics exports under exports/ are left out."""
     base = workspace.root / "site" / "data" / "v7"
-    return {path.relative_to(base).as_posix(): path.read_bytes() for path in sorted(base.rglob("*")) if path.is_file()}
+    return {path.relative_to(base).as_posix(): path.read_bytes() for path in sorted(base.rglob("*"))
+            if path.is_file() and not path.relative_to(base).as_posix().startswith("exports/")}
 
 
 def index_of(workspace):
@@ -385,8 +387,70 @@ class PackageTest(unittest.TestCase):
 
     def test_the_built_site_matches_its_manifest(self):
         report = self.package()
-        self.assertEqual(report["files"], len(index_of(self.workspace)["shards"]) + 7)
+        index = index_of(self.workspace)
+        self.assertTrue(index["exports"]["files"])
+        self.assertEqual(report["files"], len(index["shards"]) + len(index["exports"]["files"]) + 7)
+        self.assertEqual(report["exports"], len(index["exports"]["files"]))
         self.assertLess(report["compressed_estimate"], report["input_bytes"])
+
+    def test_the_report_prints_every_cap_with_its_headroom(self):
+        out = io.StringIO()
+        report = shards.package_site(self.site, out=out)
+        text = out.getvalue()
+        self.assertEqual((report["files_cap"], report["v7_file_cap"], report["input_cap"], report["compressed_cap"]),
+                         (4000, 4 * 1024 * 1024, 192 * 1024 * 1024, 48000000))
+        for key in ("files_headroom", "v7_file_headroom", "input_headroom", "compressed_headroom"):
+            self.assertIn(format(report[key], ",") + " of headroom", text, key)
+
+    def test_an_unlisted_export_is_refused(self):
+        (self.site / "data" / "v7" / "exports" / "articles-2099.csv").write_bytes(b"id\n")
+        with self.assertRaisesRegex(shards.PackageError, "not listed in the manifest"):
+            self.package()
+
+    def test_an_export_outside_the_patterns_is_refused(self):
+        (self.site / "data" / "v7" / "exports" / "notes.txt").write_bytes(b"private\n")
+        with self.assertRaisesRegex(shards.PackageError, "outside the allowlisted patterns"):
+            self.package()
+
+    def test_a_changed_export_is_refused(self):
+        path = self.site / "data" / "v7" / "exports" / "data-dictionary.md"
+        path.write_bytes(path.read_bytes() + b"x")
+        with self.assertRaisesRegex(shards.PackageError, "Byte count differs"):
+            self.package()
+
+    def test_a_missing_export_is_refused(self):
+        (self.site / "data" / "v7" / "exports" / "manifest.json").unlink()
+        with self.assertRaisesRegex(shards.PackageError, "missing"):
+            self.package()
+
+    def test_the_per_file_cap_binds_v7_files_but_not_the_v6_files(self):
+        # Without exports the largest v7 file is a shard, and the feed (every row) is larger.
+        path = self.site / "data" / "v7" / "index.json"
+        index = json.loads(path.read_text(encoding="utf-8"))
+        index["exports"] = shards.exports_entry(None, "left out by this test")
+        path.write_bytes(shards.canonical(index))
+        shutil.rmtree(self.site / "data" / "v7" / "exports")
+        report = self.package()
+        largest = report["largest_v7_file"]
+        feed = (self.site / "data" / "feed.json").stat().st_size
+        self.assertGreater(feed, largest, "the synthetic feed is larger than every v7 file")
+        self.assertEqual(self.package(max_v7_file=largest)["v7_file_headroom"], 0)
+        with self.assertRaisesRegex(shards.PackageError, "per-file cap"):
+            self.package(max_v7_file=largest - 1)
+
+    def test_the_file_count_cap_binds(self):
+        files = self.package()["files"]
+        self.assertEqual(self.package(max_files=files)["files_headroom"], 0)
+        with self.assertRaisesRegex(shards.PackageError, "file cap"):
+            self.package(max_files=files - 1)
+
+    def test_a_bad_exports_entry_is_refused(self):
+        path = self.site / "data" / "v7" / "index.json"
+        index = json.loads(path.read_text(encoding="utf-8"))
+        index["exports"]["files"][0]["path"] = "exports/../../index.html"
+        path.write_bytes(shards.canonical(index))
+        with self.assertRaisesRegex(shards.PackageError, "manifest is invalid"):
+            self.package()
 
     def test_an_extra_file_is_refused(self):
         (self.site / "data" / "v7" / "live" / "2099-01.json").write_bytes(b"{}\n")

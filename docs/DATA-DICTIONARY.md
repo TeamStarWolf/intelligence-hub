@@ -6,7 +6,7 @@ Every file is UTF-8 with LF line endings. CSV files follow RFC 4180 quoting and 
 
 Publisher rows carry headlines and links only, never article bodies. KEV text is CISA's. Curated summaries are original paraphrases. Tags come from controlled vocabularies (config/vocab/ and the library's shared vocabulary); each records how it was found (method) and how far to trust it (confidence).
 
-Until the owner approves new Pages package caps, the exports are written to `dist/exports/` by a local run and are not published on the site.
+The files are published at `data/v7/exports/` on the site (https://teamstarwolf.github.io/intelligence-hub/data/v7/exports/manifest.json lists them), and `data/v7/index.json` lists each one with its bytes and sha256. Every file is at most 4 MiB: a year whose files would pass that is written as one set per month instead (`articles-YYYY-MM.csv`, `articles-YYYY-MM.jsonl`, `tags-YYYY-MM.csv`).
 
 ## articles-YYYY.csv
 
@@ -74,7 +74,7 @@ One JSON object per line, keys sorted.
 
 ## manifest.json
 
-`files` lists every export with its year, row count, bytes and sha256. `sources` gives each source id its name, source_class and licence note. `vocabulary` records the tagger version, the Hub vocabulary versions and the pinned library commit. `notices` carries the designations for MITRE ATT&CK, CWE and CAPEC content.
+`files` lists every export with its year, its month (`YYYY-MM` for a year split by month, otherwise null), row count, bytes and sha256. `sources` gives each source id its name, source_class and licence note. `vocabulary` records the tagger version, the Hub vocabulary versions and the pinned library commit. `notices` carries the designations for MITRE ATT&CK, CWE and CAPEC content.
 
 ## Notices
 
