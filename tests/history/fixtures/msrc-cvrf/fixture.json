@@ -1,0 +1,20 @@
+{
+ "adapter": "msrc-cvrf",
+ "documents": {
+  "cvrf/1999-Sep.json": "cvrf/1999-Sep.json",
+  "cvrf/2016-Apr.json": "cvrf/2016-Apr.json",
+  "cvrf/2024-Jul.json": "cvrf/2024-Jul.json",
+  "updates.json": "updates.json"
+ },
+ "fetched_at": "2026-11-03T00:00:00Z",
+ "stats": {
+  "capped": {},
+  "upstream": {
+   "2016": 4
+  }
+ },
+ "years": [
+  2016,
+  2026
+ ]
+}

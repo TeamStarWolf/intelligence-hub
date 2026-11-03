@@ -1,0 +1,32 @@
+{
+ "value": [
+  {
+   "Alias": "1999-Sep",
+   "CvrfUrl": "https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/1999-Sep",
+   "DocumentTitle": "Mariner Release Notes",
+   "ID": "1999-Sep",
+   "InitialReleaseDate": "1999-09-02T00:00:00Z"
+  },
+  {
+   "Alias": "2016-Mar",
+   "CvrfUrl": "https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/2016-Mar",
+   "DocumentTitle": "March 2016 Security Updates",
+   "ID": "2016-Mar",
+   "InitialReleaseDate": "2016-03-08T08:00:00Z"
+  },
+  {
+   "Alias": "2016-Apr",
+   "CvrfUrl": "https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/2016-Apr",
+   "DocumentTitle": "April 2016 Security Updates",
+   "ID": "2016-Apr",
+   "InitialReleaseDate": "2016-04-12T07:00:00Z"
+  },
+  {
+   "Alias": "2024-Jul",
+   "CvrfUrl": "https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/2024-Jul",
+   "DocumentTitle": "Mariner Release Notes",
+   "ID": "2024-Jul",
+   "InitialReleaseDate": "2024-07-09T07:00:00Z"
+  }
+ ]
+}

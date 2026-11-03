@@ -1,0 +1,12 @@
+{
+ "certadvisory": "CA-1997-21",
+ "cveids": [
+  "CVE-1999-0025"
+ ],
+ "datefirstpublished": "2000-12-15T20:00:29Z",
+ "dateupdated": "2000-12-15T20:00:31Z",
+ "idnumber": "20851",
+ "name": "SGI IRIX df buffer overflow in directory argument",
+ "publicdate": "1997-05-24T00:00:00Z",
+ "vuid": "VU#20851"
+}

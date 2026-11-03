@@ -1,0 +1,42 @@
+{
+ "items": [
+  {
+   "children": [
+    {
+     "children": [
+      {
+       "href": "securitybulletins/2016/ms16-001",
+       "toc_title": "MS16-001"
+      }
+     ],
+     "href": "securitybulletins/2016/securitybulletins2016",
+     "toc_title": "2016"
+    },
+    {
+     "href": "securitybulletinsummaries/2016/ms16-jan",
+     "toc_title": "MS16-jan"
+    },
+    {
+     "children": [
+      {
+       "href": "securitybulletins/1998/ms98-002",
+       "toc_title": "MS98-002"
+      },
+      {
+       "href": "securitybulletins/1998/ms98-001",
+       "toc_title": "MS98-001"
+      },
+      {
+       "href": "securitybulletins/1998/ms98-003",
+       "toc_title": "MS98-003"
+      }
+     ],
+     "href": "securitybulletins/1998/securitybulletins1998",
+     "toc_title": "1998"
+    }
+   ],
+   "href": "./",
+   "toc_title": "Security Updates"
+  }
+ ]
+}

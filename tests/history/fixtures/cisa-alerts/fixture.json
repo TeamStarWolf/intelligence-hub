@@ -1,0 +1,20 @@
+{
+ "adapter": "cisa-alerts",
+ "documents": {
+  "page/AA18-337A.html": "page/AA18-337A.html",
+  "page/alert-20081217-microsoft-internet-explorer-data-binding-8927b28a.html": "page/alert-20081217-microsoft-internet-explorer-data-binding-8927b28a.html",
+  "sitemap.xml": "sitemap.xml"
+ },
+ "fetched_at": "2026-11-03T00:00:00Z",
+ "stats": {
+  "missing": {},
+  "upstream": {
+   "2008": 1,
+   "2018": 1
+  }
+ },
+ "years": [
+  2004,
+  2026
+ ]
+}

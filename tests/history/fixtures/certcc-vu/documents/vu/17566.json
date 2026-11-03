@@ -1,0 +1,12 @@
+{
+ "certadvisory": "CA-2000-02",
+ "cveids": [
+  "CVE-2000-0884"
+ ],
+ "datefirstpublished": "2000-12-18T15:00:00Z",
+ "dateupdated": "2001-01-05T00:00:00Z",
+ "idnumber": "17566",
+ "name": "Microsoft IIS 4.0 / 5.0 vulnerable to directory traversal",
+ "publicdate": "2000-10-17T00:00:00Z",
+ "vuid": "VU#17566"
+}

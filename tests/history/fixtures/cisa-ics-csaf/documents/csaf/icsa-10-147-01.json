@@ -1,0 +1,28 @@
+{
+ "document": {
+  "title": "Example ICS Advisory One",
+  "tracking": {
+   "current_release_date": "2010-05-27T00:00:00.000000Z",
+   "initial_release_date": "2010-05-27T00:00:00.000000Z"
+  }
+ },
+ "product_tree": {
+  "branches": [
+   {
+    "branches": [
+     {
+      "category": "product_name",
+      "name": "Example HMI"
+     }
+    ],
+    "category": "vendor",
+    "name": "Example Vendor"
+   }
+  ]
+ },
+ "vulnerabilities": [
+  {
+   "cve": "CVE-2010-2772"
+  }
+ ]
+}

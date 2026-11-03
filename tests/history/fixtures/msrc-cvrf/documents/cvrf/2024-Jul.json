@@ -1,0 +1,74 @@
+{
+ "DocumentTitle": {
+  "Value": "Mariner Release Notes"
+ },
+ "DocumentTracking": {
+  "InitialReleaseDate": "2024-07-09T07:00:00Z"
+ },
+ "ProductTree": {
+  "Branch": [
+   {
+    "Items": [
+     {
+      "Items": [
+       {
+        "ProductID": "10735",
+        "Value": "Windows 10 for x64-based Systems"
+       }
+      ],
+      "Name": "Windows",
+      "Type": 3
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "10670",
+        "Value": "Microsoft Office 2016"
+       }
+      ],
+      "Name": "Microsoft Office",
+      "Type": 3
+     }
+    ],
+    "Name": "Microsoft",
+    "Type": 0
+   }
+  ]
+ },
+ "Vulnerability": [
+  {
+   "CVE": "CVE-2024-0001",
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "10735"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "10735"
+     ],
+     "Type": 3
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Detected"
+     },
+     "ProductID": [
+      "10735"
+     ],
+     "Type": 1
+    }
+   ],
+   "Title": {
+    "Value": "Mariner package update"
+   }
+  }
+ ]
+}

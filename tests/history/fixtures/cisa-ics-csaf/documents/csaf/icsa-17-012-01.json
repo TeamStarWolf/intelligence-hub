@@ -1,0 +1,46 @@
+{
+ "document": {
+  "aggregate_severity": {
+   "text": "High"
+  },
+  "references": [
+   {
+    "category": "self",
+    "url": "https://www.cisa.gov/news-events/ics-advisories/icsa-17-012-01"
+   }
+  ],
+  "title": "Advantech WebAccess",
+  "tracking": {
+   "current_release_date": "2017-02-01T00:00:00.000000Z",
+   "initial_release_date": "2017-01-12T00:00:00.000000Z"
+  }
+ },
+ "product_tree": {
+  "branches": [
+   {
+    "branches": [
+     {
+      "branches": [
+       {
+        "category": "product_version",
+        "name": "8.1"
+       }
+      ],
+      "category": "product_name",
+      "name": "WebAccess"
+     }
+    ],
+    "category": "vendor",
+    "name": "Advantech"
+   }
+  ]
+ },
+ "vulnerabilities": [
+  {
+   "cve": "CVE-2017-5154"
+  },
+  {
+   "cve": "CVE-2017-5152"
+  }
+ ]
+}

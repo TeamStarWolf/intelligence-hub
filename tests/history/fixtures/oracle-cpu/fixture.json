@@ -1,0 +1,20 @@
+{
+ "adapter": "oracle-cpu",
+ "documents": {
+  "feed.xml": "feed.xml"
+ },
+ "fetched_at": "2026-11-03T00:00:00Z",
+ "stats": {
+  "missing": {
+   "2005": 1
+  },
+  "upstream": {
+   "2005": 2,
+   "2026": 1
+  }
+ },
+ "years": [
+  2005,
+  2026
+ ]
+}
