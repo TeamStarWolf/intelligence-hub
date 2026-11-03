@@ -1,6 +1,7 @@
 """Schema 7 shards beside feed.json: canonical bytes, the KEV ledger, the run chain,
 resuming from data/v7/index.json and the manifest-checked Pages package."""
 import contextlib
+import copy
 from datetime import date
 import io
 import json
@@ -67,6 +68,18 @@ class LayoutTest(unittest.TestCase):
     def test_canonical_bytes_do_not_depend_on_key_order(self):
         self.assertEqual(shards.canonical({"b": 1, "a": [2, {"d": 3, "c": "é"}]}), shards.canonical({"a": [2, {"c": "é", "d": 3}], "b": 1}))
         self.assertEqual(shards.canonical({"a": 1}), b'{"a":1}\n')
+
+    def test_shard_bound_is_the_smaller_of_the_feed_bound_and_the_v7_file_cap(self):
+        self.assertEqual(shards.SHARD_MAX_BYTES, min(collect.FEED_MAX_BYTES, shards.V7_FILE_MAX_BYTES))
+        self.assertLessEqual(shards.SHARD_MAX_BYTES, shards.V7_FILE_MAX_BYTES)
+
+    def test_a_shard_between_the_v7_file_cap_and_the_feed_bound_is_refused_at_build_time(self):
+        size = (shards.V7_FILE_MAX_BYTES + collect.FEED_MAX_BYTES) // 2
+        self.assertLess(shards.V7_FILE_MAX_BYTES, size)
+        self.assertLess(size, collect.FEED_MAX_BYTES)
+        shard = {"kind": "articles", "rows": [{"id": "feed-oversized", "title": "x" * size}]}
+        with self.assertRaisesRegex(ValueError, "shard bound"):
+            shards.serialize({"live/2026-10.json": shard})
 
 
 class KevLedgerTest(unittest.TestCase):
@@ -317,6 +330,14 @@ class ResumeV7Test(unittest.TestCase):
             self.assertLessEqual(len(value), maximum)
             return value
         return mock.patch.object(collect, "fetch", side_effect=fetch)
+
+    def test_an_index_entry_between_the_v7_file_cap_and_the_feed_bound_is_invalid(self):
+        index = json.loads(self.files[collect.PUBLIC_V7 + "index.json"])
+        shards.validate_index(copy.deepcopy(index))
+        index["shards"][0]["bytes"] = shards.V7_FILE_MAX_BYTES + 1
+        self.assertLess(index["shards"][0]["bytes"], collect.FEED_MAX_BYTES)
+        with self.assertRaisesRegex(ValueError, "Invalid v7 shard entry"):
+            shards.validate_index(index)
 
     def test_resume_reads_the_index_and_shards_not_the_feed(self):
         with self.serve(dict(self.files)) as fetch, contextlib.redirect_stderr(io.StringIO()):

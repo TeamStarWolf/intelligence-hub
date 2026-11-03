@@ -65,7 +65,7 @@ Where two entities of one type share a matched name, neither is tagged. Where on
 - `region`: each tag has a `role`. `publisher` comes from the source's country (high). `mentioned` comes from a country name or demonym in the headline (medium); a mention does not say whether the place is a target, an origin or neither. `target` and `vendor-hq` are reserved for structured fields from the history adapters.
 - `sector`: headline terms from `sector.json` (medium) and the library's multi-word sector names.
 - `cwe`: CNA `problemTypes` and KEV `cwes`, resolved against the pinned CWE list. Never from headline text.
-- `attack`: techniques reached from the row's CWEs through CAPEC (`cwe-capec`, low), moved forward through `superseded_by` to the current ATT&CK release, with tactics from the library's technique profiles. This tag is sparse and taxonomic: many common CWEs reach no technique, and a technique reached this way is not observed adversary behaviour.
+- `attack`: techniques reached from the row's CWEs through CAPEC (`cwe-capec`, low), moved forward through `superseded_by` to the current ATT&CK release, with tactics from the library's technique profiles. Every technique reached is kept, with no cap, so a broad CWE such as CWE-200 can give a row fifty or more. This tag is sparse and taxonomic: many common CWEs reach no technique, and a technique reached this way is not observed adversary behaviour.
 - `cvss`: the highest CNA base score among the row's CVEs, with its own version and vector. Versions are never merged.
 - `kev`: the earliest KEV addition among the row's CVEs, its due date and ransomware field, and whether it was in KEV on the row's publication day.
 

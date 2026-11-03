@@ -251,11 +251,14 @@ class PublishedExportsTest(unittest.TestCase):
         from intelligence_hub import shards
         copy = support.BuildCopy()
         try:
-            # The build runs in a subprocess on the copy, so the copy's cap is lowered on disk.
-            path = copy.root / "intelligence_hub" / "shards.py"
+            # The build runs in a subprocess on the copy, so the copy's export cap is lowered on disk.
+            # Only exports.py sees the lowered cap; the shards keep their own bound
+            # (shards.SHARD_MAX_BYTES, which is never above the real per-file cap).
+            path = copy.root / "intelligence_hub" / "exports.py"
             source = path.read_text(encoding="utf-8")
-            self.assertIn("V7_FILE_MAX_BYTES = 4 * 1024 * 1024", source)
-            path.write_text(source.replace("V7_FILE_MAX_BYTES = 4 * 1024 * 1024", "V7_FILE_MAX_BYTES = 100"), encoding="utf-8")
+            line = "from .shards import EXPORT_NAME, V7_FILE_MAX_BYTES  # noqa: F401  (EXPORT_NAME is part of this module's interface)"
+            self.assertIn(line, source)
+            path.write_text(source.replace(line, line + "\nV7_FILE_MAX_BYTES = 100"), encoding="utf-8")
             code, result, output = copy.run()
             self.assertEqual(code, 0, output)
             self.assertEqual(result["tagging"]["status"], "ok")

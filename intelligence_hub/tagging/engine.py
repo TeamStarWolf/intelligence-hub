@@ -7,7 +7,6 @@ from .match import PhraseIndex, term_pattern, tokens, words
 TAGGER_VERSION = "2026.11.1"
 ENTITY_FIELDS = ("vendor", "product", "actor", "malware")
 MULTI_FIELDS = ("event_type", "vendor", "product", "actor", "malware", "sector", "region", "cwe", "attack")
-MAX_ATTACK_TAGS = 40
 V6_TAG_LIMIT = 30
 
 
@@ -182,7 +181,7 @@ def tag_row(row, context):
         "sector": fields.tag_sector(row, context),
         "region": fields.tag_region(row, context),
         "cwe": cwe,
-        "attack": fields.tag_attack(row, context, cwe)[:MAX_ATTACK_TAGS],
+        "attack": fields.tag_attack(row, context, cwe),
         "cvss": fields.tag_cvss(row, context),
         "kev": fields.tag_kev(row, context),
     }
@@ -194,7 +193,7 @@ SHARD_LAYOUT = {
     "exploitation": "[value, method, confidence]",
     "event_type, vendor, product, actor, malware, sector, cwe": "[[value, method, confidence], ...]",
     "region": "[[value, role, method, confidence], ...]",
-    "attack": "[technique, ...]: every one reached from the row's CWE tags through CAPEC (method cwe-capec, confidence low); "
+    "attack": "[technique, ...]: every one reached from the row's CWE tags through CAPEC, with no cap (method cwe-capec, confidence low); "
               "the exports carry each tactic and path",
     "cvss": "{base, version, vector, scorer, cve}",
     "kev": "{cves, added, due, ransomware, at_publication}",

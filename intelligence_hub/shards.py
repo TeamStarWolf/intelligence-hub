@@ -36,9 +36,6 @@ DIRECTORY = "data/v7"
 LIVE_MONTHS = 24
 RUNS_KEPT = 20
 REQUESTED_CRON = "7 */2 * * *"
-# Bounds already in force elsewhere: a shard never exceeds the feed's own byte bound,
-# and a resume never reads more index than that either.
-SHARD_MAX_BYTES = FEED_MAX_BYTES
 INDEX_MAX_BYTES = 1024 * 1024
 MAX_SHARDS = 1000
 # Pages package caps (publish.yml runs package_site). These are the caps raised in
@@ -51,6 +48,10 @@ PACKAGE_MAX_INPUT = 192 * 1024 * 1024
 PACKAGE_MAX_COMPRESSED = 48000000
 PACKAGE_MAX_FILES = 4000
 V7_FILE_MAX_BYTES = 4 * 1024 * 1024
+# A shard never exceeds the feed's own byte bound or the package's per-file cap for v7
+# files, whichever is smaller, so the collector refuses an oversized shard with its own
+# shard-bound message before the package step would reject it.
+SHARD_MAX_BYTES = min(FEED_MAX_BYTES, V7_FILE_MAX_BYTES)
 # CVE brief buckets would copy every brief that data/briefs.json already carries
 # (about 9 MB). They are built and tested here but stay unpublished until a later
 # package retires the v6 briefs file; cve-index.json says where each brief is read from.

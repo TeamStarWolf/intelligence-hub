@@ -35,7 +35,7 @@ The files are published at `data/v7/exports/` on the site (https://teamstarwolf.
 | `event_type` | disclosure, exploitation, patch, breach, outage, takedown, policy, analysis or unclassified (config/vocab/event_type.json). |
 | `vendor` | Library vendor ids (vendor:<slug>). |
 | `product` | Library product ids (product:<slug>). |
-| `attack_technique` | MITRE ATT&CK technique ids reached from the row's CWEs through CAPEC. Taxonomic and sparse, never observed behaviour. |
+| `attack_technique` | MITRE ATT&CK technique ids reached from the row's CWEs through CAPEC, every one with no cap. Taxonomic and sparse, never observed behaviour. |
 | `attack_tactic` | ATT&CK tactics of those techniques. |
 | `actor` | Library actor ids: actor:G#### for ATT&CK groups, actor:<slug> for names ATT&CK does not track. |
 | `malware` | Library software ids: malware:S#### (ATT&CK malware and tools). |

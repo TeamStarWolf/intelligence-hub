@@ -7,7 +7,7 @@ import unittest
 
 import support
 from intelligence_hub import tagging, vocab
-from intelligence_hub.tagging.engine import compact, tag_row
+from intelligence_hub.tagging.engine import compact, export_fields, long_tags, tag_row
 
 VOCAB = vocab.load()
 REGISTRY = support.sources()
@@ -349,6 +349,26 @@ class CompactTest(unittest.TestCase):
         self.assertEqual(len(small["exploitation"]), 3)
         self.assertTrue(all(len(item) == 4 for item in small["region"]))
         self.assertTrue(all(isinstance(item, str) and re.fullmatch(r"T[0-9]{4}(?:\.[0-9]{3})?", item) for item in small.get("attack", [])))
+
+
+class AttackCompletenessTest(unittest.TestCase):
+    """A CWE set that reaches more than 40 techniques keeps every one, in the block, the shard form and the exports."""
+
+    def test_a_broad_cwe_set_keeps_every_technique(self):
+        cwes = ["CWE-200", "CWE-284"]
+        briefs = {"CVE-2026-90006": {"products": [], "weaknesses": [{"id": cwe} for cwe in cwes]}}
+        ctx = context(briefs=briefs)
+        expected = sorted({technique for cwe in cwes for _capec, technique, _path in ctx.cwe_chain(cwe)})
+        self.assertGreater(len(expected), 40, "the pinned CWE and CAPEC lists no longer give this set more than 40 techniques")
+        block = tag_row(row("An information disclosure flaw", cves=["CVE-2026-90006"]), ctx)
+        self.assertEqual(sorted(values(block, "cwe")), cwes)
+        self.assertEqual(sorted(values(block, "attack")), expected)
+        self.assertEqual(sorted(compact(block)["attack"]), expected)
+        flat = export_fields(row("An information disclosure flaw", cves=["CVE-2026-90006"]), block)
+        self.assertEqual(flat["attack_technique"].split(";"), expected)
+        tactics = sorted({tactic for technique in expected for tactic in VOCAB.tactics[technique]["tactics"]})
+        self.assertEqual(flat["attack_tactic"].split(";"), tactics)
+        self.assertEqual(sorted({value for field, value, *_rest in long_tags(block) if field == "attack_technique"}), expected)
 
 
 if __name__ == "__main__":
