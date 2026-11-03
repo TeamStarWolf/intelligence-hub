@@ -1,11 +1,13 @@
 // The page shell run on site/index.html in a small DOM with a synthetic schema 7 site:
 // Explorer-first DOM order, the collapsed sidebar, URL state, the poll (no read while hidden,
-// no parse on a 304) and the deploy-skew guard (reload once per session).
+// no parse on a 304), the deploy-skew guard (reload once per session) and its toast, Today's
+// bounded recent.json, the brief file checks and the cadence statement.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { webcrypto } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { inOrder } from "./dom.js";
-import { CONTENT_DATE, files, page, server, settle, storage } from "./fixtures.js";
+import { CONTENT_DATE, ROOT, files, page, server, settle, storage } from "./fixtures.js";
 import { createApp } from "../../site/js/main.js";
 import { RELOAD_KEY } from "../../site/js/guard.js";
 import { cveRegister } from "../../site/js/filters.js";
@@ -281,4 +283,126 @@ test("closing a dialog the page opened goes Back to the view underneath", async 
   await settle(80);
   assert.equal(location.hash, "#/explore?kind=advisory");
   assert.equal(doc.querySelector("#record-dialog").open, false);
+});
+
+test("Today's first load reads index.json and recent.json only", async () => {
+  const { http, doc } = await boot({ hash: "#/today" });
+  assert.deepEqual([...new Set(http.requests.map(request => request.path))].sort(), ["./data/v7/index.json", "./data/v7/recent.json"],
+    "no live month, KEV year or CVE index is read for Today");
+  const text = doc.querySelector("#view").textContent;
+  assert.ok(text.includes("1 KEV entry reaches CISA's federal due date by 17 Nov 2026."), text.slice(0, 400));
+  assert.ok(text.includes("Headline a-research") && text.includes("Headline a-press") && text.includes("KEV-linked"));
+  assert.ok(!text.includes("October advisory"), "rows before the three days stay out");
+});
+
+test("the sidebar's Today panel reads recent.json too", async () => {
+  const { doc, http } = await boot();
+  doc.querySelector("#sidebar-toggle").dispatchEvent({ type: "click" });
+  await settle(60);
+  const paths = http.requests.map(request => request.path);
+  assert.ok(paths.includes("./data/v7/recent.json"));
+  assert.ok(!paths.includes("./data/v7/kev/2026.json"), "the sidebar reads no KEV year");
+  assert.ok(doc.querySelector("#sidebar-body").textContent.includes("CVE-2026-1000"));
+});
+
+test("without a usable recent.json Today falls back to the live months and the KEV ledger", async () => {
+  const recent = JSON.parse(files().bodies["./data/v7/recent.json"]);
+  for (const site of [files({ omit: ["recent.json"] }), files({ extra: { "recent.json": { ...recent, content_date: "2026-11-02" } } })]) {
+    const { http, doc } = await boot({ hash: "#/today", site });
+    const paths = http.requests.map(request => request.path);
+    assert.ok(paths.includes("./data/v7/live/2026-11.json") && paths.includes("./data/v7/kev/2026.json") && paths.includes("./data/v7/cve-index.json"), paths.join(" "));
+    const text = doc.querySelector("#view").textContent;
+    assert.ok(text.includes("1 KEV entry reaches CISA's federal due date by 17 Nov 2026."), text.slice(0, 400));
+    assert.ok(text.includes("Headline a-research"));
+  }
+});
+
+test("a briefs file from another run is refused, nothing from it is shown, and the index is read again", async () => {
+  const site = files();
+  const briefs = JSON.parse(site.bodies["./data/briefs.json"]);
+  briefs.content_revision = "0".repeat(64);
+  site.bodies["./data/briefs.json"] = JSON.stringify(briefs) + "\n";
+  const { doc, http, app, location } = await boot({ hash: "#/cve/CVE-2026-1000", site });
+  await settle(60);
+  const text = doc.querySelector("#cve-body").textContent;
+  assert.ok(text.includes("different snapshot"), text);
+  assert.ok(text.includes("No external lookup was made."));
+  assert.ok(!text.includes("CNA title for CVE-2026-1000"), "nothing from the refused file is rendered");
+  assert.equal(app.stats.polls, 1, "the refusal asks for the index again");
+  assert.equal(http.requests.filter(request => request.path === "./data/v7/index.json").length, 2);
+  assert.ok(http.requests[http.requests.length - 1].ifNoneMatch, "the re-read is the conditional index poll");
+  assert.equal(location.reloads, 0, "a refused brief file does not reload the page");
+});
+
+test("a missing briefs file shows an error and makes no external lookup", async () => {
+  const site = files();
+  delete site.bodies["./data/briefs.json"];
+  const { doc, http } = await boot({ hash: "#/cve/CVE-2026-1000", site });
+  await settle(60);
+  assert.equal(doc.querySelector("#cve-dialog").open, true);
+  const text = doc.querySelector("#cve-body").textContent;
+  assert.ok(text.includes("HTTP 404") && text.includes("No external lookup was made."), text);
+  assert.ok(http.requests.some(request => request.path === "./data/briefs.json"));
+  assert.ok(http.requests.every(request => request.url.startsWith("./data/")), http.requests.map(request => request.url).join(" "));
+});
+
+test("the sidebar and the Sources tab state the observed gap between runs with the cron", async () => {
+  const { cadenceText } = await import("../../site/js/views/panels.js");
+  const statement = "Observed gap between published runs: median 4.3 h, longest 10.2 h over the last 10 runs";
+  const { doc, app } = await boot();
+  doc.querySelector("#sidebar-toggle").dispatchEvent({ type: "click" });
+  await settle(60);
+  const side = doc.querySelector("#sidebar-body").textContent;
+  for (const phrase of [statement, "cron 7 */2 * * *", "Content date 3 Nov 2026", "Last published run "]) assert.ok(side.includes(phrase), phrase);
+  app.navigate({ view: "sources", id: null, query: {} });
+  await settle(60);
+  assert.ok(doc.querySelector("#view").textContent.includes(statement));
+  assert.ok(cadenceText(null).includes("could not be read"));
+  assert.ok(!cadenceText(null).includes("median"), "no observed schedule is claimed without the run record");
+});
+
+test("the notice is a toast fixed above the results, after them in the DOM, and dismissable", async () => {
+  const css = readFileSync(ROOT + "site/styles.css", "utf8");
+  const rule = css.match(/\n\.toast \{([^}]*)\}/);
+  assert.ok(rule, "styles.css has a .toast rule");
+  assert.match(rule[1], /position:\s*(fixed|sticky)/);
+  const sidebar = css.match(/\n\.sidebar \{[^}]*z-index:\s*(\d+)/);
+  assert.ok(Number(rule[1].match(/z-index:\s*(\d+)/)[1]) > Number(sidebar[1]), "the toast sits above the sidebar drawer");
+  assert.match(css, /\.toast\[hidden\] \{ display: none; \}/);
+  const session = storage();
+  const site = files({ layout: "1234567890abcdef" + "0".repeat(48) });
+  await boot({ site, session, moduleUrl: "https://teamstarwolf.github.io/intelligence-hub/js/main.js?v=fedcba0987654321" });
+  const { doc } = await boot({ site, session, moduleUrl: "https://teamstarwolf.github.io/intelligence-hub/js/main.js?v=fedcba0987654321" });
+  const notice = doc.querySelector("#notice");
+  assert.ok(notice.classList.contains("toast"));
+  assert.equal(notice.hidden, false);
+  assert.ok(notice.textContent.includes("A newer version of this page is published"));
+  const all = inOrder(doc);
+  assert.ok(all.indexOf(notice) > all.indexOf(doc.querySelector("#results li")), "the notice stays after the results in DOM order");
+  doc.querySelector("#notice-close").dispatchEvent({ type: "click" });
+  assert.equal(notice.hidden, true);
+});
+
+test("the theme button follows a system scheme change until a reader picks a theme", async () => {
+  const { initTheme } = await import("../../site/js/theme.js");
+  const { doc, win } = page();
+  const listeners = [];
+  const query = { matches: false, addEventListener: (type, handler) => { if (type === "change") listeners.push(handler); } };
+  win.matchMedia = () => query;
+  const button = doc.querySelector("#theme-toggle");
+  initTheme({ doc, win, storage: storage(), button });
+  assert.equal(button.textContent, "Light", "a dark system scheme offers the light theme");
+  query.matches = true;
+  listeners.forEach(handler => handler({ matches: true }));
+  assert.equal(button.textContent, "Dark", "after the system turns light the button offers dark");
+  assert.equal(button.getAttribute("aria-label"), "Switch to the dark theme");
+  button.dispatchEvent({ type: "click" });
+  assert.equal(doc.documentElement.getAttribute("data-theme"), "dark");
+  query.matches = false;
+  listeners.forEach(handler => handler({ matches: false }));
+  assert.equal(button.textContent, "Light", "a reader's pick is not relabelled by the system scheme");
+  const blocked = page();
+  blocked.win.matchMedia = () => { throw new Error("blocked"); };
+  initTheme({ doc: blocked.doc, win: blocked.win, storage: storage(), button: blocked.doc.querySelector("#theme-toggle") });
+  assert.equal(blocked.doc.querySelector("#theme-toggle").textContent, "Light");
 });

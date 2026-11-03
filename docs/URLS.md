@@ -106,7 +106,7 @@ address to the hash route and drops the query string.
 | Reporting in one year | `https://teamstarwolf.github.io/intelligence-hub/#/explore?kind=reporting&year=2025` |
 | One CVE's brief | `https://teamstarwolf.github.io/intelligence-hub/#/cve/CVE-2021-44228` |
 | An actor | `https://teamstarwolf.github.io/intelligence-hub/#/explore?actor=G0016` |
-| KEV additions this month | `https://teamstarwolf.github.io/intelligence-hub/#/kev?range=30` |
+| KEV additions in the last 90 days | `https://teamstarwolf.github.io/intelligence-hub/#/kev?range=90` |
 
 A change to this contract changes `site/js/router.js`, its tests and this page in the same pull
 request, and the library's generator follows.

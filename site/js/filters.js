@@ -129,8 +129,11 @@ export function kevLedger(rows, query, contentDate) {
   return kept.sort((a, b) => compareNullable(a[field], b[field], direction) || b.date_added.localeCompare(a.date_added) || a.cve.localeCompare(b.cve, undefined, { numeric: true }));
 }
 
-// The Today view: the content date and the two days before it (72 hours of calendar days).
+// The Today view: the content date and the two days before it (72 hours of calendar days),
+// KEV additions for the last week and KEV due dates in the next two weeks. The collector's
+// recent.json is cut to the same windows (intelligence_hub/shards.py RECENT_*).
 export const TODAY_DAYS = 3;
+export const KEV_STRIP_DAYS = 7;
 export const ACT_WITHIN_DAYS = 14;
 
 export function today(rows, kevRows, contentDate) {
@@ -138,7 +141,7 @@ export function today(rows, kevRows, contentDate) {
   const inWindow = rows.filter(row => row.day !== null && row.day >= from && row.day <= contentDate && row.kind !== "kev");
   sortRows(inWindow, "date-desc");
   const days = [];
-  for (let offset = 0; offset < 7; offset++) {
+  for (let offset = 0; offset < KEV_STRIP_DAYS; offset++) {
     const day = addDays(contentDate, -offset);
     days.push({ day, entries: kevRows.filter(row => row.date_added === day).sort((a, b) => a.cve.localeCompare(b.cve, undefined, { numeric: true })) });
   }

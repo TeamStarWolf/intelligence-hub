@@ -36,8 +36,8 @@ export const CVE_ROWS = [
   ["CVE-2026-1002", "PUBLISHED", "ok", "needs-review", false, null, null, null, [], null]
 ];
 
-export function files({ schema = 7, layout = "b".repeat(64), extra = {} } = {}) {
-  const shards = {
+export function files({ schema = 7, layout = "b".repeat(64), extra = {}, omit = [] } = {}) {
+  const base = {
     "live/2026-11.json": { schema_version: 7, kind: "articles", period: "2026-11", rows: [
       row("a-kev-guidance", { cves: ["CVE-2026-1000"], title: "Vendor fixes exploited flaw", tagging: { ...row("x").tagging, vendor: [["vendor:fortinet", "cna-affected", "high"]], kev: { cves: ["CVE-2026-1000"], added: "2026-11-02", due: "2026-11-10", ransomware: "Unknown", at_publication: false }, exploitation: ["known", "kev", "high"] }, exploitation: "known" }),
       row("a-research", { kind: "research", source_id: "lab", source_name: "Research Lab", published_at: "2026-11-02", tagging: { ...row("x").tagging, source_class: "researcher", actor: [["actor:G0016", "title-alias", "medium"]] } }),
@@ -59,9 +59,18 @@ export function files({ schema = 7, layout = "b".repeat(64), extra = {} } = {}) 
     ] },
     "reports.json": { schema_version: 7, kind: "reports", status: "available", catalog_sha256: "c".repeat(64), catalog: { schema_version: 1, updated_at: "2026-11-01T00:00:00Z", notes: ["A note."], indexes: [{ label: "Report archive", url: "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/README.md" }],
       reports: [{ id: "SW-DAILY-2026-11-01", title: "November 1 daily", cadence: "daily", status: "partial", origin: "generated_report", coverage: "source_subset", period_start: "2026-10-31T11:00:00Z", period_end: "2026-11-01T11:00:00Z", period_kind: "rolling_elapsed", compiled_at: "2026-11-01T16:35:01Z", compilation_precision: "timestamp", prior_report_id: null, report_url: "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-11-01/README.md", data_url: "https://github.com/TeamStarWolf/intelligence-hub/blob/main/reports/daily/2026-11-01/data.json" }],
-      revision_review: { state: "partial", nominal_cutoff: "2026-11-01T12:00:00Z", notes: ["Review note."], records: [] } } },
-    ...extra
+      revision_review: { state: "partial", nominal_cutoff: "2026-11-01T12:00:00Z", notes: ["Review note."], records: [] } } }
   };
+  // recent.json as the collector cuts it: live rows from three days before the content date to
+  // the day after, KEV entries added in the last week or due in the next two weeks, and the
+  // CVE index rows the live rows name.
+  const live = base["live/2026-11.json"].rows.concat(base["live/2026-10.json"].rows).filter(item => item.published_at.slice(0, 10) >= "2026-10-31" && item.published_at.slice(0, 10) <= "2026-11-04");
+  const named = new Set(live.flatMap(item => item.cves));
+  base["recent.json"] = { schema_version: 7, kind: "recent", content_date: CONTENT_DATE, from: "2026-10-31", to: "2026-11-04", kev_from: "2026-10-28", due_until: "2026-11-17",
+    rows: live, kev: base["kev/2026.json"].rows.filter(item => (item.date_added >= "2026-10-28" && item.date_added <= CONTENT_DATE) || (item.due_date >= CONTENT_DATE && item.due_date <= "2026-11-17")),
+    cve_fields: base["cve-index.json"].fields, cves: CVE_ROWS.filter(item => named.has(item[0])) };
+  const shards = { ...base, ...extra };
+  for (const path of omit) delete shards[path];
   const bodies = {};
   const entries = [];
   for (const [path, value] of Object.entries(shards)) {

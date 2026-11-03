@@ -1,12 +1,21 @@
 // Today: KEV additions by calendar day, the act-today strip, then the last three calendar days
-// of advisories, research and press. It reads index.json, the live months those days fall in
-// and the KEV ledger for the last 60 days, nothing else.
+// of advisories, research and press. It reads index.json and data/v7/recent.json, nothing else:
+// recent.json holds the rows of those days, the KEV entries for the strips and the CVE index
+// rows those rows name, so the first load stays small on any day of the month. An index written
+// before recent.json existed falls back to the live months and the KEV ledger for 60 days.
 import { formatRoute } from "../router.js";
-import { ACT_WITHIN_DAYS, TODAY_DAYS, today } from "../filters.js";
-import { count, dateLabel, dayLabel, node, routeLink } from "../util.js";
+import { ACT_WITHIN_DAYS, KEV_STRIP_DAYS, TODAY_DAYS, today } from "../filters.js";
+import { addDays, count, dateLabel, dayLabel, node, routeLink } from "../util.js";
 import { resultCard, section } from "./common.js";
 
 export const KEV_DAYS = 60;
+export const RECENT_PATH = "recent.json";
+
+// True when recent.json was written for this content date and covers every Today window.
+export function recentCovers(recent, end) {
+  return Boolean(recent && !Array.isArray(recent) && recent.content_date === end && recent.from <= addDays(end, 1 - TODAY_DAYS) && recent.to >= end &&
+    recent.kev_from <= addDays(end, 1 - KEV_STRIP_DAYS) && recent.due_until >= addDays(end, ACT_WITHIN_DAYS));
+}
 
 export function kevStrip(data, compact = false) {
   const block = node("div", "kev-days");
@@ -42,17 +51,25 @@ export function actStrip(data, compact = false) {
   return block;
 }
 
+// The Today data and the CVE index rows its cards need (null when the caller should read the
+// full CVE index), from recent.json when the index lists one that covers the content date.
 export async function todayData(store) {
+  const end = store.contentDate();
+  if (store.state.mode === "v7" && store.entry(RECENT_PATH)) {
+    const [recent] = await store.ensure([RECENT_PATH]);
+    if (recentCovers(recent, end)) return { ...today(recent.rows, recent.kev, end), cveIndex: recent.cves, source: RECENT_PATH };
+  }
   const paths = store.todayPaths();
   const kevPaths = store.kevPaths(null, KEV_DAYS);
   await Promise.all([store.ensure(paths), store.ensure(kevPaths)]);
-  return today(store.rows(paths), store.kevRows(kevPaths), store.contentDate());
+  return { ...today(store.rows(paths), store.kevRows(kevPaths), end), cveIndex: null, source: "months" };
 }
 
 export async function renderToday(ctx) {
   const { target, store, route } = ctx;
   target.replaceChildren(node("h1", "view-title", "Today"), node("p", "view-intro", "Reading the latest days."));
-  const [data, cveIndex] = await Promise.all([todayData(store), store.cveIndex().catch(() => null)]);
+  const data = await todayData(store);
+  const cveIndex = data.cveIndex || await store.cveIndex().catch(() => null);
   if (!ctx.current()) return;
   const intro = node("p", "view-intro", "The content date is " + dateLabel(data.to) + ". This view covers it and the " + (TODAY_DAYS - 1) + " days before it (" + dateLabel(data.from) + " to " + dateLabel(data.to) + ", UTC calendar days).");
   const kev = section("KEV additions by calendar day");

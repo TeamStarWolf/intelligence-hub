@@ -4,7 +4,7 @@
 // drops only the shards whose bytes changed.
 import { maximumBriefsBytes, maximumIndexBytes, maximumLegacyFeedBytes, maximumShardBytes } from "./limits.js";
 import { HttpError } from "./fetcher.js";
-import { normalizeArticleShard, normalizeBriefsFile, normalizeBucket, normalizeCveIndex, normalizeIndex, normalizeKevShard, normalizeReports, normalizeSources } from "./validate.js";
+import { normalizeArticleShard, normalizeBriefsFile, normalizeBucket, normalizeCveIndex, normalizeIndex, normalizeKevShard, normalizeRecent, normalizeReports, normalizeSources } from "./validate.js";
 import { addDays, monthsBetween } from "./util.js";
 import { dateWindow } from "./filters.js";
 
@@ -86,6 +86,8 @@ export function createStore(fetcher) {
     return entry("live/undated.json") ? [...live, "live/undated.json"] : live;
   }
 
+  // The fallback for an index written before recent.json existed: the live months the Today
+  // window touches. Today and the sidebar read recent.json whenever the index lists it.
   function todayPaths() {
     const end = contentDate();
     const months = monthsBetween(addDays(end, -2), end);
@@ -111,7 +113,8 @@ export function createStore(fetcher) {
     kev: (value, path) => normalizeKevShard(value, path),
     "cve-index.json": value => normalizeCveIndex(value),
     "sources.json": value => normalizeSources(value),
-    "reports.json": value => normalizeReports(value)
+    "reports.json": value => normalizeReports(value),
+    "recent.json": value => normalizeRecent(value)
   };
 
   function reader(path) {

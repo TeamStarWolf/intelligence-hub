@@ -45,7 +45,7 @@ const KINDS = ["advisory", "research", "reporting", "incident", "kev", "filing",
 const EXPLOITATION = ["known", "reported", "unknown"];
 const ORIGIN = /^(?:publisher-feed|cisa-kev|library-curation|history:[a-z0-9][a-z0-9-]{0,39})$/;
 const CVE = /^CVE-\d{4}-\d{4,19}$/;
-const SHARD_PATH = /^(?:(?:sources|coverage|reports|cve-index)\.json|live\/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json|history\/(?:[0-9]{4}|undated)\.json|kev\/[0-9]{4}\.json|cve\/[0-9]{4}\/[0-9]{1,5}k\.json)$/;
+const SHARD_PATH = /^(?:(?:sources|coverage|reports|cve-index|recent)\.json|live\/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json|history\/(?:[0-9]{4}|undated)\.json|kev\/[0-9]{4}\.json|cve\/[0-9]{4}\/[0-9]{1,5}k\.json)$/;
 const EXPORT_PATH = /^exports\/(?:articles-(?:[0-9]{4}(?:-(?:0[1-9]|1[0-2]))?|undated)\.(?:csv|jsonl)|tags-(?:[0-9]{4}(?:-(?:0[1-9]|1[0-2]))?|undated)\.csv|manifest\.json|data-dictionary\.md)$/;
 
 // data/v7/index.json. Known fields are checked; fields a later collector adds are ignored.
@@ -174,28 +174,46 @@ export function normalizeArticleShard(raw, path) {
   return list(raw.rows, 30000).map(normalizeRow);
 }
 
+function normalizeKevRow(item) {
+  requireValue(isObject(item) && typeof item.cve === "string" && CVE.test(item.cve));
+  return {
+    cve: item.cve, name: boundedText(item.name, 2000, true), vendor: boundedText(item.vendor_raw, 400, true), product: boundedText(item.product_raw, 400, true),
+    date_added: calendarDay(item.date_added), due_date: item.due_date === null ? null : calendarDay(item.due_date), directive: optionalText(item.directive, 40),
+    ransomware: boundedText(item.ransomware, 40, true), forensic_triage: optionalText(item.forensic_triage, 40),
+    cwe: list(item.cwe, 20).map(id => boundedText(id, 40)), required_action: boundedText(item.required_action, 12000, true),
+    short_description: boundedText(item.short_description, 12000, true), notes_urls: list(item.notes_urls, 20).map(url => boundedText(url, 4000))
+  };
+}
+
 export function normalizeKevShard(raw, path) {
   requireValue(isObject(raw) && raw.schema_version === 7 && raw.kind === "kev" && Number.isSafeInteger(raw.year) && path === "kev/" + raw.year + ".json");
-  return list(raw.rows, 5000).map(item => {
-    requireValue(isObject(item) && typeof item.cve === "string" && CVE.test(item.cve));
-    return {
-      cve: item.cve, name: boundedText(item.name, 2000, true), vendor: boundedText(item.vendor_raw, 400, true), product: boundedText(item.product_raw, 400, true),
-      date_added: calendarDay(item.date_added), due_date: item.due_date === null ? null : calendarDay(item.due_date), directive: optionalText(item.directive, 40),
-      ransomware: boundedText(item.ransomware, 40, true), forensic_triage: optionalText(item.forensic_triage, 40),
-      cwe: list(item.cwe, 20).map(id => boundedText(id, 40)), required_action: boundedText(item.required_action, 12000, true),
-      short_description: boundedText(item.short_description, 12000, true), notes_urls: list(item.notes_urls, 20).map(url => boundedText(url, 4000))
-    };
-  });
+  return list(raw.rows, 5000).map(normalizeKevRow);
 }
 
 // data/v7/cve-index.json: the compact list-view row per CVE and where its brief lives.
 export function normalizeCveIndex(raw) {
   requireValue(isObject(raw) && raw.schema_version === 7 && raw.kind === "cve-index");
-  const fields = ["cve", ...indexFields, "bucket"];
-  requireValue(Array.isArray(raw.fields) && raw.fields.length === fields.length && raw.fields.every((field, position) => field === fields[position]));
   requireValue(raw.briefs_file === null || raw.briefs_file === "data/briefs.json");
+  return { rows: cveRows(raw.fields, raw.rows), briefs_file: raw.briefs_file };
+}
+
+// data/v7/recent.json: the Today view's file. Live rows for the last days, the KEV entries
+// added in the last week or due in the next two weeks, and the CVE index rows those rows name.
+export function normalizeRecent(raw) {
+  requireValue(isObject(raw) && raw.schema_version === 7 && raw.kind === "recent");
+  const value = { content_date: calendarDay(raw.content_date), from: calendarDay(raw.from), to: calendarDay(raw.to), kev_from: calendarDay(raw.kev_from), due_until: calendarDay(raw.due_until) };
+  requireValue(value.from <= value.content_date && value.content_date <= value.to && value.kev_from <= value.content_date && value.content_date <= value.due_until);
+  value.rows = list(raw.rows, 30000).map(normalizeRow);
+  value.kev = list(raw.kev, 5000).map(normalizeKevRow);
+  value.cves = cveRows(raw.cve_fields, raw.cves);
+  return value;
+}
+
+function cveRows(rawFields, rawRows) {
+  const fields = ["cve", ...indexFields, "bucket"];
+  requireValue(Array.isArray(rawFields) && rawFields.length === fields.length && rawFields.every((field, position) => field === fields[position]));
   const rows = new Map();
-  for (const row of list(raw.rows, 30000)) {
+  for (const row of list(rawRows, 30000)) {
     requireValue(Array.isArray(row) && row.length === fields.length);
     const [cve, state, status, guidance, action, score, version, added, weaknesses, bucket] = row;
     requireValue(typeof cve === "string" && CVE.test(cve) && !rows.has(cve));
@@ -208,7 +226,7 @@ export function normalizeCveIndex(raw) {
       weaknesses: list(weaknesses, 8).map(id => { requireValue(typeof id === "string" && /^CWE-[1-9][0-9]{0,5}$/.test(id)); return id; }), bucket
     });
   }
-  return { rows, briefs_file: raw.briefs_file };
+  return rows;
 }
 
 function intakeCount(value, maximum) { nonnegative(value); requireValue(value <= maximum); return value; }

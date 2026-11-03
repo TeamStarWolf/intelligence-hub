@@ -28,6 +28,14 @@ export function initTheme({ doc, win, storage, button }) {
   if (pick) doc.documentElement.setAttribute("data-theme", pick);
   if (!button) return;
   label(button, currentTheme(doc, win));
+  // While no theme is picked the page follows the system scheme, so the button follows it too
+  // when the scheme changes with the page open.
+  try {
+    const query = win && win.matchMedia ? win.matchMedia("(prefers-color-scheme: light)") : null;
+    const relabel = () => { if (!doc.documentElement.hasAttribute("data-theme")) label(button, currentTheme(doc, win)); };
+    if (query && typeof query.addEventListener === "function") query.addEventListener("change", relabel);
+    else if (query && typeof query.addListener === "function") query.addListener(relabel);
+  } catch (_) { /* The label then updates on the next load. */ }
   button.addEventListener("click", () => {
     const next = currentTheme(doc, win) === "light" ? "dark" : "light";
     doc.documentElement.setAttribute("data-theme", next);

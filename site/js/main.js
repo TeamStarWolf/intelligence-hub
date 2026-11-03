@@ -32,7 +32,9 @@ export function createApp(env) {
   let pollTimer = null;
   let fatal = false;
 
-  function showNotice(message) { const notice = el("#notice"); notice.hidden = !message; notice.textContent = message || ""; }
+  // The notice is a toast fixed to the bottom of the viewport (styles.css .toast), so a reader
+  // sees it wherever the results are scrolled; Dismiss hides it until the next notice.
+  function showNotice(message) { const notice = el("#notice"); notice.hidden = !message; el("#notice-text").textContent = message || ""; }
 
   // replace: a filter change (no new history entry). Otherwise a new entry Back can leave.
   function navigate(next, { replace = false } = {}) {
@@ -93,7 +95,10 @@ export function createApp(env) {
     try {
       const [record, index] = await Promise.all([store.brief(cve), store.cveIndex()]);
       if (!current()) return;
+      // The entries already read (live months, and Today's recent.json) that name this CVE.
       const loadedRows = store.state.mode === "legacy" ? store.rows([]) : store.rows(store.listed("live/").filter(path => store.cached(path)));
+      const seen = new Set(loadedRows.map(row => row.id));
+      for (const row of store.state.mode === "v7" ? store.cached("recent.json")?.rows || [] : []) if (!seen.has(row.id)) { seen.add(row.id); loadedRows.push(row); }
       el("#cve-body").replaceChildren(...(record ? briefBody(record, index.get(cve), loadedRows) : [node("p", "", "This CVE has no saved brief in this snapshot. No external lookup was made.")]));
       dialog.dataset.revision = shown;
     } catch (error) {
@@ -185,6 +190,7 @@ export function createApp(env) {
       el(button).addEventListener("click", () => closeDialog(el(dialog)));
       el(dialog).addEventListener("close", () => leaveRecord(kind));
     }
+    el("#notice-close").addEventListener("click", () => showNotice(""));
     el("#sidebar-toggle").addEventListener("click", () => setSidebar(!sidebarOpen()));
     el("#sidebar-close").addEventListener("click", () => { setSidebar(false); el("#sidebar-toggle").focus(); });
     doc.addEventListener("keydown", event => { if (event.key === "Escape" && sidebarOpen() && !el("#record-dialog").open && !el("#cve-dialog").open) { setSidebar(false); el("#sidebar-toggle").focus(); } });

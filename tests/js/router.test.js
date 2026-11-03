@@ -2,6 +2,7 @@
 // A4 link keys are rewritten, and hostile or unknown parameters never survive.
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { VIEWS, formatRoute, parseRoute, withQuery } from "../../site/js/router.js";
 
 const roundTrip = hash => formatRoute(parseRoute(hash, ""));
@@ -86,4 +87,16 @@ test("withQuery changes keys, resets the page on a filter change and keeps it ot
   assert.equal(formatRoute(withQuery(route, { exp: "known" })), "#/explore?kind=kev&exp=known");
   assert.equal(formatRoute(withQuery(route, { open: "a-1" }, true)), "#/explore?kind=kev&page=4&open=a-1");
   assert.equal(formatRoute(withQuery(route, { kind: null })), "#/explore");
+});
+
+test("every example link in docs/URLS.md is already in canonical form", () => {
+  const page = readFileSync(new URL("../../docs/URLS.md", import.meta.url), "utf8");
+  const examples = page.slice(page.indexOf("## Examples"));
+  const links = [...examples.matchAll(/`https:\/\/teamstarwolf\.github\.io\/intelligence-hub\/(#\/[^`]*)`/g)].map(match => match[1]);
+  assert.ok(links.length >= 7, "the examples table is read");
+  for (const hash of links) {
+    const route = parseRoute(hash, "");
+    assert.equal(route.rewrite, false, hash);
+    assert.equal(formatRoute(route), hash, hash + " is what the page would rewrite it to");
+  }
 });
