@@ -294,8 +294,10 @@ the collector's own byte bounds (8 MiB and 12 MiB). Actual file content must tot
 at most **192 MiB**. The check builds an in-memory tar and estimates compression
 using both gzip and zlib at level 6. If the larger estimate exceeds **48,000,000
 bytes**, it fails before artifact upload, and it prints every cap with its headroom
-on every run. The previous live site remains in place. These caps were approved for
-the owner in decision O2 (gate G-H01); new cap numbers are the owner's decision.
+on every run. The previous live site remains in place. The package caps (192 MiB
+input, 4,000 files, 4 MiB per v7 file, 48,000,000-byte estimate) were raised in pull
+request #7; a further change needs the owner's approval in the pull request that
+makes it.
 
 Final JSON serialization groups CVE-map members by their recorded vendor/product
 text, with the CVE identifier as a tie-breaker, to improve compression. This only

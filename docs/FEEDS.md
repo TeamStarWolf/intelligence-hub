@@ -41,11 +41,11 @@ These bounds are the next wall, not a permanent one. A bounded run on
 about 3,780 bytes each, 3,563,660 bytes free). New CVEs arrived at about 15 to
 21 a day in October and early November, which is about 55 to 80 KB of briefs a
 day, so the 12 MiB briefs bound is crossed between mid-December 2026 and early
-January 2027. The publish input cap is 192 MiB since decision O2 (the feed, the
-briefs and the site used 12,588,722 bytes on that run), so the 12 MiB briefs
-bound is the wall that binds first. A run that crosses it fails and the site
-keeps its last publication, so the next data layout must land before
-mid-December.
+January 2027. The publish input cap was raised to 192 MiB in pull request #7
+(the whole package, with the v7 shards and the exports, was 32,216,955 bytes on
+3 November 2026), so the 12 MiB briefs bound is the wall that binds first. A
+run that crosses it fails and the site keeps its last publication, so the next
+data layout must land before mid-December.
 
 Publisher responses keep the **3 MiB** default bound. A source can set its own
 `max_bytes` in `config/sources.json`, up to a **16 MiB** fetch ceiling. The CISA

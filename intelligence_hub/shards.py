@@ -41,12 +41,12 @@ REQUESTED_CRON = "7 */2 * * *"
 SHARD_MAX_BYTES = FEED_MAX_BYTES
 INDEX_MAX_BYTES = 1024 * 1024
 MAX_SHARDS = 1000
-# Pages package caps (publish.yml runs package_site). These numbers are the ones the
-# orchestrator approved for the owner (decision O2, closing gate G-H01): 192 MiB of
-# input, at most 4,000 files, at most 4 MiB for every v7 shard or export file and a
-# 48,000,000-byte compressed estimate. The v6 data/feed.json and data/briefs.json keep
-# their own collector byte bounds (FEED_MAX_BYTES, BRIEFS_MAX_BYTES); the per-file cap
-# applies to files under data/v7/ only.
+# Pages package caps (publish.yml runs package_site). These are the caps raised in
+# pull request #7: 192 MiB of input, at most 4,000 files, at most 4 MiB for every v7
+# shard or export file and a 48,000,000-byte compressed estimate. The v6
+# data/feed.json and data/briefs.json keep their own collector byte bounds
+# (FEED_MAX_BYTES, BRIEFS_MAX_BYTES); the per-file cap applies to files under
+# data/v7/ only.
 PACKAGE_MAX_INPUT = 192 * 1024 * 1024
 PACKAGE_MAX_COMPRESSED = 48000000
 PACKAGE_MAX_FILES = 4000

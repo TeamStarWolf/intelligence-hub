@@ -23,8 +23,8 @@ Every file stays under the package's per-file cap for v7 files (shards.V7_FILE_M
 file its year and month. A month or an undated set that still passes the cap is an error,
 and the collector then publishes the feed without exports.
 
-Publication: EXPORTS_PUBLISHED is True since the package caps were raised (decision O2,
-closing gate G-H01), so the collector writes the files to site/data/v7/exports/ and lists
+Publication: EXPORTS_PUBLISHED is True since the package caps were raised in pull
+request #7, so the collector writes the files to site/data/v7/exports/ and lists
 every one in data/v7/index.json, which the Pages package is checked against. With the flag
 off, a run writes them to dist/exports/ for local analysis only.
 """
