@@ -25,8 +25,8 @@ The command accepts no source, database or destination path arguments:
 
 After independent source/security review, an operator may copy a verified public
 snapshot into the fixed inbox and record its exact SHA-256. Staging that copy is
-separate from ingest. Do not copy Clifford's operating database or private state
-into this public-source archive. The operator pin detects byte mismatch; it is
+separate from ingest. Do not copy private state into this public-source
+archive. The operator pin detects byte mismatch; it is
 not a signature, publisher-authenticity check or declassification decision.
 
 Run commands from this repository's root, replacing placeholders deliberately:
