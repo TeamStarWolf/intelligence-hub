@@ -1,6 +1,5 @@
 """reports/ belongs to the owner's desktop compiler: a bad report input must never block the feed."""
 import json
-import subprocess
 import sys
 import unittest
 
@@ -111,15 +110,6 @@ class TolerantBuildTest(unittest.TestCase):
         self.build()
         after = {name: (self.copy.root / "reports" / name).read_bytes() for name in ("catalog.json", "reporting.json")}
         self.assertEqual(before, after)
-
-
-class SiteScriptTest(unittest.TestCase):
-    def test_app_js_parses(self):
-        try:
-            completed = subprocess.run(["node", "--check", str(support.ROOT / "site/app.js")], capture_output=True, text=True, timeout=60)
-        except FileNotFoundError:
-            self.skipTest("node is not installed; the pull-request check runs node --check itself")
-        self.assertEqual(completed.returncode, 0, completed.stderr)
 
 
 if __name__ == "__main__":

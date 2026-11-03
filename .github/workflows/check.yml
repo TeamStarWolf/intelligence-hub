@@ -54,9 +54,25 @@ jobs:
           with open('.state/collection-result.json', encoding='utf-8') as stream:
               result = json.load(stream)
           print('Articles: ' + str(len(feed['articles'])) + '; reports: ' + result['reports']['status'])
+      - name: Page files, stamping and the labels module
+        # site/files.json is the page-file allowlist; the stamp runs on a temporary copy.
+        run: |
+          python -E -s -m intelligence_hub.site check site
+          python -E -s -m intelligence_hub.site labels --check
       - name: Site script syntax
+        shell: bash
         run: |
           node --version
-          node --check site/app.js
+          for name in $(python -I -c "import json; [print(name) for name in json.load(open('site/files.json'))['files'] if name.endswith('.js')]"); do
+            node --check "site/$name"
+          done
+      - name: Site tests (node --test, no npm)
+        # Router, URL state, the poll, the deploy-skew guard and the Explorer-first DOM order on
+        # site/index.html; the last test reads the offline build above.
+        run: node --test tests/js/*.test.js
+      - name: Contrast of every text pair in both themes
+        run: python -I tests/check_contrast.py
+      - name: 12 px type floor
+        run: python -I tests/check_font_size.py
       - name: Em-dash lint outside reports/
         run: python -I tests/check_em_dash.py
