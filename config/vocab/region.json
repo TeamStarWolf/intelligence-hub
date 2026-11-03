@@ -1,0 +1,704 @@
+{
+  "vocab": "region",
+  "version": "2026.11.1",
+  "multi": true,
+  "description": "Places a row is tied to, each with a role. Values are ISO 3166-1 alpha-2 country codes, EU for the European Union, and M49-<code> for UN M49 regions. Names match case-sensitively as whole words.",
+  "roles": [
+    {
+      "value": "publisher",
+      "definition": "The country or union of the publishing agency or vendor, from config/sources.json. Confidence high."
+    },
+    {
+      "value": "mentioned",
+      "definition": "The headline names the place or its demonym. A headline mention does not say whether the place is a target, an origin or neither. Confidence medium."
+    },
+    {
+      "value": "target",
+      "definition": "A structured field names a targeted or deployment country (for example a CISA ICS CSAF deployment note). Reserved for the history adapters."
+    },
+    {
+      "value": "vendor-hq",
+      "definition": "A structured field names the vendor's headquarters country (CISA ICS CSAF). Reserved for the history adapters."
+    }
+  ],
+  "values": [
+    {
+      "value": "US",
+      "label": "United States",
+      "kind": "country",
+      "names": [
+        "United States",
+        "U.S.",
+        "US",
+        "USA",
+        "America",
+        "American",
+        "Americans",
+        "New Mexico",
+        "New England",
+        "New Jersey"
+      ]
+    },
+    {
+      "value": "CA",
+      "label": "Canada",
+      "kind": "country",
+      "names": [
+        "Canada",
+        "Canadian",
+        "Canadians"
+      ]
+    },
+    {
+      "value": "MX",
+      "label": "Mexico",
+      "kind": "country",
+      "names": [
+        "Mexico",
+        "Mexican"
+      ]
+    },
+    {
+      "value": "BR",
+      "label": "Brazil",
+      "kind": "country",
+      "names": [
+        "Brazil",
+        "Brazilian"
+      ]
+    },
+    {
+      "value": "AR",
+      "label": "Argentina",
+      "kind": "country",
+      "names": [
+        "Argentina",
+        "Argentinian",
+        "Argentine"
+      ]
+    },
+    {
+      "value": "CO",
+      "label": "Colombia",
+      "kind": "country",
+      "names": [
+        "Colombia",
+        "Colombian"
+      ]
+    },
+    {
+      "value": "GB",
+      "label": "United Kingdom",
+      "kind": "country",
+      "names": [
+        "United Kingdom",
+        "UK",
+        "U.K.",
+        "Britain",
+        "British",
+        "England",
+        "Scotland",
+        "Scottish",
+        "Wales",
+        "Welsh"
+      ]
+    },
+    {
+      "value": "IE",
+      "label": "Ireland",
+      "kind": "country",
+      "names": [
+        "Ireland",
+        "Irish"
+      ]
+    },
+    {
+      "value": "FR",
+      "label": "France",
+      "kind": "country",
+      "names": [
+        "France",
+        "French"
+      ]
+    },
+    {
+      "value": "DE",
+      "label": "Germany",
+      "kind": "country",
+      "names": [
+        "Germany",
+        "German",
+        "Germans"
+      ]
+    },
+    {
+      "value": "NL",
+      "label": "Netherlands",
+      "kind": "country",
+      "names": [
+        "Netherlands",
+        "Dutch"
+      ]
+    },
+    {
+      "value": "BE",
+      "label": "Belgium",
+      "kind": "country",
+      "names": [
+        "Belgium",
+        "Belgian"
+      ]
+    },
+    {
+      "value": "ES",
+      "label": "Spain",
+      "kind": "country",
+      "names": [
+        "Spain",
+        "Spanish"
+      ]
+    },
+    {
+      "value": "PT",
+      "label": "Portugal",
+      "kind": "country",
+      "names": [
+        "Portugal",
+        "Portuguese"
+      ]
+    },
+    {
+      "value": "IT",
+      "label": "Italy",
+      "kind": "country",
+      "names": [
+        "Italy",
+        "Italian"
+      ]
+    },
+    {
+      "value": "CH",
+      "label": "Switzerland",
+      "kind": "country",
+      "names": [
+        "Switzerland",
+        "Swiss"
+      ]
+    },
+    {
+      "value": "AT",
+      "label": "Austria",
+      "kind": "country",
+      "names": [
+        "Austria",
+        "Austrian"
+      ]
+    },
+    {
+      "value": "SE",
+      "label": "Sweden",
+      "kind": "country",
+      "names": [
+        "Sweden",
+        "Swedish"
+      ]
+    },
+    {
+      "value": "NO",
+      "label": "Norway",
+      "kind": "country",
+      "names": [
+        "Norway",
+        "Norwegian"
+      ]
+    },
+    {
+      "value": "DK",
+      "label": "Denmark",
+      "kind": "country",
+      "names": [
+        "Denmark",
+        "Danish"
+      ]
+    },
+    {
+      "value": "FI",
+      "label": "Finland",
+      "kind": "country",
+      "names": [
+        "Finland",
+        "Finnish"
+      ]
+    },
+    {
+      "value": "PL",
+      "label": "Poland",
+      "kind": "country",
+      "names": [
+        "Poland",
+        "Polish"
+      ]
+    },
+    {
+      "value": "CZ",
+      "label": "Czechia",
+      "kind": "country",
+      "names": [
+        "Czechia",
+        "Czech Republic",
+        "Czech"
+      ]
+    },
+    {
+      "value": "SK",
+      "label": "Slovakia",
+      "kind": "country",
+      "names": [
+        "Slovakia",
+        "Slovak"
+      ]
+    },
+    {
+      "value": "HU",
+      "label": "Hungary",
+      "kind": "country",
+      "names": [
+        "Hungary",
+        "Hungarian"
+      ]
+    },
+    {
+      "value": "RO",
+      "label": "Romania",
+      "kind": "country",
+      "names": [
+        "Romania",
+        "Romanian"
+      ]
+    },
+    {
+      "value": "GR",
+      "label": "Greece",
+      "kind": "country",
+      "names": [
+        "Greece",
+        "Greek"
+      ]
+    },
+    {
+      "value": "EE",
+      "label": "Estonia",
+      "kind": "country",
+      "names": [
+        "Estonia",
+        "Estonian"
+      ]
+    },
+    {
+      "value": "LV",
+      "label": "Latvia",
+      "kind": "country",
+      "names": [
+        "Latvia",
+        "Latvian"
+      ]
+    },
+    {
+      "value": "LT",
+      "label": "Lithuania",
+      "kind": "country",
+      "names": [
+        "Lithuania",
+        "Lithuanian"
+      ]
+    },
+    {
+      "value": "UA",
+      "label": "Ukraine",
+      "kind": "country",
+      "names": [
+        "Ukraine",
+        "Ukrainian",
+        "Ukrainians"
+      ]
+    },
+    {
+      "value": "MD",
+      "label": "Moldova",
+      "kind": "country",
+      "names": [
+        "Moldova",
+        "Moldovan"
+      ]
+    },
+    {
+      "value": "BY",
+      "label": "Belarus",
+      "kind": "country",
+      "names": [
+        "Belarus",
+        "Belarusian"
+      ]
+    },
+    {
+      "value": "RU",
+      "label": "Russia",
+      "kind": "country",
+      "names": [
+        "Russia",
+        "Russian",
+        "Russians",
+        "Kremlin"
+      ]
+    },
+    {
+      "value": "TR",
+      "label": "Türkiye",
+      "kind": "country",
+      "names": [
+        "Türkiye",
+        "Turkey",
+        "Turkish"
+      ]
+    },
+    {
+      "value": "IL",
+      "label": "Israel",
+      "kind": "country",
+      "names": [
+        "Israel",
+        "Israeli",
+        "Israelis"
+      ]
+    },
+    {
+      "value": "IR",
+      "label": "Iran",
+      "kind": "country",
+      "names": [
+        "Iran",
+        "Iranian",
+        "Iranians"
+      ]
+    },
+    {
+      "value": "SA",
+      "label": "Saudi Arabia",
+      "kind": "country",
+      "names": [
+        "Saudi Arabia",
+        "Saudi"
+      ]
+    },
+    {
+      "value": "AE",
+      "label": "United Arab Emirates",
+      "kind": "country",
+      "names": [
+        "United Arab Emirates",
+        "UAE",
+        "Emirati"
+      ]
+    },
+    {
+      "value": "QA",
+      "label": "Qatar",
+      "kind": "country",
+      "names": [
+        "Qatar",
+        "Qatari"
+      ]
+    },
+    {
+      "value": "EG",
+      "label": "Egypt",
+      "kind": "country",
+      "names": [
+        "Egypt",
+        "Egyptian"
+      ]
+    },
+    {
+      "value": "PK",
+      "label": "Pakistan",
+      "kind": "country",
+      "names": [
+        "Pakistan",
+        "Pakistani"
+      ]
+    },
+    {
+      "value": "IN",
+      "label": "India",
+      "kind": "country",
+      "names": [
+        "India",
+        "Indian"
+      ]
+    },
+    {
+      "value": "BD",
+      "label": "Bangladesh",
+      "kind": "country",
+      "names": [
+        "Bangladesh",
+        "Bangladeshi"
+      ]
+    },
+    {
+      "value": "CN",
+      "label": "China",
+      "kind": "country",
+      "names": [
+        "China",
+        "Chinese",
+        "PRC",
+        "Beijing"
+      ]
+    },
+    {
+      "value": "HK",
+      "label": "Hong Kong",
+      "kind": "country",
+      "names": [
+        "Hong Kong"
+      ]
+    },
+    {
+      "value": "TW",
+      "label": "Taiwan",
+      "kind": "country",
+      "names": [
+        "Taiwan",
+        "Taiwanese"
+      ]
+    },
+    {
+      "value": "KP",
+      "label": "North Korea",
+      "kind": "country",
+      "names": [
+        "North Korea",
+        "North Korean",
+        "North Koreans",
+        "DPRK",
+        "Pyongyang"
+      ]
+    },
+    {
+      "value": "KR",
+      "label": "South Korea",
+      "kind": "country",
+      "names": [
+        "South Korea",
+        "South Korean",
+        "South Koreans"
+      ]
+    },
+    {
+      "value": "JP",
+      "label": "Japan",
+      "kind": "country",
+      "names": [
+        "Japan",
+        "Japanese"
+      ]
+    },
+    {
+      "value": "VN",
+      "label": "Vietnam",
+      "kind": "country",
+      "names": [
+        "Vietnam",
+        "Vietnamese"
+      ]
+    },
+    {
+      "value": "TH",
+      "label": "Thailand",
+      "kind": "country",
+      "names": [
+        "Thailand",
+        "Thai"
+      ]
+    },
+    {
+      "value": "MY",
+      "label": "Malaysia",
+      "kind": "country",
+      "names": [
+        "Malaysia",
+        "Malaysian"
+      ]
+    },
+    {
+      "value": "SG",
+      "label": "Singapore",
+      "kind": "country",
+      "names": [
+        "Singapore",
+        "Singaporean"
+      ]
+    },
+    {
+      "value": "ID",
+      "label": "Indonesia",
+      "kind": "country",
+      "names": [
+        "Indonesia",
+        "Indonesian"
+      ]
+    },
+    {
+      "value": "PH",
+      "label": "Philippines",
+      "kind": "country",
+      "names": [
+        "Philippines",
+        "Philippine",
+        "Filipino"
+      ]
+    },
+    {
+      "value": "AU",
+      "label": "Australia",
+      "kind": "country",
+      "names": [
+        "Australia",
+        "Australian",
+        "Australians",
+        "New South Wales"
+      ]
+    },
+    {
+      "value": "NZ",
+      "label": "New Zealand",
+      "kind": "country",
+      "names": [
+        "New Zealand"
+      ]
+    },
+    {
+      "value": "KZ",
+      "label": "Kazakhstan",
+      "kind": "country",
+      "names": [
+        "Kazakhstan",
+        "Kazakh"
+      ]
+    },
+    {
+      "value": "ZA",
+      "label": "South Africa",
+      "kind": "country",
+      "names": [
+        "South Africa",
+        "South African"
+      ]
+    },
+    {
+      "value": "NG",
+      "label": "Nigeria",
+      "kind": "country",
+      "names": [
+        "Nigeria",
+        "Nigerian"
+      ]
+    },
+    {
+      "value": "KE",
+      "label": "Kenya",
+      "kind": "country",
+      "names": [
+        "Kenya",
+        "Kenyan"
+      ]
+    },
+    {
+      "value": "EU",
+      "label": "European Union",
+      "kind": "union",
+      "names": [
+        "European Union",
+        "EU",
+        "European Commission",
+        "ENISA",
+        "Europol"
+      ]
+    },
+    {
+      "value": "M49-150",
+      "label": "Europe",
+      "kind": "region",
+      "names": [
+        "Europe",
+        "European"
+      ]
+    },
+    {
+      "value": "M49-142",
+      "label": "Asia",
+      "kind": "region",
+      "names": [
+        "Asia",
+        "Asian"
+      ]
+    },
+    {
+      "value": "M49-143",
+      "label": "Central Asia",
+      "kind": "region",
+      "names": [
+        "Central Asia",
+        "Central Asian"
+      ]
+    },
+    {
+      "value": "M49-035",
+      "label": "South-eastern Asia",
+      "kind": "region",
+      "names": [
+        "Southeast Asia",
+        "South-East Asia",
+        "Southeast Asian"
+      ]
+    },
+    {
+      "value": "M49-145",
+      "label": "Western Asia (Middle East)",
+      "kind": "region",
+      "names": [
+        "Middle East",
+        "Middle Eastern"
+      ]
+    },
+    {
+      "value": "M49-002",
+      "label": "Africa",
+      "kind": "region",
+      "names": [
+        "Africa",
+        "African"
+      ]
+    },
+    {
+      "value": "M49-419",
+      "label": "Latin America and the Caribbean",
+      "kind": "region",
+      "names": [
+        "Latin America",
+        "Latin American",
+        "LATAM"
+      ]
+    },
+    {
+      "value": "M49-009",
+      "label": "Oceania",
+      "kind": "region",
+      "names": [
+        "Oceania",
+        "Pacific Islands"
+      ]
+    }
+  ]
+}

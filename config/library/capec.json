@@ -1,0 +1,3528 @@
+{
+ "rows": {
+  "CAPEC-1": {
+   "attack_techniques": [
+    "T1574.010"
+   ],
+   "name": "Accessing Functionality Not Properly Constrained by ACLs",
+   "status": "Draft"
+  },
+  "CAPEC-10": {
+   "attack_techniques": [],
+   "name": "Buffer Overflow via Environment Variables",
+   "status": "Draft"
+  },
+  "CAPEC-100": {
+   "attack_techniques": [],
+   "name": "Overflow Buffers",
+   "status": "Draft"
+  },
+  "CAPEC-101": {
+   "attack_techniques": [],
+   "name": "Server Side Include (SSI) Injection",
+   "status": "Draft"
+  },
+  "CAPEC-102": {
+   "attack_techniques": [],
+   "name": "Session Sidejacking",
+   "status": "Draft"
+  },
+  "CAPEC-103": {
+   "attack_techniques": [],
+   "name": "Clickjacking",
+   "status": "Draft"
+  },
+  "CAPEC-104": {
+   "attack_techniques": [],
+   "name": "Cross Zone Scripting",
+   "status": "Draft"
+  },
+  "CAPEC-105": {
+   "attack_techniques": [],
+   "name": "HTTP Request Splitting",
+   "status": "Stable"
+  },
+  "CAPEC-106": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: XSS through Log Files",
+   "status": "Deprecated"
+  },
+  "CAPEC-107": {
+   "attack_techniques": [],
+   "name": "Cross Site Tracing",
+   "status": "Draft"
+  },
+  "CAPEC-108": {
+   "attack_techniques": [],
+   "name": "Command Line Execution through SQL Injection",
+   "status": "Draft"
+  },
+  "CAPEC-109": {
+   "attack_techniques": [],
+   "name": "Object Relational Mapping Injection",
+   "status": "Draft"
+  },
+  "CAPEC-11": {
+   "attack_techniques": [
+    "T1036.006"
+   ],
+   "name": "Cause Web Server Misclassification",
+   "status": "Draft"
+  },
+  "CAPEC-110": {
+   "attack_techniques": [],
+   "name": "SQL Injection through SOAP Parameter Tampering",
+   "status": "Draft"
+  },
+  "CAPEC-111": {
+   "attack_techniques": [],
+   "name": "JSON Hijacking (aka JavaScript Hijacking)",
+   "status": "Draft"
+  },
+  "CAPEC-112": {
+   "attack_techniques": [
+    "T1110"
+   ],
+   "name": "Brute Force",
+   "status": "Draft"
+  },
+  "CAPEC-113": {
+   "attack_techniques": [],
+   "name": "Interface Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-114": {
+   "attack_techniques": [
+    "T1548"
+   ],
+   "name": "Authentication Abuse",
+   "status": "Draft"
+  },
+  "CAPEC-115": {
+   "attack_techniques": [
+    "T1548"
+   ],
+   "name": "Authentication Bypass",
+   "status": "Draft"
+  },
+  "CAPEC-116": {
+   "attack_techniques": [],
+   "name": "Excavation",
+   "status": "Stable"
+  },
+  "CAPEC-117": {
+   "attack_techniques": [],
+   "name": "Interception",
+   "status": "Stable"
+  },
+  "CAPEC-12": {
+   "attack_techniques": [],
+   "name": "Choosing Message Identifier",
+   "status": "Draft"
+  },
+  "CAPEC-120": {
+   "attack_techniques": [],
+   "name": "Double Encoding",
+   "status": "Draft"
+  },
+  "CAPEC-121": {
+   "attack_techniques": [],
+   "name": "Exploit Non-Production Interfaces",
+   "status": "Stable"
+  },
+  "CAPEC-122": {
+   "attack_techniques": [
+    "T1548"
+   ],
+   "name": "Privilege Abuse",
+   "status": "Draft"
+  },
+  "CAPEC-123": {
+   "attack_techniques": [],
+   "name": "Buffer Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-124": {
+   "attack_techniques": [],
+   "name": "Shared Resource Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-125": {
+   "attack_techniques": [
+    "T1498.001",
+    "T1499"
+   ],
+   "name": "Flooding",
+   "status": "Stable"
+  },
+  "CAPEC-126": {
+   "attack_techniques": [],
+   "name": "Path Traversal",
+   "status": "Draft"
+  },
+  "CAPEC-127": {
+   "attack_techniques": [
+    "T1083"
+   ],
+   "name": "Directory Indexing",
+   "status": "Draft"
+  },
+  "CAPEC-128": {
+   "attack_techniques": [],
+   "name": "Integer Attacks",
+   "status": "Draft"
+  },
+  "CAPEC-129": {
+   "attack_techniques": [],
+   "name": "Pointer Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-13": {
+   "attack_techniques": [
+    "T1562.003",
+    "T1574.006",
+    "T1574.007"
+   ],
+   "name": "Subverting Environment Variable Values",
+   "status": "Stable"
+  },
+  "CAPEC-130": {
+   "attack_techniques": [
+    "T1499.003"
+   ],
+   "name": "Excessive Allocation",
+   "status": "Stable"
+  },
+  "CAPEC-131": {
+   "attack_techniques": [
+    "T1499"
+   ],
+   "name": "Resource Leak Exposure",
+   "status": "Stable"
+  },
+  "CAPEC-132": {
+   "attack_techniques": [
+    "T1547.009"
+   ],
+   "name": "Symlink Attack",
+   "status": "Draft"
+  },
+  "CAPEC-133": {
+   "attack_techniques": [],
+   "name": "Try All Common Switches",
+   "status": "Draft"
+  },
+  "CAPEC-134": {
+   "attack_techniques": [],
+   "name": "Email Injection",
+   "status": "Draft"
+  },
+  "CAPEC-135": {
+   "attack_techniques": [],
+   "name": "Format String Injection",
+   "status": "Draft"
+  },
+  "CAPEC-136": {
+   "attack_techniques": [],
+   "name": "LDAP Injection",
+   "status": "Draft"
+  },
+  "CAPEC-137": {
+   "attack_techniques": [],
+   "name": "Parameter Injection",
+   "status": "Stable"
+  },
+  "CAPEC-138": {
+   "attack_techniques": [],
+   "name": "Reflection Injection",
+   "status": "Draft"
+  },
+  "CAPEC-139": {
+   "attack_techniques": [],
+   "name": "Relative Path Traversal",
+   "status": "Draft"
+  },
+  "CAPEC-14": {
+   "attack_techniques": [],
+   "name": "Client-side Injection-induced Buffer Overflow",
+   "status": "Draft"
+  },
+  "CAPEC-140": {
+   "attack_techniques": [],
+   "name": "Bypassing of Intermediate Forms in Multiple-Form Sets",
+   "status": "Draft"
+  },
+  "CAPEC-141": {
+   "attack_techniques": [
+    "T1557.002"
+   ],
+   "name": "Cache Poisoning",
+   "status": "Draft"
+  },
+  "CAPEC-142": {
+   "attack_techniques": [
+    "T1584.002"
+   ],
+   "name": "DNS Cache Poisoning",
+   "status": "Draft"
+  },
+  "CAPEC-143": {
+   "attack_techniques": [],
+   "name": "Detect Unpublicized Web Pages",
+   "status": "Draft"
+  },
+  "CAPEC-144": {
+   "attack_techniques": [],
+   "name": "Detect Unpublicized Web Services",
+   "status": "Draft"
+  },
+  "CAPEC-145": {
+   "attack_techniques": [],
+   "name": "Checksum Spoofing",
+   "status": "Draft"
+  },
+  "CAPEC-146": {
+   "attack_techniques": [],
+   "name": "XML Schema Poisoning",
+   "status": "Stable"
+  },
+  "CAPEC-147": {
+   "attack_techniques": [],
+   "name": "XML Ping of the Death",
+   "status": "Draft"
+  },
+  "CAPEC-148": {
+   "attack_techniques": [
+    "T1491"
+   ],
+   "name": "Content Spoofing",
+   "status": "Stable"
+  },
+  "CAPEC-149": {
+   "attack_techniques": [],
+   "name": "Explore for Predictable Temporary File Names",
+   "status": "Draft"
+  },
+  "CAPEC-15": {
+   "attack_techniques": [],
+   "name": "Command Delimiters",
+   "status": "Draft"
+  },
+  "CAPEC-150": {
+   "attack_techniques": [
+    "T1003",
+    "T1119",
+    "T1213",
+    "T1530",
+    "T1555",
+    "T1602"
+   ],
+   "name": "Collect Data from Common Resource Locations",
+   "status": "Draft"
+  },
+  "CAPEC-151": {
+   "attack_techniques": [],
+   "name": "Identity Spoofing",
+   "status": "Stable"
+  },
+  "CAPEC-153": {
+   "attack_techniques": [],
+   "name": "Input Data Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-154": {
+   "attack_techniques": [],
+   "name": "Resource Location Spoofing",
+   "status": "Stable"
+  },
+  "CAPEC-155": {
+   "attack_techniques": [],
+   "name": "Screen Temporary Files for Sensitive Information",
+   "status": "Draft"
+  },
+  "CAPEC-157": {
+   "attack_techniques": [],
+   "name": "Sniffing Attacks",
+   "status": "Draft"
+  },
+  "CAPEC-158": {
+   "attack_techniques": [
+    "T1040",
+    "T1111"
+   ],
+   "name": "Sniffing Network Traffic",
+   "status": "Draft"
+  },
+  "CAPEC-159": {
+   "attack_techniques": [
+    "T1574.008"
+   ],
+   "name": "Redirect Access to Libraries",
+   "status": "Stable"
+  },
+  "CAPEC-16": {
+   "attack_techniques": [],
+   "name": "Dictionary-based Password Attack",
+   "status": "Draft"
+  },
+  "CAPEC-160": {
+   "attack_techniques": [],
+   "name": "Exploit Script-Based APIs",
+   "status": "Draft"
+  },
+  "CAPEC-161": {
+   "attack_techniques": [],
+   "name": "Infrastructure Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-162": {
+   "attack_techniques": [],
+   "name": "Manipulating Hidden Fields",
+   "status": "Draft"
+  },
+  "CAPEC-163": {
+   "attack_techniques": [
+    "T1534",
+    "T1566.001",
+    "T1566.002",
+    "T1566.003",
+    "T1598.001",
+    "T1598.002",
+    "T1598.003"
+   ],
+   "name": "Spear Phishing",
+   "status": "Draft"
+  },
+  "CAPEC-164": {
+   "attack_techniques": [],
+   "name": "Mobile Phishing",
+   "status": "Stable"
+  },
+  "CAPEC-165": {
+   "attack_techniques": [
+    "T1036.003"
+   ],
+   "name": "File Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-166": {
+   "attack_techniques": [],
+   "name": "Force the System to Reset Values",
+   "status": "Draft"
+  },
+  "CAPEC-167": {
+   "attack_techniques": [],
+   "name": "White Box Reverse Engineering",
+   "status": "Draft"
+  },
+  "CAPEC-168": {
+   "attack_techniques": [],
+   "name": "Windows ::DATA Alternate Data Stream",
+   "status": "Draft"
+  },
+  "CAPEC-169": {
+   "attack_techniques": [
+    "T1217",
+    "T1592",
+    "T1595"
+   ],
+   "name": "Footprinting",
+   "status": "Stable"
+  },
+  "CAPEC-17": {
+   "attack_techniques": [
+    "T1574.005",
+    "T1574.010"
+   ],
+   "name": "Using Malicious Files",
+   "status": "Draft"
+  },
+  "CAPEC-170": {
+   "attack_techniques": [],
+   "name": "Web Application Fingerprinting",
+   "status": "Draft"
+  },
+  "CAPEC-171": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Variable Manipulation",
+   "status": "Deprecated"
+  },
+  "CAPEC-173": {
+   "attack_techniques": [],
+   "name": "Action Spoofing",
+   "status": "Stable"
+  },
+  "CAPEC-174": {
+   "attack_techniques": [],
+   "name": "Flash Parameter Injection",
+   "status": "Draft"
+  },
+  "CAPEC-175": {
+   "attack_techniques": [],
+   "name": "Code Inclusion",
+   "status": "Stable"
+  },
+  "CAPEC-176": {
+   "attack_techniques": [],
+   "name": "Configuration/Environment Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-177": {
+   "attack_techniques": [
+    "T1036"
+   ],
+   "name": "Create files with the same name as files protected with a higher classification",
+   "status": "Draft"
+  },
+  "CAPEC-178": {
+   "attack_techniques": [],
+   "name": "Cross-Site Flashing",
+   "status": "Draft"
+  },
+  "CAPEC-179": {
+   "attack_techniques": [],
+   "name": "Calling Micro-Services Directly",
+   "status": "Draft"
+  },
+  "CAPEC-18": {
+   "attack_techniques": [],
+   "name": "XSS Targeting Non-Script Elements",
+   "status": "Draft"
+  },
+  "CAPEC-180": {
+   "attack_techniques": [
+    "T1574.010"
+   ],
+   "name": "Exploiting Incorrectly Configured Access Control Security Levels",
+   "status": "Draft"
+  },
+  "CAPEC-181": {
+   "attack_techniques": [],
+   "name": "Flash File Overlay",
+   "status": "Draft"
+  },
+  "CAPEC-182": {
+   "attack_techniques": [],
+   "name": "Flash Injection",
+   "status": "Draft"
+  },
+  "CAPEC-183": {
+   "attack_techniques": [],
+   "name": "IMAP/SMTP Command Injection",
+   "status": "Draft"
+  },
+  "CAPEC-184": {
+   "attack_techniques": [],
+   "name": "Software Integrity Attack",
+   "status": "Draft"
+  },
+  "CAPEC-185": {
+   "attack_techniques": [],
+   "name": "Malicious Software Download",
+   "status": "Draft"
+  },
+  "CAPEC-186": {
+   "attack_techniques": [
+    "T1195.002"
+   ],
+   "name": "Malicious Software Update",
+   "status": "Draft"
+  },
+  "CAPEC-187": {
+   "attack_techniques": [
+    "T1072"
+   ],
+   "name": "Malicious Automated Software Update via Redirection",
+   "status": "Draft"
+  },
+  "CAPEC-188": {
+   "attack_techniques": [],
+   "name": "Reverse Engineering",
+   "status": "Stable"
+  },
+  "CAPEC-189": {
+   "attack_techniques": [],
+   "name": "Black Box Reverse Engineering",
+   "status": "Draft"
+  },
+  "CAPEC-19": {
+   "attack_techniques": [
+    "T1027.009",
+    "T1546.004",
+    "T1546.016"
+   ],
+   "name": "Embedding Scripts within Scripts",
+   "status": "Stable"
+  },
+  "CAPEC-190": {
+   "attack_techniques": [],
+   "name": "Reverse Engineer an Executable to Expose Assumed Hidden Functionality",
+   "status": "Draft"
+  },
+  "CAPEC-191": {
+   "attack_techniques": [
+    "T1552.001"
+   ],
+   "name": "Read Sensitive Constants Within an Executable",
+   "status": "Draft"
+  },
+  "CAPEC-192": {
+   "attack_techniques": [],
+   "name": "Protocol Analysis",
+   "status": "Stable"
+  },
+  "CAPEC-193": {
+   "attack_techniques": [],
+   "name": "PHP Remote File Inclusion",
+   "status": "Draft"
+  },
+  "CAPEC-194": {
+   "attack_techniques": [],
+   "name": "Fake the Source of Data",
+   "status": "Stable"
+  },
+  "CAPEC-195": {
+   "attack_techniques": [],
+   "name": "Principal Spoof",
+   "status": "Draft"
+  },
+  "CAPEC-196": {
+   "attack_techniques": [
+    "T1134.002",
+    "T1134.003",
+    "T1606"
+   ],
+   "name": "Session Credential Falsification through Forging",
+   "status": "Draft"
+  },
+  "CAPEC-197": {
+   "attack_techniques": [],
+   "name": "Exponential Data Expansion",
+   "status": "Draft"
+  },
+  "CAPEC-198": {
+   "attack_techniques": [],
+   "name": "XSS Targeting Error Pages",
+   "status": "Draft"
+  },
+  "CAPEC-199": {
+   "attack_techniques": [],
+   "name": "XSS Using Alternate Syntax",
+   "status": "Draft"
+  },
+  "CAPEC-2": {
+   "attack_techniques": [
+    "T1531"
+   ],
+   "name": "Inducing Account Lockout",
+   "status": "Draft"
+  },
+  "CAPEC-20": {
+   "attack_techniques": [],
+   "name": "Encryption Brute Forcing",
+   "status": "Draft"
+  },
+  "CAPEC-200": {
+   "attack_techniques": [],
+   "name": "Removal of filters: Input filters, output filters, data masking",
+   "status": "Draft"
+  },
+  "CAPEC-201": {
+   "attack_techniques": [],
+   "name": "Serialized Data External Linking",
+   "status": "Draft"
+  },
+  "CAPEC-202": {
+   "attack_techniques": [],
+   "name": "Create Malicious Client",
+   "status": "Draft"
+  },
+  "CAPEC-203": {
+   "attack_techniques": [
+    "T1112",
+    "T1647"
+   ],
+   "name": "Manipulate Registry Information",
+   "status": "Stable"
+  },
+  "CAPEC-204": {
+   "attack_techniques": [
+    "T1005"
+   ],
+   "name": "Lifting Sensitive Data Embedded in Cache",
+   "status": "Draft"
+  },
+  "CAPEC-205": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Lifting credential(s)/key material embedded in client distributions (thick or thin)",
+   "status": "Deprecated"
+  },
+  "CAPEC-206": {
+   "attack_techniques": [
+    "T1553.002"
+   ],
+   "name": "Signing Malicious Code",
+   "status": "Draft"
+  },
+  "CAPEC-207": {
+   "attack_techniques": [],
+   "name": "Removing Important Client Functionality",
+   "status": "Draft"
+  },
+  "CAPEC-208": {
+   "attack_techniques": [],
+   "name": "Removing/short-circuiting 'Purse' logic: removing/mutating 'cash' decrements",
+   "status": "Draft"
+  },
+  "CAPEC-209": {
+   "attack_techniques": [],
+   "name": "XSS Using MIME Type Mismatch",
+   "status": "Draft"
+  },
+  "CAPEC-21": {
+   "attack_techniques": [
+    "T1134",
+    "T1528",
+    "T1539"
+   ],
+   "name": "Exploitation of Trusted Identifiers",
+   "status": "Stable"
+  },
+  "CAPEC-211": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Leveraging web tools (e.g. Mozilla's GreaseMonkey, Firebug) to change application behavior",
+   "status": "Deprecated"
+  },
+  "CAPEC-212": {
+   "attack_techniques": [],
+   "name": "Functionality Misuse",
+   "status": "Stable"
+  },
+  "CAPEC-213": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Directory Traversal",
+   "status": "Deprecated"
+  },
+  "CAPEC-214": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Fuzzing for garnering J2EE/.NET-based stack traces, for application mapping",
+   "status": "Deprecated"
+  },
+  "CAPEC-215": {
+   "attack_techniques": [],
+   "name": "Fuzzing for application mapping",
+   "status": "Draft"
+  },
+  "CAPEC-216": {
+   "attack_techniques": [],
+   "name": "Communication Channel Manipulation",
+   "status": "Stable"
+  },
+  "CAPEC-217": {
+   "attack_techniques": [],
+   "name": "Exploiting Incorrectly Configured SSL/TLS",
+   "status": "Draft"
+  },
+  "CAPEC-218": {
+   "attack_techniques": [],
+   "name": "Spoofing of UDDI/ebXML Messages",
+   "status": "Draft"
+  },
+  "CAPEC-219": {
+   "attack_techniques": [],
+   "name": "XML Routing Detour Attacks",
+   "status": "Draft"
+  },
+  "CAPEC-22": {
+   "attack_techniques": [],
+   "name": "Exploiting Trust in Client",
+   "status": "Draft"
+  },
+  "CAPEC-220": {
+   "attack_techniques": [],
+   "name": "Client-Server Protocol Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-221": {
+   "attack_techniques": [],
+   "name": "Data Serialization External Entities Blowup",
+   "status": "Draft"
+  },
+  "CAPEC-222": {
+   "attack_techniques": [],
+   "name": "iFrame Overlay",
+   "status": "Draft"
+  },
+  "CAPEC-224": {
+   "attack_techniques": [],
+   "name": "Fingerprinting",
+   "status": "Stable"
+  },
+  "CAPEC-226": {
+   "attack_techniques": [],
+   "name": "Session Credential Falsification through Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-227": {
+   "attack_techniques": [
+    "T1499"
+   ],
+   "name": "Sustained Client Engagement",
+   "status": "Draft"
+  },
+  "CAPEC-228": {
+   "attack_techniques": [],
+   "name": "DTD Injection",
+   "status": "Draft"
+  },
+  "CAPEC-229": {
+   "attack_techniques": [],
+   "name": "Serialized Data Parameter Blowup",
+   "status": "Draft"
+  },
+  "CAPEC-23": {
+   "attack_techniques": [],
+   "name": "File Content Injection",
+   "status": "Draft"
+  },
+  "CAPEC-230": {
+   "attack_techniques": [],
+   "name": "Serialized Data with Nested Payloads",
+   "status": "Draft"
+  },
+  "CAPEC-231": {
+   "attack_techniques": [],
+   "name": "Oversized Serialized Data Payloads",
+   "status": "Draft"
+  },
+  "CAPEC-233": {
+   "attack_techniques": [
+    "T1548"
+   ],
+   "name": "Privilege Escalation",
+   "status": "Draft"
+  },
+  "CAPEC-234": {
+   "attack_techniques": [],
+   "name": "Hijacking a privileged process",
+   "status": "Draft"
+  },
+  "CAPEC-235": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Implementing a callback to system routine (old AWT Queue)",
+   "status": "Deprecated"
+  },
+  "CAPEC-236": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Catching exception throw/signal from privileged block",
+   "status": "Deprecated"
+  },
+  "CAPEC-237": {
+   "attack_techniques": [],
+   "name": "Escaping a Sandbox by Calling Code in Another Language",
+   "status": "Draft"
+  },
+  "CAPEC-238": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Using URL/codebase / G.A.C. (code source) to convince sandbox of privilege",
+   "status": "Deprecated"
+  },
+  "CAPEC-239": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Subversion of Authorization Checks: Cache Filtering, Programmatic Security, etc.",
+   "status": "Deprecated"
+  },
+  "CAPEC-24": {
+   "attack_techniques": [],
+   "name": "Filter Failure through Buffer Overflow",
+   "status": "Draft"
+  },
+  "CAPEC-240": {
+   "attack_techniques": [],
+   "name": "Resource Injection",
+   "status": "Stable"
+  },
+  "CAPEC-241": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Code Injection",
+   "status": "Deprecated"
+  },
+  "CAPEC-242": {
+   "attack_techniques": [],
+   "name": "Code Injection",
+   "status": "Stable"
+  },
+  "CAPEC-243": {
+   "attack_techniques": [],
+   "name": "XSS Targeting HTML Attributes",
+   "status": "Draft"
+  },
+  "CAPEC-244": {
+   "attack_techniques": [],
+   "name": "XSS Targeting URI Placeholders",
+   "status": "Draft"
+  },
+  "CAPEC-245": {
+   "attack_techniques": [],
+   "name": "XSS Using Doubled Characters",
+   "status": "Draft"
+  },
+  "CAPEC-246": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: XSS Using Flash",
+   "status": "Deprecated"
+  },
+  "CAPEC-247": {
+   "attack_techniques": [],
+   "name": "XSS Using Invalid Characters",
+   "status": "Draft"
+  },
+  "CAPEC-248": {
+   "attack_techniques": [],
+   "name": "Command Injection",
+   "status": "Stable"
+  },
+  "CAPEC-249": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Linux Terminal Injection",
+   "status": "Deprecated"
+  },
+  "CAPEC-25": {
+   "attack_techniques": [
+    "T1499.004"
+   ],
+   "name": "Forced Deadlock",
+   "status": "Stable"
+  },
+  "CAPEC-250": {
+   "attack_techniques": [],
+   "name": "XML Injection",
+   "status": "Draft"
+  },
+  "CAPEC-251": {
+   "attack_techniques": [
+    "T1055"
+   ],
+   "name": "Local Code Inclusion",
+   "status": "Stable"
+  },
+  "CAPEC-252": {
+   "attack_techniques": [],
+   "name": "PHP Local File Inclusion",
+   "status": "Draft"
+  },
+  "CAPEC-253": {
+   "attack_techniques": [],
+   "name": "Remote Code Inclusion",
+   "status": "Draft"
+  },
+  "CAPEC-254": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: DTD Injection in a SOAP Message",
+   "status": "Deprecated"
+  },
+  "CAPEC-256": {
+   "attack_techniques": [],
+   "name": "SOAP Array Overflow",
+   "status": "Draft"
+  },
+  "CAPEC-257": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Abuse of Transaction Data Structure",
+   "status": "Deprecated"
+  },
+  "CAPEC-258": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Passively Sniffing and Capturing Application Code Bound for an Authorized Client During Dynamic Update",
+   "status": "Deprecated"
+  },
+  "CAPEC-259": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Passively Sniffing and Capturing Application Code Bound for an Authorized Client During Patching",
+   "status": "Deprecated"
+  },
+  "CAPEC-26": {
+   "attack_techniques": [],
+   "name": "Leveraging Race Conditions",
+   "status": "Stable"
+  },
+  "CAPEC-260": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Passively Sniffing and Capturing Application Code Bound for an Authorized Client During Initial Distribution",
+   "status": "Deprecated"
+  },
+  "CAPEC-261": {
+   "attack_techniques": [],
+   "name": "Fuzzing for garnering other adjacent user/sensitive data",
+   "status": "Draft"
+  },
+  "CAPEC-263": {
+   "attack_techniques": [],
+   "name": "Force Use of Corrupted Files",
+   "status": "Draft"
+  },
+  "CAPEC-264": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Environment Variable Manipulation",
+   "status": "Deprecated"
+  },
+  "CAPEC-265": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Global variable manipulation",
+   "status": "Deprecated"
+  },
+  "CAPEC-266": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Manipulate Canonicalization",
+   "status": "Deprecated"
+  },
+  "CAPEC-267": {
+   "attack_techniques": [
+    "T1027"
+   ],
+   "name": "Leverage Alternate Encoding",
+   "status": "Draft"
+  },
+  "CAPEC-268": {
+   "attack_techniques": [
+    "T1070",
+    "T1562.002",
+    "T1562.003",
+    "T1562.008"
+   ],
+   "name": "Audit Log Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-269": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Registry Manipulation",
+   "status": "Deprecated"
+  },
+  "CAPEC-27": {
+   "attack_techniques": [],
+   "name": "Leveraging Race Conditions via Symbolic Links",
+   "status": "Draft"
+  },
+  "CAPEC-270": {
+   "attack_techniques": [
+    "T1547.001",
+    "T1547.014"
+   ],
+   "name": "Modification of Registry Run Keys",
+   "status": "Stable"
+  },
+  "CAPEC-271": {
+   "attack_techniques": [],
+   "name": "Schema Poisoning",
+   "status": "Draft"
+  },
+  "CAPEC-272": {
+   "attack_techniques": [],
+   "name": "Protocol Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-273": {
+   "attack_techniques": [],
+   "name": "HTTP Response Smuggling",
+   "status": "Stable"
+  },
+  "CAPEC-274": {
+   "attack_techniques": [],
+   "name": "HTTP Verb Tampering",
+   "status": "Draft"
+  },
+  "CAPEC-275": {
+   "attack_techniques": [],
+   "name": "DNS Rebinding",
+   "status": "Draft"
+  },
+  "CAPEC-276": {
+   "attack_techniques": [],
+   "name": "Inter-component Protocol Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-277": {
+   "attack_techniques": [],
+   "name": "Data Interchange Protocol Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-278": {
+   "attack_techniques": [],
+   "name": "Web Services Protocol Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-279": {
+   "attack_techniques": [],
+   "name": "SOAP Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-28": {
+   "attack_techniques": [],
+   "name": "Fuzzing",
+   "status": "Draft"
+  },
+  "CAPEC-280": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: SOAP Parameter Tampering",
+   "status": "Deprecated"
+  },
+  "CAPEC-285": {
+   "attack_techniques": [],
+   "name": "ICMP Echo Request Ping",
+   "status": "Stable"
+  },
+  "CAPEC-287": {
+   "attack_techniques": [],
+   "name": "TCP SYN Scan",
+   "status": "Stable"
+  },
+  "CAPEC-288": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: ICMP Echo Request Ping",
+   "status": "Deprecated"
+  },
+  "CAPEC-289": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Infrastructure-based footprinting",
+   "status": "Deprecated"
+  },
+  "CAPEC-29": {
+   "attack_techniques": [],
+   "name": "Leveraging Time-of-Check and Time-of-Use (TOCTOU) Race Conditions",
+   "status": "Draft"
+  },
+  "CAPEC-290": {
+   "attack_techniques": [],
+   "name": "Enumerate Mail Exchange (MX) Records",
+   "status": "Stable"
+  },
+  "CAPEC-291": {
+   "attack_techniques": [],
+   "name": "DNS Zone Transfers",
+   "status": "Stable"
+  },
+  "CAPEC-292": {
+   "attack_techniques": [
+    "T1018"
+   ],
+   "name": "Host Discovery",
+   "status": "Stable"
+  },
+  "CAPEC-293": {
+   "attack_techniques": [],
+   "name": "Traceroute Route Enumeration",
+   "status": "Stable"
+  },
+  "CAPEC-294": {
+   "attack_techniques": [],
+   "name": "ICMP Address Mask Request",
+   "status": "Stable"
+  },
+  "CAPEC-295": {
+   "attack_techniques": [
+    "T1124"
+   ],
+   "name": "Timestamp Request",
+   "status": "Stable"
+  },
+  "CAPEC-296": {
+   "attack_techniques": [],
+   "name": "ICMP Information Request",
+   "status": "Stable"
+  },
+  "CAPEC-297": {
+   "attack_techniques": [],
+   "name": "TCP ACK Ping",
+   "status": "Stable"
+  },
+  "CAPEC-298": {
+   "attack_techniques": [],
+   "name": "UDP Ping",
+   "status": "Stable"
+  },
+  "CAPEC-299": {
+   "attack_techniques": [],
+   "name": "TCP SYN Ping",
+   "status": "Stable"
+  },
+  "CAPEC-3": {
+   "attack_techniques": [],
+   "name": "Using Leading 'Ghost' Character Sequences to Bypass Input Filters",
+   "status": "Draft"
+  },
+  "CAPEC-30": {
+   "attack_techniques": [
+    "T1055.003"
+   ],
+   "name": "Hijacking a Privileged Thread of Execution",
+   "status": "Draft"
+  },
+  "CAPEC-300": {
+   "attack_techniques": [
+    "T1046"
+   ],
+   "name": "Port Scanning",
+   "status": "Stable"
+  },
+  "CAPEC-301": {
+   "attack_techniques": [],
+   "name": "TCP Connect Scan",
+   "status": "Stable"
+  },
+  "CAPEC-302": {
+   "attack_techniques": [],
+   "name": "TCP FIN Scan",
+   "status": "Stable"
+  },
+  "CAPEC-303": {
+   "attack_techniques": [],
+   "name": "TCP Xmas Scan",
+   "status": "Stable"
+  },
+  "CAPEC-304": {
+   "attack_techniques": [],
+   "name": "TCP Null Scan",
+   "status": "Stable"
+  },
+  "CAPEC-305": {
+   "attack_techniques": [],
+   "name": "TCP ACK Scan",
+   "status": "Stable"
+  },
+  "CAPEC-306": {
+   "attack_techniques": [],
+   "name": "TCP Window Scan",
+   "status": "Stable"
+  },
+  "CAPEC-307": {
+   "attack_techniques": [],
+   "name": "TCP RPC Scan",
+   "status": "Stable"
+  },
+  "CAPEC-308": {
+   "attack_techniques": [],
+   "name": "UDP Scan",
+   "status": "Stable"
+  },
+  "CAPEC-309": {
+   "attack_techniques": [
+    "T1016",
+    "T1049",
+    "T1590"
+   ],
+   "name": "Network Topology Mapping",
+   "status": "Draft"
+  },
+  "CAPEC-31": {
+   "attack_techniques": [
+    "T1539"
+   ],
+   "name": "Accessing/Intercepting/Modifying HTTP Cookies",
+   "status": "Draft"
+  },
+  "CAPEC-310": {
+   "attack_techniques": [],
+   "name": "Scanning for Vulnerable Software",
+   "status": "Draft"
+  },
+  "CAPEC-311": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: OS Fingerprinting",
+   "status": "Deprecated"
+  },
+  "CAPEC-312": {
+   "attack_techniques": [
+    "T1082"
+   ],
+   "name": "Active OS Fingerprinting",
+   "status": "Stable"
+  },
+  "CAPEC-313": {
+   "attack_techniques": [
+    "T1082"
+   ],
+   "name": "Passive OS Fingerprinting",
+   "status": "Stable"
+  },
+  "CAPEC-314": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: IP Fingerprinting Probes",
+   "status": "Deprecated"
+  },
+  "CAPEC-315": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: TCP/IP Fingerprinting Probes",
+   "status": "Deprecated"
+  },
+  "CAPEC-316": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: ICMP Fingerprinting Probes",
+   "status": "Deprecated"
+  },
+  "CAPEC-317": {
+   "attack_techniques": [],
+   "name": "IP ID Sequencing Probe",
+   "status": "Stable"
+  },
+  "CAPEC-318": {
+   "attack_techniques": [],
+   "name": "IP 'ID' Echoed Byte-Order Probe",
+   "status": "Stable"
+  },
+  "CAPEC-319": {
+   "attack_techniques": [],
+   "name": "IP (DF) 'Don't Fragment Bit' Echoing Probe",
+   "status": "Stable"
+  },
+  "CAPEC-32": {
+   "attack_techniques": [],
+   "name": "XSS Through HTTP Query Strings",
+   "status": "Draft"
+  },
+  "CAPEC-320": {
+   "attack_techniques": [],
+   "name": "TCP Timestamp Probe",
+   "status": "Stable"
+  },
+  "CAPEC-321": {
+   "attack_techniques": [],
+   "name": "TCP Sequence Number Probe",
+   "status": "Stable"
+  },
+  "CAPEC-322": {
+   "attack_techniques": [],
+   "name": "TCP (ISN) Greatest Common Divisor Probe",
+   "status": "Stable"
+  },
+  "CAPEC-323": {
+   "attack_techniques": [],
+   "name": "TCP (ISN) Counter Rate Probe",
+   "status": "Stable"
+  },
+  "CAPEC-324": {
+   "attack_techniques": [],
+   "name": "TCP (ISN) Sequence Predictability Probe",
+   "status": "Stable"
+  },
+  "CAPEC-325": {
+   "attack_techniques": [],
+   "name": "TCP Congestion Control Flag (ECN) Probe",
+   "status": "Stable"
+  },
+  "CAPEC-326": {
+   "attack_techniques": [],
+   "name": "TCP Initial Window Size Probe",
+   "status": "Stable"
+  },
+  "CAPEC-327": {
+   "attack_techniques": [],
+   "name": "TCP Options Probe",
+   "status": "Stable"
+  },
+  "CAPEC-328": {
+   "attack_techniques": [],
+   "name": "TCP 'RST' Flag Checksum Probe",
+   "status": "Stable"
+  },
+  "CAPEC-329": {
+   "attack_techniques": [],
+   "name": "ICMP Error Message Quoting Probe",
+   "status": "Stable"
+  },
+  "CAPEC-33": {
+   "attack_techniques": [],
+   "name": "HTTP Request Smuggling",
+   "status": "Stable"
+  },
+  "CAPEC-330": {
+   "attack_techniques": [],
+   "name": "ICMP Error Message Echoing Integrity Probe",
+   "status": "Stable"
+  },
+  "CAPEC-331": {
+   "attack_techniques": [],
+   "name": "ICMP IP Total Length Field Probe",
+   "status": "Stable"
+  },
+  "CAPEC-332": {
+   "attack_techniques": [],
+   "name": "ICMP IP 'ID' Field Error Message Probe",
+   "status": "Stable"
+  },
+  "CAPEC-34": {
+   "attack_techniques": [],
+   "name": "HTTP Response Splitting",
+   "status": "Stable"
+  },
+  "CAPEC-35": {
+   "attack_techniques": [
+    "T1027.006",
+    "T1027.009",
+    "T1564.009"
+   ],
+   "name": "Leverage Executable Code in Non-Executable Files",
+   "status": "Draft"
+  },
+  "CAPEC-36": {
+   "attack_techniques": [],
+   "name": "Using Unpublished Interfaces or Functionality",
+   "status": "Draft"
+  },
+  "CAPEC-37": {
+   "attack_techniques": [
+    "T1005",
+    "T1552.004"
+   ],
+   "name": "Retrieve Embedded Sensitive Data",
+   "status": "Draft"
+  },
+  "CAPEC-38": {
+   "attack_techniques": [
+    "T1574.007",
+    "T1574.009"
+   ],
+   "name": "Leveraging/Manipulating Configuration File Search Paths",
+   "status": "Draft"
+  },
+  "CAPEC-383": {
+   "attack_techniques": [
+    "T1056.004"
+   ],
+   "name": "Harvesting Information via API Event Monitoring",
+   "status": "Draft"
+  },
+  "CAPEC-384": {
+   "attack_techniques": [],
+   "name": "Application API Message Manipulation via Man-in-the-Middle",
+   "status": "Draft"
+  },
+  "CAPEC-385": {
+   "attack_techniques": [],
+   "name": "Transaction or Event Tampering via Application API Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-386": {
+   "attack_techniques": [],
+   "name": "Application API Navigation Remapping",
+   "status": "Draft"
+  },
+  "CAPEC-387": {
+   "attack_techniques": [],
+   "name": "Navigation Remapping To Propagate Malicious Content",
+   "status": "Draft"
+  },
+  "CAPEC-388": {
+   "attack_techniques": [],
+   "name": "Application API Button Hijacking",
+   "status": "Draft"
+  },
+  "CAPEC-389": {
+   "attack_techniques": [],
+   "name": "Content Spoofing Via Application API Manipulation",
+   "status": "Draft"
+  },
+  "CAPEC-39": {
+   "attack_techniques": [],
+   "name": "Manipulating Opaque Client-based Data Tokens",
+   "status": "Draft"
+  },
+  "CAPEC-390": {
+   "attack_techniques": [],
+   "name": "Bypassing Physical Security",
+   "status": "Draft"
+  },
+  "CAPEC-391": {
+   "attack_techniques": [],
+   "name": "Bypassing Physical Locks",
+   "status": "Draft"
+  },
+  "CAPEC-392": {
+   "attack_techniques": [],
+   "name": "Lock Bumping",
+   "status": "Draft"
+  },
+  "CAPEC-393": {
+   "attack_techniques": [],
+   "name": "Lock Picking",
+   "status": "Draft"
+  },
+  "CAPEC-394": {
+   "attack_techniques": [],
+   "name": "Using a Snap Gun Lock to Force a Lock",
+   "status": "Draft"
+  },
+  "CAPEC-395": {
+   "attack_techniques": [],
+   "name": "Bypassing Electronic Locks and Access Controls",
+   "status": "Draft"
+  },
+  "CAPEC-396": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Bypassing Card or Badge-Based Systems",
+   "status": "Deprecated"
+  },
+  "CAPEC-397": {
+   "attack_techniques": [],
+   "name": "Cloning Magnetic Strip Cards",
+   "status": "Draft"
+  },
+  "CAPEC-398": {
+   "attack_techniques": [],
+   "name": "Magnetic Strip Card Brute Force Attacks",
+   "status": "Draft"
+  },
+  "CAPEC-399": {
+   "attack_techniques": [],
+   "name": "Cloning RFID Cards or Chips",
+   "status": "Draft"
+  },
+  "CAPEC-4": {
+   "attack_techniques": [],
+   "name": "Using Alternative IP Address Encodings",
+   "status": "Draft"
+  },
+  "CAPEC-40": {
+   "attack_techniques": [],
+   "name": "Manipulating Writeable Terminal Devices",
+   "status": "Draft"
+  },
+  "CAPEC-400": {
+   "attack_techniques": [],
+   "name": "RFID Chip Deactivation or Destruction",
+   "status": "Draft"
+  },
+  "CAPEC-401": {
+   "attack_techniques": [],
+   "name": "Physically Hacking Hardware",
+   "status": "Stable"
+  },
+  "CAPEC-402": {
+   "attack_techniques": [],
+   "name": "Bypassing ATA Password Security",
+   "status": "Draft"
+  },
+  "CAPEC-404": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Social Information Gathering Attacks",
+   "status": "Deprecated"
+  },
+  "CAPEC-405": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Social Information Gathering via Research",
+   "status": "Deprecated"
+  },
+  "CAPEC-406": {
+   "attack_techniques": [],
+   "name": "Dumpster Diving",
+   "status": "Stable"
+  },
+  "CAPEC-407": {
+   "attack_techniques": [
+    "T1589"
+   ],
+   "name": "Pretexting",
+   "status": "Draft"
+  },
+  "CAPEC-408": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Information Gathering from Traditional Sources",
+   "status": "Deprecated"
+  },
+  "CAPEC-409": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Information Gathering from Non-Traditional Sources",
+   "status": "Deprecated"
+  },
+  "CAPEC-41": {
+   "attack_techniques": [],
+   "name": "Using Meta-characters in E-mail Headers to Inject Malicious Payloads",
+   "status": "Draft"
+  },
+  "CAPEC-410": {
+   "attack_techniques": [],
+   "name": "Information Elicitation",
+   "status": "Draft"
+  },
+  "CAPEC-411": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Pretexting",
+   "status": "Deprecated"
+  },
+  "CAPEC-412": {
+   "attack_techniques": [],
+   "name": "Pretexting via Customer Service",
+   "status": "Draft"
+  },
+  "CAPEC-413": {
+   "attack_techniques": [],
+   "name": "Pretexting via Tech Support",
+   "status": "Draft"
+  },
+  "CAPEC-414": {
+   "attack_techniques": [],
+   "name": "Pretexting via Delivery Person",
+   "status": "Draft"
+  },
+  "CAPEC-415": {
+   "attack_techniques": [],
+   "name": "Pretexting via Phone",
+   "status": "Draft"
+  },
+  "CAPEC-416": {
+   "attack_techniques": [],
+   "name": "Manipulate Human Behavior",
+   "status": "Stable"
+  },
+  "CAPEC-417": {
+   "attack_techniques": [],
+   "name": "Influence Perception",
+   "status": "Stable"
+  },
+  "CAPEC-418": {
+   "attack_techniques": [],
+   "name": "Influence Perception of Reciprocation",
+   "status": "Draft"
+  },
+  "CAPEC-419": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Target Influence via Perception of Concession",
+   "status": "Deprecated"
+  },
+  "CAPEC-42": {
+   "attack_techniques": [],
+   "name": "MIME Conversion",
+   "status": "Draft"
+  },
+  "CAPEC-420": {
+   "attack_techniques": [],
+   "name": "Influence Perception of Scarcity",
+   "status": "Stable"
+  },
+  "CAPEC-421": {
+   "attack_techniques": [],
+   "name": "Influence Perception of Authority",
+   "status": "Stable"
+  },
+  "CAPEC-422": {
+   "attack_techniques": [],
+   "name": "Influence Perception of Commitment and Consistency",
+   "status": "Stable"
+  },
+  "CAPEC-423": {
+   "attack_techniques": [],
+   "name": "Influence Perception of Liking",
+   "status": "Stable"
+  },
+  "CAPEC-424": {
+   "attack_techniques": [],
+   "name": "Influence Perception of Consensus or Social Proof",
+   "status": "Draft"
+  },
+  "CAPEC-425": {
+   "attack_techniques": [],
+   "name": "Target Influence via Framing",
+   "status": "Draft"
+  },
+  "CAPEC-426": {
+   "attack_techniques": [],
+   "name": "Influence via Incentives",
+   "status": "Stable"
+  },
+  "CAPEC-427": {
+   "attack_techniques": [],
+   "name": "Influence via Psychological Principles",
+   "status": "Draft"
+  },
+  "CAPEC-428": {
+   "attack_techniques": [],
+   "name": "Influence via Modes of Thinking",
+   "status": "Draft"
+  },
+  "CAPEC-429": {
+   "attack_techniques": [],
+   "name": "Target Influence via Eye Cues",
+   "status": "Draft"
+  },
+  "CAPEC-43": {
+   "attack_techniques": [],
+   "name": "Exploiting Multiple Input Interpretation Layers",
+   "status": "Draft"
+  },
+  "CAPEC-430": {
+   "attack_techniques": [],
+   "name": "DEPRECATED:  Target Influence via Micro-Expressions",
+   "status": "Deprecated"
+  },
+  "CAPEC-431": {
+   "attack_techniques": [],
+   "name": "DEPRECATED:  Target Influence via Neuro-Linguistic Programming (NLP)",
+   "status": "Deprecated"
+  },
+  "CAPEC-432": {
+   "attack_techniques": [],
+   "name": "DEPRECATED:  Target Influence via Voice in NLP",
+   "status": "Deprecated"
+  },
+  "CAPEC-433": {
+   "attack_techniques": [],
+   "name": "Target Influence via The Human Buffer Overflow",
+   "status": "Draft"
+  },
+  "CAPEC-434": {
+   "attack_techniques": [],
+   "name": "Target Influence via Interview and Interrogation",
+   "status": "Draft"
+  },
+  "CAPEC-435": {
+   "attack_techniques": [],
+   "name": "Target Influence via Instant Rapport",
+   "status": "Draft"
+  },
+  "CAPEC-438": {
+   "attack_techniques": [
+    "T1195"
+   ],
+   "name": "Modification During Manufacture",
+   "status": "Draft"
+  },
+  "CAPEC-439": {
+   "attack_techniques": [
+    "T1195"
+   ],
+   "name": "Manipulation During Distribution",
+   "status": "Draft"
+  },
+  "CAPEC-44": {
+   "attack_techniques": [],
+   "name": "Overflow Binary Resource File",
+   "status": "Draft"
+  },
+  "CAPEC-440": {
+   "attack_techniques": [
+    "T1195.003",
+    "T1200"
+   ],
+   "name": "Hardware Integrity Attack",
+   "status": "Stable"
+  },
+  "CAPEC-441": {
+   "attack_techniques": [],
+   "name": "Malicious Logic Insertion",
+   "status": "Stable"
+  },
+  "CAPEC-442": {
+   "attack_techniques": [
+    "T1195.001",
+    "T1195.002"
+   ],
+   "name": "Infected Software",
+   "status": "Stable"
+  },
+  "CAPEC-443": {
+   "attack_techniques": [
+    "T1195.002",
+    "T1195.003"
+   ],
+   "name": "Malicious Logic Inserted Into Product by Authorized Developer",
+   "status": "Stable"
+  },
+  "CAPEC-444": {
+   "attack_techniques": [],
+   "name": "Development Alteration",
+   "status": "Stable"
+  },
+  "CAPEC-445": {
+   "attack_techniques": [
+    "T1195.001"
+   ],
+   "name": "Malicious Logic Insertion into Product Software via Configuration Management Manipulation",
+   "status": "Stable"
+  },
+  "CAPEC-446": {
+   "attack_techniques": [
+    "T1195"
+   ],
+   "name": "Malicious Logic Insertion into Product via Inclusion of Third-Party Component",
+   "status": "Stable"
+  },
+  "CAPEC-447": {
+   "attack_techniques": [],
+   "name": "Design Alteration",
+   "status": "Stable"
+  },
+  "CAPEC-448": {
+   "attack_techniques": [
+    "T1027.009"
+   ],
+   "name": "Embed Virus into DLL",
+   "status": "Stable"
+  },
+  "CAPEC-449": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Malware Propagation via USB Stick",
+   "status": "Deprecated"
+  },
+  "CAPEC-45": {
+   "attack_techniques": [],
+   "name": "Buffer Overflow via Symbolic Links",
+   "status": "Draft"
+  },
+  "CAPEC-450": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Malware Propagation via USB U3 Autorun",
+   "status": "Deprecated"
+  },
+  "CAPEC-451": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Malware Propagation via Infected Peripheral Device",
+   "status": "Deprecated"
+  },
+  "CAPEC-452": {
+   "attack_techniques": [],
+   "name": "Infected Hardware",
+   "status": "Stable"
+  },
+  "CAPEC-453": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Malicious Logic Insertion via Counterfeit Hardware",
+   "status": "Deprecated"
+  },
+  "CAPEC-454": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Modification of Existing Components with Counterfeit Hardware",
+   "status": "Deprecated"
+  },
+  "CAPEC-455": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Malicious Logic Insertion via Inclusion of Counterfeit Hardware Components",
+   "status": "Deprecated"
+  },
+  "CAPEC-456": {
+   "attack_techniques": [],
+   "name": "Infected Memory",
+   "status": "Stable"
+  },
+  "CAPEC-457": {
+   "attack_techniques": [
+    "T1091",
+    "T1092"
+   ],
+   "name": "USB Memory Attacks",
+   "status": "Draft"
+  },
+  "CAPEC-458": {
+   "attack_techniques": [],
+   "name": "Flash Memory Attacks",
+   "status": "Draft"
+  },
+  "CAPEC-459": {
+   "attack_techniques": [],
+   "name": "Creating a Rogue Certification Authority Certificate",
+   "status": "Draft"
+  },
+  "CAPEC-46": {
+   "attack_techniques": [],
+   "name": "Overflow Variables and Tags",
+   "status": "Draft"
+  },
+  "CAPEC-460": {
+   "attack_techniques": [],
+   "name": "HTTP Parameter Pollution (HPP)",
+   "status": "Draft"
+  },
+  "CAPEC-461": {
+   "attack_techniques": [],
+   "name": "Web Services API Signature Forgery Leveraging Hash Function Extension Weakness",
+   "status": "Draft"
+  },
+  "CAPEC-462": {
+   "attack_techniques": [],
+   "name": "Cross-Domain Search Timing",
+   "status": "Draft"
+  },
+  "CAPEC-463": {
+   "attack_techniques": [],
+   "name": "Padding Oracle Crypto Attack",
+   "status": "Draft"
+  },
+  "CAPEC-464": {
+   "attack_techniques": [
+    "T1606.001"
+   ],
+   "name": "Evercookie",
+   "status": "Draft"
+  },
+  "CAPEC-465": {
+   "attack_techniques": [
+    "T1090.001"
+   ],
+   "name": "Transparent Proxy Abuse",
+   "status": "Draft"
+  },
+  "CAPEC-466": {
+   "attack_techniques": [],
+   "name": "Leveraging Active Adversary in the Middle Attacks to Bypass Same Origin Policy",
+   "status": "Draft"
+  },
+  "CAPEC-467": {
+   "attack_techniques": [],
+   "name": "Cross Site Identification",
+   "status": "Draft"
+  },
+  "CAPEC-468": {
+   "attack_techniques": [],
+   "name": "Generic Cross-Browser Cross-Domain Theft",
+   "status": "Draft"
+  },
+  "CAPEC-469": {
+   "attack_techniques": [
+    "T1499.002"
+   ],
+   "name": "HTTP DoS",
+   "status": "Draft"
+  },
+  "CAPEC-47": {
+   "attack_techniques": [],
+   "name": "Buffer Overflow via Parameter Expansion",
+   "status": "Draft"
+  },
+  "CAPEC-470": {
+   "attack_techniques": [],
+   "name": "Expanding Control over the Operating System from the Database",
+   "status": "Draft"
+  },
+  "CAPEC-471": {
+   "attack_techniques": [
+    "T1574.001",
+    "T1574.004",
+    "T1574.008"
+   ],
+   "name": "Search Order Hijacking",
+   "status": "Stable"
+  },
+  "CAPEC-472": {
+   "attack_techniques": [],
+   "name": "Browser Fingerprinting",
+   "status": "Draft"
+  },
+  "CAPEC-473": {
+   "attack_techniques": [
+    "T1036.001",
+    "T1553.002"
+   ],
+   "name": "Signature Spoof",
+   "status": "Draft"
+  },
+  "CAPEC-474": {
+   "attack_techniques": [
+    "T1552.004"
+   ],
+   "name": "Signature Spoofing by Key Theft",
+   "status": "Draft"
+  },
+  "CAPEC-475": {
+   "attack_techniques": [],
+   "name": "Signature Spoofing by Improper Validation",
+   "status": "Draft"
+  },
+  "CAPEC-476": {
+   "attack_techniques": [],
+   "name": "Signature Spoofing by Misrepresentation",
+   "status": "Draft"
+  },
+  "CAPEC-477": {
+   "attack_techniques": [],
+   "name": "Signature Spoofing by Mixing Signed and Unsigned Content",
+   "status": "Draft"
+  },
+  "CAPEC-478": {
+   "attack_techniques": [
+    "T1543.003",
+    "T1574.011"
+   ],
+   "name": "Modification of Windows Service Configuration",
+   "status": "Usable"
+  },
+  "CAPEC-479": {
+   "attack_techniques": [
+    "T1553.004"
+   ],
+   "name": "Malicious Root Certificate",
+   "status": "Stable"
+  },
+  "CAPEC-48": {
+   "attack_techniques": [],
+   "name": "Passing Local Filenames to Functions That Expect a URL",
+   "status": "Draft"
+  },
+  "CAPEC-480": {
+   "attack_techniques": [
+    "T1611"
+   ],
+   "name": "Escaping Virtualization",
+   "status": "Draft"
+  },
+  "CAPEC-481": {
+   "attack_techniques": [
+    "T1090.004"
+   ],
+   "name": "Contradictory Destinations in Traffic Routing Schemes",
+   "status": "Draft"
+  },
+  "CAPEC-482": {
+   "attack_techniques": [
+    "T1498.001",
+    "T1499.001",
+    "T1499.002"
+   ],
+   "name": "TCP Flood",
+   "status": "Draft"
+  },
+  "CAPEC-484": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: XML Client-Side Attack",
+   "status": "Deprecated"
+  },
+  "CAPEC-485": {
+   "attack_techniques": [
+    "T1552.004"
+   ],
+   "name": "Signature Spoofing by Key Recreation",
+   "status": "Draft"
+  },
+  "CAPEC-486": {
+   "attack_techniques": [],
+   "name": "UDP Flood",
+   "status": "Draft"
+  },
+  "CAPEC-487": {
+   "attack_techniques": [],
+   "name": "ICMP Flood",
+   "status": "Draft"
+  },
+  "CAPEC-488": {
+   "attack_techniques": [
+    "T1499.002"
+   ],
+   "name": "HTTP Flood",
+   "status": "Draft"
+  },
+  "CAPEC-489": {
+   "attack_techniques": [
+    "T1499.002"
+   ],
+   "name": "SSL Flood",
+   "status": "Draft"
+  },
+  "CAPEC-49": {
+   "attack_techniques": [
+    "T1110.001"
+   ],
+   "name": "Password Brute Forcing",
+   "status": "Draft"
+  },
+  "CAPEC-490": {
+   "attack_techniques": [
+    "T1498.002"
+   ],
+   "name": "Amplification",
+   "status": "Draft"
+  },
+  "CAPEC-491": {
+   "attack_techniques": [],
+   "name": "Quadratic Data Expansion",
+   "status": "Draft"
+  },
+  "CAPEC-492": {
+   "attack_techniques": [],
+   "name": "Regular Expression Exponential Blowup",
+   "status": "Draft"
+  },
+  "CAPEC-493": {
+   "attack_techniques": [],
+   "name": "SOAP Array Blowup",
+   "status": "Draft"
+  },
+  "CAPEC-494": {
+   "attack_techniques": [],
+   "name": "TCP Fragmentation",
+   "status": "Draft"
+  },
+  "CAPEC-495": {
+   "attack_techniques": [],
+   "name": "UDP Fragmentation",
+   "status": "Draft"
+  },
+  "CAPEC-496": {
+   "attack_techniques": [],
+   "name": "ICMP Fragmentation",
+   "status": "Draft"
+  },
+  "CAPEC-497": {
+   "attack_techniques": [
+    "T1083"
+   ],
+   "name": "File Discovery",
+   "status": "Draft"
+  },
+  "CAPEC-498": {
+   "attack_techniques": [],
+   "name": "Probe iOS Screenshots",
+   "status": "Draft"
+  },
+  "CAPEC-499": {
+   "attack_techniques": [],
+   "name": "Android Intent Intercept",
+   "status": "Draft"
+  },
+  "CAPEC-5": {
+   "attack_techniques": [],
+   "name": "Blue Boxing",
+   "status": "Obsolete"
+  },
+  "CAPEC-50": {
+   "attack_techniques": [],
+   "name": "Password Recovery Exploitation",
+   "status": "Draft"
+  },
+  "CAPEC-500": {
+   "attack_techniques": [],
+   "name": "WebView Injection",
+   "status": "Draft"
+  },
+  "CAPEC-501": {
+   "attack_techniques": [],
+   "name": "Android Activity Hijack",
+   "status": "Draft"
+  },
+  "CAPEC-502": {
+   "attack_techniques": [],
+   "name": "Intent Spoof",
+   "status": "Draft"
+  },
+  "CAPEC-503": {
+   "attack_techniques": [],
+   "name": "WebView Exposure",
+   "status": "Draft"
+  },
+  "CAPEC-504": {
+   "attack_techniques": [
+    "T1036.004"
+   ],
+   "name": "Task Impersonation",
+   "status": "Stable"
+  },
+  "CAPEC-505": {
+   "attack_techniques": [],
+   "name": "Scheme Squatting",
+   "status": "Draft"
+  },
+  "CAPEC-506": {
+   "attack_techniques": [],
+   "name": "Tapjacking",
+   "status": "Draft"
+  },
+  "CAPEC-507": {
+   "attack_techniques": [],
+   "name": "Physical Theft",
+   "status": "Draft"
+  },
+  "CAPEC-508": {
+   "attack_techniques": [],
+   "name": "Shoulder Surfing",
+   "status": "Draft"
+  },
+  "CAPEC-509": {
+   "attack_techniques": [
+    "T1558.003"
+   ],
+   "name": "Kerberoasting",
+   "status": "Stable"
+  },
+  "CAPEC-51": {
+   "attack_techniques": [],
+   "name": "Poison Web Service Registry",
+   "status": "Draft"
+  },
+  "CAPEC-510": {
+   "attack_techniques": [],
+   "name": "SaaS User Request Forgery",
+   "status": "Draft"
+  },
+  "CAPEC-511": {
+   "attack_techniques": [
+    "T1195.001"
+   ],
+   "name": "Infiltration of Software Development Environment",
+   "status": "Draft"
+  },
+  "CAPEC-516": {
+   "attack_techniques": [
+    "T1195.003"
+   ],
+   "name": "Hardware Component Substitution During Baselining",
+   "status": "Draft"
+  },
+  "CAPEC-517": {
+   "attack_techniques": [],
+   "name": "Documentation Alteration to Circumvent Dial-down",
+   "status": "Draft"
+  },
+  "CAPEC-518": {
+   "attack_techniques": [],
+   "name": "Documentation Alteration to Produce Under-performing Systems",
+   "status": "Draft"
+  },
+  "CAPEC-519": {
+   "attack_techniques": [],
+   "name": "Documentation Alteration to Cause Errors in System Design",
+   "status": "Draft"
+  },
+  "CAPEC-52": {
+   "attack_techniques": [],
+   "name": "Embedding NULL Bytes",
+   "status": "Draft"
+  },
+  "CAPEC-520": {
+   "attack_techniques": [
+    "T1195.003"
+   ],
+   "name": "Counterfeit Hardware Component Inserted During Product Assembly",
+   "status": "Draft"
+  },
+  "CAPEC-521": {
+   "attack_techniques": [],
+   "name": "Hardware Design Specifications Are Altered",
+   "status": "Draft"
+  },
+  "CAPEC-522": {
+   "attack_techniques": [
+    "T1195.003"
+   ],
+   "name": "Malicious Hardware Component Replacement",
+   "status": "Draft"
+  },
+  "CAPEC-523": {
+   "attack_techniques": [
+    "T1195.002"
+   ],
+   "name": "Malicious Software Implanted",
+   "status": "Draft"
+  },
+  "CAPEC-524": {
+   "attack_techniques": [],
+   "name": "Rogue Integration Procedures",
+   "status": "Draft"
+  },
+  "CAPEC-528": {
+   "attack_techniques": [
+    "T1498.001",
+    "T1499.002"
+   ],
+   "name": "XML Flood",
+   "status": "Draft"
+  },
+  "CAPEC-529": {
+   "attack_techniques": [],
+   "name": "Malware-Directed Internal Reconnaissance",
+   "status": "Stable"
+  },
+  "CAPEC-53": {
+   "attack_techniques": [],
+   "name": "Postfix, Null Terminate, and Backslash",
+   "status": "Draft"
+  },
+  "CAPEC-530": {
+   "attack_techniques": [],
+   "name": "Provide Counterfeit Component",
+   "status": "Draft"
+  },
+  "CAPEC-531": {
+   "attack_techniques": [
+    "T1195.003"
+   ],
+   "name": "Hardware Component Substitution",
+   "status": "Draft"
+  },
+  "CAPEC-532": {
+   "attack_techniques": [
+    "T1495",
+    "T1542.001"
+   ],
+   "name": "Altered Installed BIOS",
+   "status": "Stable"
+  },
+  "CAPEC-533": {
+   "attack_techniques": [],
+   "name": "Malicious Manual Software Update",
+   "status": "Draft"
+  },
+  "CAPEC-534": {
+   "attack_techniques": [],
+   "name": "Malicious Hardware Update",
+   "status": "Stable"
+  },
+  "CAPEC-535": {
+   "attack_techniques": [],
+   "name": "Malicious Gray Market Hardware",
+   "status": "Draft"
+  },
+  "CAPEC-536": {
+   "attack_techniques": [],
+   "name": "Data Injected During Configuration",
+   "status": "Stable"
+  },
+  "CAPEC-537": {
+   "attack_techniques": [
+    "T1195.003"
+   ],
+   "name": "Infiltration of Hardware Development Environment",
+   "status": "Draft"
+  },
+  "CAPEC-538": {
+   "attack_techniques": [
+    "T1195.001"
+   ],
+   "name": "Open-Source Library Manipulation",
+   "status": "Stable"
+  },
+  "CAPEC-539": {
+   "attack_techniques": [
+    "T1195.003"
+   ],
+   "name": "ASIC With Malicious Functionality",
+   "status": "Draft"
+  },
+  "CAPEC-54": {
+   "attack_techniques": [],
+   "name": "Query System for Information",
+   "status": "Draft"
+  },
+  "CAPEC-540": {
+   "attack_techniques": [],
+   "name": "Overread Buffers",
+   "status": "Draft"
+  },
+  "CAPEC-541": {
+   "attack_techniques": [
+    "T1592.002"
+   ],
+   "name": "Application Fingerprinting",
+   "status": "Draft"
+  },
+  "CAPEC-542": {
+   "attack_techniques": [
+    "T1027",
+    "T1587.001"
+   ],
+   "name": "Targeted Malware",
+   "status": "Draft"
+  },
+  "CAPEC-543": {
+   "attack_techniques": [
+    "T1036.005"
+   ],
+   "name": "Counterfeit Websites",
+   "status": "Draft"
+  },
+  "CAPEC-544": {
+   "attack_techniques": [],
+   "name": "Counterfeit Organizations",
+   "status": "Draft"
+  },
+  "CAPEC-545": {
+   "attack_techniques": [
+    "T1005",
+    "T1555.001"
+   ],
+   "name": "Pull Data from System Resources",
+   "status": "Draft"
+  },
+  "CAPEC-546": {
+   "attack_techniques": [],
+   "name": "Incomplete Data Deletion in a Multi-Tenant Environment",
+   "status": "Draft"
+  },
+  "CAPEC-547": {
+   "attack_techniques": [],
+   "name": "Physical Destruction of Device or Component",
+   "status": "Draft"
+  },
+  "CAPEC-548": {
+   "attack_techniques": [],
+   "name": "Contaminate Resource",
+   "status": "Draft"
+  },
+  "CAPEC-549": {
+   "attack_techniques": [],
+   "name": "Local Execution of Code",
+   "status": "Stable"
+  },
+  "CAPEC-55": {
+   "attack_techniques": [
+    "T1110.002"
+   ],
+   "name": "Rainbow Table Password Cracking",
+   "status": "Draft"
+  },
+  "CAPEC-550": {
+   "attack_techniques": [
+    "T1543"
+   ],
+   "name": "Install New Service",
+   "status": "Draft"
+  },
+  "CAPEC-551": {
+   "attack_techniques": [
+    "T1543"
+   ],
+   "name": "Modify Existing Service",
+   "status": "Draft"
+  },
+  "CAPEC-552": {
+   "attack_techniques": [
+    "T1014",
+    "T1542.003",
+    "T1547.006"
+   ],
+   "name": "Install Rootkit ",
+   "status": "Draft"
+  },
+  "CAPEC-554": {
+   "attack_techniques": [],
+   "name": "Functionality Bypass",
+   "status": "Draft"
+  },
+  "CAPEC-555": {
+   "attack_techniques": [
+    "T1021",
+    "T1114.002",
+    "T1133"
+   ],
+   "name": "Remote Services with Stolen Credentials",
+   "status": "Stable"
+  },
+  "CAPEC-556": {
+   "attack_techniques": [
+    "T1546.001"
+   ],
+   "name": "Replace File Extension Handlers",
+   "status": "Draft"
+  },
+  "CAPEC-557": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Schedule Software To Run",
+   "status": "Deprecated"
+  },
+  "CAPEC-558": {
+   "attack_techniques": [
+    "T1505.005",
+    "T1546.008"
+   ],
+   "name": "Replace Trusted Executable",
+   "status": "Stable"
+  },
+  "CAPEC-559": {
+   "attack_techniques": [],
+   "name": "Orbital Jamming",
+   "status": "Draft"
+  },
+  "CAPEC-56": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Removing/short-circuiting 'guard logic'",
+   "status": "Deprecated"
+  },
+  "CAPEC-560": {
+   "attack_techniques": [
+    "T1078"
+   ],
+   "name": "Use of Known Domain Credentials",
+   "status": "Stable"
+  },
+  "CAPEC-561": {
+   "attack_techniques": [
+    "T1021.002"
+   ],
+   "name": "Windows Admin Shares with Stolen Credentials",
+   "status": "Draft"
+  },
+  "CAPEC-562": {
+   "attack_techniques": [
+    "T1080"
+   ],
+   "name": "Modify Shared File",
+   "status": "Draft"
+  },
+  "CAPEC-563": {
+   "attack_techniques": [],
+   "name": "Add Malicious File to Shared Webroot",
+   "status": "Draft"
+  },
+  "CAPEC-564": {
+   "attack_techniques": [
+    "T1037",
+    "T1543.001",
+    "T1543.004",
+    "T1547"
+   ],
+   "name": "Run Software at Logon",
+   "status": "Draft"
+  },
+  "CAPEC-565": {
+   "attack_techniques": [
+    "T1110.003"
+   ],
+   "name": "Password Spraying",
+   "status": "Draft"
+  },
+  "CAPEC-566": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Dump Password Hashes",
+   "status": "Deprecated"
+  },
+  "CAPEC-567": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Obtain Data via Utilities",
+   "status": "Deprecated"
+  },
+  "CAPEC-568": {
+   "attack_techniques": [
+    "T1056.001"
+   ],
+   "name": "Capture Credentials via Keylogger",
+   "status": "Draft"
+  },
+  "CAPEC-569": {
+   "attack_techniques": [
+    "T1056"
+   ],
+   "name": "Collect Data as Provided by Users",
+   "status": "Draft"
+  },
+  "CAPEC-57": {
+   "attack_techniques": [
+    "T1040"
+   ],
+   "name": "Utilizing REST's Trust in the System Resource to Obtain Sensitive Data",
+   "status": "Draft"
+  },
+  "CAPEC-570": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Signature-Based Avoidance",
+   "status": "Deprecated"
+  },
+  "CAPEC-571": {
+   "attack_techniques": [
+    "T1562.002",
+    "T1562.006",
+    "T1562.008"
+   ],
+   "name": "Block Logging to Central Repository",
+   "status": "Draft"
+  },
+  "CAPEC-572": {
+   "attack_techniques": [
+    "T1027.001"
+   ],
+   "name": "Artificially Inflate File Sizes",
+   "status": "Draft"
+  },
+  "CAPEC-573": {
+   "attack_techniques": [
+    "T1057"
+   ],
+   "name": "Process Footprinting",
+   "status": "Stable"
+  },
+  "CAPEC-574": {
+   "attack_techniques": [
+    "T1007"
+   ],
+   "name": "Services Footprinting",
+   "status": "Stable"
+  },
+  "CAPEC-575": {
+   "attack_techniques": [
+    "T1087"
+   ],
+   "name": "Account Footprinting",
+   "status": "Stable"
+  },
+  "CAPEC-576": {
+   "attack_techniques": [
+    "T1069",
+    "T1615"
+   ],
+   "name": "Group Permission Footprinting",
+   "status": "Stable"
+  },
+  "CAPEC-577": {
+   "attack_techniques": [
+    "T1033"
+   ],
+   "name": "Owner Footprinting",
+   "status": "Draft"
+  },
+  "CAPEC-578": {
+   "attack_techniques": [
+    "T1556.006",
+    "T1562.001",
+    "T1562.002",
+    "T1562.004",
+    "T1562.007",
+    "T1562.008",
+    "T1562.009"
+   ],
+   "name": "Disable Security Software",
+   "status": "Usable"
+  },
+  "CAPEC-579": {
+   "attack_techniques": [
+    "T1547.004"
+   ],
+   "name": "Replace Winlogon Helper DLL",
+   "status": "Draft"
+  },
+  "CAPEC-58": {
+   "attack_techniques": [],
+   "name": "Restful Privilege Elevation",
+   "status": "Draft"
+  },
+  "CAPEC-580": {
+   "attack_techniques": [
+    "T1082"
+   ],
+   "name": "System Footprinting",
+   "status": "Stable"
+  },
+  "CAPEC-581": {
+   "attack_techniques": [
+    "T1518.001"
+   ],
+   "name": "Security Software Footprinting",
+   "status": "Draft"
+  },
+  "CAPEC-582": {
+   "attack_techniques": [],
+   "name": "Route Disabling",
+   "status": "Draft"
+  },
+  "CAPEC-583": {
+   "attack_techniques": [],
+   "name": "Disabling Network Hardware",
+   "status": "Draft"
+  },
+  "CAPEC-584": {
+   "attack_techniques": [],
+   "name": "BGP Route Disabling",
+   "status": "Draft"
+  },
+  "CAPEC-585": {
+   "attack_techniques": [],
+   "name": "DNS Domain Seizure",
+   "status": "Draft"
+  },
+  "CAPEC-586": {
+   "attack_techniques": [],
+   "name": "Object Injection",
+   "status": "Draft"
+  },
+  "CAPEC-587": {
+   "attack_techniques": [],
+   "name": "Cross Frame Scripting (XFS)",
+   "status": "Draft"
+  },
+  "CAPEC-588": {
+   "attack_techniques": [],
+   "name": "DOM-Based XSS",
+   "status": "Stable"
+  },
+  "CAPEC-589": {
+   "attack_techniques": [],
+   "name": "DNS Blocking",
+   "status": "Draft"
+  },
+  "CAPEC-59": {
+   "attack_techniques": [],
+   "name": "Session Credential Falsification through Prediction",
+   "status": "Draft"
+  },
+  "CAPEC-590": {
+   "attack_techniques": [],
+   "name": "IP Address Blocking",
+   "status": "Draft"
+  },
+  "CAPEC-591": {
+   "attack_techniques": [],
+   "name": "Reflected XSS",
+   "status": "Stable"
+  },
+  "CAPEC-592": {
+   "attack_techniques": [],
+   "name": "Stored XSS",
+   "status": "Stable"
+  },
+  "CAPEC-593": {
+   "attack_techniques": [
+    "T1185",
+    "T1550.001",
+    "T1563"
+   ],
+   "name": "Session Hijacking",
+   "status": "Stable"
+  },
+  "CAPEC-594": {
+   "attack_techniques": [],
+   "name": "Traffic Injection",
+   "status": "Stable"
+  },
+  "CAPEC-595": {
+   "attack_techniques": [],
+   "name": "Connection Reset",
+   "status": "Draft"
+  },
+  "CAPEC-596": {
+   "attack_techniques": [],
+   "name": "TCP RST Injection",
+   "status": "Draft"
+  },
+  "CAPEC-597": {
+   "attack_techniques": [],
+   "name": "Absolute Path Traversal",
+   "status": "Draft"
+  },
+  "CAPEC-598": {
+   "attack_techniques": [],
+   "name": "DNS Spoofing",
+   "status": "Draft"
+  },
+  "CAPEC-599": {
+   "attack_techniques": [],
+   "name": "Terrestrial Jamming",
+   "status": "Draft"
+  },
+  "CAPEC-6": {
+   "attack_techniques": [],
+   "name": "Argument Injection",
+   "status": "Draft"
+  },
+  "CAPEC-60": {
+   "attack_techniques": [
+    "T1134.001",
+    "T1550.004"
+   ],
+   "name": "Reusing Session IDs (aka Session Replay)",
+   "status": "Draft"
+  },
+  "CAPEC-600": {
+   "attack_techniques": [
+    "T1110.004"
+   ],
+   "name": "Credential Stuffing",
+   "status": "Stable"
+  },
+  "CAPEC-601": {
+   "attack_techniques": [],
+   "name": "Jamming",
+   "status": "Draft"
+  },
+  "CAPEC-602": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Degradation",
+   "status": "Deprecated"
+  },
+  "CAPEC-603": {
+   "attack_techniques": [],
+   "name": "Blockage",
+   "status": "Draft"
+  },
+  "CAPEC-604": {
+   "attack_techniques": [],
+   "name": "Wi-Fi Jamming",
+   "status": "Draft"
+  },
+  "CAPEC-605": {
+   "attack_techniques": [],
+   "name": "Cellular Jamming",
+   "status": "Draft"
+  },
+  "CAPEC-606": {
+   "attack_techniques": [],
+   "name": "Weakening of Cellular Encryption",
+   "status": "Draft"
+  },
+  "CAPEC-607": {
+   "attack_techniques": [],
+   "name": "Obstruction",
+   "status": "Draft"
+  },
+  "CAPEC-608": {
+   "attack_techniques": [],
+   "name": "Cryptanalysis of Cellular Encryption",
+   "status": "Draft"
+  },
+  "CAPEC-609": {
+   "attack_techniques": [
+    "T1111"
+   ],
+   "name": "Cellular Traffic Intercept",
+   "status": "Draft"
+  },
+  "CAPEC-61": {
+   "attack_techniques": [],
+   "name": "Session Fixation",
+   "status": "Draft"
+  },
+  "CAPEC-610": {
+   "attack_techniques": [],
+   "name": "Cellular Data Injection",
+   "status": "Stable"
+  },
+  "CAPEC-611": {
+   "attack_techniques": [],
+   "name": "BitSquatting",
+   "status": "Draft"
+  },
+  "CAPEC-612": {
+   "attack_techniques": [],
+   "name": "WiFi MAC Address Tracking",
+   "status": "Draft"
+  },
+  "CAPEC-613": {
+   "attack_techniques": [],
+   "name": "WiFi SSID Tracking",
+   "status": "Draft"
+  },
+  "CAPEC-614": {
+   "attack_techniques": [],
+   "name": "Rooting SIM Cards",
+   "status": "Draft"
+  },
+  "CAPEC-615": {
+   "attack_techniques": [],
+   "name": "Evil Twin Wi-Fi Attack",
+   "status": "Draft"
+  },
+  "CAPEC-616": {
+   "attack_techniques": [
+    "T1036.005"
+   ],
+   "name": "Establish Rogue Location",
+   "status": "Stable"
+  },
+  "CAPEC-617": {
+   "attack_techniques": [],
+   "name": "Cellular Rogue Base Station",
+   "status": "Draft"
+  },
+  "CAPEC-618": {
+   "attack_techniques": [],
+   "name": "Cellular Broadcast Message Request",
+   "status": "Draft"
+  },
+  "CAPEC-619": {
+   "attack_techniques": [],
+   "name": "Signal Strength Tracking",
+   "status": "Draft"
+  },
+  "CAPEC-62": {
+   "attack_techniques": [],
+   "name": "Cross Site Request Forgery",
+   "status": "Draft"
+  },
+  "CAPEC-620": {
+   "attack_techniques": [
+    "T1600"
+   ],
+   "name": "Drop Encryption Level",
+   "status": "Draft"
+  },
+  "CAPEC-621": {
+   "attack_techniques": [],
+   "name": "Analysis of Packet Timing and Sizes",
+   "status": "Draft"
+  },
+  "CAPEC-622": {
+   "attack_techniques": [],
+   "name": "Electromagnetic Side-Channel Attack",
+   "status": "Draft"
+  },
+  "CAPEC-623": {
+   "attack_techniques": [],
+   "name": "Compromising Emanations Attack",
+   "status": "Draft"
+  },
+  "CAPEC-624": {
+   "attack_techniques": [],
+   "name": "Hardware Fault Injection",
+   "status": "Stable"
+  },
+  "CAPEC-625": {
+   "attack_techniques": [],
+   "name": "Mobile Device Fault Injection",
+   "status": "Draft"
+  },
+  "CAPEC-626": {
+   "attack_techniques": [],
+   "name": "Smudge Attack",
+   "status": "Draft"
+  },
+  "CAPEC-627": {
+   "attack_techniques": [],
+   "name": "Counterfeit GPS Signals",
+   "status": "Draft"
+  },
+  "CAPEC-628": {
+   "attack_techniques": [],
+   "name": "Carry-Off GPS Attack",
+   "status": "Draft"
+  },
+  "CAPEC-629": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Unauthorized Use of Device Resources",
+   "status": "Deprecated"
+  },
+  "CAPEC-63": {
+   "attack_techniques": [],
+   "name": "Cross-Site Scripting (XSS)",
+   "status": "Draft"
+  },
+  "CAPEC-630": {
+   "attack_techniques": [],
+   "name": "TypoSquatting",
+   "status": "Draft"
+  },
+  "CAPEC-631": {
+   "attack_techniques": [],
+   "name": "SoundSquatting",
+   "status": "Draft"
+  },
+  "CAPEC-632": {
+   "attack_techniques": [],
+   "name": "Homograph Attack via Homoglyphs",
+   "status": "Draft"
+  },
+  "CAPEC-633": {
+   "attack_techniques": [
+    "T1134"
+   ],
+   "name": "Token Impersonation",
+   "status": "Stable"
+  },
+  "CAPEC-634": {
+   "attack_techniques": [
+    "T1123",
+    "T1125"
+   ],
+   "name": "Probe Audio and Video Peripherals",
+   "status": "Stable"
+  },
+  "CAPEC-635": {
+   "attack_techniques": [
+    "T1036.007"
+   ],
+   "name": "Alternative Execution Due to Deceptive Filenames",
+   "status": "Draft"
+  },
+  "CAPEC-636": {
+   "attack_techniques": [
+    "T1001.002",
+    "T1027.003",
+    "T1027.004",
+    "T1218.001",
+    "T1221"
+   ],
+   "name": "Hiding Malicious Data or Code within Files",
+   "status": "Draft"
+  },
+  "CAPEC-637": {
+   "attack_techniques": [
+    "T1115"
+   ],
+   "name": "Collect Data from Clipboard",
+   "status": "Stable"
+  },
+  "CAPEC-638": {
+   "attack_techniques": [
+    "T1542.002"
+   ],
+   "name": "Altered Component Firmware",
+   "status": "Stable"
+  },
+  "CAPEC-639": {
+   "attack_techniques": [
+    "T1039",
+    "T1552.001",
+    "T1552.003",
+    "T1552.004",
+    "T1552.006"
+   ],
+   "name": "Probe System Files",
+   "status": "Stable"
+  },
+  "CAPEC-64": {
+   "attack_techniques": [],
+   "name": "Using Slashes and URL Encoding Combined to Bypass Validation Logic",
+   "status": "Draft"
+  },
+  "CAPEC-640": {
+   "attack_techniques": [
+    "T1505.005",
+    "T1574.006",
+    "T1574.013",
+    "T1620"
+   ],
+   "name": "Inclusion of Code in Existing Process",
+   "status": "Stable"
+  },
+  "CAPEC-641": {
+   "attack_techniques": [
+    "T1574.002"
+   ],
+   "name": "DLL Side-Loading",
+   "status": "Stable"
+  },
+  "CAPEC-642": {
+   "attack_techniques": [
+    "T1505.005",
+    "T1554",
+    "T1574.005"
+   ],
+   "name": "Replace Binaries",
+   "status": "Draft"
+  },
+  "CAPEC-643": {
+   "attack_techniques": [
+    "T1135"
+   ],
+   "name": "Identify Shared Files/Directories on System",
+   "status": "Draft"
+  },
+  "CAPEC-644": {
+   "attack_techniques": [
+    "T1550.002"
+   ],
+   "name": "Use of Captured Hashes (Pass The Hash)",
+   "status": "Stable"
+  },
+  "CAPEC-645": {
+   "attack_techniques": [
+    "T1550.003"
+   ],
+   "name": "Use of Captured Tickets (Pass The Ticket)",
+   "status": "Stable"
+  },
+  "CAPEC-646": {
+   "attack_techniques": [
+    "T1120"
+   ],
+   "name": "Peripheral Footprinting",
+   "status": "Stable"
+  },
+  "CAPEC-647": {
+   "attack_techniques": [
+    "T1005",
+    "T1012",
+    "T1552.002"
+   ],
+   "name": "Collect Data from Registries",
+   "status": "Draft"
+  },
+  "CAPEC-648": {
+   "attack_techniques": [
+    "T1113",
+    "T1513"
+   ],
+   "name": "Collect Data from Screen Capture",
+   "status": "Draft"
+  },
+  "CAPEC-649": {
+   "attack_techniques": [
+    "T1036.006"
+   ],
+   "name": "Adding a Space to a File Extension",
+   "status": "Draft"
+  },
+  "CAPEC-65": {
+   "attack_techniques": [
+    "T1040"
+   ],
+   "name": "Sniff Application Code",
+   "status": "Draft"
+  },
+  "CAPEC-650": {
+   "attack_techniques": [
+    "T1505.003"
+   ],
+   "name": "Upload a Web Shell to a Web Server",
+   "status": "Draft"
+  },
+  "CAPEC-651": {
+   "attack_techniques": [
+    "T1111"
+   ],
+   "name": "Eavesdropping",
+   "status": "Draft"
+  },
+  "CAPEC-652": {
+   "attack_techniques": [
+    "T1558"
+   ],
+   "name": "Use of Known Kerberos Credentials",
+   "status": "Draft"
+  },
+  "CAPEC-653": {
+   "attack_techniques": [],
+   "name": "Use of Known Operating System Credentials",
+   "status": "Draft"
+  },
+  "CAPEC-654": {
+   "attack_techniques": [
+    "T1056",
+    "T1548.004"
+   ],
+   "name": "Credential Prompt Impersonation",
+   "status": "Stable"
+  },
+  "CAPEC-655": {
+   "attack_techniques": [
+    "T1027.001"
+   ],
+   "name": "Avoid Security Tool Identification by Adding Data",
+   "status": "Draft"
+  },
+  "CAPEC-656": {
+   "attack_techniques": [],
+   "name": "Voice Phishing",
+   "status": "Stable"
+  },
+  "CAPEC-657": {
+   "attack_techniques": [
+    "T1072"
+   ],
+   "name": "Malicious Automated Software Update via Spoofing",
+   "status": "Draft"
+  },
+  "CAPEC-66": {
+   "attack_techniques": [],
+   "name": "SQL Injection",
+   "status": "Draft"
+  },
+  "CAPEC-660": {
+   "attack_techniques": [
+    "T1055"
+   ],
+   "name": "Root/Jailbreak Detection Evasion via Hooking",
+   "status": "Stable"
+  },
+  "CAPEC-661": {
+   "attack_techniques": [],
+   "name": "Root/Jailbreak Detection Evasion via Debugging",
+   "status": "Stable"
+  },
+  "CAPEC-662": {
+   "attack_techniques": [
+    "T1185"
+   ],
+   "name": "Adversary in the Browser (AiTB)",
+   "status": "Stable"
+  },
+  "CAPEC-663": {
+   "attack_techniques": [],
+   "name": "Exploitation of Transient Instruction Execution",
+   "status": "Stable"
+  },
+  "CAPEC-664": {
+   "attack_techniques": [],
+   "name": "Server Side Request Forgery",
+   "status": "Stable"
+  },
+  "CAPEC-665": {
+   "attack_techniques": [
+    "T1211",
+    "T1542.002",
+    "T1556"
+   ],
+   "name": "Exploitation of Thunderbolt Protection Flaws",
+   "status": "Stable"
+  },
+  "CAPEC-666": {
+   "attack_techniques": [
+    "T1498.001",
+    "T1499.001"
+   ],
+   "name": "BlueSmacking",
+   "status": "Draft"
+  },
+  "CAPEC-667": {
+   "attack_techniques": [],
+   "name": "Bluetooth Impersonation AttackS (BIAS)",
+   "status": "Draft"
+  },
+  "CAPEC-668": {
+   "attack_techniques": [
+    "T1565.002"
+   ],
+   "name": "Key Negotiation of Bluetooth Attack (KNOB)",
+   "status": "Draft"
+  },
+  "CAPEC-669": {
+   "attack_techniques": [
+    "T1195.002"
+   ],
+   "name": "Alteration of a Software Update",
+   "status": "Draft"
+  },
+  "CAPEC-67": {
+   "attack_techniques": [],
+   "name": "String Format Overflow in syslog()",
+   "status": "Draft"
+  },
+  "CAPEC-670": {
+   "attack_techniques": [
+    "T1127",
+    "T1195.001"
+   ],
+   "name": "Software Development Tools Maliciously Altered",
+   "status": "Draft"
+  },
+  "CAPEC-671": {
+   "attack_techniques": [
+    "T1195.003"
+   ],
+   "name": "Requirements for ASIC Functionality Maliciously Altered",
+   "status": "Draft"
+  },
+  "CAPEC-672": {
+   "attack_techniques": [
+    "T1195.003"
+   ],
+   "name": "Malicious Code Implanted During Chip Programming",
+   "status": "Draft"
+  },
+  "CAPEC-673": {
+   "attack_techniques": [
+    "T1195.002"
+   ],
+   "name": "Developer Signing Maliciously Altered Software",
+   "status": "Draft"
+  },
+  "CAPEC-674": {
+   "attack_techniques": [
+    "T1195.003"
+   ],
+   "name": "Design for FPGA Maliciously Altered",
+   "status": "Stable"
+  },
+  "CAPEC-675": {
+   "attack_techniques": [
+    "T1052"
+   ],
+   "name": "Retrieve Data from Decommissioned Devices",
+   "status": "Stable"
+  },
+  "CAPEC-676": {
+   "attack_techniques": [],
+   "name": "NoSQL Injection",
+   "status": "Stable"
+  },
+  "CAPEC-677": {
+   "attack_techniques": [
+    "T1195.003"
+   ],
+   "name": "Server Motherboard Compromise",
+   "status": "Draft"
+  },
+  "CAPEC-678": {
+   "attack_techniques": [
+    "T1195.002"
+   ],
+   "name": "System Build Data Maliciously Altered",
+   "status": "Draft"
+  },
+  "CAPEC-679": {
+   "attack_techniques": [],
+   "name": "Exploitation of Improperly Configured or Implemented Memory Protections",
+   "status": "Draft"
+  },
+  "CAPEC-68": {
+   "attack_techniques": [
+    "T1553.002"
+   ],
+   "name": "Subvert Code-signing Facilities",
+   "status": "Draft"
+  },
+  "CAPEC-680": {
+   "attack_techniques": [],
+   "name": "Exploitation of Improperly Controlled Registers",
+   "status": "Draft"
+  },
+  "CAPEC-681": {
+   "attack_techniques": [],
+   "name": "Exploitation of Improperly Controlled Hardware Security Identifiers",
+   "status": "Draft"
+  },
+  "CAPEC-682": {
+   "attack_techniques": [],
+   "name": "Exploitation of Firmware or ROM Code with Unpatchable Vulnerabilities",
+   "status": "Draft"
+  },
+  "CAPEC-69": {
+   "attack_techniques": [],
+   "name": "Target Programs with Elevated Privileges",
+   "status": "Draft"
+  },
+  "CAPEC-690": {
+   "attack_techniques": [],
+   "name": "Metadata Spoofing",
+   "status": "Stable"
+  },
+  "CAPEC-691": {
+   "attack_techniques": [
+    "T1195.001",
+    "T1195.002"
+   ],
+   "name": "Spoof Open-Source Software Metadata",
+   "status": "Stable"
+  },
+  "CAPEC-692": {
+   "attack_techniques": [],
+   "name": "Spoof Version Control System Commit Metadata",
+   "status": "Stable"
+  },
+  "CAPEC-693": {
+   "attack_techniques": [],
+   "name": "StarJacking",
+   "status": "Stable"
+  },
+  "CAPEC-694": {
+   "attack_techniques": [
+    "T1614"
+   ],
+   "name": "System Location Discovery",
+   "status": "Stable"
+  },
+  "CAPEC-695": {
+   "attack_techniques": [
+    "T1195.001"
+   ],
+   "name": "Repo Jacking",
+   "status": "Stable"
+  },
+  "CAPEC-696": {
+   "attack_techniques": [],
+   "name": "Load Value Injection",
+   "status": "Draft"
+  },
+  "CAPEC-697": {
+   "attack_techniques": [
+    "T1557.003"
+   ],
+   "name": "DHCP Spoofing",
+   "status": "Stable"
+  },
+  "CAPEC-698": {
+   "attack_techniques": [
+    "T1176",
+    "T1505.004"
+   ],
+   "name": "Install Malicious Extension",
+   "status": "Stable"
+  },
+  "CAPEC-699": {
+   "attack_techniques": [],
+   "name": "Eavesdropping on a Monitor",
+   "status": "Draft"
+  },
+  "CAPEC-7": {
+   "attack_techniques": [],
+   "name": "Blind SQL Injection",
+   "status": "Draft"
+  },
+  "CAPEC-70": {
+   "attack_techniques": [
+    "T1078.001"
+   ],
+   "name": "Try Common or Default Usernames and Passwords",
+   "status": "Draft"
+  },
+  "CAPEC-700": {
+   "attack_techniques": [
+    "T1599"
+   ],
+   "name": "Network Boundary Bridging",
+   "status": "Draft"
+  },
+  "CAPEC-701": {
+   "attack_techniques": [],
+   "name": "Browser in the Middle (BiTM)",
+   "status": "Draft"
+  },
+  "CAPEC-702": {
+   "attack_techniques": [],
+   "name": "Exploiting Incorrect Chaining or Granularity of Hardware Debug Components",
+   "status": "Draft"
+  },
+  "CAPEC-71": {
+   "attack_techniques": [],
+   "name": "Using Unicode Encoding to Bypass Validation Logic",
+   "status": "Draft"
+  },
+  "CAPEC-72": {
+   "attack_techniques": [],
+   "name": "URL Encoding",
+   "status": "Draft"
+  },
+  "CAPEC-73": {
+   "attack_techniques": [],
+   "name": "User-Controlled Filename",
+   "status": "Draft"
+  },
+  "CAPEC-74": {
+   "attack_techniques": [],
+   "name": "Manipulating State",
+   "status": "Stable"
+  },
+  "CAPEC-75": {
+   "attack_techniques": [],
+   "name": "Manipulating Writeable Configuration Files",
+   "status": "Draft"
+  },
+  "CAPEC-76": {
+   "attack_techniques": [],
+   "name": "Manipulating Web Input to File System Calls",
+   "status": "Draft"
+  },
+  "CAPEC-77": {
+   "attack_techniques": [],
+   "name": "Manipulating User-Controlled Variables",
+   "status": "Draft"
+  },
+  "CAPEC-78": {
+   "attack_techniques": [],
+   "name": "Using Escaped Slashes in Alternate Encoding",
+   "status": "Draft"
+  },
+  "CAPEC-79": {
+   "attack_techniques": [],
+   "name": "Using Slashes in Alternate Encoding",
+   "status": "Draft"
+  },
+  "CAPEC-8": {
+   "attack_techniques": [],
+   "name": "Buffer Overflow in an API Call",
+   "status": "Draft"
+  },
+  "CAPEC-80": {
+   "attack_techniques": [],
+   "name": "Using UTF-8 Encoding to Bypass Validation Logic",
+   "status": "Draft"
+  },
+  "CAPEC-81": {
+   "attack_techniques": [],
+   "name": "Web Server Logs Tampering",
+   "status": "Draft"
+  },
+  "CAPEC-82": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: Violating Implicit Assumptions Regarding XML Content (aka XML Denial of Service (XDoS))",
+   "status": "Deprecated"
+  },
+  "CAPEC-83": {
+   "attack_techniques": [],
+   "name": "XPath Injection",
+   "status": "Draft"
+  },
+  "CAPEC-84": {
+   "attack_techniques": [],
+   "name": "XQuery Injection",
+   "status": "Draft"
+  },
+  "CAPEC-85": {
+   "attack_techniques": [],
+   "name": "AJAX Footprinting",
+   "status": "Draft"
+  },
+  "CAPEC-86": {
+   "attack_techniques": [],
+   "name": "XSS Through HTTP Headers",
+   "status": "Draft"
+  },
+  "CAPEC-87": {
+   "attack_techniques": [],
+   "name": "Forceful Browsing",
+   "status": "Draft"
+  },
+  "CAPEC-88": {
+   "attack_techniques": [],
+   "name": "OS Command Injection",
+   "status": "Draft"
+  },
+  "CAPEC-89": {
+   "attack_techniques": [],
+   "name": "Pharming",
+   "status": "Draft"
+  },
+  "CAPEC-9": {
+   "attack_techniques": [],
+   "name": "Buffer Overflow in Local Command-Line Utilities",
+   "status": "Draft"
+  },
+  "CAPEC-90": {
+   "attack_techniques": [],
+   "name": "Reflection Attack in Authentication Protocol",
+   "status": "Draft"
+  },
+  "CAPEC-91": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: XSS in IMG Tags",
+   "status": "Deprecated"
+  },
+  "CAPEC-92": {
+   "attack_techniques": [],
+   "name": "Forced Integer Overflow",
+   "status": "Draft"
+  },
+  "CAPEC-93": {
+   "attack_techniques": [],
+   "name": "Log Injection-Tampering-Forging",
+   "status": "Draft"
+  },
+  "CAPEC-94": {
+   "attack_techniques": [
+    "T1557"
+   ],
+   "name": "Adversary in the Middle (AiTM)",
+   "status": "Stable"
+  },
+  "CAPEC-95": {
+   "attack_techniques": [],
+   "name": "WSDL Scanning",
+   "status": "Draft"
+  },
+  "CAPEC-96": {
+   "attack_techniques": [],
+   "name": "Block Access to Libraries",
+   "status": "Draft"
+  },
+  "CAPEC-97": {
+   "attack_techniques": [],
+   "name": "Cryptanalysis",
+   "status": "Draft"
+  },
+  "CAPEC-98": {
+   "attack_techniques": [
+    "T1566",
+    "T1598"
+   ],
+   "name": "Phishing",
+   "status": "Draft"
+  },
+  "CAPEC-99": {
+   "attack_techniques": [],
+   "name": "DEPRECATED: XML Parser Attack",
+   "status": "Deprecated"
+  }
+ },
+ "source": "data/weaknesses/capec.jsonl"
+}
