@@ -4,7 +4,7 @@
 import { formatRoute, withQuery } from "../router.js";
 import { cveRegister, kevLinked } from "../filters.js";
 import { count, dateLabel, link, node, routeLink, stamp } from "../util.js";
-import { pager } from "./common.js";
+import { cveOrgLink, libraryDoor, pager } from "./common.js";
 import { pageSize } from "../limits.js";
 
 export const GUIDANCE = { "publisher-guidance": "Publisher guidance", "cisa-action": "CISA action", "needs-review": "Needs review" };
@@ -82,7 +82,8 @@ function guidanceItems(title, values) {
 }
 
 // The brief for one CVE, built from the saved record only. No lookup leaves this site.
-export function briefBody(record, indexRow, rows) {
+// lib is the library-door module: a CVE the shared vocabulary covers links its library notes.
+export function briefBody(record, indexRow, rows, lib = null) {
   const parts = [];
   const overview = block(record.title || "Source record title not supplied");
   overview.append(node("p", "chips", ""));
@@ -94,6 +95,11 @@ export function briefBody(record, indexRow, rows) {
   overview.append(node("p", "", record.description || "Description not supplied in this saved record."));
   if (record.cvss?.vector) overview.append(node("p", "mono", "Vector: " + record.cvss.vector));
   overview.append(node("p", "muted", "CNA source updated " + stamp(record.source_updated_at) + " · retrieved " + stamp(record.retrieved_at) + ". Review affected products and your installed version before acting; this is not a device assessment."));
+  const elsewhere = node("p");
+  elsewhere.append(cveOrgLink(record.cve, "The CVE Program's record for " + record.cve));
+  const door = libraryDoor(lib, "cve:" + record.cve, "TeamStarWolf library notes on " + record.cve);
+  if (door) elsewhere.append(node("span", "", " · "), door);
+  overview.append(elsewhere);
   parts.push(overview);
   const action = block("CISA catalog action");
   action.append(node("p", "", record.required_action || "No CISA required action is supplied for this record."));

@@ -4,6 +4,13 @@ import { formatRoute } from "../router.js";
 import { count, dateLabel, hoursLabel, link, node, routeLink, stamp } from "../util.js";
 import { definitionList, section } from "./common.js";
 import { actStrip, kevStrip, todayData } from "./today.js";
+import { coverageMatrix } from "./history.js";
+import { MITRE_NOTICES, licenceTable } from "./method.js";
+
+// Every view besides the Explorer, for the sidebar's list. The tab strip carries the same views.
+export const OTHER_VIEW_LINKS = [["today", "Today"], ["advisories", "Advisories"], ["kev", "Known exploited"], ["research", "Research"], ["news", "News"], ["cves", "CVE register"],
+  ["history", "History, 1998 to today"], ["vendors", "Vendors"], ["tags", "Tags"], ["actors", "Actors and malware"], ["reports", "Reports and run record"],
+  ["data", "Data downloads"], ["sources", "Sources and coverage"], ["method", "Method"], ["about", "About"]];
 
 export function cadenceText(index) {
   if (!index) return "The collector's run record could not be read, so no observed schedule is shown. The workflow asks GitHub for a run every two hours, and GitHub does not guarantee it.";
@@ -36,8 +43,12 @@ export async function renderSidebar(ctx) {
   const sources = section("Sources", "panel side-panel");
   const data = section("Data exports", "panel side-panel");
   const method = section("Method and limits", "panel side-panel");
-  method.append(node("p", "", "A selected collection, not every incident. Publisher headlines link to their sources; no article body is copied. Unknown exploitation never means safe."), more("How the Hub works", "about"));
-  parts.push(todayPanel, snapshot, reports, sources, data, method);
+  method.append(node("p", "", "A selected collection, not every incident. Publisher headlines link to their sources; no article body is copied. Unknown exploitation never means safe."), more("How every tag is decided", "method"));
+  const views = section("All views", "panel side-panel");
+  const viewList = node("ul", "detail-list side-views");
+  for (const [view, text] of OTHER_VIEW_LINKS) { const item = node("li"); item.append(routeLink(text, formatRoute({ view, id: null, query: {} }))); viewList.append(item); }
+  views.append(viewList);
+  parts.push(todayPanel, snapshot, reports, sources, data, method, views);
   target.replaceChildren(...parts);
   const [today, reportFile, ledger] = await Promise.all([todayData(store).catch(() => null), store.reports().catch(() => null), store.sources().catch(() => null)]);
   if (!ctx.current()) return;
@@ -60,12 +71,28 @@ export async function renderSidebar(ctx) {
   data.append(node("p", "", exports && exports.status === "ok" ? count(exports.files.length, "export file") + ": per-year CSV and JSONL with every tag, a manifest and a data dictionary." : "No exports are listed in this index."), more("Data downloads", "data"));
 }
 
+// The collector's own run record: the cadence statement and the published runs, newest first.
+export function runRecord(store, title = "Run record") {
+  const block = section(title);
+  block.append(node("p", "", store.state.mode === "v7" ? cadenceText(store.state.index) : cadenceText(null)));
+  if (store.state.mode === "v7") {
+    const list = node("ul", "detail-list");
+    for (const run of store.state.index.runs) list.append(node("li", "", stamp(run.generated_at) + " · " + run.trigger.replaceAll("_", " ") + (run.changed ? "" : " · no change")));
+    block.append(list);
+  }
+  return block;
+}
+
 export async function renderReports(ctx) {
   const { target, store } = ctx;
-  target.replaceChildren(node("h1", "view-title", "Reports"), node("p", "view-intro", "Report editions come from a separate desktop compiler and live in the repository's reports folder. This tab lists the catalog that the last published run validated."));
+  target.replaceChildren(node("h1", "view-title", "Reports"), node("p", "view-intro", "Every report edition, the collector's run record and the catalog's own review notes. Report editions come from a separate desktop compiler and live in the repository's reports folder; this tab lists the catalog that the last published run validated."));
+  target.append(runRecord(store, "Collector runs and cadence"));
   const file = await store.reports();
   if (!ctx.current()) return;
   if (file.status !== "available") { target.append(node("p", "notice-inline", "Report catalog unavailable: " + file.reason + " Other views are not affected.")); return file; }
+  const cadences = new Map();
+  for (const report of file.reports) cadences.set(report.cadence, (cadences.get(report.cadence) || 0) + 1);
+  target.append(node("p", "muted", "Editions by cadence: " + [...cadences].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([cadence, total]) => cadence + " " + total).join(", ") + "."));
   const table = node("table", "data-table");
   table.append(node("caption", "", count(file.reports.length, "edition") + (file.updated_at ? ". Catalog updated " + stamp(file.updated_at) : "") + ". Published means a report file exists, not that every claim was independently verified."));
   const head = node("tr");
@@ -103,18 +130,22 @@ function intakeLine(source) {
 
 export async function renderSources(ctx) {
   const { target, store } = ctx;
-  const parts = [node("h1", "view-title", "Sources and run record"), node("p", "view-intro", "Who the Hub reads, what the last published run recorded for each source, and how often GitHub actually ran the collector.")];
-  const cadence = section("Run record");
-  cadence.append(node("p", "", store.state.mode === "v7" ? cadenceText(store.state.index) : cadenceText(null)));
-  if (store.state.mode === "v7") {
-    const list = node("ul", "detail-list");
-    for (const run of store.state.index.runs) list.append(node("li", "", stamp(run.generated_at) + " · " + run.trigger.replaceAll("_", " ")));
-    cadence.append(list);
-  }
-  parts.push(cadence);
+  const parts = [node("h1", "view-title", "Sources and coverage"), node("p", "view-intro", "Who the Hub reads, what the last published run recorded for each source, how completely each history source covers each year since 1998, and how often GitHub actually ran the collector.")];
+  parts.push(runRecord(store));
   target.replaceChildren(...parts);
-  const sources = await store.sources();
+  const [sources, coverage] = await Promise.all([store.sources(), store.coverage()]);
   if (!ctx.current()) return;
+  const matrix = section("History coverage by source and year");
+  if (coverage.status === "ok") {
+    matrix.append(node("p", "muted", "One statement per source and year. Method explains each status; a year page under History spells out that year's statements."), coverageMatrix(coverage));
+    const notes = node("details", "cell-details");
+    notes.append(node("summary", "", "Filters and licence notes for each history source"));
+    const list = node("ul", "detail-list");
+    for (const source of [...coverage.sources].sort((a, b) => a.name.localeCompare(b.name))) list.append(node("li", "", source.name + ": " + [source.filter ? "filter: " + source.filter : "no filter", source.licence || "no adapter yet, so no rows are kept"].join("; ") + "."));
+    notes.append(list);
+    matrix.append(notes);
+  } else matrix.append(node("p", "muted", "Coverage statements are not published in this snapshot: " + (coverage.note || "no reason recorded") + "."));
+  target.append(matrix);
   const ledger = section("Source ledger");
   ledger.append(node("p", "", sourceSummary(sources)), node("p", "muted", "Recorded collection outcomes, not live connectivity checks. Last accepted input is not exhaustive publisher coverage."));
   const states = { ok: "Input accepted", partial: "Partial input", failed: "Fetch or intake failed", not_fetched: "Not fetched" };
@@ -135,7 +166,10 @@ export function renderData(ctx) {
   const { target, store } = ctx;
   const parts = [node("h1", "view-title", "Data downloads"), node("p", "view-intro", "Per-year analytics exports: one CSV and one JSONL row per entry with every tag field, and a long CSV with one row per tag, confidence and method. Load them into a spreadsheet or a notebook.")];
   const exports = store.state.mode === "v7" ? store.state.index.exports : null;
-  if (!exports || exports.status !== "ok") { parts.push(node("p", "notice-inline", "No exports are listed in this index" + (exports && exports.reason ? ": " + exports.reason : ".") )); target.replaceChildren(...parts); return; }
+  const licences = section("Licences and notices");
+  licences.append(licenceTable());
+  for (const text of MITRE_NOTICES) licences.append(node("p", "muted", text));
+  if (!exports || exports.status !== "ok") { parts.push(node("p", "notice-inline", "No exports are listed in this index" + (exports && exports.reason ? ": " + exports.reason : ".") ), licences); target.replaceChildren(...parts); return; }
   const fixed = section("Start here");
   const fixedList = node("ul", "detail-list");
   const years = new Map();
@@ -156,17 +190,9 @@ export function renderData(ctx) {
     table.append(item);
   }
   const byYear = section("By year"); byYear.append(table);
-  const licences = section("Licences and notices");
-  for (const text of ["Publisher rows carry headlines and links only; the articles belong to their publishers.", "KEV rows carry CISA's catalog text, which CISA publishes under CC0 1.0.", "CVE record fields come from the CVE Program's records under the CVE terms of use.", "Curated history rows are original paraphrases backed by a dated primary source.", "The Hub's code is MIT-licensed."]) licences.append(node("p", "", text));
   parts.push(fixed, byYear, licences);
   target.replaceChildren(...parts);
 }
-
-const MITRE_NOTICES = [
-  "© 2026 The MITRE Corporation. This work is reproduced and distributed with the permission of The MITRE Corporation. License: ATT&CK Terms of Use (https://attack.mitre.org/resources/legal-and-branding/terms-of-use/). ATT&CK® and MITRE ATT&CK® are registered trademarks of The MITRE Corporation. This project is not affiliated with or endorsed by MITRE.",
-  "© The MITRE Corporation. Includes material from the Common Weakness Enumeration (CWE™), used under the CWE Terms of Use. https://cwe.mitre.org/",
-  "© The MITRE Corporation. Includes material from the Common Attack Pattern Enumeration and Classification (CAPEC™), used under the CAPEC Terms of Use. https://capec.mitre.org/"
-];
 
 export function renderAbout(ctx) {
   const { target, store } = ctx;
@@ -174,15 +200,13 @@ export function renderAbout(ctx) {
     node("p", "view-lead", "Open security news, advisories, and known exploited vulnerabilities for the community, linked to their original sources."),
     node("p", "", "The Hub is part of TeamStarWolf. A collector run by GitHub Actions reads public RSS and Atom feeds, CISA's Known Exploited Vulnerabilities catalog and CVE records, tags every entry from controlled vocabularies, and publishes the result as static files. Your browser reads only those files, from this site.")];
   const method = section("Dates, scores and boundaries");
-  for (const text of ["Published and updated dates are the publisher's own. Event dates are separate. A KEV date is the day CISA added the entry to its catalog, not disclosure or first exploitation.",
-    "CVSS versions stay labelled; scores across versions are not normalized. Affected ranges are not a list of fixed versions.",
-    "Exploitation is known, reported or unknown. Unknown means this entry does not establish exploitation; it never means safe.",
-    "Tags carry their method and confidence. ATT&CK techniques reached through CWE and CAPEC are low-confidence taxonomy paths, not observed behaviour.",
+  for (const text of ["Exploitation is known, reported or unknown; unknown never means safe. Tags carry their method and confidence. Dates, scores and catalog facts are kept apart.",
     "CVE guidance needs applicability review. No entry proves that a device is exposed. CISA federal due dates are not your deadlines."]) method.append(node("p", "", text));
+  method.append(more("Every evidence rule, confidence level and coverage status", "method"));
   const scope = section("What the Hub covers");
   for (const text of ["A selected collection within a declared window, not every incident, article or vulnerability. History rows reach back to 1998 from the sources each year's coverage statement names.",
     "Publisher rows carry headlines and links only. KEV rows carry CISA's text. Curated summaries are original paraphrases.",
-    "The Explorer starts with the live window (the last 24 months). Choose a year to add that year's history rows."]) scope.append(node("p", "", text));
+    "The Explorer starts with the live window (the last 24 months). Choose a year to add that year's history rows, or open History for one page per year."]) scope.append(node("p", "", text));
   const cadence = section("How fresh the data is");
   cadence.append(node("p", "", store.state.mode === "v7" ? cadenceText(store.state.index) : cadenceText(null)), node("p", "muted", "While this page stays open and visible it asks the site whether the index changed, and reads nothing while the tab is hidden."));
   const notices = section("Notices");

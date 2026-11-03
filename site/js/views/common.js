@@ -1,7 +1,8 @@
-// Building blocks shared by the views: result cards, chips, the pager and select filling.
-import { formatRoute, withQuery } from "../router.js";
+// Building blocks shared by the views: result cards, chips, the pager, select filling and the
+// doors to the TeamStarWolf library.
+import { CVE_ID, LIST_VIEWS, formatRoute, withQuery } from "../router.js";
 import { kevLinked } from "../filters.js";
-import { count, dateLabel, humanize, link, node, routeLink } from "../util.js";
+import { count, dateLabel, humanize, link, node, routeLink, safeUrl } from "../util.js";
 import { pageSize } from "../limits.js";
 
 export const KIND_LABELS = { advisory: "Advisory", research: "Research", reporting: "Reporting", incident: "Incident", kev: "KEV entry", filing: "Filing", bulletin: "Bulletin", note: "Vulnerability note" };
@@ -11,6 +12,44 @@ export const EXPLOITATION_LABELS = { known: "Known exploited", reported: "Report
 let labels = null;
 export function setLabels(value) { labels = value; }
 export function label(id) { return (labels && Object.hasOwn(labels, id) && labels[id]) || humanize(id); }
+
+// The library doors. site/js/library.js is generated from the vendored vocabulary's
+// library_path and library_anchor (python -m intelligence_hub.site labels); the page renders
+// no library link from anywhere else, and every one must start with LIBRARY_PREFIX and pass
+// safeUrl. The module loads on first use; when it cannot load, no door is shown.
+export const LIBRARY_PREFIX = "https://teamstarwolf.github.io/TeamStarWolf/#/";
+const NO_LIBRARY = { LINKS: {}, PINNED: {}, KEV: {}, PRODUCTS: {} };
+let library = null;
+export function loadLibrary() {
+  if (!library) library = import("../library.js").then(module => ({ LINKS: module.LINKS, PINNED: module.PINNED, KEV: module.KEV, PRODUCTS: module.PRODUCTS }), () => NO_LIBRARY);
+  return library;
+}
+export function libraryUrl(value) {
+  const url = safeUrl(value);
+  return url && url.startsWith(LIBRARY_PREFIX) ? url : null;
+}
+// A door for a vocabulary id, or null when the library has no page for it.
+export function libraryDoor(lib, id, text) {
+  const url = lib && Object.hasOwn(lib.LINKS, id) ? libraryUrl(lib.LINKS[id]) : null;
+  return url ? link(text, url, "library-link") : null;
+}
+// The rendered library page beside a commit-pinned library evidence link, or null.
+export function pinnedDoor(lib, evidenceUrl, text = "Read it on the library site") {
+  const url = lib && Object.hasOwn(lib.PINNED, evidenceUrl) ? libraryUrl(lib.PINNED[evidenceUrl]) : null;
+  return url ? link(text, url, "library-link") : null;
+}
+// The CVE Program's record page for a CVE id.
+export function cveOrgLink(cve, text = "CVE.org record") {
+  return CVE_ID.test(cve) ? link(text, "https://www.cve.org/CVERecord?id=" + cve) : null;
+}
+
+// The route a card's chips and Details link use: the list view it sits in, or the Explorer
+// (with the row's year, so a history row is in scope) when the card sits on another view.
+export function listRoute(route) { return Object.hasOwn(LIST_VIEWS, route.view) ? route : { view: "explore", id: null, query: {} }; }
+export function detailsRoute(row, route) {
+  if (Object.hasOwn(LIST_VIEWS, route.view)) return withQuery(route, { open: row.id }, true);
+  return { view: "explore", id: null, query: { ...(/^\d{4}$/.test(row.year) ? { year: row.year } : {}), open: row.id } };
+}
 
 export function dateBasisLabel(row) {
   if (!row.time) return "Date unknown";
@@ -36,9 +75,9 @@ export function resultCard(row, route, cveIndex) {
   if (row.exploited !== "unknown") chips.append(node("span", "chip chip-exp-" + row.exploited, EXPLOITATION_LABELS[row.exploited]));
   if (row.score !== null) chips.append(node("span", "chip", "CVSS " + row.score.toFixed(1) + (row.t.cvss && row.t.cvss.version ? " (v" + row.t.cvss.version + ")" : "")));
   for (const [field, key] of [["vendor", "vendor"], ["product", "product"], ["actor", "actor"], ["malware", "malware"]]) {
-    for (const item of row.t[field].slice(0, 2)) chips.append(routeLink(label(item[0]), formatRoute(withQuery(route, { [key]: item[0].replace(/^[a-z]+:/, "") })), "chip chip-entity"));
+    for (const item of row.t[field].slice(0, 2)) chips.append(routeLink(label(item[0]), formatRoute(withQuery(listRoute(route), { [key]: item[0].replace(/^[a-z]+:/, "") })), "chip chip-entity"));
   }
-  const details = routeLink("Details", formatRoute(withQuery(route, { open: row.id }, true)), "card-details");
+  const details = routeLink("Details", formatRoute(detailsRoute(row, route)), "card-details");
   details.setAttribute("aria-label", "Details for " + row.title.slice(0, 120));
   chips.append(details);
   card.append(chips);

@@ -18,11 +18,17 @@
     "js/theme.js",
     "js/util.js",
     "js/labels.js",
+    "js/library.js",
     "js/views/common.js",
     "js/views/explore.js",
     "js/views/today.js",
     "js/views/kev.js",
     "js/views/cves.js",
-    "js/views/panels.js"
+    "js/views/panels.js",
+    "js/views/history.js",
+    "js/views/vendors.js",
+    "js/views/tags.js",
+    "js/views/actors.js",
+    "js/views/method.js"
   ]
 }
