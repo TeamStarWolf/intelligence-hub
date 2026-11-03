@@ -9,7 +9,7 @@ publisher that wrote it.
 
 ## What you can do here
 
-- Read headlines from **61 configured publisher RSS/Atom feeds** plus CISA's KEV
+- Read headlines from **62 configured publisher RSS/Atom feeds** plus CISA's KEV
   catalog. The count is feed definitions, not unique publishers. Feeds can fail,
   and every outcome stays visible in the source ledger.
 - Browse by year and month or a date preset, filter by source, kind, exploitation
@@ -75,7 +75,7 @@ python -m intelligence_hub --start 1998-01-01 --end 2026-10-26
 ```
 
 These commands make bounded public HTTPS reads and write the snapshot to
-`site/data/feed.json`. CI adds `--resume-public` to recover retained history and
+`site/data/feed.json` and its CVE briefs to `site/data/briefs.json`. CI adds `--resume-public` to recover retained history and
 CNA progress from this hub's own fixed, validated public snapshot; that is not an
 arbitrary URL import. `--cached` rebuilds from retained local public inputs
 without network access and cannot be combined with `--resume-public`.
@@ -108,13 +108,14 @@ a syntax check of `site/app.js` and an em-dash lint. New code needs tests.
 ## Limits
 
 - **Selected, not complete.** The hub is a selected collection within its date
-  window, not every incident, article or vulnerability. The schema 6 window runs
+  window, not every incident, article or vulnerability. The schema 6 and 7 window runs
   from 1 January 1998 to the run date, within a 14,610-day technical review
   horizon; that is not forty years of coverage. Schema 5 keeps its 7,306-day
   profile and legacy schemas 2 to 4 keep 3,661 days.
 - **Bounded intake.** Each accepted feed response yields at most **150 entries**.
   An invalid link or title, or more than **100 unique CVE mentions**, rejects that
-  whole entry. **Partial** means some safe input was accepted with a gap, not
+  whole entry. `data/feed.json` is bounded at **8 MiB** and `data/briefs.json` at
+  **12 MiB**; a run that would cross either bound fails without evicting rows. **Partial** means some safe input was accepted with a gap, not
   that the publisher's archive is complete. See
   [intake accounting](docs/FEEDS.md#partial-intake-and-entry-accounting) and the
   [F5 date ranking](docs/FEEDS.md#f5-date-ranking-and-selection-provenance).
@@ -142,7 +143,7 @@ a syntax check of `site/app.js` and an em-dash lint. New code needs tests.
   an unchanged run can succeed without a newer snapshot. Check the
   [workflow history](https://github.com/TeamStarWolf/intelligence-hub/actions/workflows/publish.yml)
   when the desk looks stale.
-- **Package budget.** Only five allowlisted files enter Pages. A changed
+- **Package budget.** Only six allowlisted files enter Pages. A changed
   publication must fit **21 MiB of input** and a **3,000,000-byte** level-6
   compressed-size estimate, and the artifact is kept for one day. At the
   requested maximum of 144 scheduled publications a day that is at most
