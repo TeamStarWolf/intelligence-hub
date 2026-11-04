@@ -195,9 +195,13 @@ without exports and records `exports.status: unavailable` with the reason.
 3. It reads Adobe's bulletin index and the SAP pages it needs (at most 16 a run).
 4. It joins the CISA KEV catalog, the Hub's CVE briefs and the vocabulary tags to every month,
    applies the fixed priority rules and writes the shards. A brief that would pass the 4 MiB
-   per-file bound drops its tags first, then its Moderate, Low and unrated rows that are neither
-   exploited nor disclosed (the counts stay whole); a brief that still does not fit is listed as
-   pending with the reason.
+   per-file bound drops its tags first, then its Moderate, Low and unrated rows, keeping every
+   row that is exploited, disclosed, in KEV, given a Hub brief or named by one of the first three
+   priority rules (in KEV; exploited; Critical remote code execution in an internet-facing or
+   identity component). The "rest by CVSS" priority list keeps only the rows that remain, the
+   counts stay whole and the brief's `trimmed` field says what was dropped. A brief that still
+   does not fit is listed as pending with the reason. A trimmed brief is never resumed from the
+   deployed site: its month is read again from MSRC.
 5. It prints every brief's bytes and headroom under the per-file bound.
 
 State between runs is `.state/patch-tuesday.json`: the parsed months, the revision last read

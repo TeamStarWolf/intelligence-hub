@@ -180,6 +180,27 @@ class JoinTest(unittest.TestCase):
         self.assertEqual([row[0] for row in rows], ["APSB26-01"])
         self.assertEqual(rows[0][1], "Update")
 
+    def test_adobe_rows_with_an_extra_trailing_cell_do_not_swallow_their_neighbours(self):
+        # Adobe ends some rows with <th>&nbsp;</th> (APSB26-130, APSB26-136) or an empty fourth <td>;
+        # the fixture's Photoshop table has both beside a plain three-cell row (APSB26-40).
+        rows = {row[0]: row for row in pt.parse_adobe((DOCUMENTS / "adobe-security.html").read_bytes(), collect.safe_url)}
+        photoshop = {key: row[4] for key, row in rows.items() if row[2] == ["Adobe Photoshop"]}
+        self.assertEqual(photoshop, {"APSB26-130": "2026-09-08", "APSB26-136": "2026-09-08", "APSB26-40": "2026-04-14",
+                                     "APSB25-75": "2025-08-12"})
+        self.assertEqual(rows["APSB26-136"][3], "https://helpx.adobe.com/security/products/photoshop/apsb26-136.html")
+        self.assertEqual(rows["APSB26-40"][1], "Security update available for Adobe Photoshop")
+        september = pt.adobe_block({"status": "ok", "rows": list(rows.values())}, "2026-09-08T07:00:00Z", CONFIG["adobe"]["home"])
+        self.assertEqual(sorted(row[0] for row in september["rows"]), ["APSB26-130", "APSB26-136", "APSB26-141"])
+
+    def test_adobe_cells_with_attributes_line_breaks_and_one_digit_days_parse(self):
+        page = ('<h2 id="x">Adobe Example</h2><table><tr><td><a href="/security/products/example/apsb25-15.html"><b>APSB25-15</b>: One</a></td>'
+                '<td>04/8/2025</td><td>04/8/2025</td></tr><tr><td><a href="/security/products/example/apsb25-112.html"><b>APSB25-112 </b>: Two</a></td>'
+                '<td valign="top">11/11/2025<br />\n</td><td valign="top">11/11/2025<br />\n</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td>'
+                '<td>&nbsp;</td></tr><tr><td><a href="/security/products/example/apsb24-98.html"><b>APSB24-98</b>: Three</a></td>'
+                '<td>12/10/2024</td><td>12/10/2024</td></tr></table>').encode("utf-8")
+        rows = pt.parse_adobe(page, collect.safe_url)
+        self.assertEqual([[row[0], row[4]] for row in rows], [["APSB24-98", "2024-12-10"], ["APSB25-15", "2025-04-08"], ["APSB25-112", "2025-11-11"]])
+
     def test_sap_month_page_and_year_page_rows(self):
         october = pt.parse_sap((DOCUMENTS / "sap-october-2026.html").read_bytes(), collect.safe_url, "2026-10")["2026-10"]
         self.assertEqual(october[0][:5], ["GHSA-4mv3-jxxm-9cx2", "OAuth2 SSRF vulnerability in SAP Cloud SDK for Python", ["CVE-2026-89111"], "Critical", 10.0])
@@ -266,6 +287,24 @@ class CollectTest(unittest.TestCase):
         state = pt.empty_state()
         self.assertEqual(pt.resume_deployed(state, {"shards": [{**good, "sha256": "0" * 64}]}, lambda entry: raw), 0)
         self.assertEqual(state["months"], {})
+
+    def test_a_trimmed_deployed_brief_is_not_resumed_so_its_month_is_read_again(self):
+        value = json.loads((FIXTURE / "golden" / "2026-10.json").read_text(encoding="utf-8"))
+        trimmed = pt.fit(copy.deepcopy(value), len(pt.canonical(value)) - 1)
+        self.assertGreater(trimmed["trimmed"]["rows"], 0)
+        raw = pt.canonical(trimmed)
+        entry = {"path": "patch-tuesday/2026-10.json", "bytes": len(raw), "sha256": hashlib.sha256(raw).hexdigest()}
+        state = pt.empty_state()
+        with contextlib.redirect_stderr(io.StringIO()) as errors:
+            self.assertEqual(pt.resume_deployed(state, {"shards": [entry]}, lambda item: raw), 0)
+        self.assertIn("2026-10 not resumed (the deployed brief is trimmed)", errors.getvalue())
+        self.assertEqual(state["months"], {})
+        self.assertEqual([item["id"] for item in pt.plan([OCTOBER], state, 10, 0)], ["2026-Oct"])
+        # A brief that only shed its tags is held back too: the month comes back whole from MSRC.
+        tags_only = pt.canonical({**value, "tags": {}, "trimmed": {"tags": True, "rows": 0}})
+        entry = {**entry, "bytes": len(tags_only), "sha256": hashlib.sha256(tags_only).hexdigest()}
+        with contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(pt.resume_deployed(pt.empty_state(), {"shards": [entry]}, lambda item: tags_only), 0)
 
     def test_an_oversized_brief_sheds_tags_then_minor_rows_then_is_held(self):
         value = json.loads((FIXTURE / "golden" / "2026-10.json").read_text(encoding="utf-8"))

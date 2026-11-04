@@ -314,7 +314,7 @@ def _cell_text(value, maximum=240):
 
 
 def _us_date(value):
-    match = re.fullmatch(r"([0-9]{2})/([0-9]{2})/([0-9]{4})", value or "")
+    match = re.fullmatch(r"([0-9]{1,2})/([0-9]{1,2})/([0-9]{4})", value or "")
     if not match:
         return None
     try:
@@ -328,12 +328,18 @@ def parse_adobe(raw, safe_url):
     page = raw.decode("utf-8", "replace")
     headings = [(match.start(), _cell_text(match.group(1), 100)) for match in re.finditer(r"<h2[^>]{0,400}>(.{0,600}?)</h2>", page, re.S)]
     found = {}
-    for match in re.finditer(r"<tr>\s*<td>(.{0,3000}?)</td>\s*<td>(.{0,200}?)</td>\s*<td>(.{0,200}?)</td>\s*</tr>", page, re.S):
-        cell = match.group(1)
+    # One <tr> block at a time: the block never crosses a </tr> or the next <tr>, so a row with an
+    # extra trailing cell (Adobe ends some rows with <th>&nbsp;</th> or an empty fourth <td>) cannot
+    # swallow its neighbour. The first three <td> cells are the bulletin, posted and updated dates.
+    for match in re.finditer(r"<tr[^>]{0,200}>((?:(?!</?tr[\s>]).){0,6000})</tr>", page, re.S | re.I):
+        cells = re.findall(r"<td[^>]{0,200}>((?:(?!</?t[dhr][\s>]).){0,3000})</td>", match.group(1), re.S | re.I)
+        if len(cells) < 3:
+            continue
+        cell = cells[0]
         anchor = re.search(r'href="([^"]{1,300})"', cell)
         label = _cell_text(cell, 300) or ""
         ident = re.match(r"(APSB(\d{2})-\d{1,4})\s*:?\s*(.*)", label)
-        posted, updated = _us_date(_cell_text(match.group(2), 20)), _us_date(_cell_text(match.group(3), 20))
+        posted, updated = _us_date(_cell_text(cells[1][:200], 20)), _us_date(_cell_text(cells[2][:200], 20))
         if not anchor or not ident or posted is None or posted[2:4] != ident.group(2):
             continue
         href = anchor.group(1)
@@ -477,7 +483,8 @@ def save_state(directory, state, write_raw):
 
 
 def resume_deployed(state, previous_index, read):
-    """Months the state lacks, read from the deployed shards that previous_index lists. read(entry) returns the bytes."""
+    """Months the state lacks, read from the deployed shards that previous_index lists. read(entry) returns the bytes.
+    A trimmed brief is not resumed, so its month is read again from MSRC with its rows whole."""
     entries = [entry for entry in (previous_index or {}).get("shards", []) if MONTH_PATH.fullmatch(entry.get("path", ""))]
     wanted = [entry for entry in entries if MONTH_PATH.fullmatch(entry["path"]).group(1) not in state["months"]]
     resumed = 0
@@ -494,6 +501,11 @@ def resume_deployed(state, previous_index, read):
     with ThreadPoolExecutor(max_workers=WORKERS) as pool:
         for value in pool.map(one, wanted):
             if not isinstance(value, dict) or value.get("kind") != "patch-tuesday":
+                continue
+            if value.get("trimmed"):
+                # fit() dropped rows or tags from this brief, and its counts cover rows it no longer
+                # carries: resuming it would shrink the totals and lose the marker. Read it from MSRC.
+                print("Patch Tuesday: " + str(value.get("month"))[:7] + " not resumed (the deployed brief is trimmed).", file=sys.stderr)
                 continue
             unit = {"parser_version": value.get("parser_version"), "month": value.get("month"), "msrc": value.get("msrc"),
                     "fields": value.get("fields"), "rows": value.get("rows")}

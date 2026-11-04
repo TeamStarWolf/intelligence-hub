@@ -28,6 +28,9 @@ UPDATES = ("2016-Jan", "2024-Jan", "2026-Sep", "2026-Oct", "1999-Sep")
 ADOBE_SECTIONS = ("Adobe Acrobat", "Adobe Substance 3D Stager", "Adobe Dreamweaver", "Adobe Photoshop")
 # Rows on these posting dates are kept beside the first three of each section.
 ADOBE_DAYS = ("01/09/2024", "10/13/2026")
+# Per section, also these bulletins: True strips the row's trailing <th> cell, so a plain three-cell
+# row sits beside rows that end with <th>&nbsp;</th>, and a row with an empty fourth <td> follows.
+ADOBE_SHAPES = {"Adobe Photoshop": (("APSB26-40", True), ("APSB25-75", False))}
 SAP_ROWS = 6
 
 
@@ -132,6 +135,11 @@ def adobe(source):
         table = re.search(r"<table.*?</table>", page[match.end():], re.S).group(0)
         rows = re.findall(r"<tr>.*?</tr>", table, re.S)
         kept = rows[:3] + [row for row in rows[3:] if any(day in row for day in ADOBE_DAYS)]
+        for ident, strip in ADOBE_SHAPES.get(name, ()):
+            row = next((row for row in rows if "/" + ident.lower() + ".html\"" in row), None)
+            if row is None:
+                raise SystemExit("Adobe bulletin " + ident + " not found.")
+            kept.append(re.sub(r"<th>[^<]{0,20}</th>\s*(?=</tr>)", "", row) if strip else row)
         parts.append(match.group(0) + "\n<table width=\"100%\" cellspacing=\"0\" cellpadding=\"1\" border=\"1\">\n<tbody>" +
                      "".join(kept) + "</tbody></table>\n")
     parts.append("</body></html>\n")
