@@ -1,0 +1,2438 @@
+{
+ "DocumentTitle": {
+  "Value": "October 2026 Security Updates"
+ },
+ "DocumentType": {
+  "Value": "Security Update"
+ },
+ "DocumentPublisher": {
+  "ContactDetails": {
+   "Value": "secure@microsoft.com"
+  },
+  "IssuingAuthority": {
+   "Value": "The Microsoft Security Response Center (MSRC) identifies, monitors, resolves, and responds to security incidents and Microsoft software security vulnerabilities. For more information, see http://www.microsoft.com/security/msrc."
+  },
+  "Type": 0
+ },
+ "DocumentTracking": {
+  "Identification": {
+   "ID": {
+    "Value": "2026-Oct"
+   },
+   "Alias": {
+    "Value": "2026-Oct"
+   }
+  },
+  "Status": 2,
+  "Version": "1.0",
+  "RevisionHistory": [
+   {
+    "Number": "2891",
+    "Date": "2026-11-03T14:45:49",
+    "Description": {
+     "Value": "October 2026 Security Updates"
+    }
+   }
+  ],
+  "InitialReleaseDate": "2026-10-13T07:00:00",
+  "CurrentReleaseDate": "2026-11-03T14:45:49"
+ },
+ "ProductTree": {
+  "Branch": [
+   {
+    "Items": [
+     {
+      "Items": [
+       {
+        "ProductID": "21955",
+        "Value": "Microsoft Edge (Chromium-based)"
+       }
+      ],
+      "Type": 1,
+      "Name": "Browser"
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "12421",
+        "Value": "Microsoft Office LTSC 2024 for 64-bit editions"
+       },
+       {
+        "ProductID": "12420",
+        "Value": "Microsoft Office LTSC 2024 for 32-bit editions"
+       },
+       {
+        "ProductID": "11763",
+        "Value": "Microsoft 365 Apps for Enterprise for 64-bit Systems"
+       }
+      ],
+      "Type": 1,
+      "Name": "Microsoft Office"
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "11723-22028",
+        "Value": "Microsoft .NET Framework 3.5 AND 4.6.2/4.7/4.7.1/4.7.2 on Windows 10 version 1607"
+       },
+       {
+        "ProductID": "11723-10816",
+        "Value": "Microsoft .NET Framework 3.5 AND 4.6.2/4.7/4.7.1/4.7.2 on Windows Server 2016"
+       },
+       {
+        "ProductID": "11723-11571",
+        "Value": "Microsoft .NET Framework 3.5 AND 4.6.2/4.7/4.7.1/4.7.2 on Windows Server 2019"
+       },
+       {
+        "ProductID": "22220",
+        "Value": ".NET 8.0 installed on Windows"
+       },
+       {
+        "ProductID": "22221",
+        "Value": ".NET 8.0 installed on Linux"
+       }
+      ],
+      "Type": 1,
+      "Name": "Developer Tools"
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "11923",
+        "Value": "Windows Server 2022"
+       },
+       {
+        "ProductID": "10852",
+        "Value": "Windows 10 Version 1607 for 32-bit Systems"
+       },
+       {
+        "ProductID": "11571",
+        "Value": "Windows Server 2019"
+       },
+       {
+        "ProductID": "11572",
+        "Value": "Windows Server 2019 (Server Core installation)"
+       },
+       {
+        "ProductID": "12242",
+        "Value": "Windows 11 Version 23H2 for ARM64-based Systems"
+       },
+       {
+        "ProductID": "12243",
+        "Value": "Windows 11 Version 23H2 for x64-based Systems"
+       },
+       {
+        "ProductID": "12389",
+        "Value": "Windows 11 Version 24H2 for ARM64-based Systems"
+       }
+      ],
+      "Type": 1,
+      "Name": "Windows"
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "10378",
+        "Value": "Windows Server 2012"
+       },
+       {
+        "ProductID": "10379",
+        "Value": "Windows Server 2012 (Server Core installation)"
+       },
+       {
+        "ProductID": "10483",
+        "Value": "Windows Server 2012 R2"
+       },
+       {
+        "ProductID": "10543",
+        "Value": "Windows Server 2012 R2 (Server Core installation)"
+       },
+       {
+        "ProductID": "12039",
+        "Value": "Microsoft Exchange Server 2016 Cumulative Update 23"
+       },
+       {
+        "ProductID": "12502",
+        "Value": "Microsoft Exchange Server 2019 Cumulative Update 15"
+       }
+      ],
+      "Type": 1,
+      "Name": "ESU"
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "10133",
+        "Value": "Microsoft Exchange Online"
+       },
+       {
+        "ProductID": "16792",
+        "Value": "Microsoft Exchange Server Subscription Edition RTM"
+       }
+      ],
+      "Type": 1,
+      "Name": "Server Software"
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "21965-20837",
+        "Value": "Microsoft.AspNetCore.SignalR.Protocols.MessagePack on .NET 10.0 runtime installed on Windows"
+       },
+       {
+        "ProductID": "21965-20839",
+        "Value": "Microsoft.AspNetCore.SignalR.Protocols.MessagePack on .NET 10.0 runtime installed on Linux"
+       },
+       {
+        "ProductID": "21965-20838",
+        "Value": "Microsoft.AspNetCore.SignalR.Protocols.MessagePack on .NET 10.0 runtime installed on Mac OS"
+       }
+      ],
+      "Type": 1,
+      "Name": "Other"
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "22215-17084",
+        "Value": "azl3 brotli 1.1.0-2 on Azure Linux 3.0"
+       },
+       {
+        "ProductID": "21021-17084",
+        "Value": "azl3 tensorflow 2.16.1-11 on Azure Linux 3.0"
+       },
+       {
+        "ProductID": "22358-17084",
+        "Value": "azl3 python-markdown 3.8.2-3 on Azure Linux 3.0"
+       }
+      ],
+      "Type": 1,
+      "Name": "Open Source Software"
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "17527-17084",
+        "Value": "azl3 dpdk 23.11.3-1 on Azure Linux 3.0"
+       }
+      ],
+      "Type": 1,
+      "Name": "Mariner"
+     }
+    ],
+    "Type": 0,
+    "Name": "Microsoft"
+   }
+  ],
+  "FullProductName": [
+   {
+    "ProductID": "10133",
+    "CPE": "cpe:2.3:a:microsoft:exchange_online:*:*:*:*:*:*:*:*",
+    "Value": "Microsoft Exchange Online"
+   },
+   {
+    "ProductID": "10378",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2012:6.2.9200.26434:*:*:*:*:*:x64:*",
+    "Value": "Windows Server 2012"
+   },
+   {
+    "ProductID": "10379",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2012:6.2.9200.26434:*:*:*:*:*:x64:*",
+    "Value": "Windows Server 2012 (Server Core installation)"
+   },
+   {
+    "ProductID": "10483",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2012_R2:6.3.9600.23470:*:*:*:*:*:x64:*",
+    "Value": "Windows Server 2012 R2"
+   },
+   {
+    "ProductID": "10543",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2012_R2:6.3.9600.23470:*:*:*:*:*:x64:*",
+    "Value": "Windows Server 2012 R2 (Server Core installation)"
+   },
+   {
+    "ProductID": "10852",
+    "CPE": "cpe:2.3:o:microsoft:windows_10_1607:*:*:*:*:*:*:x86:*",
+    "Value": "Windows 10 Version 1607 for 32-bit Systems"
+   },
+   {
+    "ProductID": "11571",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*:*",
+    "Value": "Windows Server 2019"
+   },
+   {
+    "ProductID": "11572",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2019:*:*:*:*:*:*:*:*",
+    "Value": "Windows Server 2019 (Server Core installation)"
+   },
+   {
+    "ProductID": "11723-10816",
+    "CPE": "cpe:2.3:a:microsoft:.net_framework:3.5:*:*:*:*:*:*:*",
+    "Value": "Microsoft .NET Framework 3.5 AND 4.6.2/4.7/4.7.1/4.7.2 on Windows Server 2016"
+   },
+   {
+    "ProductID": "11723-11571",
+    "CPE": "cpe:2.3:a:microsoft:.net_framework:3.5:*:*:*:*:*:*:*",
+    "Value": "Microsoft .NET Framework 3.5 AND 4.6.2/4.7/4.7.1/4.7.2 on Windows Server 2019"
+   },
+   {
+    "ProductID": "11723-22028",
+    "CPE": "cpe:2.3:a:microsoft:.net_framework:3.5:*:*:*:*:*:*:*",
+    "Value": "Microsoft .NET Framework 3.5 AND 4.6.2/4.7/4.7.1/4.7.2 on Windows 10 version 1607"
+   },
+   {
+    "ProductID": "11763",
+    "CPE": "cpe:2.3:a:microsoft:365_apps:*:*:*:*:enterprise:*:*:*",
+    "Value": "Microsoft 365 Apps for Enterprise for 64-bit Systems"
+   },
+   {
+    "ProductID": "11923",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2022:*:*:*:*:*:*:*:*",
+    "Value": "Windows Server 2022"
+   },
+   {
+    "ProductID": "12039",
+    "CPE": "cpe:2.3:a:microsoft:exchange_server_2016:*:cumulative_update_23:*:*:*:*:*:*",
+    "Value": "Microsoft Exchange Server 2016 Cumulative Update 23"
+   },
+   {
+    "ProductID": "12242",
+    "CPE": "cpe:2.3:o:microsoft:windows_11_23H2:*:*:*:*:*:*:arm64:*",
+    "Value": "Windows 11 Version 23H2 for ARM64-based Systems"
+   },
+   {
+    "ProductID": "12243",
+    "CPE": "cpe:2.3:o:microsoft:windows_11_23H2:*:*:*:*:*:*:x64:*",
+    "Value": "Windows 11 Version 23H2 for x64-based Systems"
+   },
+   {
+    "ProductID": "12389",
+    "CPE": "cpe:2.3:o:microsoft:windows_11_24H2:*:*:*:*:*:*:arm64:*",
+    "Value": "Windows 11 Version 24H2 for ARM64-based Systems"
+   },
+   {
+    "ProductID": "12420",
+    "CPE": "cpe:2.3:a:microsoft:office_2024:*:*:*:*:long_term_servicing_channel:*:*:*",
+    "Value": "Microsoft Office LTSC 2024 for 32-bit editions"
+   },
+   {
+    "ProductID": "12421",
+    "CPE": "cpe:2.3:a:microsoft:office_2024:*:*:*:*:long_term_servicing_channel:*:*:*",
+    "Value": "Microsoft Office LTSC 2024 for 64-bit editions"
+   },
+   {
+    "ProductID": "12502",
+    "CPE": "cpe:2.3:a:microsoft:exchange_server_2019:*:cumulative_update_15:*:*:*:*:*:*",
+    "Value": "Microsoft Exchange Server 2019 Cumulative Update 15"
+   },
+   {
+    "ProductID": "16792",
+    "CPE": "cpe:2.3:a:microsoft:exchange_server_se:*:RTM:*:*:*:*:*:*",
+    "Value": "Microsoft Exchange Server Subscription Edition RTM"
+   },
+   {
+    "ProductID": "17527-17084",
+    "CPE": "cpe:2.3:a:microsoft:azl3_dpdk_23.11.3-1:*:*:*:*:*:*:*:*",
+    "Value": "azl3 dpdk 23.11.3-1 on Azure Linux 3.0"
+   },
+   {
+    "ProductID": "21021-17084",
+    "CPE": "cpe:2.3:a:microsoft:azl3_tensorflow_2.16.1-11:*:*:*:*:*:*:*:*",
+    "Value": "azl3 tensorflow 2.16.1-11 on Azure Linux 3.0"
+   },
+   {
+    "ProductID": "21955",
+    "CPE": "cpe:2.3:a:microsoft:edge_chromium:*:*:*:*:*:*:*:*",
+    "Value": "Microsoft Edge (Chromium-based)"
+   },
+   {
+    "ProductID": "21965-20837",
+    "CPE": "cpe:2.3:a:microsoft:microsoft.aspnetcore.signalr.protocols.messagepack:*:*:*:*:*:*:*:*",
+    "Value": "Microsoft.AspNetCore.SignalR.Protocols.MessagePack on .NET 10.0 runtime installed on Windows"
+   },
+   {
+    "ProductID": "21965-20838",
+    "CPE": "cpe:2.3:a:microsoft:microsoft.aspnetcore.signalr.protocols.messagepack:*:*:*:*:*:*:*:*",
+    "Value": "Microsoft.AspNetCore.SignalR.Protocols.MessagePack on .NET 10.0 runtime installed on Mac OS"
+   },
+   {
+    "ProductID": "21965-20839",
+    "CPE": "cpe:2.3:a:microsoft:microsoft.aspnetcore.signalr.protocols.messagepack:*:*:*:*:*:*:*:*",
+    "Value": "Microsoft.AspNetCore.SignalR.Protocols.MessagePack on .NET 10.0 runtime installed on Linux"
+   },
+   {
+    "ProductID": "22215-17084",
+    "CPE": "cpe:2.3:a:microsoft:azl3_brotli_1.1.0-2:*:*:*:*:*:*:*:*",
+    "Value": "azl3 brotli 1.1.0-2 on Azure Linux 3.0"
+   },
+   {
+    "ProductID": "22220",
+    "CPE": "cpe:2.3:a:microsoft:.net_8.0_installed_on_windows:*:*:*:*:*:*:*:*",
+    "Value": ".NET 8.0 installed on Windows"
+   },
+   {
+    "ProductID": "22221",
+    "CPE": "cpe:2.3:a:microsoft:.net_8.0_installed_on_linux:*:*:*:*:*:*:*:*",
+    "Value": ".NET 8.0 installed on Linux"
+   },
+   {
+    "ProductID": "22358-17084",
+    "CPE": "cpe:2.3:a:microsoft:azl3_python-markdown_3.8.2-3:*:*:*:*:*:*:*:*",
+    "Value": "azl3 python-markdown 3.8.2-3 on Azure Linux 3.0"
+   }
+  ]
+ },
+ "Vulnerability": [
+  {
+   "Title": {
+    "Value": "Windows Message Queuing Queue Manager Remote Code Execution Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": "Windows Message Queuing Queue Manager",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Windows Message Queuing Queue Manager"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2026-100202",
+   "CWE": [
+    {
+     "ID": "CWE-416",
+     "Value": "Use After Free"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "10378",
+      "10379",
+      "10483"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "10378"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "10379"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "10483"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "10378"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "10379"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "10483"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Less Likely"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 9.8,
+     "TemporalScore": 8.5,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "10378"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 9.8,
+     "TemporalScore": 8.5,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "10379"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 9.8,
+     "TemporalScore": 8.5,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "10483"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "949",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2026-10-13T07:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Microsoft Office Excel Remote Code Execution Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": "Microsoft Office Excel",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Microsoft Office Excel"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2026-100209",
+   "CWE": [
+    {
+     "ID": "CWE-416",
+     "Value": "Use After Free"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "12421",
+      "12420",
+      "11763"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "12421"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "12420"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "11763"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "12421"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "12420"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "11763"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Less Likely"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 8.8,
+     "TemporalScore": 7.7,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "12421"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.8,
+     "TemporalScore": 7.7,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "12420"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.8,
+     "TemporalScore": 7.7,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11763"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "953",
+   "RevisionHistory": [
+    {
+     "Number": "1.1",
+     "Date": "2026-10-15T07:00:00"
+    },
+    {
+     "Number": "1.0",
+     "Date": "2026-10-13T07:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": ".NET Framework Security Feature Bypass Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": ".NET Framework",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": ".NET Framework"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2026-108398",
+   "CWE": [
+    {
+     "ID": "CWE-426",
+     "Value": "Untrusted Search Path"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "11723-22028",
+      "11723-10816",
+      "11723-11571"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Security Feature Bypass"
+     },
+     "ProductID": [
+      "11723-22028"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Security Feature Bypass"
+     },
+     "ProductID": [
+      "11723-10816"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Security Feature Bypass"
+     },
+     "ProductID": [
+      "11723-11571"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "11723-22028"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "11723-10816"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "11723-11571"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:Yes;Exploited:No;Latest Software Release:Exploitation Less Likely"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 8.8,
+     "TemporalScore": 7.7,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11723-22028"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.8,
+     "TemporalScore": 7.7,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11723-10816"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.8,
+     "TemporalScore": 7.7,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11723-11571"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "1376",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2026-10-13T07:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Google: CVE-2026-111497 Buffer overflow vulnerability in the Brotli decoder"
+   },
+   "Notes": [
+    {
+     "Title": ".NET",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": ".NET"
+    },
+    {
+     "Title": "Google",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Google"
+    }
+   ],
+   "CVE": "CVE-2026-111497",
+   "CWE": [],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "22215-17084",
+      "22220",
+      "22221"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {},
+     "ProductID": [
+      "22215-17084"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Elevation of Privilege"
+     },
+     "ProductID": [
+      "22220"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Elevation of Privilege"
+     },
+     "ProductID": [
+      "22221"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "22215-17084"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "22220"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "22221"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:Yes;Exploited:No;Latest Software Release:Exploitation More Likely"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 8.1,
+     "TemporalScore": 7.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "22215-17084"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.1,
+     "TemporalScore": 7.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "22220"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.1,
+     "TemporalScore": 7.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "22221"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "1473",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2026-10-25T07:00:00"
+    },
+    {
+     "Number": "3.0",
+     "Date": "2026-10-30T01:02:42"
+    },
+    {
+     "Number": "1.1",
+     "Date": "2026-10-26T07:00:00"
+    },
+    {
+     "Number": "5.0",
+     "Date": "2026-11-01T14:59:32"
+    },
+    {
+     "Number": "4.0",
+     "Date": "2026-10-31T01:13:53"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Windows Remote Desktop Services Remote Code Execution Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": "Remote Desktop Gateway Service",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Remote Desktop Gateway Service"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2026-70187",
+   "CWE": [
+    {
+     "ID": "CWE-416",
+     "Value": "Use After Free"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "11571",
+      "11572",
+      "11923"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "11571"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "11572"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "11923"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "11571"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "11572"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "11923"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Less Likely"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 8.1,
+     "TemporalScore": 7.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11571"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.1,
+     "TemporalScore": 7.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11572"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.1,
+     "TemporalScore": 7.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11923"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "2135",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2026-10-13T07:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Microsoft Exchange Server Remote Code Execution Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": "Microsoft Exchange Server",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Microsoft Exchange Server"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2026-70571",
+   "CWE": [
+    {
+     "ID": "CWE-121",
+     "Value": "Stack-based Buffer Overflow"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "12502",
+      "16792",
+      "12039"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "12502"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "16792"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "12039"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "12502"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "16792"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "12039"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation More Likely"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 8.1,
+     "TemporalScore": 7.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "12502"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.1,
+     "TemporalScore": 7.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "16792"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.1,
+     "TemporalScore": 7.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "12039"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "2237",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2026-10-13T07:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Windows DHCP Server Remote Code Execution Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": "Windows DHCP Server",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Windows DHCP Server"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2026-88117",
+   "CWE": [
+    {
+     "ID": "CWE-416",
+     "Value": "Use After Free"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "10378",
+      "10379",
+      "10483"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "10378"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "10379"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "10483"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "10378"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "10379"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "10483"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Less Likely"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 8.1,
+     "TemporalScore": 7.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "10378"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.1,
+     "TemporalScore": 7.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "10379"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.1,
+     "TemporalScore": 7.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "10483"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "2802",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2026-10-13T07:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "MessagePack-CSharp Denial of Service Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": ".NET",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": ".NET"
+    },
+    {
+     "Title": "GitHub_M",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "GitHub_M"
+    }
+   ],
+   "CVE": "CVE-2026-92707",
+   "CWE": [
+    {
+     "ID": "CWE-1325",
+     "Value": "Improperly Controlled Sequential Memory Allocation"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "21965-20837",
+      "21965-20839",
+      "21965-20838"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {},
+     "ProductID": [
+      "21965-20837"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "21965-20839"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "21965-20838"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "21965-20837"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "21965-20839"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "21965-20838"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:Yes;Exploited:No;Latest Software Release:Exploitation Less Likely"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 5.3,
+     "TemporalScore": 5.3,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+     "ProductID": [
+      "21965-20837"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 5.3,
+     "TemporalScore": 5.3,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+     "ProductID": [
+      "21965-20839"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 5.3,
+     "TemporalScore": 5.3,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+     "ProductID": [
+      "21965-20838"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "2892",
+   "RevisionHistory": [
+    {
+     "Number": "1.1",
+     "Date": "2026-10-15T07:00:00"
+    },
+    {
+     "Number": "1.0",
+     "Date": "2026-10-13T07:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Microsoft Exchange Online Remote Code Execution Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": "Microsoft Exchange Online",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Microsoft Exchange Online"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2026-96185",
+   "CWE": [
+    {
+     "ID": "CWE-121",
+     "Value": "Stack-based Buffer Overflow"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "10133"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "10133"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "10133"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:N/A"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 7.5,
+     "TemporalScore": 6.5,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "10133"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "2906",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2026-10-22T07:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Windows Shell Security Feature Bypass Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": "Windows Shell",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Windows Shell"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2026-96951",
+   "CWE": [
+    {
+     "ID": "CWE-77",
+     "Value": "Improper Neutralization of Special Elements used in a Command ('Command Injection')"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "10483",
+      "10543",
+      "10852"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Security Feature Bypass"
+     },
+     "ProductID": [
+      "10483"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Security Feature Bypass"
+     },
+     "ProductID": [
+      "10543"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Security Feature Bypass"
+     },
+     "ProductID": [
+      "10852"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "10483"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "10543"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "10852"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:Yes;Latest Software Release:Exploitation Detected"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 8.8,
+     "TemporalScore": 8.2,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H/E:F/RL:O/RC:C",
+     "ProductID": [
+      "10483"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.8,
+     "TemporalScore": 8.2,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H/E:F/RL:O/RC:C",
+     "ProductID": [
+      "10543"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.8,
+     "TemporalScore": 8.2,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H/E:F/RL:O/RC:C",
+     "ProductID": [
+      "10852"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "3041",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2026-10-13T07:00:00"
+    },
+    {
+     "Number": "2.0",
+     "Date": "2026-10-26T07:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Windows Update Service Elevation of Privilege Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": "Windows Update Service",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Windows Update Service"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2026-100200",
+   "CWE": [
+    {
+     "ID": "CWE-416",
+     "Value": "Use After Free"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "12242",
+      "12243",
+      "12389"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Elevation of Privilege"
+     },
+     "ProductID": [
+      "12242"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Elevation of Privilege"
+     },
+     "ProductID": [
+      "12243"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Elevation of Privilege"
+     },
+     "ProductID": [
+      "12389"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "12242"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "12243"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "12389"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Less Likely"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 7.0,
+     "TemporalScore": 6.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "12242"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.0,
+     "TemporalScore": 6.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "12243"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.0,
+     "TemporalScore": 6.1,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "12389"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "947",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2026-10-13T07:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Microsoft Edge for Android Security Feature Bypass Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": "Microsoft Edge for Android",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Microsoft Edge for Android"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2026-85330",
+   "CWE": [
+    {
+     "ID": "CWE-863",
+     "Value": "Incorrect Authorization"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "21955"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Security Feature Bypass"
+     },
+     "ProductID": [
+      "21955"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Moderate"
+     },
+     "ProductID": [
+      "21955"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Unlikely"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 4.3,
+     "TemporalScore": 3.8,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:L/A:N/E:U/RL:O/RC:C",
+     "ProductID": [
+      "21955"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "2576",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2026-10-26T07:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Microsoft Edge (Chromium-based) Spoofing Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": "Microsoft Edge (Chromium-based)",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Microsoft Edge (Chromium-based)"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2026-20942",
+   "CWE": [
+    {
+     "ID": "CWE-1021",
+     "Value": "Improper Restriction of Rendered UI Layers or Frames"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "21955"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Spoofing"
+     },
+     "ProductID": [
+      "21955"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Low"
+     },
+     "ProductID": [
+      "21955"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Less Likely"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 4.3,
+     "TemporalScore": 3.8,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:N/A:N/E:U/RL:O/RC:C",
+     "ProductID": [
+      "21955"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "1878",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2026-10-27T07:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Chromium CVE-2026-102299: Type confusion"
+   },
+   "Notes": [
+    {
+     "Title": "Microsoft Edge (Chromium-based)",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Microsoft Edge (Chromium-based)"
+    },
+    {
+     "Title": "Chrome",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Chrome"
+    }
+   ],
+   "CVE": "CVE-2026-102299",
+   "CWE": [
+    {
+     "ID": "CWE-843",
+     "Value": "Access of Resource Using Incompatible Type ('Type Confusion')"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "21955"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {},
+     "ProductID": [
+      "21955"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "21955"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 8.8,
+     "TemporalScore": 8.8,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+     "ProductID": [
+      "21955"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "1007",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2026-10-26T07:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Python-Markdown 3.0 through 3.11.2 Denial of Service via Link Bracket Parsing"
+   },
+   "Notes": [
+    {
+     "Title": "Mariner",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Mariner"
+    },
+    {
+     "Title": "VulnCheck",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "VulnCheck"
+    }
+   ],
+   "CVE": "CVE-2019-25781",
+   "CWE": [
+    {
+     "ID": "CWE-407",
+     "Value": "Inefficient Algorithmic Complexity"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "22358-17084",
+      "21021-17084"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {},
+     "ProductID": [
+      "22358-17084"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "21021-17084"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "22358-17084"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "21021-17084"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 7.5,
+     "TemporalScore": 7.5,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+     "ProductID": [
+      "22358-17084"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.5,
+     "TemporalScore": 7.5,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+     "ProductID": [
+      "21021-17084"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "0",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2026-11-03T01:06:41"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Dpdk: dpdk: heap out-of-bounds read/write in gso header copy"
+   },
+   "Notes": [
+    {
+     "Title": "Mariner",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Mariner"
+    },
+    {
+     "Title": "redhat",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "redhat"
+    }
+   ],
+   "CVE": "CVE-2026-100236",
+   "CWE": [
+    {
+     "ID": "CWE-787",
+     "Value": "Out-of-bounds Write"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "17527-17084"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {},
+     "ProductID": [
+      "17527-17084"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "17527-17084"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 8.6,
+     "TemporalScore": 8.6,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:H",
+     "ProductID": [
+      "17527-17084"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "1",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2026-10-17T01:04:04"
+    },
+    {
+     "Number": "3.0",
+     "Date": "2026-10-25T01:46:59"
+    },
+    {
+     "Number": "2.0",
+     "Date": "2026-10-24T14:49:33"
+    }
+   ]
+  }
+ ]
+}

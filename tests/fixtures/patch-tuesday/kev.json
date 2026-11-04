@@ -1,0 +1,9 @@
+{
+ "catalogVersion": "2026.11.03",
+ "count": 3,
+ "vulnerabilities": [
+  {"cveID": "CVE-2023-29357", "vendorProject": "Microsoft", "product": "SharePoint Server", "vulnerabilityName": "Microsoft SharePoint Server Privilege Escalation Vulnerability", "dateAdded": "2024-01-10", "dueDate": "2024-01-31"},
+  {"cveID": "CVE-2026-96951", "vendorProject": "Microsoft", "product": "Windows", "vulnerabilityName": "Microsoft Windows Command Injection Vulnerability", "dateAdded": "2026-10-13", "dueDate": "2026-10-16"},
+  {"cveID": "CVE-2026-111497", "vendorProject": "Google", "product": "Brotli", "vulnerabilityName": "Google Brotli Unchecked Return Value Vulnerability", "dateAdded": "2026-10-27", "dueDate": "2026-11-10"}
+ ]
+}

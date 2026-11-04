@@ -2,3 +2,4 @@
 # so no checkout may rewrite their line endings.
 history/** -text
 tests/history/fixtures/** -text
+tests/fixtures/patch-tuesday/** -text

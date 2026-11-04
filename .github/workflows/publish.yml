@@ -37,15 +37,19 @@ jobs:
           path: |
             .state/public-cache.json
             .state/cve-projections.json
+            .state/patch-tuesday.json
           key: public-v2-${{ hashFiles('intelligence_hub/*.py', 'config/sources.json') }}-${{ steps.day.outputs.value }}
           restore-keys: |
             public-v2-${{ hashFiles('intelligence_hub/*.py', 'config/sources.json') }}-
       - name: Collect actual public intelligence
         env:
           CVE_ENRICH_LIMIT: ${{ github.event_name == 'push' && '2000' || '40' }}
+          # MSRC release documents per run: a push reads every month that is missing or revised
+          # (the backfill), a scheduled run at most 12 (new and revised months).
+          PATCH_TUESDAY_LIMIT: ${{ github.event_name == 'push' && '200' || '12' }}
         run: |
           python3 --version
-          python3 -m intelligence_hub --resume-public --enrich-limit "$CVE_ENRICH_LIMIT"
+          python3 -m intelligence_hub --resume-public --enrich-limit "$CVE_ENRICH_LIMIT" --patch-tuesday-limit "$PATCH_TUESDAY_LIMIT"
       - name: Read typed publication decision
         id: result
         shell: python
@@ -63,7 +67,8 @@ jobs:
           if not isinstance(result, dict) or type(result.get('changed')) is not bool:
               raise SystemExit('The collection result requires a Boolean changed field.')
           shard = re.compile(r'(?:sources|coverage|reports|cve-index|recent)\.json|live/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json'
-                             r'|history/(?:[0-9]{4}|undated)\.json|kev/[0-9]{4}\.json|cve/[0-9]{4}/[0-9]{1,5}k\.json')
+                             r'|history/(?:[0-9]{4}|undated)\.json|kev/[0-9]{4}\.json|cve/[0-9]{4}/[0-9]{1,5}k\.json'
+                             r'|patch-tuesday/(?:index|[0-9]{4}-(?:0[1-9]|1[0-2]))\.json')
           for field in ('changed_shards', 'removed_shards'):
               paths = result.get(field)
               if (type(paths) is not list or len(paths) > 1000 or
