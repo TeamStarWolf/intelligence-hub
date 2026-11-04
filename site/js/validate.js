@@ -337,7 +337,15 @@ export function normalizeCoverage(raw) {
   const rows = list(raw.rows, 20000).map(item => {
     requireValue(isObject(item) && ids.has(item.source_id) && Number.isSafeInteger(item.year) && item.year >= raw.first_year && item.year <= raw.end_year && COVERAGE_STATUSES.includes(item.status));
     const key = item.source_id + " " + item.year; requireValue(!seen.has(key)); seen.add(key);
-    return { source_id: item.source_id, year: item.year, status: item.status, admitted: nonnegative(item.admitted),
+    // given_up: rows another source's row already held by link; in_feed: rows the source's own feed or
+    // KEV row already held; shown: rows the year's shards carry under this source. A file written
+    // before these existed reads as nothing given up, nothing in the feed, all shown.
+    const admitted = nonnegative(item.admitted);
+    const given_up = item.given_up === undefined ? 0 : nonnegative(item.given_up);
+    const in_feed = item.in_feed === undefined ? 0 : nonnegative(item.in_feed);
+    const shown = item.shown === undefined ? admitted : nonnegative(item.shown);
+    requireValue(given_up + in_feed + shown <= admitted);
+    return { source_id: item.source_id, year: item.year, status: item.status, admitted, given_up, in_feed, shown,
       upstream_count: item.upstream_count === null ? null : nonnegative(item.upstream_count), filter: optionalText(item.filter, 600), reason: optionalText(item.reason, 600),
       checked_at: item.checked_at == null ? null : calendarDay(item.checked_at), licence: optionalText(item.licence, 600) };
   });

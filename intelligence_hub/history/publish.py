@@ -10,6 +10,13 @@ A missing, unreadable or invalid history/ never blocks the feed: the run continu
 without adapter rows and records why. Nor can the adapter rows push a year's shard past
 the shard byte bound: fit() holds back that year's lowest-priority adapter rows until
 the shard fits, and the v7 coverage file says how many were held back.
+
+The committed history/coverage.json states what each adapter admitted. The published
+data/v7/coverage.json adds three numbers per row (annotate_coverage): given_up, the rows
+whose link was already a feed, KEV or curated row of another source in this run;
+in_feed, the rows whose link was already a feed or KEV row of the same source; and
+shown, the rows that source actually has in the year's shards (admitted minus given_up
+minus in_feed minus the rows fit() held back).
 """
 from . import ADAPTERS, base, canonical, check, coverage
 
@@ -95,8 +102,14 @@ def article(row):
     return value
 
 
-def articles(root, existing_urls=()):
+def articles(root, existing=None):
     """(v7 article rows, summary). A row whose URL is already a feed, KEV or curated row is left to that row.
+
+    existing maps each URL already taken by a feed, KEV or curated row to that row's
+    source_id. The summary's given_up lists, per adapter and year, how many rows were left
+    to such a row of ANOTHER source and which sources took them; in_feed lists, per adapter
+    and year, how many were left to a row of the adapter's own source (its feed or KEV row
+    already holds the page). duplicates_left_to_other_rows is the total of both.
 
     History rows never displace each other by URL: their ids are unique, and several of
     them can share one link by design (every CA-series row of a year links to that year's
@@ -107,17 +120,76 @@ def articles(root, existing_urls=()):
     rows, reason = load(root)
     if reason:
         return [], {"status": "empty" if reason == "no committed history rows" else "unavailable", "reason": reason}
-    taken = set(existing_urls)
-    out, duplicates = [], 0
+    taken = dict(existing or {})
+    out, duplicates, given, own = [], 0, {}, {}
     for row in rows:
         if row["url"] in taken:
             duplicates += 1
+            key = (row["adapter"], row["source_id"], int(row["published"][:4]))
+            holder = str(taken[row["url"]])
+            if holder == row["source_id"]:
+                # The source's own feed or KEV row already lists this page: shown under the same source.
+                own[key] = own.get(key, 0) + 1
+                continue
+            entry = given.setdefault(key, {"rows": 0, "taken_by": set()})
+            entry["rows"] += 1
+            entry["taken_by"].add(holder)
             continue
         out.append(article(row))
     by_adapter = {}
     for row in out:
         by_adapter[row["origin"][len(ORIGIN_PREFIX):]] = by_adapter.get(row["origin"][len(ORIGIN_PREFIX):], 0) + 1
-    return out, {"status": "ok", "rows": len(out), "duplicates_left_to_other_rows": duplicates, "by_adapter": dict(sorted(by_adapter.items()))}
+    given_up = [{"adapter": adapter, "source_id": source_id, "year": year, "rows": entry["rows"], "taken_by": sorted(entry["taken_by"])}
+                for (adapter, source_id, year), entry in sorted(given.items())]
+    in_feed = [{"adapter": adapter, "source_id": source_id, "year": year, "rows": count}
+               for (adapter, source_id, year), count in sorted(own.items())]
+    return out, {"status": "ok", "rows": len(out), "duplicates_left_to_other_rows": duplicates, "given_up": given_up,
+                 "in_feed": in_feed, "by_adapter": dict(sorted(by_adapter.items()))}
+
+
+def shard_year(path):
+    """The calendar year of a history shard path: history/2025.json and history/2025-h1.json are both 2025."""
+    return int(path.split("/", 1)[1][:4])
+
+
+def annotate_coverage(value, given_up, held, published=True, in_feed=()):
+    """Add given_up, in_feed and shown to every row of a published v7 coverage file, in place.
+
+    given_up and in_feed are the articles() summary lists and held is fit()'s result. For an
+    adapter row, shown = admitted - given_up - in_feed - the rows fit() held back for that
+    adapter and year; a source without an adapter, or a run that publishes no adapter rows,
+    shows 0. Raises HistoryError when a number cannot be placed or shown would be negative,
+    so the caller publishes the stub instead of a statement that disagrees with the shards.
+    """
+    def by_year(items):
+        totals = {}
+        for item in items:
+            key = (item["adapter"], item["year"])
+            totals[key] = totals.get(key, 0) + item["rows"]
+        return totals
+    gave, own = by_year(given_up), by_year(in_feed)
+    kept_back = {}
+    for item in held:
+        key = (item["adapter"], shard_year(item["path"]))
+        kept_back[key] = kept_back.get(key, 0) + item["rows"]
+    for row in value["rows"]:
+        key = (row["adapter"], row["year"])
+        if row["adapter"] is None or not published:
+            row["given_up"], row["in_feed"], row["shown"] = 0, 0, 0
+            continue
+        row["given_up"], row["in_feed"] = gave.pop(key, 0), own.pop(key, 0)
+        row["shown"] = row["admitted"] - row["given_up"] - row["in_feed"] - kept_back.pop(key, 0)
+        base.require(row["shown"] >= 0, "Coverage for " + row["adapter"] + " " + str(row["year"]) + " would show " +
+                     str(row["shown"]) + " rows after cross-source deduplication.")
+    if published:
+        left = sorted(set(gave) | set(own) | set(kept_back))
+        base.require(not left, "Given-up, in-feed or held-back rows without a coverage row: " + repr(left[:3]))
+    return value
+
+
+def stub(schema_version, reason):
+    return {"schema_version": schema_version, "kind": "coverage", "status": "stub", "rows": [],
+            "note": "History coverage is unavailable in this run: " + reason[:300]}
 
 
 def coverage_file(root, schema_version):
@@ -129,10 +201,10 @@ def coverage_file(root, schema_version):
         counts, _bytes, _rows = check.check_files(root)
         coverage.validate(value, counts)
     except (base.HistoryError, OSError, ValueError, KeyError, TypeError) as error:
-        return {"schema_version": schema_version, "kind": "coverage", "status": "stub", "rows": [],
-                "note": "History coverage is unavailable in this run: " + (str(error) or type(error).__name__)[:300]}
+        return stub(schema_version, str(error) or type(error).__name__)
     return {"schema_version": schema_version, "kind": "coverage", "status": "ok", "published_rows": HISTORY_PUBLISHED,
             "first_year": value["first_year"], "end_year": value["end_year"], "statuses": value["statuses"],
             "sources": value["sources"], "rows": value["rows"],
-            # Filled by the collector: adapter rows held back to keep a year shard inside its bound (fit).
+            # Filled by the collector: adapter rows held back to keep a year shard inside its bound (fit),
+            # and each row's given_up, in_feed and shown numbers (annotate_coverage).
             "held_back": []}
