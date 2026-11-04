@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { ROOT } from "./fixtures.js";
-import { normalizeArticleShard, normalizeBriefsFile, normalizeCveIndex, normalizeIndex, normalizeKevShard, normalizeRecent, normalizeReports, normalizeSources } from "../../site/js/validate.js";
+import { normalizeArticleShard, normalizeBriefsFile, normalizeCveIndex, normalizeIndex, normalizeKevShard, normalizePatchTuesday, normalizePatchTuesdayIndex, normalizeRecent, normalizeReports, normalizeSources } from "../../site/js/validate.js";
 import { recentCovers } from "../../site/js/views/today.js";
 import { cveRegister, filterRows } from "../../site/js/filters.js";
 
@@ -17,6 +17,8 @@ test("every shard of the offline build validates and matches its manifest sha256
   let rows = 0;
   const articles = [];
   let recent = null;
+  let patchIndex = null;
+  const patchMonths = [];
   for (const entry of index.shards) {
     const raw = readFileSync(base + "v7/" + entry.path);
     assert.equal(createHash("sha256").update(raw).digest("hex"), entry.sha256, entry.path);
@@ -27,7 +29,11 @@ test("every shard of the offline build validates and matches its manifest sha256
     else if (entry.path === "sources.json") rows += normalizeSources(value).length;
     else if (entry.path === "reports.json") normalizeReports(value);
     else if (entry.path === "recent.json") recent = normalizeRecent(value);
+    else if (entry.path === "patch-tuesday/index.json") patchIndex = normalizePatchTuesdayIndex(value);
+    else if (entry.path.startsWith("patch-tuesday/")) patchMonths.push(normalizePatchTuesday(value, entry.path).month);
   }
+  // Every brief the Patch Tuesday index lists is a shard the manifest lists too.
+  if (patchIndex) assert.deepEqual(patchIndex.months.map(item => item.month).sort(), patchMonths.sort());
   // recent.json covers the content date and holds only live rows the live shards also hold.
   assert.ok(recent, "the build writes recent.json");
   assert.ok(recentCovers(recent, index.content_date || index.window.end));

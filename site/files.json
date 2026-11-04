@@ -29,6 +29,7 @@
     "js/views/vendors.js",
     "js/views/tags.js",
     "js/views/actors.js",
-    "js/views/method.js"
+    "js/views/method.js",
+    "js/views/patch-tuesday.js"
   ]
 }
