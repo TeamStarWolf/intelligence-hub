@@ -4,10 +4,12 @@
 
 The folder holds what the collector would read: updates.json and cvrf/<id>.json from the
 MSRC CVRF API, adobe-security.html (https://helpx.adobe.com/security.html), sap-index.html
-and the SAP month or year pages under their own file names. The fixture keeps a few CVEs per
-month (the exploited and disclosed ones, Critical remote code execution in and outside the
-exposed-component rule, every severity, a Chromium row and two left-out package rows), the
-products those CVEs name, and short excerpts of the vendor pages. Descriptions, FAQs,
+and the SAP month or year pages under their own file names; a vendor page left out of the
+folder keeps its committed excerpt. The fixture keeps a few CVEs per month (the exploited and
+disclosed ones, Critical remote code execution in and outside the exposed-component rule,
+every severity, a Chromium row, two left-out package rows and a CVE rated only on its package
+products), the first products those CVEs name (plus the first rated product when none of
+those carries a severity), and short excerpts of the vendor pages. Descriptions, FAQs,
 acknowledgments and remediation tables are dropped: the collector reads none of them.
 Run build_golden.py afterwards to refresh the golden briefs.
 """
@@ -32,6 +34,7 @@ ADOBE_DAYS = ("01/09/2024", "10/13/2026")
 # row sits beside rows that end with <th>&nbsp;</th>, and a row with an empty fourth <td> follows.
 ADOBE_SHAPES = {"Adobe Photoshop": (("APSB26-40", True), ("APSB25-75", False))}
 SAP_ROWS = 6
+PACKAGE_FAMILIES = {"Mariner", "Azure Linux", "Open Source Software"}
 
 
 def write(name, raw):
@@ -51,9 +54,15 @@ def severities(item):
     return {threat["Description"].get("Value") for threat in item.get("Threats") or [] if threat.get("Type") == 3}
 
 
+def rated(item, products):
+    """True when a severity threat with a value names one of products."""
+    return any(threat.get("Type") == 3 and (threat.get("Description") or {}).get("Value") and
+               products & {str(ident) for ident in threat.get("ProductID") or []} for threat in item.get("Threats") or [])
+
+
 def kind(item, families):
     products = {str(ident) for status in item.get("ProductStatuses") or [] for ident in status.get("ProductID") or []}
-    if products and all(families.get(ident) in {"Mariner", "Azure Linux", "Open Source Software"} for ident in products):
+    if products and all(families.get(ident) in PACKAGE_FAMILIES for ident in products):
         return "left-out"
     if notes(item).get(8) == "Chrome":
         return "Chrome"
@@ -89,6 +98,12 @@ def trim_document(source, ident):
                 if str(product) not in products:
                     products.append(str(product))
         keep = set(products[:MAX_PRODUCTS])
+        # A Microsoft-product CVE rated only on a package product (CVE-2026-92707: Moderate and Denial
+        # of Service on the MessagePack packages, nothing on .NET or Visual Studio) keeps the first
+        # rated product too, so the fixture carries the shape the severity fallback reads. A CVE whose
+        # kept products are all packages stays a left-out row.
+        if not rated(item, keep) and any(families.get(product) not in PACKAGE_FAMILIES for product in keep):
+            keep |= set(next(([product] for product in products if rated(item, {product})), []))
         seen |= keep
 
         def scoped(entries):
@@ -178,10 +193,16 @@ def main(argv):
                            "value": [item for item in updates["value"] if item["ID"] in UPDATES]})
     for ident in MONTHS:
         write("cvrf/" + ident + ".json", trim_document(source, ident))
-    write("adobe-security.html", adobe(source))
-    write("sap-index.html", sap_index(source))
-    write("sap-october-2026.html", sap_page(source, "sap-october-2026.html"))
-    write("sap-bulletin-2024.html", sap_page(source, "sap-bulletin-2024.html", "January 2024"))
+    # A vendor page missing from the folder keeps its committed excerpt, so the CVRF documents can be
+    # refreshed alone.
+    pages = (("adobe-security.html", lambda: adobe(source)), ("sap-index.html", lambda: sap_index(source)),
+             ("sap-october-2026.html", lambda: sap_page(source, "sap-october-2026.html")),
+             ("sap-bulletin-2024.html", lambda: sap_page(source, "sap-bulletin-2024.html", "January 2024")))
+    for name, excerpt in pages:
+        if (source / name).is_file():
+            write(name, excerpt())
+        else:
+            print("Kept the committed " + name + " (not in " + str(source) + ").")
     print("Wrote " + str(OUT))
 
 

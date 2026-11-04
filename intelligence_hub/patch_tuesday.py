@@ -10,7 +10,10 @@ changes. The second Tuesday is never assumed: the release dates are Microsoft's.
 
 Rows: one per CVE in the release document that affects at least one Microsoft product (the
 Azure Linux, CBL-Mariner and open-source package CVEs that the documents also carry are
-counted and left out, by the same rule as the msrc-cvrf history adapter). Joins, recomputed
+counted and left out, by the same rule as the msrc-cvrf history adapter). A row's severity
+and impact are the ones MSRC gives its Microsoft products; when MSRC rates only the CVE's
+package products (a MessagePack or OpenSSL package beside .NET or Visual Studio), the row takes
+the highest of those ratings, which is the Max Severity MSRC's Update Guide shows. Joins, recomputed
 every run: the CISA KEV catalog (which of the month's CVEs KEV lists, and every Microsoft KEV
 addition dated in the release month), the Hub's CVE briefs, the vocabulary tags, Adobe's
 bulletin index (bulletins first posted on the release day) and SAP's Security Patch Day page
@@ -40,7 +43,7 @@ import time
 from .history import base
 from .history.adapters import msrc_cvrf
 
-PARSER_VERSION = "1"
+PARSER_VERSION = "2"
 SCHEMA_VERSION = 7
 DIRECTORY = "patch-tuesday"
 INDEX_PATH = DIRECTORY + "/index.json"
@@ -104,6 +107,9 @@ NOTES = [
     "open-source package CVEs listed in the same document are counted and left out.",
     "Chromium CVEs that Microsoft ships in Edge are rows with their issuing CNA named; they count in the totals.",
     "Adobe and SAP appear as headline rows only: bulletin ids, titles, dates, priorities and links to the vendor's page.",
+    "Severity and impact are Microsoft's ratings for the CVE's Microsoft products. When Microsoft rates only the CVE's package "
+    "products (an open-source library shipped beside .NET, for example), the highest of those ratings is shown, as MSRC's Max "
+    "Severity does.",
     "Exploited and publicly disclosed are Microsoft's flags at the document's last revision, not the Hub's assessment.",
     "KEV dates are CISA's catalog additions, not disclosure or first exploitation."]
 
@@ -260,24 +266,36 @@ def parse_document(raw, entry, retrieved_at):
             left_out += 1
             continue
         severities, impacts, exploitability = set(), set(), set()
+        # Ratings on any of the CVE's products, for a CVE whose Microsoft products carry none.
+        any_severities, any_impacts = set(), set()
         exploited = disclosed = False
         for threat in item.get("Threats") or []:
-            if not isinstance(threat, dict) or not _applies(threat, microsoft):
+            if not isinstance(threat, dict):
                 continue
             description = str((threat.get("Description") or {}).get("Value") or "").strip()
+            if description and threat.get("Type") == 3:
+                any_severities.add(description)
+            elif description and threat.get("Type") == 0:
+                any_impacts.add(description)
+            if not _applies(threat, microsoft):
+                continue
             if threat.get("Type") == 3:
-                severities.add(description)
+                if description:
+                    severities.add(description)
             elif threat.get("Type") == 0:
-                impacts.add(description)
+                if description:
+                    impacts.add(description)
             elif threat.get("Type") == 1:
                 fields = _threat_fields(description)
                 exploited = exploited or fields.get("exploited", "").lower() == "yes"
                 disclosed = disclosed or fields.get("publicly disclosed", "").lower() == "yes"
                 if fields.get("latest software release"):
                     exploitability.add(fields["latest software release"])
-        severity = msrc_cvrf.highest(severities)
+        # MSRC's Max Severity: the Microsoft products' rating, or, when none of them carries one (the
+        # rating sits only on a package product, such as MessagePack beside .NET), the CVE's highest.
+        severity = msrc_cvrf.highest(severities) or msrc_cvrf.highest(any_severities)
         severity = severity.capitalize() if severity and severity.capitalize() in SEVERITIES else None
-        impact = min(impacts, key=lambda name: (_rank(name, IMPACTS), name), default=None)
+        impact = min(impacts or any_impacts, key=lambda name: (_rank(name, IMPACTS), name), default=None)
         scores = []
         for score in item.get("CVSSScoreSets") or []:
             if not isinstance(score, dict) or not _applies(score, microsoft):

@@ -194,6 +194,10 @@
      {
       "Items": [
        {
+        "ProductID": "21942",
+        "Value": "MessagePack 2.5.303"
+       },
+       {
         "ProductID": "22215-17084",
         "Value": "azl3 brotli 1.1.0-2 on Azure Linux 3.0"
        },
@@ -339,6 +343,11 @@
     "ProductID": "21021-17084",
     "CPE": "cpe:2.3:a:microsoft:azl3_tensorflow_2.16.1-11:*:*:*:*:*:*:*:*",
     "Value": "azl3 tensorflow 2.16.1-11 on Azure Linux 3.0"
+   },
+   {
+    "ProductID": "21942",
+    "CPE": "cpe:2.3:a:messagepack:messagepack:*:*:*:*:*:c\\#:*:*",
+    "Value": "MessagePack 2.5.303"
    },
    {
     "ProductID": "21955",
@@ -1490,7 +1499,8 @@
      "ProductID": [
       "21965-20837",
       "21965-20839",
-      "21965-20838"
+      "21965-20838",
+      "21942"
      ],
      "Type": 3
     }
@@ -1524,6 +1534,17 @@
      "DateSpecified": false
     },
     {
+     "Description": {
+      "Value": "Denial of Service"
+     },
+     "ProductID": [
+      "21942"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
      "Description": {},
      "ProductID": [
       "21965-20837"
@@ -1545,6 +1566,17 @@
      "Description": {},
      "ProductID": [
       "21965-20838"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Moderate"
+     },
+     "ProductID": [
+      "21942"
      ],
      "Type": 3,
      "Date": "0001-01-01T00:00:00",
@@ -1588,6 +1620,16 @@
      "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
      "ProductID": [
       "21965-20838"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 5.3,
+     "TemporalScore": 5.3,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+     "ProductID": [
+      "21942"
      ],
      "IsTemporalScoreFieldSpecified": false
     }

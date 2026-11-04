@@ -57,6 +57,16 @@ March 2016 release, and its 2016 documents overlap the last year of the bulletin
   Microsoft product. Azure Linux, CBL-Mariner and open-source package CVEs are counted in
   `left_out` and not listed. Chromium CVEs that Microsoft ships in Edge are rows, with Chrome
   named as their issuing CNA.
+- **Where severity and impact come from.** A row's severity (Critical, Important, Moderate,
+  Low) and impact are the values MSRC's threat entries give the CVE's Microsoft products, the
+  highest severity and the most serious impact when products differ. Some CVEs carry their
+  rating only on a package product: CVE-2026-92707 in October 2026 is rated Moderate, Denial of
+  Service on its two MessagePack package entries while its .NET and Visual Studio entries carry
+  empty values. When none of the Microsoft products has a rating, the row takes the highest
+  severity and the most serious impact across all of the CVE's entries, which is the Max
+  Severity MSRC's Update Guide shows. A row is "Not rated" only when no entry of the CVE has a
+  rating. The Exploited and Publicly Disclosed flags and the CVSS score keep the Microsoft-product
+  rule.
 - **What the flags mean.** Exploited and Publicly Disclosed are Microsoft's values at the
   document's last revision. They are not the Hub's assessment, and a CVE marked exploited later
   shows the flag only after the collector reads that revision.

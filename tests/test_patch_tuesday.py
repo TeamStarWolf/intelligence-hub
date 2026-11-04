@@ -74,6 +74,41 @@ class ParserTest(unittest.TestCase):
         self.assertEqual((row["exploited"], row["disclosed"]), (False, False))
         self.assertEqual(row["families"], ["Windows"])
 
+    def test_a_rating_only_on_a_package_is_the_rows_severity_and_impact(self):
+        # CVE-2026-92707's shape: Moderate and Denial of Service sit on the MessagePack packages only,
+        # and the .NET product's severity and impact threats are empty. MSRC's Max Severity is Moderate.
+        item = vulnerability("CVE-2026-0020", products=("1", "2"), severity="Moderate", impact="Denial of Service", score=5.3)
+        item["Threats"] = [{"Type": 3, "Description": {}, "ProductID": ["1"]}, {"Type": 0, "Description": {}, "ProductID": ["1"]},
+                           {"Type": 3, "Description": {"Value": "Low"}, "ProductID": ["2"]},
+                           {"Type": 3, "Description": {"Value": "Moderate"}, "ProductID": ["2"]},
+                           {"Type": 0, "Description": {"Value": "Denial of Service"}, "ProductID": ["2"]},
+                           {"Type": 1, "Description": {"Value": "Publicly Disclosed:Yes;Exploited:No"}, "ProductID": []}]
+        row = row_of(pt.parse_document(document([item]), OCTOBER, "2026-11-03T12:00:00Z"), "CVE-2026-0020")
+        self.assertEqual((row["severity"], row["impact"], row["cvss"], row["disclosed"], row["families"]),
+                         ("Moderate", "Denial of Service", 5.3, True, ["Windows"]))
+
+    def test_a_microsoft_products_rating_wins_over_a_package_rating(self):
+        item = vulnerability("CVE-2026-0021", products=("1", "2"), severity="Important", impact="Elevation of Privilege")
+        item["Threats"] = [{"Type": 3, "Description": {"Value": "Important"}, "ProductID": ["1"]},
+                           {"Type": 0, "Description": {"Value": "Elevation of Privilege"}, "ProductID": ["1"]},
+                           {"Type": 3, "Description": {"Value": "Critical"}, "ProductID": ["2"]},
+                           {"Type": 0, "Description": {"Value": "Remote Code Execution"}, "ProductID": ["2"]}]
+        row = row_of(pt.parse_document(document([item]), OCTOBER, "2026-11-03T12:00:00Z"), "CVE-2026-0021")
+        self.assertEqual((row["severity"], row["impact"]), ("Important", "Elevation of Privilege"))
+
+    def test_a_cve_with_no_rating_anywhere_stays_unrated(self):
+        item = vulnerability("CVE-2026-0022", products=("1", "2"))
+        item["Threats"] = [{"Type": 3, "Description": {}, "ProductID": ["1"]}, {"Type": 3, "Description": {"Value": ""}, "ProductID": ["2"]}]
+        row = row_of(pt.parse_document(document([item]), OCTOBER, "2026-11-03T12:00:00Z"), "CVE-2026-0022")
+        self.assertEqual((row["severity"], row["impact"]), (None, None))
+
+    def test_the_fixture_month_rates_the_package_rated_cve_as_msrc_does(self):
+        entry = next(entry for entry in pt.listing((DOCUMENTS / "updates.json").read_bytes()) if entry["id"] == "2026-Oct")
+        unit = pt.parse_document((DOCUMENTS / "cvrf" / "2026-Oct.json").read_bytes(), entry, "2026-11-03T12:00:00Z")
+        row = row_of(unit, "CVE-2026-92707")
+        self.assertEqual((row["severity"], row["impact"], row["cvss"], row["exploited"], row["disclosed"]),
+                         ("Moderate", "Denial of Service", 5.3, False, True))
+
     def test_package_only_cves_are_counted_and_left_out(self):
         unit = pt.parse_document(document([vulnerability("CVE-2026-0005"), vulnerability("CVE-2026-0006", products=("2",))]),
                                  OCTOBER, "2026-11-03T12:00:00Z")
