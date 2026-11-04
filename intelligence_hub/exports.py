@@ -226,6 +226,12 @@ def dictionary():
              "`data/v7/index.json` lists each one with its bytes and sha256. Every file is at most 4 MiB: a year whose files "
              "would pass that is written as one set per month instead (`articles-YYYY-MM.csv`, `articles-YYYY-MM.jsonl`, "
              "`tags-YYYY-MM.csv`).", "",
+             "The exports keep one set of files per year even when the year's history shard on the site is written as calendar "
+             "parts. A history shard (`data/v7/history/YYYY.json`) whose bytes would pass 3 MiB (3,145,728 bytes) is written "
+             "instead as halves (`history/YYYY-h1.json`, `history/YYYY-h2.json`), then quarters (`-q1` to `-q4`), then months "
+             "(`history/YYYY-01.json` to `-12.json`), the first rung whose every part is at or under 3 MiB. Each part's "
+             "`period` is its label (`2025-h1`), `data/v7/index.json` lists every part with its rows, bytes and sha256, and a "
+             "part with no rows is not written.", "",
              "## articles-YYYY.csv", "", "| Column | Meaning |", "| --- | --- |"]
     lines += ["| `" + name + "` | " + text + " |" for name, text in ARTICLE_COLUMNS]
     lines += ["", "## tags-YYYY.csv", "", "| Column | Meaning |", "| --- | --- |"]
