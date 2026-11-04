@@ -351,3 +351,53 @@ test("a narrow window closes the sidebar after a view is chosen from it", async 
   assert.equal(shell.location.hash, "#/history");
   assert.equal(shell.doc.querySelector("#sidebar").hidden, true);
 });
+
+test("an entry opened from a year keeps that year on every dialog entity link, and each finds the opened row", async () => {
+  const shell = await boot();
+  for (const [year, id] of [["1998", "h-ms98-001"], ["2010", "hist-curated-2010"]]) {
+    await go(shell, "#/explore?year=" + year + "&open=" + id);
+    assert.equal(shell.doc.querySelector("#record-dialog").open, true, id + " opens");
+    const hrefs = [...shell.doc.querySelectorAll("#record-body a")].map(anchor => anchor.getAttribute("href")).filter(href => href && href.startsWith("#/explore"));
+    assert.ok(hrefs.length >= 1, id + " has entity links");
+    if (year === "1998") assert.ok(hrefs.includes("#/explore?vendor=microsoft&year=1998"), "the Microsoft link keeps 1998");
+    if (year === "2010") for (const field of ["vendor", "actor", "malware"]) assert.ok(hrefs.some(href => parseRoute(href, "").query[field]), id + " has a " + field + " link");
+    for (const href of hrefs) {
+      assert.equal(parseRoute(href, "").query.year, year, href + " keeps the year");
+      const entries = await explorerEntries(shell, href);
+      assert.ok(entries.some(item => item.getAttribute("data-id") === id), href + " finds the opened row " + id);
+    }
+  }
+  await go(shell, "#/explore?open=a-kev-guidance");
+  const live = [...shell.doc.querySelectorAll("#record-body a")].map(anchor => anchor.getAttribute("href")).filter(href => href && href.startsWith("#/explore"));
+  assert.ok(live.length >= 1, "a live entry has entity links");
+  for (const href of live) assert.equal(parseRoute(href, "").query.year, undefined, href + " stays in the live window");
+});
+
+test("on a narrow window the active tab is scrolled into the tab strip's view, sideways only", async () => {
+  const shell = await boot({ matches: true });
+  const { doc } = shell;
+  const strip = doc.querySelector("nav.tabs");
+  const tabs = [...strip.querySelectorAll("a")];
+  // A 375 px strip holding about 1,236 px of tabs, laid out from its scroll position.
+  strip.scrollLeft = 0;
+  strip.getBoundingClientRect = () => ({ left: 0, right: 375 });
+  tabs.forEach((tab, index) => { tab.getBoundingClientRect = () => ({ left: 16 + index * 82 - strip.scrollLeft, right: 16 + index * 82 + 78 - strip.scrollLeft }); });
+  const inView = tab => { const box = tab.getBoundingClientRect(); return box.left >= 0 && box.right <= 375; };
+  doc.querySelector("#sidebar-toggle").dispatchEvent({ type: "click" });
+  await settle(80);
+  const entry = [...doc.querySelectorAll("#sidebar-body .side-views a")].find(anchor => anchor.getAttribute("href") === "#/history");
+  doc.dispatchEvent({ type: "click", target: entry, button: 0, preventDefault() { this.defaultPrevented = true; } });
+  await settle(80);
+  const active = () => doc.querySelector(".tabs a[aria-current=page]");
+  assert.equal(active().getAttribute("data-view"), "history");
+  assert.ok(strip.scrollLeft > 0, "the strip scrolled");
+  assert.ok(inView(active()), "the History tab is in view after the sidebar choice");
+  for (const hash of ["#/method", "#/vendors", "#/explore"]) {
+    await go(shell, hash);
+    assert.ok(inView(active()), active().getAttribute("data-view") + " is in view");
+  }
+  assert.equal(strip.scrollLeft, 0, "back on Explore the strip returns to its start");
+  strip.scrollLeft = 200;
+  await go(shell, "#/explore?q=fortinet");
+  assert.equal(strip.scrollLeft, 200, "a filter change on the same tab leaves the strip where the reader put it");
+});

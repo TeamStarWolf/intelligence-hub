@@ -61,11 +61,27 @@ export function createApp(env) {
     render();
   }
 
+  // On a narrow window the tab strip scrolls sideways inside itself. When the active tab
+  // changes it is brought into the strip's view, sideways only, so the page never jumps.
+  let revealedTab = null;
+  function revealTab(tab) {
+    try {
+      const strip = tab.parentNode;
+      const box = tab.getBoundingClientRect();
+      const frame = strip.getBoundingClientRect();
+      const pad = 16;
+      if (box.left < frame.left + pad) strip.scrollLeft -= frame.left + pad - box.left;
+      else if (box.right > frame.right - pad) strip.scrollLeft += box.right - (frame.right - pad);
+    } catch (_) { /* a strip without layout stays where it is */ }
+  }
+
   function updateTabs() {
     const active = TAB_OF[route.view] || route.view;
+    let activeTab = null;
     for (const tab of doc.querySelectorAll(".tabs a")) {
-      if (tab.dataset.view === active) tab.setAttribute("aria-current", "page"); else tab.removeAttribute("aria-current");
+      if (tab.dataset.view === active) { tab.setAttribute("aria-current", "page"); activeTab = tab; } else tab.removeAttribute("aria-current");
     }
+    if (activeTab && activeTab !== revealedTab) { revealedTab = activeTab; revealTab(activeTab); }
     doc.title = (TITLES[route.view] || "Explorer") + " · Intelligence Hub · TeamStarWolf";
   }
 

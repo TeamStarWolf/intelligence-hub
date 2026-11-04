@@ -173,9 +173,12 @@ export function recordDetail(row, route, cveIndex, lib = null) {
   tags.append(node("h3", "", "Exploitation"), node("p", "", (EXPLOITATION_LABELS[row.exploited] || row.exploited) + (exploitation ? " (basis " + exploitation[1].replaceAll("-", " ") + ", " + exploitation[2] + " confidence)" : "") + ". Unknown never means safe."));
   if (row.t.cvss) tags.append(node("p", "", "CVSS " + row.t.cvss.base.toFixed(1) + (row.t.cvss.version ? " (version " + row.t.cvss.version + ")" : "") + (row.t.cvss.scorer ? ", scored by " + row.t.cvss.scorer : "") + (row.t.cvss.cve ? ", for " + row.t.cvss.cve : "") + ". Scores across versions are not normalized."));
   body.push(tags);
+  // An entry opened from a year (a History card's Details link) keeps that year on its entity
+  // links, so the Explorer they open still holds the history row they came from.
+  const year = route && route.query && route.query.year ? { year: route.query.year } : {};
   const entity = (field, key) => item => {
     const entry = node("li");
-    entry.append(routeLink(label(item[0]), formatRoute({ view: "explore", id: null, query: { [key]: item[0].replace(/^[a-z]+:/, "") } })), node("span", "muted", confidence(item)));
+    entry.append(routeLink(label(item[0]), formatRoute({ view: "explore", id: null, query: { [key]: item[0].replace(/^[a-z]+:/, ""), ...year } })), node("span", "muted", confidence(item)));
     const door = libraryDoor(lib, item[0], "library page");
     if (door) entry.append(node("span", "", " · "), door);
     return entry;
