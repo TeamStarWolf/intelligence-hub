@@ -152,6 +152,8 @@ collector writes `site/data/v7/`:
 | `sources.json` | The source ledger |
 | `coverage.json` | One coverage statement per source and year from 1998 (complete, filtered, partial, sample, gap or unreachable), copied from the committed `history/coverage.json`, plus any adapter rows held back to keep a year shard inside its byte bound; a stub that says why when the committed file is missing or invalid |
 | `reports.json` | A copy of the validated `reports/catalog.json`, or status `unavailable` with the reason |
+| `patch-tuesday/YYYY-MM.json` | One Patch Tuesday brief per Microsoft monthly release: the MSRC document facts, one row per CVE in the order its `fields` list names, the headline counts, the KEV join, the CVEs with a Hub brief, the priority list, the vocabulary tags per CVE, and the Adobe and SAP headline rows (see [Patch Tuesday briefs](#patch-tuesday-briefs)) |
+| `patch-tuesday/index.json` | Every built month with its totals, the releases not built yet and why, the priority rules, the notes and each source's status |
 
 Every file is canonical JSON: sorted keys, compact separators, UTF-8 and one
 trailing newline, rows in a fixed order. The same inputs give the same bytes, so
@@ -171,6 +173,60 @@ The analytics exports (`data/v7/exports/`: per-year CSV and JSON Lines files, th
 under `exports` with its bytes and sha256. A run whose tagging is unavailable, or
 whose exports cannot be kept under the per-file cap, publishes the feed and shards
 without exports and records `exports.status: unavailable` with the reason.
+
+### Patch Tuesday briefs
+
+`intelligence_hub/patch_tuesday.py` builds the briefs on every run, after the feeds are read:
+
+1. It reads the MSRC updates list. A month is read again when it is new, when its current
+   release date differs from the one last read, or when the brief was built by an older parser.
+   The newest month is read again on every revision; an older month at most once a day. The
+   second Tuesday is never computed: the release dates are Microsoft's.
+2. It reads at most `--patch-tuesday-limit` release documents (0 to 200; default 12), four at a
+   time, and starts no new read after 420 seconds. New months come first, newest first. The
+   publish workflow passes 200 on a push to `main`, so a merge reads every missing or revised
+   month at once, and 12 on a scheduled run.
+3. It reads Adobe's bulletin index and the SAP pages it needs (at most 16 a run).
+4. It joins the CISA KEV catalog, the Hub's CVE briefs and the vocabulary tags to every month,
+   applies the fixed priority rules and writes the shards. A brief that would pass the 4 MiB
+   per-file bound drops its tags first, then its Moderate, Low and unrated rows that are neither
+   exploited nor disclosed (the counts stay whole); a brief that still does not fit is listed as
+   pending with the reason.
+5. It prints every brief's bytes and headroom under the per-file bound.
+
+State between runs is `.state/patch-tuesday.json`: the parsed months, the revision last read
+for each, the Adobe index rows, the SAP rows and the last updates list. The publish workflow
+keeps it in the Actions cache beside the public-feed cache. When that cache is gone (a change to
+`intelligence_hub/*.py` or `config/sources.json` starts a new cache key), a `--resume-public`
+run reads the months it lacks from the deployed briefs, each checked against the bytes and
+sha256 that the deployed `data/v7/index.json` lists.
+
+A failed source never fails the run. When the updates list cannot be read, the briefs already
+built stay published and the index says why; a release document that cannot be read leaves the
+month pending with the reason; a failed Adobe or SAP read keeps the last rows read and the brief
+says the source was unavailable. A broken `patch_tuesday` block in `config/sources.json`
+publishes the feed without briefs.
+
+A full backfill from January 2016 to October 2026 (128 briefs and the index, every monthly
+release the updates list carries) was built offline from the live API on 3 November 2026:
+9,227,355 bytes with vocabulary tags and 660,219 bytes as gzip, the largest brief 1,086,979 bytes
+(October 2026). The state file was 5,289,266 bytes. Every brief sits inside the 4 MiB per-file
+cap, and the whole set adds about 129 files, 9 MiB of input and well under 1 MB of compressed
+estimate to the package, so the backfill runs in the publish job and is not committed.
+
+Rebuild the briefs locally with network access:
+
+```sh
+python -m intelligence_hub --patch-tuesday-limit 200
+```
+
+The offline `--cached` build reads the same files from `.state/patch-tuesday-documents/` when
+they are there (`updates.json`, `cvrf/<id>.json`, `adobe-security.html`, `sap-index.html` and
+`sap-<page>.html`); the pull-request check copies the trimmed fixture from
+`tests/fixtures/patch-tuesday/documents/`. `tests/fixtures/patch-tuesday/make_fixture.py`
+trims full downloads into that fixture, and `tests/fixtures/patch-tuesday/build_golden.py`
+writes, or with `--check` compares, the golden briefs that `tests/test_patch_tuesday.py` and
+`tests/js/patch-tuesday.test.js` read.
 
 ## Failure and retention behavior
 
@@ -257,6 +313,12 @@ To include retained history and progress from the fixed deployed public snapshot
 
 ```sh
 python -m intelligence_hub --resume-public
+```
+
+To read every Patch Tuesday release document that is missing or revised in one run:
+
+```sh
+python -m intelligence_hub --patch-tuesday-limit 200
 ```
 
 To rebuild only from already retained local inputs, without network access:
