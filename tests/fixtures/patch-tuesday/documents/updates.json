@@ -1,0 +1,50 @@
+{
+ "@odata.context": "https://api.msrc.microsoft.com/$metadata#Updates",
+ "value": [
+  {
+   "ID": "1999-Sep",
+   "Alias": "1999-Sep",
+   "DocumentTitle": "Mariner Release Notes",
+   "Severity": null,
+   "InitialReleaseDate": "1999-09-02T00:00:00Z",
+   "CurrentReleaseDate": "2025-10-01T23:10:48Z",
+   "CvrfUrl": "https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/1999-Sep"
+  },
+  {
+   "ID": "2016-Jan",
+   "Alias": "2016-Jan",
+   "DocumentTitle": "January 2016 Security Updates",
+   "Severity": null,
+   "InitialReleaseDate": "2016-01-12T08:00:00Z",
+   "CurrentReleaseDate": "2026-02-18T01:02:08Z",
+   "CvrfUrl": "https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/2016-Jan"
+  },
+  {
+   "ID": "2024-Jan",
+   "Alias": "2024-Jan",
+   "DocumentTitle": "January 2024 Security Updates",
+   "Severity": null,
+   "InitialReleaseDate": "2024-01-09T08:00:00Z",
+   "CurrentReleaseDate": "2026-10-09T02:34:04Z",
+   "CvrfUrl": "https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/2024-Jan"
+  },
+  {
+   "ID": "2026-Oct",
+   "Alias": "2026-Oct",
+   "DocumentTitle": "October 2026 Security Updates",
+   "Severity": null,
+   "InitialReleaseDate": "2026-10-13T07:00:00Z",
+   "CurrentReleaseDate": "2026-11-03T14:45:49Z",
+   "CvrfUrl": "https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/2026-Oct"
+  },
+  {
+   "ID": "2026-Sep",
+   "Alias": "2026-Sep",
+   "DocumentTitle": "September 2026 Security Updates",
+   "Severity": null,
+   "InitialReleaseDate": "2026-09-08T07:00:00Z",
+   "CurrentReleaseDate": "2026-11-03T01:02:38Z",
+   "CvrfUrl": "https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/2026-Sep"
+  }
+ ]
+}

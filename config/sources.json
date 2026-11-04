@@ -63,5 +63,10 @@
     {"id":"register-security","name":"The Register Security","kind":"reporting","source_class":"press","url":"https://www.theregister.com/security/?lab_viewport=rss","home":"https://www.theregister.com/security/","article_hosts":["www.theregister.com"]},
     {"id":"talos-threat-advisories","name":"Cisco Talos Threat Advisory (category subset)","kind":"research","source_class":"researcher","publisher_vendor":"vendor:cisco","url":"https://blog.talosintelligence.com/category/threat-advisory/rss/","home":"https://blog.talosintelligence.com/category/threat-advisory/","article_hosts":["blog.talosintelligence.com"]},
     {"id":"qualys","name":"Qualys Security Blog","kind":"research","source_class":"researcher","publisher_vendor":"vendor:qualys","url":"https://blog.qualys.com/feed","home":"https://blog.qualys.com/","article_hosts":["blog.qualys.com"]}
-  ]
+  ],
+  "patch_tuesday": {
+    "msrc": {"name":"Microsoft Security Response Center CVRF API","home":"https://msrc.microsoft.com/update-guide/","updates":"https://api.msrc.microsoft.com/cvrf/v3.0/updates","updates_max_bytes":1048576,"document":"https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/{id}","document_max_bytes":67108864},
+    "adobe": {"name":"Adobe Security Bulletins and Advisories","home":"https://helpx.adobe.com/security.html","index":"https://helpx.adobe.com/security.html","max_bytes":2097152},
+    "sap": {"name":"SAP Security Patch Day","home":"https://support.sap.com/en/my-support/knowledge-base/security-notes-news.html","index":"https://support.sap.com/en/my-support/knowledge-base/security-notes-news.html","year":"https://support.sap.com/en/my-support/knowledge-base/security-notes-news/bulletin-{year}.html","max_bytes":1048576}
+  }
 }

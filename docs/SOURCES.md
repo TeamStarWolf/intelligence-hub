@@ -44,6 +44,44 @@ The 2026 boundary year is partial. Coverage within all years remains uneven; 199
 
 Live feeds, curated history and CISA KEV remain separate inputs. RSS usually contains only recent posts. A wider date window cannot reconstruct a publisher’s archive or establish complete source coverage.
 
+## Patch Tuesday briefs
+
+The Patch Tuesday tab is a separate input from the curated history above. Its rows come from
+the [Microsoft Security Response Center CVRF API](https://api.msrc.microsoft.com/cvrf/v3.0/updates),
+one brief per monthly release. The updates list starts with January 2016 and has no February or
+March 2016 release, and its 2016 documents overlap the last year of the bulletin series (the
+`microsoft-bulletins` history source). An out-of-band release with a suffixed id, such as
+`2017-May-B` (8 May 2017), is not a monthly release and gets no brief.
+
+- **What a row is.** A CVE in the month's release document that affects at least one
+  Microsoft product. Azure Linux, CBL-Mariner and open-source package CVEs are counted in
+  `left_out` and not listed. Chromium CVEs that Microsoft ships in Edge are rows, with Chrome
+  named as their issuing CNA.
+- **Where severity and impact come from.** A row's severity (Critical, Important, Moderate,
+  Low) and impact are the values MSRC's threat entries give the CVE's Microsoft products, the
+  highest severity and the most serious impact when products differ. Some CVEs carry their
+  rating only on a package product: CVE-2026-92707 in October 2026 is rated Moderate, Denial of
+  Service on its two MessagePack package entries while its .NET and Visual Studio entries carry
+  empty values. When none of the Microsoft products has a rating, the row takes the highest
+  severity and the most serious impact across all of the CVE's entries, which is the Max
+  Severity MSRC's Update Guide shows. A row is "Not rated" only when no entry of the CVE has a
+  rating. The Exploited and Publicly Disclosed flags and the CVSS score keep the Microsoft-product
+  rule.
+- **What the flags mean.** Exploited and Publicly Disclosed are Microsoft's values at the
+  document's last revision. They are not the Hub's assessment, and a CVE marked exploited later
+  shows the flag only after the collector reads that revision.
+- **The joins.** The KEV join lists the month's CVEs that the CISA KEV catalog holds, with
+  CISA's date added, and every Microsoft KEV entry CISA added in the release month. Adobe rows
+  are the bulletins on Adobe's index first posted on Microsoft's release day. SAP rows are the
+  Security Notes on SAP's Security Patch Day page for the month; 2023 and earlier years are PDF
+  bulletins and have no SAP rows.
+- **The priority list.** Fixed rules, in order: in KEV; exploited; Critical remote code
+  execution in an internet-facing or identity component (Exchange Server, SharePoint, IIS or
+  HTTP.sys, Remote Desktop, DNS Server, RRAS, TCP/IP, IKE, LDAP, Kerberos, Netlogon, NTLM, Active
+  Directory, LSA, Entra, SMB, QUIC, Message Queuing, WSUS or the Network Device Enrollment
+  Service, matched against Microsoft's component tag); then the rest by CVSS base score. The list
+  does not know which of these products you run.
+
 ## Dates and evidence
 
 - `published_at` is a supported original publication day. It is not silently replaced by retrieval time, a search estimate, a detection day or the latest update date.

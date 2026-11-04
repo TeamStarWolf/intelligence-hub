@@ -1,0 +1,1699 @@
+{
+ "DocumentTitle": {
+  "Value": "January 2024 Security Updates"
+ },
+ "DocumentType": {
+  "Value": "Security Update"
+ },
+ "DocumentPublisher": {
+  "ContactDetails": {
+   "Value": "secure@microsoft.com"
+  },
+  "IssuingAuthority": {
+   "Value": "The Microsoft Security Response Center (MSRC) identifies, monitors, resolves, and responds to security incidents and Microsoft software security vulnerabilities. For more information, see http://www.microsoft.com/security/msrc."
+  },
+  "Type": 0
+ },
+ "DocumentTracking": {
+  "Identification": {
+   "ID": {
+    "Value": "2024-Jan"
+   },
+   "Alias": {
+    "Value": "2024-Jan"
+   }
+  },
+  "Status": 2,
+  "Version": "1.0",
+  "RevisionHistory": [
+   {
+    "Number": "369",
+    "Date": "2026-10-09T02:34:04",
+    "Description": {
+     "Value": "January 2024 Security Updates"
+    }
+   }
+  ],
+  "InitialReleaseDate": "2024-01-09T08:00:00",
+  "CurrentReleaseDate": "2026-10-09T02:34:04"
+ },
+ "ProductTree": {
+  "Branch": [
+   {
+    "Items": [
+     {
+      "Items": [
+       {
+        "ProductID": "12265",
+        "Value": "Azure Storage Mover Agent"
+       }
+      ],
+      "Type": 1,
+      "Name": "Azure"
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "11655",
+        "Value": "Microsoft Edge (Chromium-based)"
+       },
+       {
+        "ProductID": "12142",
+        "Value": "Microsoft Edge (Chromium-based) Extended Stable"
+       }
+      ],
+      "Type": 1,
+      "Name": "Browser"
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "11568",
+        "Value": "Windows 10 Version 1809 for 32-bit Systems"
+       },
+       {
+        "ProductID": "11569",
+        "Value": "Windows 10 Version 1809 for x64-based Systems"
+       },
+       {
+        "ProductID": "11570",
+        "Value": "Windows 10 Version 1809 for ARM64-based Systems"
+       },
+       {
+        "ProductID": "11571",
+        "Value": "Windows Server 2019"
+       },
+       {
+        "ProductID": "11572",
+        "Value": "Windows Server 2019 (Server Core installation)"
+       }
+      ],
+      "Type": 1,
+      "Name": "Windows"
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "11760",
+        "Value": "3D Viewer"
+       }
+      ],
+      "Type": 1,
+      "Name": "Apps"
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "11573",
+        "Value": "Microsoft Office 2019 for 32-bit editions"
+       },
+       {
+        "ProductID": "11574",
+        "Value": "Microsoft Office 2019 for 64-bit editions"
+       }
+      ],
+      "Type": 1,
+      "Name": "Microsoft Office"
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "12138",
+        "Value": "CBL Mariner 1.0 ARM"
+       },
+       {
+        "ProductID": "12137",
+        "Value": "CBL Mariner 1.0 x64"
+       },
+       {
+        "ProductID": "12140",
+        "Value": "CBL Mariner 2.0 ARM"
+       },
+       {
+        "ProductID": "16838-16823",
+        "Value": "cbl2 kernel 5.15.153.1-1 on CBL Mariner 2.0"
+       },
+       {
+        "ProductID": "17095-17086",
+        "Value": "cbl2 kernel 5.15.180.1-1 on CBL Mariner 2.0"
+       },
+       {
+        "ProductID": "17233-17086",
+        "Value": "cbl2 kernel 5.15.162.2-1 on CBL Mariner 2.0"
+       }
+      ],
+      "Type": 1,
+      "Name": "Mariner"
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "12009",
+        "Value": ".NET 6.0"
+       },
+       {
+        "ProductID": "12130",
+        "Value": ".NET 7.0"
+       },
+       {
+        "ProductID": "12260",
+        "Value": ".NET 8.0"
+       }
+      ],
+      "Type": 1,
+      "Name": "Developer Tools"
+     },
+     {
+      "Items": [
+       {
+        "ProductID": "19673-17086",
+        "Value": "cbl2 kernel 5.15.180.1-1 on CBL Mariner 2.0"
+       },
+       {
+        "ProductID": "19731-17086",
+        "Value": "cbl2 kernel 5.15.162.2-1 on CBL Mariner 2.0"
+       }
+      ],
+      "Type": 1,
+      "Name": "Open Source Software"
+     }
+    ],
+    "Type": 0,
+    "Name": "Microsoft"
+   }
+  ],
+  "FullProductName": [
+   {
+    "ProductID": "11568",
+    "CPE": "cpe:2.3:o:microsoft:windows_10_1809:10.0.17763.5329:*:*:*:*:*:x86:*",
+    "Value": "Windows 10 Version 1809 for 32-bit Systems"
+   },
+   {
+    "ProductID": "11569",
+    "CPE": "cpe:2.3:o:microsoft:windows_10_1809:10.0.17763.5329:*:*:*:*:*:x64:*",
+    "Value": "Windows 10 Version 1809 for x64-based Systems"
+   },
+   {
+    "ProductID": "11570",
+    "CPE": "cpe:2.3:o:microsoft:windows_10_1809:10.0.17763.5329:*:*:*:*:*:arm64:*",
+    "Value": "Windows 10 Version 1809 for ARM64-based Systems"
+   },
+   {
+    "ProductID": "11571",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2019:10.0.17763.5329:*:*:*:*:*:*:*",
+    "Value": "Windows Server 2019"
+   },
+   {
+    "ProductID": "11572",
+    "CPE": "cpe:2.3:o:microsoft:windows_server_2019:10.0.17763.5329:*:*:*:*:*:*:*",
+    "Value": "Windows Server 2019 (Server Core installation)"
+   },
+   {
+    "ProductID": "11573",
+    "CPE": "cpe:2.3:a:microsoft:office:2019:*:*:*:*:*:*:*",
+    "Value": "Microsoft Office 2019 for 32-bit editions"
+   },
+   {
+    "ProductID": "11574",
+    "CPE": "cpe:2.3:a:microsoft:office:2019:*:*:*:*:*:*:*",
+    "Value": "Microsoft Office 2019 for 64-bit editions"
+   },
+   {
+    "ProductID": "11655",
+    "CPE": "cpe:2.3:a:microsoft:edge_chromium:*:*:*:*:*:*:*:*",
+    "Value": "Microsoft Edge (Chromium-based)"
+   },
+   {
+    "ProductID": "11760",
+    "CPE": "cpe:2.3:a:microsoft:3d_viewer:-:*:*:*:*:*:*:*",
+    "Value": "3D Viewer"
+   },
+   {
+    "ProductID": "12009",
+    "CPE": "cpe:2.3:a:microsoft:.net:6.0.0:*:*:*:*:*:*:*",
+    "Value": ".NET 6.0"
+   },
+   {
+    "ProductID": "12130",
+    "CPE": "cpe:2.3:a:microsoft:.net:7.0.0:*:*:*:*:*:*:*",
+    "Value": ".NET 7.0"
+   },
+   {
+    "ProductID": "12137",
+    "CPE": "cpe:2.3:o:microsoft:cbl_mariner:1.0:*:*:*:*:*:*:x64",
+    "Value": "CBL Mariner 1.0 x64"
+   },
+   {
+    "ProductID": "12138",
+    "CPE": "cpe:2.3:o:microsoft:cbl_mariner:1.0:*:*:*:*:*:*:arm",
+    "Value": "CBL Mariner 1.0 ARM"
+   },
+   {
+    "ProductID": "12140",
+    "CPE": "cpe:2.3:o:microsoft:cbl_mariner:2.0:*:*:*:*:*:*:arm",
+    "Value": "CBL Mariner 2.0 ARM"
+   },
+   {
+    "ProductID": "12142",
+    "CPE": "cpe:2.3:a:microsoft:edge_chromium:*:*:*:*:extended_stable:*:*:*",
+    "Value": "Microsoft Edge (Chromium-based) Extended Stable"
+   },
+   {
+    "ProductID": "12260",
+    "CPE": "cpe:2.3:a:microsoft:.net:8.0.0:*:*:*:*:*:*:*",
+    "Value": ".NET 8.0"
+   },
+   {
+    "ProductID": "12265",
+    "CPE": "cpe:2.3:a:microsoft:azure_storage_mover:-:*:*:*:*:*:*:*",
+    "Value": "Azure Storage Mover Agent"
+   },
+   {
+    "ProductID": "16838-16823",
+    "CPE": "cpe:2.3:a:microsoft:cbl2_kernel_5.15.153.1-1:*:*:*:*:*:*:*:*",
+    "Value": "cbl2 kernel 5.15.153.1-1 on CBL Mariner 2.0"
+   },
+   {
+    "ProductID": "17095-17086",
+    "CPE": "cpe:2.3:a:microsoft:cbl2_kernel_5.15.180.1-1:*:*:*:*:*:*:*:*",
+    "Value": "cbl2 kernel 5.15.180.1-1 on CBL Mariner 2.0"
+   },
+   {
+    "ProductID": "17233-17086",
+    "CPE": "cpe:2.3:a:microsoft:cbl2_kernel_5.15.162.2-1:*:*:*:*:*:*:*:*",
+    "Value": "cbl2 kernel 5.15.162.2-1 on CBL Mariner 2.0"
+   },
+   {
+    "ProductID": "19673-17086",
+    "CPE": "cpe:2.3:a:microsoft:cbl2_kernel_5.15.180.1-1:*:*:*:*:*:*:*:*",
+    "Value": "cbl2 kernel 5.15.180.1-1 on CBL Mariner 2.0"
+   },
+   {
+    "ProductID": "19731-17086",
+    "CPE": "cpe:2.3:a:microsoft:cbl2_kernel_5.15.162.2-1:*:*:*:*:*:*:*:*",
+    "Value": "cbl2 kernel 5.15.162.2-1 on CBL Mariner 2.0"
+   }
+  ]
+ },
+ "Vulnerability": [
+  {
+   "Title": {
+    "Value": "Windows Kerberos Security Feature Bypass Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": "Windows Authentication Methods",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Windows Authentication Methods"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2024-20674",
+   "CWE": [
+    {
+     "ID": "CWE-305",
+     "Value": "Authentication Bypass by Primary Weakness"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "11568",
+      "11569",
+      "11570"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Security Feature Bypass"
+     },
+     "ProductID": [
+      "11568"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Security Feature Bypass"
+     },
+     "ProductID": [
+      "11569"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Security Feature Bypass"
+     },
+     "ProductID": [
+      "11570"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "11568"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "11569"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "11570"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation More Likely;DOS:N/A"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 8.8,
+     "TemporalScore": 7.7,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11568"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.8,
+     "TemporalScore": 7.7,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11569"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 8.8,
+     "TemporalScore": 7.7,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11570"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "120",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2024-01-09T08:00:00"
+    },
+    {
+     "Number": "1.2",
+     "Date": "2024-01-18T08:00:00"
+    },
+    {
+     "Number": "1.1",
+     "Date": "2024-01-09T08:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Microsoft Office Remote Code Execution Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": "Microsoft Office",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Microsoft Office"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2024-20677",
+   "CWE": [
+    {
+     "ID": "CWE-122",
+     "Value": "Heap-based Buffer Overflow"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "11760",
+      "11573",
+      "11574"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "11760"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "11573"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "11574"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "11760"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "11573"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "11574"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Less Likely;DOS:N/A"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 7.8,
+     "TemporalScore": 6.8,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11760"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.8,
+     "TemporalScore": 6.8,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11573"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.8,
+     "TemporalScore": 6.8,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11574"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "121",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2024-01-09T08:00:00"
+    },
+    {
+     "Number": "1.1",
+     "Date": "2024-01-16T08:00:00"
+    },
+    {
+     "Number": "2.0",
+     "Date": "2024-02-13T08:00:00"
+    },
+    {
+     "Number": "2.1",
+     "Date": "2024-02-23T08:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "MITRE: CVE-2022-35737 SQLite allows an array-bounds overflow"
+   },
+   "Notes": [
+    {
+     "Title": "SQLite",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "SQLite"
+    },
+    {
+     "Title": "MITRE Corporation",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "MITRE Corporation"
+    }
+   ],
+   "CVE": "CVE-2022-35737",
+   "CWE": [],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "12138",
+      "12137",
+      "12140"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {},
+     "ProductID": [
+      "12138"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "12137"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "12140"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "12138"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "12137"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "12140"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Less Likely;DOS:N/A"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [],
+   "Ordinal": "131",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2024-01-09T08:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Windows Hyper-V Remote Code Execution Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": "Windows Hyper-V",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Windows Hyper-V"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2024-20700",
+   "CWE": [
+    {
+     "ID": "CWE-362",
+     "Value": "Concurrent Execution using Shared Resource with Improper Synchronization ('Race Condition')"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "11569",
+      "11571",
+      "11572"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "11569"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "11571"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "11572"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "11569"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "11571"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Critical"
+     },
+     "ProductID": [
+      "11572"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Less Likely;DOS:N/A"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 7.5,
+     "TemporalScore": 6.5,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:A/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11569"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.5,
+     "TemporalScore": 6.5,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:A/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11571"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 7.5,
+     "TemporalScore": 6.5,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:A/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11572"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "136",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2024-01-09T08:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "NET, .NET Framework, and Visual Studio Security Feature Bypass Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": ".NET and Visual Studio",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": ".NET and Visual Studio"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2024-0057",
+   "CWE": [
+    {
+     "ID": "CWE-20",
+     "Value": "Improper Input Validation"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "12260",
+      "12130",
+      "12009"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Security Feature Bypass"
+     },
+     "ProductID": [
+      "12260"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Security Feature Bypass"
+     },
+     "ProductID": [
+      "12130"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Security Feature Bypass"
+     },
+     "ProductID": [
+      "12009"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "12260"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "12130"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "12009"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Less Likely;DOS:N/A"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 9.1,
+     "TemporalScore": 8.2,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N/E:P/RL:O/RC:C",
+     "ProductID": [
+      "12260"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 9.1,
+     "TemporalScore": 8.2,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N/E:P/RL:O/RC:C",
+     "ProductID": [
+      "12130"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 9.1,
+     "TemporalScore": 8.2,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N/E:P/RL:O/RC:C",
+     "ProductID": [
+      "12009"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "202",
+   "RevisionHistory": [
+    {
+     "Number": "2.1",
+     "Date": "2024-01-16T08:00:00"
+    },
+    {
+     "Number": "3.0",
+     "Date": "2024-02-13T08:00:00"
+    },
+    {
+     "Number": "1.0",
+     "Date": "2024-01-09T08:00:00"
+    },
+    {
+     "Number": "2.0",
+     "Date": "2024-01-12T08:00:00"
+    },
+    {
+     "Number": "2.2",
+     "Date": "2024-01-22T08:00:00"
+    },
+    {
+     "Number": "3.1",
+     "Date": "2024-02-13T08:00:00"
+    },
+    {
+     "Number": "3.2",
+     "Date": "2024-04-16T07:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Azure Storage Mover Remote Code Execution Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": "Azure Storage Mover",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Azure Storage Mover"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2024-20676",
+   "CWE": [
+    {
+     "ID": "CWE-77",
+     "Value": "Improper Neutralization of Special Elements used in a Command ('Command Injection')"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "12265"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Remote Code Execution"
+     },
+     "ProductID": [
+      "12265"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "12265"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Less Likely;DOS:N/A"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 8.0,
+     "TemporalScore": 7.0,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:H/PR:H/UI:N/S:C/C:H/I:H/A:H/E:U/RL:O/RC:C",
+     "ProductID": [
+      "12265"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "118",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2024-01-09T08:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Microsoft Edge (Chromium-based) Elevation of Privilege Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": "Microsoft Edge (Chromium-based)",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Microsoft Edge (Chromium-based)"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2024-21337",
+   "CWE": [
+    {
+     "ID": "CWE-122",
+     "Value": "Heap-based Buffer Overflow"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "11655",
+      "12142"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Elevation of Privilege"
+     },
+     "ProductID": [
+      "11655"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Elevation of Privilege"
+     },
+     "ProductID": [
+      "12142"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Moderate"
+     },
+     "ProductID": [
+      "11655"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Moderate"
+     },
+     "ProductID": [
+      "12142"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Less Likely;Older Software Release:Exploitation Less Likely;DOS:N/A"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 5.2,
+     "TemporalScore": 4.5,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:C/C:L/I:L/A:L/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11655"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 5.2,
+     "TemporalScore": 4.5,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:R/S:C/C:L/I:L/A:L/E:U/RL:O/RC:C",
+     "ProductID": [
+      "12142"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "119",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2024-01-11T08:00:00"
+    },
+    {
+     "Number": "1.1",
+     "Date": "2024-01-18T08:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Microsoft Edge (Chromium-based) Security Feature Bypass Vulnerability"
+   },
+   "Notes": [
+    {
+     "Title": "Microsoft Edge (Chromium-based)",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Microsoft Edge (Chromium-based)"
+    },
+    {
+     "Title": "Microsoft",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Microsoft"
+    }
+   ],
+   "CVE": "CVE-2024-20675",
+   "CWE": [
+    {
+     "ID": "CWE-284",
+     "Value": "Improper Access Control"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "11655"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {
+      "Value": "Security Feature Bypass"
+     },
+     "ProductID": [
+      "11655"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Low"
+     },
+     "ProductID": [
+      "11655"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Publicly Disclosed:No;Exploited:No;Latest Software Release:Exploitation Less Likely;Older Software Release:Exploitation Less Likely;DOS:N/A"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 6.3,
+     "TemporalScore": 5.5,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:L/E:U/RL:O/RC:C",
+     "ProductID": [
+      "11655"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "141",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2024-01-11T08:00:00"
+    },
+    {
+     "Number": "1.1",
+     "Date": "2024-01-18T08:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "Chromium: CVE-2024-0813 Use after free in Reading Mode"
+   },
+   "Notes": [
+    {
+     "Title": "Microsoft Edge (Chromium-based)",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Microsoft Edge (Chromium-based)"
+    },
+    {
+     "Title": "Chrome",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "Chrome"
+    }
+   ],
+   "CVE": "CVE-2024-0813",
+   "CWE": [],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "11655"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {},
+     "ProductID": [
+      "11655"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "11655"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "DOS:N/A"
+     },
+     "Type": 1,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false,
+     "ProductID": []
+    }
+   ],
+   "CVSSScoreSets": [],
+   "Ordinal": "147",
+   "RevisionHistory": [
+    {
+     "Number": "1.0",
+     "Date": "2024-01-25T08:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "It was discovered that when exec'ing from a non-leader thread armed POSIX CPU timers would be left on a list but freed leading to a use-after-free."
+   },
+   "Notes": [
+    {
+     "Title": "Mariner",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Mariner"
+    },
+    {
+     "Title": "canonical",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "canonical"
+    }
+   ],
+   "CVE": "CVE-2022-2585",
+   "CWE": [
+    {
+     "ID": "CWE-416",
+     "Value": "Use After Free"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "16838-16823",
+      "19731-17086",
+      "17233-17086"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {},
+     "ProductID": [
+      "16838-16823"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "19731-17086"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "17233-17086"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "16838-16823"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "19731-17086"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "17233-17086"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 7.8,
+     "TemporalScore": 7.8,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+     "ProductID": [
+      "16838-16823"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 5.3,
+     "TemporalScore": 5.3,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:H",
+     "ProductID": [
+      "19731-17086"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 5.3,
+     "TemporalScore": 5.3,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:H",
+     "ProductID": [
+      "17233-17086"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "0",
+   "RevisionHistory": [
+    {
+     "Number": "2.0",
+     "Date": "2026-02-18T03:09:47"
+    },
+    {
+     "Number": "1.0",
+     "Date": "2024-01-21T00:00:00"
+    }
+   ]
+  },
+  {
+   "Title": {
+    "Value": "It was discovered that a nft object or expression could reference a nft set on a different nft table leading to a use-after-free once that table was deleted."
+   },
+   "Notes": [
+    {
+     "Title": "Mariner",
+     "Type": 7,
+     "Ordinal": "20",
+     "Value": "Mariner"
+    },
+    {
+     "Title": "canonical",
+     "Type": 8,
+     "Ordinal": "30",
+     "Value": "canonical"
+    }
+   ],
+   "CVE": "CVE-2022-2586",
+   "CWE": [
+    {
+     "ID": "CWE-416",
+     "Value": "Use After Free"
+    }
+   ],
+   "ProductStatuses": [
+    {
+     "ProductID": [
+      "16838-16823",
+      "19673-17086",
+      "17095-17086"
+     ],
+     "Type": 3
+    }
+   ],
+   "Threats": [
+    {
+     "Description": {},
+     "ProductID": [
+      "16838-16823"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "19673-17086"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "17095-17086"
+     ],
+     "Type": 0,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Important"
+     },
+     "ProductID": [
+      "16838-16823"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {},
+     "ProductID": [
+      "19673-17086"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    },
+    {
+     "Description": {
+      "Value": "Moderate"
+     },
+     "ProductID": [
+      "17095-17086"
+     ],
+     "Type": 3,
+     "Date": "0001-01-01T00:00:00",
+     "DateSpecified": false
+    }
+   ],
+   "CVSSScoreSets": [
+    {
+     "BaseScore": 7.8,
+     "TemporalScore": 7.8,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+     "ProductID": [
+      "16838-16823"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 5.3,
+     "TemporalScore": 5.3,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:H",
+     "ProductID": [
+      "19673-17086"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    },
+    {
+     "BaseScore": 5.3,
+     "TemporalScore": 5.3,
+     "EnvironmentalScore": 0,
+     "Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:L/A:H",
+     "ProductID": [
+      "17095-17086"
+     ],
+     "IsTemporalScoreFieldSpecified": false
+    }
+   ],
+   "Ordinal": "1",
+   "RevisionHistory": [
+    {
+     "Number": "2.0",
+     "Date": "2026-02-18T02:12:25"
+    },
+    {
+     "Number": "1.0",
+     "Date": "2024-01-13T00:00:00"
+    }
+   ]
+  }
+ ]
+}

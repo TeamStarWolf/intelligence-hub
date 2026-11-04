@@ -47,7 +47,7 @@ const ORIGIN = /^(?:publisher-feed|cisa-kev|library-curation|history:[a-z0-9][a-
 const CVE = /^CVE-\d{4}-\d{4,19}$/;
 // The same pattern as SHARD_PATH in intelligence_hub/shards.py and the typed check in publish.yml;
 // tests/test_shards.py holds the three in step.
-const SHARD_PATTERN = String.raw`(?:sources|coverage|reports|cve-index|recent)\.json|live/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json|history/(?:[0-9]{4}(?:-(?:h[12]|q[1-4]|0[1-9]|1[0-2]))?|undated)\.json|kev/[0-9]{4}\.json|cve/[0-9]{4}/[0-9]{1,5}k\.json`;
+const SHARD_PATTERN = String.raw`(?:sources|coverage|reports|cve-index|recent)\.json|live/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json|history/(?:[0-9]{4}(?:-(?:h[12]|q[1-4]|0[1-9]|1[0-2]))?|undated)\.json|kev/[0-9]{4}\.json|cve/[0-9]{4}/[0-9]{1,5}k\.json|patch-tuesday/(?:index|[0-9]{4}-(?:0[1-9]|1[0-2]))\.json`;
 const SHARD_PATH = new RegExp("^(?:" + SHARD_PATTERN + ")$");
 const EXPORT_PATH = /^exports\/(?:articles-(?:[0-9]{4}(?:-(?:0[1-9]|1[0-2]))?|undated)\.(?:csv|jsonl)|tags-(?:[0-9]{4}(?:-(?:0[1-9]|1[0-2]))?|undated)\.csv|manifest\.json|data-dictionary\.md)$/;
 
@@ -412,4 +412,105 @@ export function normalizeBriefsFile(raw, index) {
 export function normalizeBucket(raw, path) {
   requireValue(isObject(raw) && raw.schema_version === 7 && raw.kind === "cve-briefs" && "cve/" + raw.bucket + ".json" === path && isObject(raw.briefs));
   return new Map(Object.entries(raw.briefs).map(([key, value]) => [key, normalizeBrief(value, key)]));
+}
+
+// Patch Tuesday briefs (intelligence_hub/patch_tuesday.py): data/v7/patch-tuesday/index.json and
+// one data/v7/patch-tuesday/YYYY-MM.json per Microsoft monthly release. Rows arrive as arrays in
+// the order of PATCH_TUESDAY_FIELDS; every link must start with its vendor's own prefix and pass
+// safeUrl, and the view builds MSRC, KEV and Hub links from checked CVE ids only.
+export const PATCH_TUESDAY_FIELDS = ["cve", "title", "severity", "impact", "cvss", "vector", "families", "component", "cna", "exploited", "disclosed", "exploitability", "cwe", "released", "revised"];
+export const PATCH_TUESDAY_TIERS = ["kev", "exploited", "critical-rce-exposed", "cvss"];
+const PT_MONTH = /^[0-9]{4}-(?:0[1-9]|1[0-2])$/;
+const PT_SEVERITIES = ["Critical", "Important", "Moderate", "Low"];
+const PT_CVE = /^CVE-\d{4}-\d{4,19}$/;
+function prefixed(value, prefixes, nullable = true) {
+  if (nullable && value === null) return null;
+  const url = safeUrl(value);
+  requireValue(url !== null && url === value && prefixes.some(prefix => value.startsWith(prefix)), "A Patch Tuesday link is not a vendor link.");
+  return value;
+}
+function score(value) { requireValue(value === null || (typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 10)); return value; }
+function day(value) { return value === null ? null : calendarDay(value); }
+function month(value) { requireValue(typeof value === "string" && PT_MONTH.test(value)); return value; }
+function countMap(value, limit = 80) {
+  requireValue(isObject(value) && Object.keys(value).length <= limit);
+  const out = new Map();
+  for (const [key, item] of Object.entries(value)) { boundedText(key, 80); out.set(key, nonnegative(item)); }
+  return out;
+}
+function sourceStatus(value) {
+  requireValue(isObject(value) && ["ok", "unavailable"].includes(value.status));
+  return { status: value.status, reason: optionalText(value.reason, 300) };
+}
+
+export function normalizePatchTuesdayIndex(raw) {
+  requireValue(isObject(raw) && raw.schema_version === 7 && raw.kind === "patch-tuesday-index", "The Patch Tuesday index is not a schema 7 index.");
+  const months = list(raw.months, 600).map(item => {
+    requireValue(isObject(item) && item.path === "patch-tuesday/" + month(item.month) + ".json");
+    return { month: item.month, id: boundedText(item.id, 20), title: boundedText(item.title, 120), initial_release: timestamp(item.initial_release, false),
+      current_release: timestamp(item.current_release, false), path: item.path, total: nonnegative(item.total), critical: nonnegative(item.critical),
+      important: nonnegative(item.important), exploited: nonnegative(item.exploited), disclosed: nonnegative(item.disclosed), in_kev: nonnegative(item.in_kev),
+      kev_added_in_month: nonnegative(item.kev_added_in_month), adobe: nonnegative(item.adobe), sap: nonnegative(item.sap) };
+  });
+  const pending = list(raw.pending, 600).map(item => {
+    requireValue(isObject(item));
+    return { month: month(item.month), id: boundedText(item.id, 20), reason: boundedText(item.reason, 400) };
+  });
+  requireValue(isObject(raw.status));
+  return { months, pending, rules: textList(raw.rules, 12, 600), notes: textList(raw.notes, 12, 600),
+    status: { msrc: sourceStatus(raw.status.msrc), adobe: sourceStatus(raw.status.adobe), sap: sourceStatus(raw.status.sap) },
+    first_month: raw.first_month === null ? null : month(raw.first_month), last_month: raw.last_month === null ? null : month(raw.last_month) };
+}
+
+function patchRow(item) {
+  requireValue(Array.isArray(item) && item.length === PATCH_TUESDAY_FIELDS.length);
+  const [cve, title, severity, impact, cvss, vector, families, component, cna, exploited, disclosed, exploitability, cwe, released, revised] = item;
+  requireValue(typeof cve === "string" && PT_CVE.test(cve) && (severity === null || PT_SEVERITIES.includes(severity)) && typeof exploited === "boolean" && typeof disclosed === "boolean");
+  requireValue(vector === null || (typeof vector === "string" && /^CVSS:[0-9.]+\/[A-Za-z:/.]{1,200}$/.test(vector)));
+  return { cve, title: boundedText(title, 240), severity, impact: optionalText(impact, 60), cvss: score(cvss), vector, families: textList(families, 12, 80),
+    component: optionalText(component, 120), cna: optionalText(cna, 60), exploited, disclosed, exploitability: optionalText(exploitability, 60),
+    cwe: list(cwe, 10).map(value => { requireValue(typeof value === "string" && /^CWE-[1-9][0-9]{0,5}$/.test(value)); return value; }), released: day(released), revised: day(revised) };
+}
+
+export function normalizePatchTuesday(raw, path) {
+  requireValue(isObject(raw) && raw.schema_version === 7 && raw.kind === "patch-tuesday" && path === "patch-tuesday/" + month(raw.month) + ".json",
+    "A Patch Tuesday brief does not match its path.");
+  requireValue(Array.isArray(raw.fields) && raw.fields.join(",") === PATCH_TUESDAY_FIELDS.join(","), "A Patch Tuesday brief has an unknown row layout.");
+  const msrc = raw.msrc;
+  requireValue(isObject(msrc) && isObject(raw.counts) && isObject(raw.kev));
+  const rows = list(raw.rows, 20000).map(patchRow);
+  const cves = new Set(rows.map(row => row.cve));
+  const counts = raw.counts;
+  const kevListed = list(raw.kev.listed, 20000).map(item => { requireValue(Array.isArray(item) && item.length === 3 && cves.has(item[0])); return { cve: item[0], added: calendarDay(item[1]), due: day(item[2]) }; });
+  const kevAdded = list(raw.kev.added_in_month, 2000).map(item => {
+    requireValue(Array.isArray(item) && item.length === 3 && typeof item[0] === "string" && PT_CVE.test(item[0]) && typeof item[2] === "boolean");
+    return { cve: item[0], added: calendarDay(item[1]), inRelease: item[2] };
+  });
+  const priority = list(raw.priority, 20000).map(item => { requireValue(Array.isArray(item) && item.length === 2 && cves.has(item[0]) && PATCH_TUESDAY_TIERS.includes(item[1])); return { cve: item[0], tier: item[1] }; });
+  const briefs = new Set(list(raw.briefs, 20000).map(value => { requireValue(cves.has(value)); return value; }));
+  const adobe = raw.adobe;
+  requireValue(isObject(adobe) && Array.isArray(adobe.fields) && adobe.fields.join(",") === "id,title,products,url,posted,updated");
+  const adobeRows = list(adobe.rows, 200).map(item => {
+    requireValue(Array.isArray(item) && item.length === 6 && typeof item[0] === "string" && /^APSB\d{2}-\d{1,4}$/.test(item[0]));
+    return { id: item[0], title: boundedText(item[1], 240), products: textList(item[2], 6, 100), url: prefixed(item[3], ["https://helpx.adobe.com/security/products/"], false),
+      posted: calendarDay(item[4]), updated: day(item[5]) };
+  });
+  const sap = raw.sap;
+  requireValue(isObject(sap) && Array.isArray(sap.fields) && sap.fields.join(",") === "note,title,cves,priority,cvss,url");
+  const sapRows = list(sap.rows, 200).map(item => {
+    requireValue(Array.isArray(item) && item.length === 6);
+    return { note: boundedText(item[0], 60), title: boundedText(item[1], 240), cves: list(item[2], 20).map(value => { requireValue(typeof value === "string" && PT_CVE.test(value)); return value; }),
+      priority: boundedText(item[3], 20), cvss: score(item[4]),
+      url: prefixed(item[5], ["https://me.sap.com/", "https://launchpad.support.sap.com/", "https://github.com/SAP/", "https://support.sap.com/"]) };
+  });
+  return {
+    month: raw.month,
+    msrc: { id: boundedText(msrc.id, 20), title: boundedText(msrc.title, 120), initial_release: timestamp(msrc.initial_release, false), current_release: timestamp(msrc.current_release, false),
+      listed: nonnegative(msrc.listed), left_out: nonnegative(msrc.left_out), url: prefixed(msrc.url, ["https://msrc.microsoft.com/update-guide/"], false) },
+    rows, kev: { listed: kevListed, addedInMonth: kevAdded }, priority, briefs,
+    counts: { total: nonnegative(counts.total), critical: nonnegative(counts.critical), exploited: nonnegative(counts.exploited), disclosed: nonnegative(counts.disclosed),
+      in_kev: nonnegative(counts.in_kev), severity: countMap(counts.severity, 10), impact: countMap(counts.impact), family: countMap(counts.family), cna: countMap(counts.cna, 200) },
+    adobe: { ...sourceStatus(adobe), url: prefixed(adobe.url, ["https://helpx.adobe.com/"], false), rows: adobeRows, latest_posted: adobe.latest_posted == null ? null : calendarDay(adobe.latest_posted) },
+    sap: { ...sourceStatus(sap), url: prefixed(sap.url, ["https://support.sap.com/"], false), rows: sapRows }
+  };
 }

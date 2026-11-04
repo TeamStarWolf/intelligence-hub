@@ -25,6 +25,9 @@ CATALOG_URL = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vu
 # max_bytes in config/sources.json, never above FETCH_CEILING.
 MAX_BYTES = 3 * 1024 * 1024
 FETCH_CEILING = 16 * 1024 * 1024
+# The one larger bound: a Microsoft CVRF monthly release document (intelligence_hub/patch_tuesday.py).
+# The October 2026 document was 30,083,214 bytes when read on 2026-11-03, mostly Azure Linux rows.
+LARGE_DOCUMENT_CEILING = 64 * 1024 * 1024
 # Byte bounds for the two public data files. Rows are never evicted to fit:
 # a run that would cross a bound fails and the deployed publication stays.
 FEED_MAX_BYTES = 8 * 1024 * 1024
@@ -103,12 +106,20 @@ class ResponseByteLimitExceeded(ValueError):
     """The existing fetch loop crossed its configured response byte bound."""
 
 
-def fetch(url, maximum=MAX_BYTES, fresh=False):
+def fetch(url, maximum=MAX_BYTES, fresh=False, *, accept=None, language=None, ceiling=FETCH_CEILING):
+    """One bounded HTTPS read. accept and language replace the default Accept header and add an
+    Accept-Language header (Adobe's bulletin index refuses a read without both); ceiling is
+    FETCH_CEILING, or LARGE_DOCUMENT_CEILING for an MSRC release document."""
     require(safe_url(url) == url, "Source URL must be a canonical public HTTPS URL.")
-    require(type(maximum) is int and 1 <= maximum <= FETCH_CEILING, "Invalid bounded read size.")
+    require(ceiling in (FETCH_CEILING, LARGE_DOCUMENT_CEILING), "Invalid fetch ceiling.")
+    require(type(maximum) is int and 1 <= maximum <= ceiling, "Invalid bounded read size.")
+    require(accept is None or accept in {"application/json", "text/html"}, "Invalid Accept value.")
+    require(language is None or language == "en-US", "Invalid Accept-Language value.")
     started = time.monotonic()
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
-    headers = {"User-Agent": "TeamStarWolf-IntelligenceHub/0.1 (public feed reader)", "Accept": "application/rss+xml, application/atom+xml, application/json, text/xml, application/xml", "Accept-Encoding": "identity"}
+    headers = {"User-Agent": "TeamStarWolf-IntelligenceHub/0.1 (public feed reader)", "Accept": accept or "application/rss+xml, application/atom+xml, application/json, text/xml, application/xml", "Accept-Encoding": "identity"}
+    if language:
+        headers["Accept-Language"] = language
     if fresh:
         # The deployed files are served through a CDN cache; ask for the current copy.
         headers.update({"Cache-Control": "no-cache", "Pragma": "no-cache"})
@@ -698,17 +709,23 @@ def check_bounds(feed_raw, briefs_raw):
     return reports
 
 
-def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=40):
+def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=40, patch_limit=None):
     from .mitigations import brief_index, build_briefs, merge_retained, split_publication
     from .intelligence import compose_with_reports, load_inputs
     from .archive import validate_snapshot
     from .site import layout_revision as site_layout_revision
 
+    from . import patch_tuesday
+
     validate_window(start, end, SNAPSHOT_VERSION)
+    patch_limit = patch_tuesday.DEFAULT_DOCUMENTS if patch_limit is None else patch_limit
+    require(type(patch_limit) is int and 0 <= patch_limit <= patch_tuesday.MAX_DOCUMENTS,
+            "The Patch Tuesday document limit must be 0 to " + str(patch_tuesday.MAX_DOCUMENTS) + ".")
     intelligence_inputs = load_inputs(ROOT)
     require(type(enrich_limit) is int and 0 <= enrich_limit <= 2000, "CVE enrichment limit must be 0 to 2000.")
     context = load_mitigation_context(ROOT / "config/mitigation-context.json")
-    sources = validate_registry(read_json(ROOT / "config/sources.json", 128 * 1024))
+    registry = read_json(ROOT / "config/sources.json", 128 * 1024)
+    sources = validate_registry(registry)
     cache_path = STATE / "public-cache.json"
     cache = read_json(cache_path) if cache_path.exists() else {"sources": {}, "kev": {}}
     validate_cache(cache, sources)
@@ -730,6 +747,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
             cache = {"sources": {key: future.result() for key, future in futures.items()}, "kev": kev_future.result()}
         validate_cache(cache, sources)
         require(any(item.get("status") in {"ok", "partial"} for item in [*cache["sources"].values(), cache["kev"]]), "No live source succeeded; the previously deployed snapshot must remain available.")
+    patch = collect_patch_tuesday(registry, refresh, previous, patch_limit)
     failures = [{"id": key, "error": item.get("error")} for key, item in [*sorted(cache["sources"].items()), ("cisa-kev", cache["kev"])]
                 if item.get("status") == "failed"]
     for failure in failures:
@@ -832,7 +850,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     # Exports are built (never written) before the index, so the index can list every export file.
     export_files, exported = build_analytics_exports(snapshot["articles"], tagged, sources)
     v7 = build_v7(snapshot, previous, kev.get("catalog"), reports, intelligence_inputs, end, feed_raw, briefs_raw, tagged,
-                  exports_index(export_files, exported))
+                  exports_index(export_files, exported), patch)
     # sources.json carries every run's attempt clocks, so on its own it never republishes;
     # the v6 content revision above ignores those clocks in the same way. A change in the
     # published export files (for example a new dictionary) republishes too.
@@ -841,6 +859,8 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     if refresh:
         write_json(cache_path, cache)
         write_json(cve_path, projections, compact=True)
+        if patch["state"] is not None:
+            patch_tuesday.save_state(STATE, patch["state"], write_raw)
     # Exports, then v7, then briefs: a reader that sees the new feed can then also read its
     # briefs, and the v7 clean-up keeps exactly the export files the new index lists.
     exported = write_analytics_exports(export_files, exported)
@@ -853,7 +873,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
         "coverage": snapshot["coverage"], "mitigations": mitigation_stats, "reports": reports, "changed": changed, "generated_at": snapshot["generated_at"],
         "schema_version": SNAPSHOT_VERSION, "publication": bounds, "rows": rows, "source_failures": failures[:100],
         "changed_shards": v7["changed_shards"], "removed_shards": v7["removed_shards"], "v7": v7["summary"],
-        "tagging": tagged["summary"], "exports": exported}
+        "tagging": tagged["summary"], "exports": exported, "patch_tuesday": v7["patch_tuesday"]}
     result_raw = (json.dumps(result, ensure_ascii=False, allow_nan=False, indent=2) + "\n").encode("utf-8")
     require(len(result_raw) <= RESULT_MAX_BYTES, "The collection result would exceed its " + format(RESULT_MAX_BYTES, ",") + "-byte bound.")
     write_raw(STATE / "collection-result.json", result_raw)
@@ -986,7 +1006,60 @@ def tag_history(snapshot, tagged, catalog):
     return rows, summary
 
 
-def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs_raw, tagged=None, exports_entry=None):
+def collect_patch_tuesday(registry, refresh, previous, limit):
+    """The Patch Tuesday state for this run: {"state", "report", "config", "reason"}. Never raises.
+
+    A live run reads the MSRC updates list and the documents the plan names; a --cached build
+    reads the same files from .state/patch-tuesday-documents/ when they are there. Either way
+    the months already built come from .state/patch-tuesday.json, and a resumed run also
+    takes the months that cache lacks from the deployed briefs.
+    """
+    from . import patch_tuesday
+    try:
+        config = patch_tuesday.load_config(registry, safe_url)
+        reader = patch_tuesday.Reader(fetch=fetch) if refresh else patch_tuesday.Reader(offline=STATE / patch_tuesday.DOCUMENTS_NAME)
+        index = previous.get("v7_index") if previous is not None else None
+
+        def deployed(entry):
+            from .shards import SHARD_MAX_BYTES
+            return fetch(PUBLIC_V7 + entry["path"], SHARD_MAX_BYTES, fresh=True)
+
+        state, report = patch_tuesday.collect(STATE, config, reader, limit=limit, previous_index=index,
+                                              deployed_read=deployed if index is not None else None, safe_url=safe_url)
+        print("Patch Tuesday: {:,} release documents read, {:,} failed, {:,} months resumed from the deployed briefs, {:,} pending".format(
+            report["documents_read"], len(report["failed"]), report["resumed"], len(report["pending"])), file=sys.stderr)
+        return {"state": state, "report": report, "config": config, "reason": None}
+    except (ValueError, OSError, TypeError, KeyError, AttributeError) as error:
+        reason = (str(error) or type(error).__name__)[:300]
+        print("Patch Tuesday: not collected (" + reason + ").", file=sys.stderr)
+        return {"state": None, "report": {}, "config": None, "reason": reason}
+
+
+def build_patch_tuesday(patch, catalog, briefs, tagged):
+    """The Patch Tuesday shards ({} when the step was unavailable) and the run summary."""
+    from . import patch_tuesday, shards
+    if not patch or patch.get("state") is None:
+        return {}, {"status": "unavailable", "reason": (patch or {}).get("reason") or "not collected in this run"}
+    context = None
+    if (tagged or {}).get("context") is not None:
+        from .history import registry as history_registry
+        from . import tagging
+        try:
+            context = tagging.build_context(tagged["context"].vocab, history_registry(), catalog, briefs)
+        except (ValueError, TypeError, KeyError, AttributeError) as error:
+            print("Patch Tuesday: tags unavailable (" + (str(error) or type(error).__name__)[:200] + ").", file=sys.stderr)
+    try:
+        files = patch_tuesday.build(patch["state"], catalog, briefs, tagging_context=context, limit=shards.SHARD_MAX_BYTES,
+                                    config=patch["config"])
+    except (ValueError, TypeError, KeyError, AttributeError) as error:
+        reason = (str(error) or type(error).__name__)[:300]
+        print("Patch Tuesday: briefs not built (" + reason + ").", file=sys.stderr)
+        return {}, {"status": "unavailable", "reason": reason}
+    patch_tuesday.print_headroom(files, shards.SHARD_MAX_BYTES)
+    return files, {"status": "ok", **patch_tuesday.summary(files, patch["report"])}
+
+
+def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs_raw, tagged=None, exports_entry=None, patch=None):
     """The schema 7 shards and index for this run, compared with the previous index. Nothing is written here."""
     from . import shards
     from .tagging.engine import compact
@@ -995,9 +1068,10 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
     blocks = (tagged or {}).get("blocks", {})
     rows = [{**article, "tagging": compact(blocks[article["id"]])} if article["id"] in blocks else article for article in snapshot["articles"]]
     history_rows, history_summary = tag_history(snapshot, tagged, catalog)
+    patch_files, patch_summary = build_patch_tuesday(patch, catalog, snapshot["mitigations"], tagged)
     files = shards.build_shards(rows + history_rows, snapshot["sources"], catalog, snapshot["mitigations"],
                                 shards.reports_file(reports, catalog_value, catalog_sha), end,
-                                coverage=history_publish.coverage_file(ROOT, shards.SCHEMA_VERSION))
+                                coverage=history_publish.coverage_file(ROOT, shards.SCHEMA_VERSION), extra=patch_files)
     # Adapter rows never push a year's history shard past its byte bound; any held back are named.
     held = history_publish.fit(files, shards.SHARD_MAX_BYTES, shards.canonical)
     if files["coverage.json"].get("status") == "ok":
@@ -1036,7 +1110,8 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
               "history_adapter_rows": len(history_rows) - sum(item["rows"] for item in held),
               "kev": sum(entry["rows"] for entry in entries if entry["path"].startswith("kev/")),
               "kev_catalog_version": version if isinstance(version, str) and len(version) <= 40 else None,
-              "cves": len(snapshot["mitigations"]), "sources": len(snapshot["sources"]), "shards": len(entries)}
+              "cves": len(snapshot["mitigations"]), "sources": len(snapshot["sources"]), "shards": len(entries),
+              "patch_tuesday_months": sum(1 for entry in entries if shards.PATCH_TUESDAY_MONTH.fullmatch(entry["path"]))}
     index = shards.build_index(entries, generated_at=snapshot["generated_at"], end=end, feed_content_revision=snapshot["content_revision"],
                                layout_revision=snapshot["layout_revision"], runs=runs, counts=counts,
                                v6_files=[shards.file_entry("data/feed.json", feed_raw), shards.file_entry("data/briefs.json", briefs_raw)],
@@ -1050,7 +1125,7 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
                "observed_interval_hours": index["observed_interval_hours"], "runs_recorded": len(runs), "history": history_summary}
     export_paths = [item["path"] for item in (exports_entry or {}).get("files", [])]
     return {"raw": raw, "index_raw": index_raw, "index": index, "changed_shards": changed_shards,
-            "removed_shards": removed_shards, "summary": summary, "export_paths": export_paths,
+            "removed_shards": removed_shards, "summary": summary, "export_paths": export_paths, "patch_tuesday": patch_summary,
             "exports_changed": shards.exports_changed(previous_index, exports_entry)}
 
 

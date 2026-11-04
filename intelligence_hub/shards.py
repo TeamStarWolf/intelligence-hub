@@ -101,8 +101,11 @@ SHARD_PATH = re.compile(r"(?:sources|coverage|reports|cve-index|recent)\.json"
                         r"|live/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json"
                         r"|history/(?:[0-9]{4}(?:-(?:h[12]|q[1-4]|0[1-9]|1[0-2]))?|undated)\.json"
                         r"|kev/[0-9]{4}\.json"
-                        r"|cve/[0-9]{4}/[0-9]{1,5}k\.json")
-SHARD_DIRECTORY = re.compile(r"live|history|kev|cve|cve/[0-9]{4}|exports")
+                        r"|cve/[0-9]{4}/[0-9]{1,5}k\.json"
+                        r"|patch-tuesday/(?:index|[0-9]{4}-(?:0[1-9]|1[0-2]))\.json")
+SHARD_DIRECTORY = re.compile(r"live|history|kev|cve|cve/[0-9]{4}|exports|patch-tuesday")
+# The Patch Tuesday briefs (intelligence_hub/patch_tuesday.py): one per Microsoft monthly release.
+PATCH_TUESDAY_MONTH = re.compile(r"patch-tuesday/[0-9]{4}-(?:0[1-9]|1[0-2])\.json")
 # The page files are the ones site/files.json lists (intelligence_hub/site.py), plus that list.
 V6_FILES = ("data/feed.json", "data/briefs.json")
 INDEX_KEYS = {"schema_version", "generated_at", "content_date", "content_revision", "feed_content_revision",
@@ -341,12 +344,14 @@ def split_history(shards, threshold=HISTORY_SPLIT_BYTES):
 
 
 def build_shards(articles, sources, catalog, briefs, reports, end, safe_url=collector_safe_url, coverage=None,
-                 history_split=HISTORY_SPLIT_BYTES):
+                 history_split=HISTORY_SPLIT_BYTES, extra=None):
     """Every v7 shard except index.json, as {relative path: value}.
 
     coverage is the history coverage file (intelligence_hub.history.publish.coverage_file);
     without one, coverage.json is the stub that makes no coverage claim. A history year over
     history_split bytes is written as calendar parts (split_year), before history fit() runs.
+    extra holds shards built elsewhere (the Patch Tuesday briefs); their paths pass the same
+    pattern check.
     """
     live_from = live_start(end)
     groups = {}
@@ -367,6 +372,9 @@ def build_shards(articles, sources, catalog, briefs, reports, end, safe_url=coll
     recent = recent_shard(shards, end)
     if recent is not None:
         shards[RECENT_PATH] = recent
+    for path, value in (extra or {}).items():
+        require(path.startswith("patch-tuesday/") and path not in shards, "Unexpected extra v7 shard " + path + ".")
+        shards[path] = value
     for path in shards:
         require(SHARD_PATH.fullmatch(path), "Unexpected v7 shard path " + path + ".")
     return shards
@@ -377,6 +385,10 @@ def _span(value):
         days = sorted(day.isoformat() for day in (row_day(row) for row in value["rows"]) if day)
     elif value["kind"] == "kev":
         days = [row["date_added"] for row in value["rows"]]
+    elif value["kind"] == "patch-tuesday":
+        days = [value["msrc"]["initial_release"][:10]]
+    elif value["kind"] == "patch-tuesday-index" and value["months"]:
+        days = sorted(item["initial_release"][:10] for item in value["months"])
     else:
         return None, None
     return (days[0], days[-1]) if days else (None, None)
@@ -387,6 +399,8 @@ def _rows(value):
         return len(value["briefs"])
     if value["kind"] == "reports":
         return len(value["catalog"]["reports"]) if value["status"] == "available" else 0
+    if value["kind"] == "patch-tuesday-index":
+        return len(value["months"])
     return len(value["rows"])
 
 
