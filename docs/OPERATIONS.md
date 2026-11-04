@@ -321,12 +321,6 @@ To include retained history and progress from the fixed deployed public snapshot
 python -m intelligence_hub --resume-public
 ```
 
-To read every Patch Tuesday release document that is missing or revised in one run:
-
-```sh
-python -m intelligence_hub --patch-tuesday-limit 200
-```
-
 To rebuild only from already retained local inputs, without network access:
 
 ```sh

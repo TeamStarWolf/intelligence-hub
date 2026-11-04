@@ -29,7 +29,7 @@ history rows, back to 1998. Everything else is a tab, and every tab is also list
 | Sources | The run record, the history coverage matrix by source and year, and the source ledger. |
 | Method | The evidence rules, confidence levels, coverage statuses and licence notices. |
 | About | What the Hub is and what it covers. |
-| Patch Tuesday | Microsoft's monthly security release from the MSRC CVRF data: the headline numbers, what to prioritize by fixed rules, the exploited and publicly disclosed CVEs, the Critical CVEs, the product families, the KEV join, Adobe's and SAP's same-day bulletins as headline rows, and a brief for every month back to January 2016. |
+| Patch Tuesday | Microsoft's monthly security release from the MSRC CVRF data: the headline numbers, what to prioritize by fixed rules, the exploited and publicly disclosed CVEs, the Critical CVEs, the product families, the KEV join, Adobe's and SAP's same-day bulletins as headline rows, and a brief for every monthly release back to January 2016. |
 
 Every view, filter, page and open entry has its own address; [docs/URLS.md](docs/URLS.md) is the
 route contract that the TeamStarWolf library's links follow.

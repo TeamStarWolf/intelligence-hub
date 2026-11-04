@@ -739,14 +739,23 @@ def month_shard(unit, kev, briefs, adobe_index, sap, tags, homes):
 
 
 def fit(value, limit):
-    """value inside limit bytes: tags go first, then Moderate, Low and unrated rows (counts stay whole). None if it cannot fit."""
+    """value inside limit bytes: tags go first, then Moderate, Low and unrated rows (counts stay whole). None if it cannot fit.
+
+    A row that the KEV join, a Hub brief or one of the first three priority rules names is kept
+    whatever its severity, and the "rest by CVSS" priority list keeps only the rows that remain,
+    so every CVE the brief names is still in its rows (site/js/validate.js refuses one that is not).
+    """
     if len(canonical(value)) <= limit:
         return value
     value = {**value, "tags": {}, "trimmed": {"tags": True, "rows": 0}}
     if len(canonical(value)) <= limit:
         return value
-    kept = [row for row in value["rows"] if row[2] in ("Critical", "Important") or row[9] or row[10]]
-    value = {**value, "rows": kept, "trimmed": {"tags": True, "rows": len(value["rows"]) - len(kept)}}
+    named = ({item[0] for item in value["kev"]["listed"]} | set(value["briefs"]) |
+             {item[0] for item in value["priority"] if item[1] != "cvss"})
+    kept = [row for row in value["rows"] if row[2] in ("Critical", "Important") or row[9] or row[10] or row[0] in named]
+    remaining = {row[0] for row in kept}
+    value = {**value, "rows": kept, "priority": [item for item in value["priority"] if item[0] in remaining],
+             "trimmed": {"tags": True, "rows": len(value["rows"]) - len(kept)}}
     return value if len(canonical(value)) <= limit else None
 
 

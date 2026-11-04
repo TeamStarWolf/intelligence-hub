@@ -278,7 +278,48 @@ class CollectTest(unittest.TestCase):
         smaller = pt.fit(copy.deepcopy(value), no_tags - 1)
         self.assertGreater(smaller["trimmed"]["rows"], 0)
         self.assertTrue(all(row[2] in ("Critical", "Important") or row[9] or row[10] for row in smaller["rows"]))
+        self.assert_every_named_cve_is_a_row(smaller)
         self.assertIsNone(pt.fit(copy.deepcopy(value), 100))
+
+    def assert_every_named_cve_is_a_row(self, value):
+        # The rule normalizePatchTuesday in site/js/validate.js applies to kev.listed, priority and briefs.
+        rows = {row[0] for row in value["rows"]}
+        self.assertLessEqual({item[0] for item in value["kev"]["listed"]}, rows)
+        self.assertLessEqual({item[0] for item in value["priority"]}, rows)
+        self.assertLessEqual(set(value["briefs"]), rows)
+
+    def trim_with(self, kev=(), briefs=()):
+        """The golden October brief with the named CVEs KEV-listed or given a Hub brief, trimmed to drop rows."""
+        value = json.loads((FIXTURE / "golden" / "2026-10.json").read_text(encoding="utf-8"))
+        for cve in kev:
+            value["kev"]["listed"].append([cve, "2026-10-20", "2026-11-10"])
+            value["priority"] = [[cve, "kev"]] + [item for item in value["priority"] if item[0] != cve]
+        value["briefs"].extend(briefs)
+        value["tags"] = {row[0]: {"product": [["product:x", "title-match", "medium"]] * 40} for row in value["rows"]}
+        no_tags = len(pt.canonical({**value, "tags": {}, "trimmed": {"tags": True, "rows": 0}}))
+        trimmed = pt.fit(copy.deepcopy(value), no_tags - 1)
+        self.assertEqual(trimmed["counts"], value["counts"])
+        self.assertEqual(trimmed["trimmed"]["rows"], 1)
+        self.assert_every_named_cve_is_a_row(trimmed)
+        return {row[0] for row in trimmed["rows"]}, trimmed
+
+    def test_trimming_keeps_a_kev_listed_moderate_row(self):
+        value = json.loads((FIXTURE / "golden" / "2026-10.json").read_text(encoding="utf-8"))
+        rows = {row[0]: row for row in value["rows"]}
+        # The only two rows the second stage can drop: Moderate and Low, neither exploited nor disclosed.
+        for cve, severity in (("CVE-2026-85330", "Moderate"), ("CVE-2026-20942", "Low")):
+            self.assertEqual((rows[cve][2], rows[cve][9], rows[cve][10]), (severity, False, False))
+        kept, trimmed = self.trim_with(kev=["CVE-2026-85330"])
+        self.assertIn("CVE-2026-85330", kept)
+        self.assertNotIn("CVE-2026-20942", kept)
+        self.assertIn(["CVE-2026-85330", "kev"], trimmed["priority"])
+        self.assertNotIn("CVE-2026-20942", {item[0] for item in trimmed["priority"]})
+
+    def test_trimming_keeps_a_low_row_with_a_hub_brief(self):
+        kept, trimmed = self.trim_with(briefs=["CVE-2026-20942"])
+        self.assertIn("CVE-2026-20942", kept)
+        self.assertNotIn("CVE-2026-85330", kept)
+        self.assertIn("CVE-2026-20942", trimmed["briefs"])
 
 
 class GoldenTest(unittest.TestCase):
