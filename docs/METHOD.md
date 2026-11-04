@@ -68,6 +68,18 @@ complete year keeps every listed item, and a gap or unreachable year keeps none.
 the live RSS and Atom feeds are outside these statements. A quiet year in History is a coverage
 fact, never a claim that nothing happened.
 
+A statement's row count is what the source's adapter admitted. When one of those rows links to a
+page that a feed, KEV or curated row already holds, the page keeps that other row. If the other
+row belongs to another source, the statement says so: "Microsoft Security Bulletins: complete,
+20 rows, 1 shown under another source." If it is the same source's own feed or KEV row, the page
+is still listed under that source, in the live months, and the statement says "K shown as this
+source's feed rows" instead. The published file records this per source and year as `given_up`
+(rows another source's row holds by link), `in_feed` (rows the source's own feed or KEV row
+holds) and `shown` (rows listed under the source in that year's history file), and `shown`
+equals the admitted count minus `given_up` minus `in_feed` minus any rows held back to keep the
+year's file inside its size bound. The year index and the coverage matrix count the rows shown.
+Two history sources that share one link both keep their rows.
+
 ## Links to the TeamStarWolf library
 
 The vendor, actor and malware pages and indexes, and the tag list in a row's detail dialog
