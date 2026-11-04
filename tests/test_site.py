@@ -160,23 +160,22 @@ class ThemeTest(unittest.TestCase):
 
     def test_a_low_contrast_token_is_caught(self):
         css = (SITE / "styles.css").read_text(encoding="utf-8")
-        light = re.search(r'^:root\[data-theme="light"\]\s*\{(.*?)
-\}', css, re.S | re.M).group(1)
+        light = re.search(r'^:root\[data-theme="light"\]\s*\{(.*?)\n\}', css, re.S | re.M).group(1)
         muted = re.search(r"--tsw-text-muted:\s*#[0-9a-fA-F]{6};", light).group(0)
-        planted = css.replace(muted, "--tsw-text-muted:        def test_the_system_light_block_matches_the_light_theme(self):
+        planted = css.replace(muted, "--tsw-text-muted:    #b0b8c8;")
+        self.assertNotEqual(planted, css)
+        self.assertTrue(any("--tsw-text-muted" in line for line in check_contrast.failures(planted)))
+
+    def test_the_system_light_block_matches_the_light_theme(self):
         css = (SITE / "styles.css").read_text(encoding="utf-8")
-        system = re.search(r'@media \(prefers-color-scheme: light\)\s*\{\s*:root:not\(\[data-theme="dark"\]\)\s*\{(.*?)
-\s*\}', css, re.S)
+        system = re.search(r'@media \(prefers-color-scheme: light\)\s*\{\s*:root:not\(\[data-theme="dark"\]\)\s*\{(.*?)\n\s*\}', css, re.S)
         link = re.search(r"--tsw-link:\s*#([0-9a-fA-F]{6});", system.group(1))
         value = link.group(1)
         nudged = value[:-1] + ("8" if value[-1].lower() != "8" else "9")
-        start = css.index(system.group(1))
-        planted = css[:start] + system.group(1).replace(link.group(0), link.group(0).replace(value, nudged), 1) + css[start + len(system.group(1)):]
+        block = system.group(1)
+        start = css.index(block)
+        planted = css[:start] + block.replace(link.group(0), link.group(0).replace(value, nudged), 1) + css[start + len(block):]
         self.assertNotEqual(planted, css)
-        self.assertIn("differs", " ".join(check_contrast.failures(planted)))
-
-
-assertNotEqual(planted, css.replace("\r\n", "\n") if "\r\n" in css else css)
         self.assertIn("differs", " ".join(check_contrast.failures(planted)))
 
 
