@@ -391,6 +391,16 @@ test("a statement whose row another source holds by link says so, and the counts
   assert.equal(cell.getAttribute("title"), "Microsoft Security Bulletins 1998: complete, 2 rows, 1 shown under another source.");
 });
 
+test("coverageSentence keeps rows the source's own feed holds apart from rows under another source", () => {
+  const row = { status: "complete", admitted: 435, upstream_count: 435, reason: null, filter: null };
+  const own = coverageSentence({ ...row, given_up: 0, in_feed: 28, shown: 407 }, "CISA ICS Advisories (CSAF)");
+  assert.equal(own, "CISA ICS Advisories (CSAF): complete, 435 rows, 28 shown as this source's feed rows.");
+  assert.ok(!own.includes("another source"));
+  assert.equal(coverageSentence({ ...row, given_up: 1, in_feed: 28, shown: 406 }, "CISA ICS Advisories (CSAF)"),
+    "CISA ICS Advisories (CSAF): complete, 435 rows, 1 shown under another source, 28 shown as this source's feed rows.");
+  assert.equal(coverageSentence({ ...row, given_up: 0, in_feed: 0, shown: 435 }, "X"), coverageSentence(row, "X"));
+});
+
 test("coverageSentence names the rows shown under another source only when there are some", () => {
   const row = { status: "complete", admitted: 20, upstream_count: 20, reason: null, filter: null };
   assert.equal(coverageSentence({ ...row, given_up: 1, shown: 19 }, "Microsoft Security Bulletins"), "Microsoft Security Bulletins: complete, 20 rows, 1 shown under another source.");
@@ -417,6 +427,11 @@ test("the coverage validator reads given_up and shown, defaults them for an olde
   assert.throws(() => normalizeCoverage(bad({ shown: -1 })));
   assert.throws(() => normalizeCoverage(bad({ given_up: "1" })));
   assert.equal(normalizeCoverage(bad({ given_up: 1, shown: 0 })).rows[index].shown, 0, "held-back rows can leave fewer shown");
+  assert.equal(old.rows.find(item => item.source_id === "microsoft-bulletins" && item.year === 1998).in_feed, 0, "in_feed defaults to 0");
+  const fed = normalizeCoverage(bad({ given_up: 0, in_feed: 1, shown: 1 })).rows[index];
+  assert.deepEqual([fed.admitted, fed.given_up, fed.in_feed, fed.shown], [2, 0, 1, 1]);
+  assert.throws(() => normalizeCoverage(bad({ given_up: 1, in_feed: 1, shown: 1 })), "given_up + in_feed + shown over admitted");
+  assert.throws(() => normalizeCoverage(bad({ in_feed: -1, shown: 0 })));
 });
 
 test("the coverage validator refuses a status outside the list and reads a stub as no claim", () => {

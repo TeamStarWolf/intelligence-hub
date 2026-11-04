@@ -30,9 +30,10 @@ export function statusSummary(rows) {
 }
 
 // One coverage statement as a sentence: who, the status, how many rows, how many of them another
-// source's row already holds by link, and why.
+// source's row already holds by link, how many the source's own feed rows already list, and why.
 export function coverageSentence(row, name) {
-  const elsewhere = row.given_up ? ", " + row.given_up.toLocaleString("en-US") + " shown under another source" : "";
+  const elsewhere = (row.given_up ? ", " + row.given_up.toLocaleString("en-US") + " shown under another source" : "") +
+    (row.in_feed ? ", " + row.in_feed.toLocaleString("en-US") + " shown as this source's feed rows" : "");
   const rows = row.admitted ? ", " + count(row.admitted, "row") + (row.upstream_count !== null && row.upstream_count !== row.admitted ? " of " + row.upstream_count.toLocaleString("en-US") + " listed" : "") + elsewhere : "";
   const why = row.reason || row.filter;
   return name + ": " + STATUS_LABELS[row.status] + rows + (why ? " (" + why + ")" : "") + ".";

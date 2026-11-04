@@ -12,10 +12,11 @@ the shard byte bound: fit() holds back that year's lowest-priority adapter rows 
 the shard fits, and the v7 coverage file says how many were held back.
 
 The committed history/coverage.json states what each adapter admitted. The published
-data/v7/coverage.json adds two numbers per row (annotate_coverage): given_up, the rows
-whose link was already a feed, KEV or curated row of another source in this run, and
+data/v7/coverage.json adds three numbers per row (annotate_coverage): given_up, the rows
+whose link was already a feed, KEV or curated row of another source in this run;
+in_feed, the rows whose link was already a feed or KEV row of the same source; and
 shown, the rows that source actually has in the year's shards (admitted minus given_up
-minus the rows fit() held back).
+minus in_feed minus the rows fit() held back).
 """
 from . import ADAPTERS, base, canonical, check, coverage
 
@@ -106,7 +107,9 @@ def articles(root, existing=None):
 
     existing maps each URL already taken by a feed, KEV or curated row to that row's
     source_id. The summary's given_up lists, per adapter and year, how many rows were left
-    to such a row and which sources took them; duplicates_left_to_other_rows is their total.
+    to such a row of ANOTHER source and which sources took them; in_feed lists, per adapter
+    and year, how many were left to a row of the adapter's own source (its feed or KEV row
+    already holds the page). duplicates_left_to_other_rows is the total of both.
 
     History rows never displace each other by URL: their ids are unique, and several of
     them can share one link by design (every CA-series row of a year links to that year's
@@ -118,13 +121,19 @@ def articles(root, existing=None):
     if reason:
         return [], {"status": "empty" if reason == "no committed history rows" else "unavailable", "reason": reason}
     taken = dict(existing or {})
-    out, duplicates, given = [], 0, {}
+    out, duplicates, given, own = [], 0, {}, {}
     for row in rows:
         if row["url"] in taken:
             duplicates += 1
-            entry = given.setdefault((row["adapter"], row["source_id"], int(row["published"][:4])), {"rows": 0, "taken_by": set()})
+            key = (row["adapter"], row["source_id"], int(row["published"][:4]))
+            holder = str(taken[row["url"]])
+            if holder == row["source_id"]:
+                # The source's own feed or KEV row already lists this page: shown under the same source.
+                own[key] = own.get(key, 0) + 1
+                continue
+            entry = given.setdefault(key, {"rows": 0, "taken_by": set()})
             entry["rows"] += 1
-            entry["taken_by"].add(str(taken[row["url"]]))
+            entry["taken_by"].add(holder)
             continue
         out.append(article(row))
     by_adapter = {}
@@ -132,8 +141,10 @@ def articles(root, existing=None):
         by_adapter[row["origin"][len(ORIGIN_PREFIX):]] = by_adapter.get(row["origin"][len(ORIGIN_PREFIX):], 0) + 1
     given_up = [{"adapter": adapter, "source_id": source_id, "year": year, "rows": entry["rows"], "taken_by": sorted(entry["taken_by"])}
                 for (adapter, source_id, year), entry in sorted(given.items())]
+    in_feed = [{"adapter": adapter, "source_id": source_id, "year": year, "rows": count}
+               for (adapter, source_id, year), count in sorted(own.items())]
     return out, {"status": "ok", "rows": len(out), "duplicates_left_to_other_rows": duplicates, "given_up": given_up,
-                 "by_adapter": dict(sorted(by_adapter.items()))}
+                 "in_feed": in_feed, "by_adapter": dict(sorted(by_adapter.items()))}
 
 
 def shard_year(path):
@@ -141,19 +152,22 @@ def shard_year(path):
     return int(path.split("/", 1)[1][:4])
 
 
-def annotate_coverage(value, given_up, held, published=True):
-    """Add given_up and shown to every row of a published v7 coverage file, in place.
+def annotate_coverage(value, given_up, held, published=True, in_feed=()):
+    """Add given_up, in_feed and shown to every row of a published v7 coverage file, in place.
 
-    given_up is the articles() summary list and held is fit()'s result. For an adapter row,
-    shown = admitted - given_up - the rows fit() held back for that adapter and year; a
-    source without an adapter, or a run that publishes no adapter rows, shows 0. Raises
-    HistoryError when a number cannot be placed or shown would be negative, so the caller
-    publishes the stub instead of a statement that disagrees with the shards.
+    given_up and in_feed are the articles() summary lists and held is fit()'s result. For an
+    adapter row, shown = admitted - given_up - in_feed - the rows fit() held back for that
+    adapter and year; a source without an adapter, or a run that publishes no adapter rows,
+    shows 0. Raises HistoryError when a number cannot be placed or shown would be negative,
+    so the caller publishes the stub instead of a statement that disagrees with the shards.
     """
-    gave = {}
-    for item in given_up:
-        key = (item["adapter"], item["year"])
-        gave[key] = gave.get(key, 0) + item["rows"]
+    def by_year(items):
+        totals = {}
+        for item in items:
+            key = (item["adapter"], item["year"])
+            totals[key] = totals.get(key, 0) + item["rows"]
+        return totals
+    gave, own = by_year(given_up), by_year(in_feed)
     kept_back = {}
     for item in held:
         key = (item["adapter"], shard_year(item["path"]))
@@ -161,15 +175,15 @@ def annotate_coverage(value, given_up, held, published=True):
     for row in value["rows"]:
         key = (row["adapter"], row["year"])
         if row["adapter"] is None or not published:
-            row["given_up"], row["shown"] = 0, 0
+            row["given_up"], row["in_feed"], row["shown"] = 0, 0, 0
             continue
-        row["given_up"] = gave.pop(key, 0)
-        row["shown"] = row["admitted"] - row["given_up"] - kept_back.pop(key, 0)
+        row["given_up"], row["in_feed"] = gave.pop(key, 0), own.pop(key, 0)
+        row["shown"] = row["admitted"] - row["given_up"] - row["in_feed"] - kept_back.pop(key, 0)
         base.require(row["shown"] >= 0, "Coverage for " + row["adapter"] + " " + str(row["year"]) + " would show " +
                      str(row["shown"]) + " rows after cross-source deduplication.")
     if published:
-        left = sorted(set(gave) | set(kept_back))
-        base.require(not left, "Given-up or held-back rows without a coverage row: " + repr(left[:3]))
+        left = sorted(set(gave) | set(own) | set(kept_back))
+        base.require(not left, "Given-up, in-feed or held-back rows without a coverage row: " + repr(left[:3]))
     return value
 
 
@@ -192,5 +206,5 @@ def coverage_file(root, schema_version):
             "first_year": value["first_year"], "end_year": value["end_year"], "statuses": value["statuses"],
             "sources": value["sources"], "rows": value["rows"],
             # Filled by the collector: adapter rows held back to keep a year shard inside its bound (fit),
-            # and each row's given_up and shown numbers (annotate_coverage).
+            # and each row's given_up, in_feed and shown numbers (annotate_coverage).
             "held_back": []}

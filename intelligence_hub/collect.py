@@ -1002,11 +1002,13 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
     held = history_publish.fit(files, shards.SHARD_MAX_BYTES, shards.canonical)
     if files["coverage.json"].get("status") == "ok":
         files["coverage.json"]["held_back"] = held
-        # Each statement also says how many rows another source's row took and how many the shards show.
+        # Each statement also says how many rows another source's row took, how many the source's own
+        # feed or KEV row already holds, and how many the shards show.
         # A statement that cannot agree with the shards is replaced by the stub; the feed carries on.
         try:
             history_publish.annotate_coverage(files["coverage.json"], history_summary.get("given_up", []), held,
-                                              published=history_summary["status"] == "ok")
+                                              published=history_summary["status"] == "ok",
+                                              in_feed=history_summary.get("in_feed", []))
         except (history_base.HistoryError, KeyError, TypeError, ValueError) as error:
             reason = (str(error) or type(error).__name__)[:300]
             files["coverage.json"] = history_publish.stub(shards.SCHEMA_VERSION, reason)

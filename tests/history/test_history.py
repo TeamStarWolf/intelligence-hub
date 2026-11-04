@@ -626,9 +626,9 @@ class PublishTest(unittest.TestCase):
         value = self.shard("coverage.json")
         self.assertEqual((value["status"], value["first_year"], value["end_year"]), ("ok", 1998, coverage.END_YEAR))
         # The committed statements unchanged, each with the run's given_up and shown numbers added.
-        stated = [{key: item for key, item in row.items() if key not in ("given_up", "shown")} for row in value["rows"]]
+        stated = [{key: item for key, item in row.items() if key not in ("given_up", "in_feed", "shown")} for row in value["rows"]]
         self.assertEqual(stated, canonical.read_coverage(self.workspace.root)["rows"])
-        self.assertTrue(all(set(row) == set(coverage.ROW_KEYS) | {"given_up", "shown"} for row in value["rows"]))
+        self.assertTrue(all(set(row) == set(coverage.ROW_KEYS) | {"given_up", "in_feed", "shown"} for row in value["rows"]))
 
     def test_a_row_left_to_a_curated_row_is_given_up_and_not_shown(self):
         rows = {(row["source_id"], row["year"]): row for row in self.shard("coverage.json")["rows"]}
@@ -637,7 +637,8 @@ class PublishTest(unittest.TestCase):
         self.assertEqual((ms98["admitted"], ms98["given_up"], ms98["shown"]), (admitted, 1, admitted - 1))
         self.assertIn({"adapter": "msrc-bulletins", "source_id": "microsoft-bulletins", "year": 1998, "rows": 1, "taken_by": ["microsoft-msrc"]},
                       self.result["v7"]["history"]["given_up"])
-        self.assertTrue(all(row["given_up"] == 0 and row["shown"] == 0 for row in rows.values() if row["adapter"] is None))
+        self.assertEqual(ms98["in_feed"], 0)
+        self.assertTrue(all(row["given_up"] == 0 and row["in_feed"] == 0 and row["shown"] == 0 for row in rows.values() if row["adapter"] is None))
 
     def test_every_statement_shows_what_its_year_shards_hold(self):
         shown, counted = agreement(self.v7)
@@ -740,7 +741,34 @@ class CoverageAfterDedupeTest(unittest.TestCase):
         value = publish.annotate_coverage(publish.coverage_file(self.folder, shards.SCHEMA_VERSION), summary["given_up"], [])
         row = self.statement(value)
         self.assertEqual((row["admitted"], row["given_up"], row["shown"]), (len(self.rows), 1, len(self.rows) - 1))
-        self.assertTrue(all((row["given_up"], row["shown"]) == (0, 0) for row in value["rows"] if row["adapter"] is None))
+        self.assertEqual(row["in_feed"], 0)
+        self.assertEqual(summary["in_feed"], [])
+        self.assertTrue(all((row["given_up"], row["in_feed"], row["shown"]) == (0, 0, 0) for row in value["rows"] if row["adapter"] is None))
+
+    def test_a_row_whose_link_the_same_source_holds_is_not_given_up(self):
+        # The source's own feed or KEV row holds the page: that is not "another source".
+        existing = {self.rows[0]["url"]: "microsoft-bulletins", self.rows[1]["url"]: "microsoft-msrc"}
+        rows, summary = publish.articles(self.folder, existing)
+        self.assertEqual({row["id"] for row in rows} & {self.rows[0]["id"], self.rows[1]["id"]}, set())
+        self.assertEqual(summary["given_up"], [{"adapter": "msrc-bulletins", "source_id": "microsoft-bulletins", "year": 1998, "rows": 1, "taken_by": ["microsoft-msrc"]}])
+        self.assertEqual(summary["in_feed"], [{"adapter": "msrc-bulletins", "source_id": "microsoft-bulletins", "year": 1998, "rows": 1}])
+        self.assertEqual(summary["duplicates_left_to_other_rows"], 2)
+        value = publish.annotate_coverage(publish.coverage_file(self.folder, shards.SCHEMA_VERSION), summary["given_up"], [],
+                                          in_feed=summary["in_feed"])
+        row = self.statement(value)
+        self.assertEqual((row["admitted"], row["given_up"], row["in_feed"], row["shown"]), (len(self.rows), 1, 1, len(self.rows) - 2))
+        # Only same-source takes: nothing is given up at all.
+        rows, summary = publish.articles(self.folder, {self.rows[0]["url"]: "microsoft-bulletins"})
+        self.assertEqual((summary["given_up"], summary["in_feed"]), ([], [{"adapter": "msrc-bulletins", "source_id": "microsoft-bulletins", "year": 1998, "rows": 1}]))
+        value = publish.annotate_coverage(publish.coverage_file(self.folder, shards.SCHEMA_VERSION), summary["given_up"], [],
+                                          in_feed=summary["in_feed"])
+        row = self.statement(value)
+        self.assertEqual((row["given_up"], row["in_feed"], row["shown"]), (0, 1, len(self.rows) - 1))
+
+    def test_an_in_feed_row_without_a_statement_is_refused(self):
+        stray = [{"adapter": "msrc-bulletins", "source_id": "microsoft-bulletins", "year": 2031, "rows": 1}]
+        with self.assertRaises(base.HistoryError):
+            publish.annotate_coverage(publish.coverage_file(self.folder, shards.SCHEMA_VERSION), [], [], in_feed=stray)
 
     def test_a_held_back_row_lowers_shown_but_not_given_up(self):
         _rows, summary = publish.articles(self.folder, {self.rows[0]["url"]: "microsoft-msrc"})
@@ -858,7 +886,7 @@ class FitTest(unittest.TestCase):
             for item in value["held_back"]:
                 row = statements[(item["adapter"], publish.shard_year(item["path"]))]
                 self.assertEqual(row["given_up"], given.get((item["adapter"], row["year"]), 0))
-                self.assertEqual(row["shown"], row["admitted"] - row["given_up"] - item["rows"])
+                self.assertEqual(row["shown"], row["admitted"] - row["given_up"] - row["in_feed"] - item["rows"])
             shown, counted = agreement(v7)
             self.assertEqual(shown, counted)
         finally:
