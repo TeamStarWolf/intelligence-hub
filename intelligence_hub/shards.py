@@ -53,6 +53,17 @@ V7_FILE_MAX_BYTES = 4 * 1024 * 1024
 # files, whichever is smaller, so the collector refuses an oversized shard with its own
 # shard-bound message before the package step would reject it.
 SHARD_MAX_BYTES = min(FEED_MAX_BYTES, V7_FILE_MAX_BYTES)
+# A history year whose canonical bytes would pass this threshold is written as calendar
+# parts instead of one history/YYYY.json: halves (history/YYYY-h1.json, -h2.json), else
+# quarters (-q1 to -q4), else months (history/YYYY-MM.json), the first rung whose parts all
+# fit. It is an internal threshold under SHARD_MAX_BYTES, not a raised bound: it keeps
+# headroom as live months fold into their year and a year's file grows.
+HISTORY_SPLIT_BYTES = 3 * 1024 * 1024
+HISTORY_YEAR = re.compile(r"history/([0-9]{4})\.json")
+# The part label for a month on each rung: halves, quarters, months.
+HISTORY_RUNGS = (lambda month: "h" + str((month - 1) // 6 + 1),
+                 lambda month: "q" + str((month - 1) // 3 + 1),
+                 lambda month: format(month, "02d"))
 # CVE brief buckets would copy every brief that data/briefs.json already carries
 # (about 9 MB). They are built and tested here but stay unpublished until a later
 # package retires the v6 briefs file; cve-index.json says where each brief is read from.
@@ -88,7 +99,7 @@ DAY = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
 NAMED = ("sources.json", "coverage.json", "reports.json", "cve-index.json")
 SHARD_PATH = re.compile(r"(?:sources|coverage|reports|cve-index|recent)\.json"
                         r"|live/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json"
-                        r"|history/(?:[0-9]{4}|undated)\.json"
+                        r"|history/(?:[0-9]{4}(?:-(?:h[12]|q[1-4]|0[1-9]|1[0-2]))?|undated)\.json"
                         r"|kev/[0-9]{4}\.json"
                         r"|cve/[0-9]{4}/[0-9]{1,5}k\.json")
 SHARD_DIRECTORY = re.compile(r"live|history|kev|cve|cve/[0-9]{4}|exports")
@@ -289,11 +300,53 @@ def recent_shard(shards, end):
     return value if len(canonical(value)) <= SHARD_MAX_BYTES else None
 
 
-def build_shards(articles, sources, catalog, briefs, reports, end, safe_url=collector_safe_url, coverage=None):
+def article_shard(period, rows):
+    return {"schema_version": SCHEMA_VERSION, "kind": "articles", "period": period, "rows": rows}
+
+
+def split_year(path, value, threshold=HISTORY_SPLIT_BYTES):
+    """{path: value} for one history year: the year file itself, or its calendar parts.
+
+    A year at or under threshold comes back unchanged. Otherwise its rows (already in
+    row_order) go to halves, quarters or months, the first rung whose every part is at or
+    under threshold; when even a month passes it, the months are kept and the shard bound
+    and history fit() still apply. A part with no rows is not written.
+    """
+    match = HISTORY_YEAR.fullmatch(path)
+    if match is None or value.get("kind") != "articles" or len(canonical(value)) <= threshold:
+        return {path: value}
+    year = match.group(1)
+    months = []
+    for row in value["rows"]:
+        day = row_day(row)
+        require(day is not None and format(day.year, "04d") == year, "A history row is outside its year file " + path + ".")
+        months.append(day.month)
+    for label in HISTORY_RUNGS:
+        groups = {}
+        for row, month in zip(value["rows"], months):
+            groups.setdefault(year + "-" + label(month), []).append(row)
+        parts = {"history/" + period + ".json": article_shard(period, rows) for period, rows in sorted(groups.items())}
+        if all(len(canonical(part)) <= threshold for part in parts.values()):
+            break
+    return parts
+
+
+def split_history(shards, threshold=HISTORY_SPLIT_BYTES):
+    """Replace every history/YYYY.json over threshold with its calendar parts, in place."""
+    for path in sorted(shards):
+        if HISTORY_YEAR.fullmatch(path):
+            value = shards.pop(path)
+            shards.update(split_year(path, value, threshold))
+    return shards
+
+
+def build_shards(articles, sources, catalog, briefs, reports, end, safe_url=collector_safe_url, coverage=None,
+                 history_split=HISTORY_SPLIT_BYTES):
     """Every v7 shard except index.json, as {relative path: value}.
 
     coverage is the history coverage file (intelligence_hub.history.publish.coverage_file);
-    without one, coverage.json is the stub that makes no coverage claim.
+    without one, coverage.json is the stub that makes no coverage claim. A history year over
+    history_split bytes is written as calendar parts (split_year), before history fit() runs.
     """
     live_from = live_start(end)
     groups = {}
@@ -302,7 +355,8 @@ def build_shards(articles, sources, catalog, briefs, reports, end, safe_url=coll
     shards = {}
     for path, rows in groups.items():
         period = path.split("/", 1)[1][:-5]
-        shards[path] = {"schema_version": SCHEMA_VERSION, "kind": "articles", "period": period, "rows": sorted(rows, key=row_order)}
+        shards[path] = article_shard(period, sorted(rows, key=row_order))
+    split_history(shards, history_split)
     shards.update(kev_ledger(catalog, safe_url))
     if CVE_BUCKETS_PUBLISHED:
         shards.update(cve_buckets(briefs))
@@ -348,6 +402,19 @@ def serialize(shards):
         entries.append({"path": path, "rows": _rows(shards[path]), "bytes": len(data), "sha256": sha256(data), "from": start, "to": finish})
     require(len(entries) <= MAX_SHARDS, "The v7 index would list more shards than its bound.")
     return raw, entries
+
+
+def headroom_line(path, size, cap=V7_FILE_MAX_BYTES):
+    """One v7 file's size against the per-file cap; a history file also against the split threshold.
+
+    path is relative to data/v7, for example "history/2025-h1.json".
+    """
+    line = "data/v7/{}: {:,} of {:,} bytes ({:,} of headroom".format(path, size, cap, cap - size)
+    if path.startswith("history/"):
+        spare = HISTORY_SPLIT_BYTES - size
+        line += "; {:,} {} the {:,}-byte history split threshold".format(abs(spare), "of headroom under" if spare >= 0 else "over",
+                                                                          HISTORY_SPLIT_BYTES)
+    return line + ")"
 
 
 def content_revision(entries):
@@ -589,6 +656,7 @@ def package_site(site, max_input=PACKAGE_MAX_INPUT, max_compressed=PACKAGE_MAX_C
             format(max_files, ",") + "-file cap.")
     total = 0
     largest_v7 = 0
+    v7_lines = []
     archive = io.BytesIO()
     with tarfile.open(fileobj=archive, mode="w", format=tarfile.USTAR_FORMAT) as tar:
         for directory in ["."] + sorted(directories):
@@ -606,6 +674,7 @@ def package_site(site, max_input=PACKAGE_MAX_INPUT, max_compressed=PACKAGE_MAX_C
             if name.startswith(DIRECTORY + "/"):
                 _refuse(len(content) <= max_v7_file, "A v7 file exceeds the " + format(max_v7_file, ",") + "-byte per-file cap: " + name)
                 largest_v7 = max(largest_v7, len(content))
+                v7_lines.append(headroom_line(name[len(DIRECTORY) + 1:], len(content), max_v7_file))
             if name in listed:
                 _refuse(len(content) == listed[name]["bytes"], "Byte count differs from the manifest: " + name)
                 _refuse(sha256(content) == listed[name]["sha256"], "sha256 differs from the manifest: " + name)
@@ -622,6 +691,9 @@ def package_site(site, max_input=PACKAGE_MAX_INPUT, max_compressed=PACKAGE_MAX_C
               "largest_v7_file": largest_v7, "v7_file_cap": max_v7_file, "v7_file_headroom": max_v7_file - largest_v7,
               "input_bytes": total, "input_cap": max_input, "input_headroom": max_input - total,
               "compressed_estimate": estimate, "compressed_cap": max_compressed, "compressed_headroom": max_compressed - estimate}
+    # Every file under data/v7/ (shards, exports and index.json) by path, then the four caps.
+    for line in v7_lines:
+        print(line, file=out)
     print("Public files: {files:,} of {files_cap:,} ({files_headroom:,} of headroom; all match data/v7/index.json; "
           "{exports:,} export files)".format(**report), file=out)
     print("Largest v7 file: {largest_v7_file:,} of {v7_file_cap:,} bytes ({v7_file_headroom:,} of headroom)".format(**report), file=out)

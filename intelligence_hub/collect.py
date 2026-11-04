@@ -1003,6 +1003,9 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
         print("History: " + format(sum(item["rows"] for item in held), ",") + " adapter rows held back to keep " +
               ", ".join(sorted({item["path"] for item in held})) + " inside the shard bound", file=sys.stderr)
     raw, entries = shards.serialize(files)
+    # Every shard's size against the per-file cap, and each history file's against its split threshold.
+    for path in sorted(raw):
+        print(shards.headroom_line(path, len(raw[path])), file=sys.stderr)
     previous_index = previous.get("v7_index") if previous is not None else shards.local_index(ROOT / "site")
     changed_shards, removed_shards = shards.compare(previous_index, entries)
     # A first v7 run knows the previous publication only from the v6 feed's generation time.

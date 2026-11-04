@@ -6,9 +6,11 @@ from datetime import date
 import io
 import json
 import os
+from pathlib import Path
 import re
 import shutil
 import subprocess
+import tempfile
 import unittest
 from unittest import mock
 
@@ -280,6 +282,11 @@ class BuildTest(unittest.TestCase):
             self.assertIn("sources.json", result["changed_shards"])
             reports = json.loads((copy_.root / "site/data/v7/reports.json").read_text(encoding="utf-8"))
             self.assertEqual(reports["status"], result["reports"]["status"])
+            # One headroom line per shard the index lists, with the bytes the index records.
+            index = json.loads((copy_.root / "site/data/v7/index.json").read_text(encoding="utf-8"))
+            for entry in index["shards"]:
+                self.assertIn("data/v7/" + entry["path"] + ": " + format(entry["bytes"], ",") + " of 4,194,304 bytes (", output)
+            self.assertIn("of headroom under the 3,145,728-byte history split threshold)", output)
         finally:
             copy_.close()
 
@@ -300,6 +307,130 @@ class BuildTest(unittest.TestCase):
         self.assertIn("- cron: '7 */2 * * *'", workflow)
         pieces = re.findall(r"r'([^']*)'", workflow[workflow.index("shard = re.compile("):])[:2]
         self.assertEqual("".join(pieces), shards.SHARD_PATH.pattern)
+
+    def test_the_page_validator_uses_the_shard_pattern(self):
+        source = (support.ROOT / "site" / "js" / "validate.js").read_text(encoding="utf-8")
+        found = re.findall(r"const SHARD_PATTERN = String\.raw`([^`]*)`;", source)
+        self.assertEqual(found, [shards.SHARD_PATH.pattern])
+        self.assertIn('const SHARD_PATH = new RegExp("^(?:" + SHARD_PATTERN + ")$");', source)
+
+
+def history_row(year, month, number, title_bytes=400, adapter="nvd-cve"):
+    """A history-adapter article row of about title_bytes + 300 canonical bytes."""
+    day = "{:04d}-{:02d}-{:02d}".format(year, month, 1 + number % 28)
+    return {"id": "h-{}-{:04d}-{:02d}-{:05d}".format(adapter, year, month, number), "title": "t" * title_bytes,
+            "url": "https://advisories.example.org/{}/{}".format(year, number), "source_id": "example", "source_name": "Example",
+            "kind": "advisory", "published_at": day, "event_date": None, "date_basis": "publication", "summary": "", "cves": [],
+            "tags": [], "exploitation": "unknown", "references": [], "origin": "history:" + adapter}
+
+
+def history_year(year, per_month, months=range(1, 13), **row):
+    return [history_row(year, month, number, **row) for month in months for number in range(per_month)]
+
+
+def built(articles, threshold):
+    """build_shards over article rows only, with the history split threshold passed in."""
+    return shards.build_shards(articles, [], None, {}, shards.reports_file({}, None, None), END, history_split=threshold)
+
+
+class SplitTest(unittest.TestCase):
+    """A history year over the split threshold is written as halves, quarters or months."""
+
+    THRESHOLD = 64 * 1024
+
+    def year_parts(self, files, year):
+        return sorted(path for path in files if path.startswith("history/" + str(year)))
+
+    def unsplit(self, rows, year):
+        return shards.article_shard(str(year), sorted(rows, key=shards.row_order))
+
+    def test_the_threshold_is_three_mebibytes_under_the_unchanged_caps(self):
+        self.assertEqual(shards.HISTORY_SPLIT_BYTES, 3 * 1024 * 1024)
+        self.assertEqual(shards.V7_FILE_MAX_BYTES, 4 * 1024 * 1024)
+        self.assertEqual(shards.SHARD_MAX_BYTES, min(collect.FEED_MAX_BYTES, shards.V7_FILE_MAX_BYTES))
+        self.assertLess(shards.HISTORY_SPLIT_BYTES, shards.SHARD_MAX_BYTES)
+        for path in ("history/2025-h1.json", "history/2025-h2.json", "history/2025-q4.json", "history/2025-01.json", "history/2025-12.json"):
+            self.assertTrue(shards.SHARD_PATH.fullmatch(path), path)
+        for path in ("history/2025-h3.json", "history/2025-q5.json", "history/2025-13.json", "history/2025-00.json", "history/undated-h1.json"):
+            self.assertIsNone(shards.SHARD_PATH.fullmatch(path), path)
+
+    def test_a_year_over_the_threshold_splits_into_halves_listed_in_the_index(self):
+        rows = history_year(2025, 10)
+        unsplit = self.unsplit(rows, 2025)
+        self.assertGreater(len(shards.canonical(unsplit)), self.THRESHOLD)
+        files = built(rows, self.THRESHOLD)
+        parts = self.year_parts(files, 2025)
+        self.assertEqual(parts, ["history/2025-h1.json", "history/2025-h2.json"])
+        for path in parts:
+            self.assertLessEqual(len(shards.canonical(files[path])), self.THRESHOLD, path)
+            self.assertEqual(files[path]["period"], path[len("history/"):-len(".json")])
+        self.assertEqual([row for path in parts for row in files[path]["rows"]], unsplit["rows"])
+        raw, entries = shards.serialize(files)
+        run = {"generated_at": "2026-11-01T12:00:00+00:00", "trigger": "local", "changed": True}
+        index = shards.build_index(entries, generated_at=run["generated_at"], end=END, feed_content_revision="a" * 64,
+                                   layout_revision="b" * 64, runs=[run], counts={},
+                                   v6_files=[shards.file_entry(name, b"x\n") for name in shards.V6_FILES])
+        index_raw = shards.canonical(index)
+        shards.read_index(index_raw)
+
+        def write(path, data):
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+        with tempfile.TemporaryDirectory() as directory:
+            shards.write_v7(directory, raw, index_raw, write)
+            listed = {entry["path"]: entry for entry in json.loads(index_raw)["shards"]}
+            for path in parts:
+                data = (Path(directory) / shards.DIRECTORY / path).read_bytes()
+                self.assertEqual((listed[path]["rows"], listed[path]["bytes"], listed[path]["sha256"]),
+                                 (len(files[path]["rows"]), len(data), shards.sha256(data)), path)
+            self.assertNotIn("history/2025.json", listed)
+            self.assertFalse((Path(directory) / shards.DIRECTORY / "history" / "2025.json").exists())
+
+    def test_halves_over_the_threshold_go_to_quarters_then_to_months(self):
+        quarters = built(history_year(2024, 20), self.THRESHOLD)
+        self.assertEqual(self.year_parts(quarters, 2024), ["history/2024-q" + str(number) + ".json" for number in range(1, 5)])
+        months = built(history_year(2023, 40), self.THRESHOLD)
+        self.assertEqual(self.year_parts(months, 2023), ["history/2023-{:02d}.json".format(month) for month in range(1, 13)])
+        for files in (quarters, months):
+            for path in files:
+                if path.startswith("history/"):
+                    self.assertLessEqual(len(shards.canonical(files[path])), self.THRESHOLD, path)
+        # Rows in two months only: the first half and quarter pass, the months fit, and no empty part is written.
+        sparse = built(history_year(2022, 50, months=(1, 2)), self.THRESHOLD)
+        self.assertEqual(self.year_parts(sparse, 2022), ["history/2022-01.json", "history/2022-02.json"])
+        # When even one month passes the threshold the months are kept; the shard bound still applies.
+        heavy = built(history_year(2021, 130, months=(5,)), self.THRESHOLD)
+        self.assertEqual(self.year_parts(heavy, 2021), ["history/2021-05.json"])
+        self.assertGreater(len(shards.canonical(heavy["history/2021-05.json"])), self.THRESHOLD)
+
+    def test_a_year_under_the_threshold_keeps_its_one_file_and_sha256(self):
+        rows = history_year(2010, 2)
+        before = shards.sha256(shards.canonical({"schema_version": 7, "kind": "articles", "period": "2010",
+                                                 "rows": sorted(rows, key=shards.row_order)}))
+        for threshold in (self.THRESHOLD, shards.HISTORY_SPLIT_BYTES):
+            files = built(rows, threshold)
+            self.assertEqual(self.year_parts(files, 2010), ["history/2010.json"])
+            self.assertEqual(shards.sha256(shards.canonical(files["history/2010.json"])), before)
+
+    def test_undated_and_live_rows_are_never_split(self):
+        undated = [{**row, "published_at": None, "origin": "library-curation"} for row in history_year(2025, 10)]
+        files = built(undated, self.THRESHOLD)
+        self.assertEqual(sorted(path for path in files if path.startswith(("history/", "live/"))), ["history/undated.json"])
+        live = [{**row, "origin": "publisher-feed", "id": "feed-" + row["id"]} for row in history_year(2026, 10, months=(10,))]
+        files = built(live, self.THRESHOLD)
+        self.assertEqual(sorted(path for path in files if path.startswith(("history/", "live/"))), ["live/2026-10.json"])
+
+    def test_fit_holds_back_adapter_rows_from_a_part_and_names_it(self):
+        from intelligence_hub.history import publish
+        files = built(history_year(2020, 10), self.THRESHOLD)
+        self.assertIn("history/2020-h1.json", files)
+        # The second half is kept small, so only the first one passes the limit below.
+        files["history/2020-h2.json"]["rows"] = files["history/2020-h2.json"]["rows"][:5]
+        size = len(shards.canonical(files["history/2020-h1.json"]))
+        held = publish.fit(files, size - 1, shards.canonical)
+        self.assertEqual([(item["path"], item["adapter"]) for item in held], [("history/2020-h1.json", "nvd-cve")])
+        self.assertLessEqual(len(shards.canonical(files["history/2020-h1.json"])), size - 1)
+        self.assertEqual(len(files["history/2020-h1.json"]["rows"]) + held[0]["rows"], 60)
 
 
 class RecentTest(unittest.TestCase):
@@ -475,6 +606,25 @@ class PackageTest(unittest.TestCase):
                          (4000, 4 * 1024 * 1024, 192 * 1024 * 1024, 48000000))
         for key in ("files_headroom", "v7_file_headroom", "input_headroom", "compressed_headroom"):
             self.assertIn(format(report[key], ",") + " of headroom", text, key)
+
+    def test_the_report_prints_every_v7_file_before_the_caps(self):
+        out = io.StringIO()
+        shards.package_site(self.site, out=out)
+        lines = out.getvalue().splitlines()
+        index = index_of(self.workspace)
+        base = self.site / "data" / "v7"
+        paths = sorted([entry["path"] for entry in index["shards"]] + [item["path"] for item in index["exports"]["files"]] + ["index.json"])
+        prefix = [line.split(": ", 1)[0] for line in lines[:len(paths)]]
+        self.assertEqual(prefix, ["data/v7/" + path for path in paths])
+        for path, line in zip(paths, lines):
+            size = (base / path).stat().st_size
+            self.assertTrue(line.startswith("data/v7/{}: {:,} of 4,194,304 bytes ({:,} of headroom".format(path, size, 4194304 - size)), line)
+            self.assertEqual(path.startswith("history/"), "3,145,728-byte history split threshold" in line, line)
+        self.assertEqual([line.split(":", 1)[0] for line in lines[len(paths):]],
+                         ["Public files", "Largest v7 file", "Public input bytes", "Estimated compressed artifact bytes"])
+        self.assertEqual(shards.headroom_line("history/2025-01.json", 3145730),
+                         "data/v7/history/2025-01.json: 3,145,730 of 4,194,304 bytes (1,048,574 of headroom; "
+                         "2 over the 3,145,728-byte history split threshold)")
 
     def test_an_unlisted_export_is_refused(self):
         (self.site / "data" / "v7" / "exports" / "articles-2099.csv").write_bytes(b"id\n")
