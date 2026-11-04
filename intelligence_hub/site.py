@@ -7,8 +7,8 @@ publish workflow stamps the same revision into the page before packaging it:
 
     python -m intelligence_hub.site stamp site    # publish.yml, on the checked-out copy only
     python -m intelligence_hub.site check site    # check.yml: stamp a temporary copy and verify it
-    python -m intelligence_hub.site labels         # rewrite site/js/labels.js from config/
-    python -m intelligence_hub.site labels --check # fail when site/js/labels.js is out of date
+    python -m intelligence_hub.site labels         # rewrite site/js/labels.js and site/js/library.js
+    python -m intelligence_hub.site labels --check # fail when either generated module is out of date
 
 Stamping appends ?v=<first 16 hex of layout_revision> to the stylesheet and module URLs in
 index.html and to every relative import between modules, so a browser never pairs a new page
@@ -33,6 +33,13 @@ IMPORT = re.compile(r"""(\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)(["'])(\.{1,2}/[
 PAGE_REF = re.compile(r"""(\b(?:href|src)=)(["'])\./([A-Za-z0-9_./-]+?\.(?:css|js))\2""")
 STAMPED = re.compile(r"\?v=[a-f0-9]{16}$")
 LABELS = "js/labels.js"
+LIBRARY = "js/library.js"
+# Every library link the page renders starts here. The vendored vocabulary records the same base.
+LIBRARY_SITE = "https://teamstarwolf.github.io/TeamStarWolf/"
+# A commit-pinned evidence link to a library page, as config/history.json cites them.
+PINNED_LIBRARY = re.compile(r"https://github\.com/TeamStarWolf/TeamStarWolf/blob/([a-f0-9]{40})/((?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_.-]+)\.md")
+LIBRARY_PATH = re.compile(r"/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_.-]+\.md")
+LIBRARY_ANCHOR = re.compile(r"[a-z0-9_][a-z0-9_-]{0,159}")
 
 
 class SiteError(SystemExit):
@@ -188,6 +195,80 @@ def build_labels(root=ROOT):
     return "\n".join(lines) + "\n"
 
 
+def library_url(path, anchor=None, site_url=LIBRARY_SITE):
+    """The rendered library link for a library_path and library_anchor pair, in the form the
+    library's own build_vocab.py writes into library_url. build_library proves the two agree for
+    every vocabulary entity before it uses this for anything else."""
+    _refuse(isinstance(path, str) and LIBRARY_PATH.fullmatch(path) is not None, "library_path is not a /-prefixed .md path: " + repr(path))
+    _refuse(anchor is None or (isinstance(anchor, str) and LIBRARY_ANCHOR.fullmatch(anchor) is not None), "library_anchor is not a docsify slug: " + repr(anchor))
+    return site_url + "#" + path[:-3] + ("?id=" + anchor if anchor else "")
+
+
+def _pinned_links(value, found):
+    """Every commit-pinned library evidence link inside a curated config value."""
+    if isinstance(value, dict):
+        for item in value.values():
+            _pinned_links(item, found)
+    elif isinstance(value, list):
+        for item in value:
+            _pinned_links(item, found)
+    elif isinstance(value, str):
+        match = PINNED_LIBRARY.fullmatch(value)
+        if match:
+            found[value] = library_url("/" + match[2] + ".md")
+
+
+def build_library(root=ROOT):
+    """site/js/library.js: the library door for every vocabulary entity that has a library page,
+    the rendered page beside each commit-pinned library evidence link in the curated files, and
+    the KEV vendorProject spellings and products of each vendor for the vendor pages."""
+    root = Path(root)
+    vocabulary = json.loads((root / "config" / "vocabulary.json").read_text(encoding="utf-8"))
+    _refuse(vocabulary.get("site") == LIBRARY_SITE, "config/vocabulary.json names a different library site: " + repr(vocabulary.get("site")))
+    links, kev, products = {}, {}, {}
+    for entity in vocabulary["entities"]:
+        path, anchor, recorded = entity.get("library_path"), entity.get("library_anchor"), entity.get("library_url")
+        if path is None:
+            _refuse(anchor is None and recorded is None, entity["id"] + " has a library anchor or link without a library path.")
+        else:
+            url = library_url(path, anchor)
+            _refuse(url == recorded, entity["id"] + ": library_url " + repr(recorded) + " does not match its library_path and library_anchor (" + url + ").")
+            links[entity["id"]] = url
+        if entity["type"] in ("vendor", "product") and entity.get("kev_vendor_project"):
+            kev[entity["id"]] = sorted(entity["kev_vendor_project"])
+        if entity["type"] == "product" and entity.get("vendor"):
+            products.setdefault(entity["vendor"], []).append(entity["id"])
+    pinned = {}
+    for name in ("history.json", "intelligence-context.json"):
+        _pinned_links(json.loads((root / "config" / name).read_text(encoding="utf-8")), pinned)
+    commit = vocabulary.get("generated_from")
+    _refuse(isinstance(commit, str) and re.fullmatch(r"[a-f0-9]{40}", commit) is not None, "config/vocabulary.json has no generated_from commit.")
+
+    def block(name, mapping, comment):
+        lines = ["// " + comment, "export const " + name + " = {"]
+        for key in sorted(mapping):
+            value = mapping[key]
+            lines.append("  " + json.dumps(key) + ": " + json.dumps(sorted(value) if isinstance(value, list) else value) + ",")
+        if len(lines) > 2:
+            lines[-1] = lines[-1].rstrip(",")
+        lines.append("};")
+        return lines
+
+    lines = ["// Generated by python -m intelligence_hub.site labels from config/vocabulary.json (library_path",
+             "// and library_anchor), config/history.json and config/intelligence-context.json. Do not edit",
+             "// by hand; the pull-request check runs it with --check. The page renders no other library link.",
+             "export const SITE = " + json.dumps(LIBRARY_SITE) + ";",
+             "export const VOCABULARY_COMMIT = " + json.dumps(commit) + ";"]
+    lines += block("LINKS", links, "Vocabulary id to its library page.")
+    lines += block("PINNED", pinned, "Commit-pinned library evidence link to the same page on the library site.")
+    lines += block("KEV", kev, "Vendor or product id to the exact CISA KEV vendorProject spellings.")
+    lines += block("PRODUCTS", products, "Vendor id to its product ids.")
+    return "\n".join(lines) + "\n"
+
+
+GENERATED = ((LABELS, build_labels), (LIBRARY, build_library))
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     if argv[:1] == ["stamp"] and len(argv) <= 2:
@@ -195,15 +276,16 @@ def main(argv=None):
     elif argv[:1] == ["check"] and len(argv) <= 2:
         check(argv[1] if len(argv) == 2 else "site")
     elif argv[:1] == ["labels"] and argv[1:] in ([], ["--check"]):
-        text = build_labels()
-        path = ROOT / "site" / LABELS
-        if argv[1:] == ["--check"]:
-            current = path.read_text(encoding="utf-8").replace("\r\n", "\n") if path.exists() else ""
-            _refuse(current == text, "site/js/labels.js is out of date; run python -m intelligence_hub.site labels")
-            print("site/js/labels.js is current (" + str(text.count("\n") - 4) + " labels)")
-        else:
-            path.write_text(text, encoding="utf-8", newline="\n")
-            print("Wrote site/js/labels.js")
+        for name, build in GENERATED:
+            text = build()
+            path = ROOT / "site" / name
+            if argv[1:] == ["--check"]:
+                current = path.read_text(encoding="utf-8").replace("\r\n", "\n") if path.exists() else ""
+                _refuse(current == text, "site/" + name + " is out of date; run python -m intelligence_hub.site labels")
+                print("site/" + name + " is current (" + str(text.count("\n")) + " lines)")
+            else:
+                path.write_text(text, encoding="utf-8", newline="\n")
+                print("Wrote site/" + name)
     else:
         raise SystemExit("usage: python -m intelligence_hub.site stamp [site] | check [site] | labels [--check]")
 

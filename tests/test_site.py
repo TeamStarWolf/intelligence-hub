@@ -145,6 +145,72 @@ class LabelsTest(unittest.TestCase):
             self.assertIn(key, text)
 
 
+class LibraryLinksTest(unittest.TestCase):
+    """site/js/library.js: every library link the page renders, generated from the vocabulary."""
+
+    @staticmethod
+    def parse(text):
+        blocks = {}
+        for name in ("LINKS", "PINNED", "KEV", "PRODUCTS"):
+            match = re.search(r"export const " + name + r" = (\{.*?\n\});", text, re.S)
+            blocks[name] = json.loads(match[1])
+        return blocks
+
+    def test_library_module_is_current(self):
+        self.assertEqual((SITE / "js" / "library.js").read_text(encoding="utf-8").replace("\r\n", "\n"), site.build_library())
+
+    def test_every_link_is_the_vocabulary_link_on_the_library_site(self):
+        blocks = self.parse(site.build_library())
+        vocabulary = json.loads((support.ROOT / "config" / "vocabulary.json").read_text(encoding="utf-8"))
+        expected = {entity["id"]: entity["library_url"] for entity in vocabulary["entities"] if entity["library_path"]}
+        self.assertEqual(blocks["LINKS"], expected)
+        self.assertGreater(len(expected), 1000)
+        for url in list(blocks["LINKS"].values()) + list(blocks["PINNED"].values()):
+            self.assertTrue(url.startswith("https://teamstarwolf.github.io/TeamStarWolf/#/"), url)
+            self.assertNotIn(".md", url)
+        self.assertEqual(blocks["LINKS"]["vendor:fortinet"], "https://teamstarwolf.github.io/TeamStarWolf/#/platforms/fortinet")
+        self.assertEqual(blocks["LINKS"]["actor:G0016"], "https://teamstarwolf.github.io/TeamStarWolf/#/mitre/groups/G0016")
+        self.assertIn("product:microsoft-entra-id", blocks["PRODUCTS"]["vendor:microsoft"])
+        self.assertEqual(blocks["KEV"]["vendor:fortinet"], ["Fortinet"])
+
+    def test_pinned_library_evidence_maps_to_its_site_page(self):
+        pinned = self.parse(site.build_library())["PINNED"]
+        self.assertTrue(pinned)
+        for evidence, url in pinned.items():
+            self.assertRegex(evidence, r"^https://github\.com/TeamStarWolf/TeamStarWolf/blob/[a-f0-9]{40}/")
+            page = evidence.split("/blob/", 1)[1].split("/", 1)[1][:-3]
+            self.assertEqual(url, "https://teamstarwolf.github.io/TeamStarWolf/#/" + page)
+
+    def test_a_library_url_that_disagrees_with_its_path_is_refused(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory)
+            shutil.copytree(support.ROOT / "config", target / "config")
+            path = target / "config" / "vocabulary.json"
+            vocabulary = json.loads(path.read_text(encoding="utf-8"))
+            entity = next(item for item in vocabulary["entities"] if item["id"] == "vendor:fortinet")
+            entity["library_url"] = "https://teamstarwolf.github.io/TeamStarWolf/#/platforms/elsewhere"
+            path.write_text(json.dumps(vocabulary), encoding="utf-8")
+            with self.assertRaisesRegex(site.SiteError, "vendor:fortinet"):
+                site.build_library(target)
+            entity["library_url"] = "https://teamstarwolf.github.io/TeamStarWolf/#/platforms/fortinet"
+            entity["library_path"] = "https://evil.example/platforms/fortinet.md"
+            path.write_text(json.dumps(vocabulary), encoding="utf-8")
+            with self.assertRaisesRegex(site.SiteError, "library_path"):
+                site.build_library(target)
+            vocabulary["site"] = "https://elsewhere.example/"
+            path.write_text(json.dumps(vocabulary), encoding="utf-8")
+            with self.assertRaisesRegex(site.SiteError, "different library site"):
+                site.build_library(target)
+
+    def test_the_library_url_rule(self):
+        self.assertEqual(site.library_url("/platforms/fortinet.md"), "https://teamstarwolf.github.io/TeamStarWolf/#/platforms/fortinet")
+        self.assertEqual(site.library_url("/HEALTHCARE_SECURITY_REFERENCE.md", "sector-threat-profile"),
+                         "https://teamstarwolf.github.io/TeamStarWolf/#/HEALTHCARE_SECURITY_REFERENCE?id=sector-threat-profile")
+        for bad in (("platforms/fortinet.md", None), ("/platforms/../x.md", None), ("/platforms/fortinet", None), ("/a.md", "Bad Anchor"), ("/a.md", "x&y")):
+            with self.assertRaises(site.SiteError, msg=repr(bad)):
+                site.library_url(*bad)
+
+
 @unittest.skipIf(NODE is None, "Node is not installed; the pull-request check runs node --check itself")
 class ScriptSyntaxTest(unittest.TestCase):
     def test_every_listed_script_parses(self):

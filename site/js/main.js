@@ -7,15 +7,24 @@ import { layoutSkew, reloadOnce, runningRevision } from "./guard.js";
 import { initTheme } from "./theme.js";
 import { pollInterval } from "./limits.js";
 import { node } from "./util.js";
-import { setLabels } from "./views/common.js";
+import { loadLibrary, setLabels } from "./views/common.js";
 import { bindExplore, recordDetail, renderExplore } from "./views/explore.js";
 import { renderToday } from "./views/today.js";
 import { renderKev } from "./views/kev.js";
 import { briefBody, renderCves } from "./views/cves.js";
 import { renderAbout, renderData, renderReports, renderSidebar, renderSources } from "./views/panels.js";
+import { renderHistory } from "./views/history.js";
+import { renderVendor, renderVendors } from "./views/vendors.js";
+import { renderTags } from "./views/tags.js";
+import { renderActors, renderEntity } from "./views/actors.js";
+import { renderMethod } from "./views/method.js";
 
-const TITLES = { explore: "Explorer", today: "Today", advisories: "Advisories", kev: "Known exploited", research: "Research", news: "News", cves: "CVE register", cve: "CVE", reports: "Reports", sources: "Sources", data: "Data", about: "About" };
-const OTHER_VIEWS = { today: renderToday, kev: renderKev, cves: renderCves, cve: renderCves, reports: renderReports, sources: renderSources, data: renderData, about: renderAbout };
+const TITLES = { explore: "Explorer", today: "Today", advisories: "Advisories", kev: "Known exploited", research: "Research", news: "News", cves: "CVE register", cve: "CVE",
+  history: "History", vendors: "Vendors", vendor: "Vendor", tags: "Tags", actors: "Actors and malware", actor: "Actor", malware: "Malware", reports: "Reports", sources: "Sources", method: "Method", data: "Data", about: "About" };
+const OTHER_VIEWS = { today: renderToday, kev: renderKev, cves: renderCves, cve: renderCves, history: renderHistory, vendors: renderVendors, vendor: renderVendor, tags: renderTags,
+  actors: renderActors, actor: renderEntity, malware: renderEntity, reports: renderReports, sources: renderSources, method: renderMethod, data: renderData, about: renderAbout };
+// The tab a view sits under: a page with an id lights its index tab.
+const TAB_OF = { cve: "cves", vendor: "vendors", actor: "actors", malware: "actors" };
 
 export function createApp(env) {
   const { doc, win, location, history, storage = null, session = null, fetchImpl, subtle, moduleUrl = null, now = () => Date.now(), every = (fn, ms) => setInterval(fn, ms), loadLabels = () => import("./labels.js") } = env;
@@ -52,11 +61,27 @@ export function createApp(env) {
     render();
   }
 
+  // On a narrow window the tab strip scrolls sideways inside itself. When the active tab
+  // changes it is brought into the strip's view, sideways only, so the page never jumps.
+  let revealedTab = null;
+  function revealTab(tab) {
+    try {
+      const strip = tab.parentNode;
+      const box = tab.getBoundingClientRect();
+      const frame = strip.getBoundingClientRect();
+      const pad = 16;
+      if (box.left < frame.left + pad) strip.scrollLeft -= frame.left + pad - box.left;
+      else if (box.right > frame.right - pad) strip.scrollLeft += box.right - (frame.right - pad);
+    } catch (_) { /* a strip without layout stays where it is */ }
+  }
+
   function updateTabs() {
-    const active = route.view === "cve" ? "cves" : route.view;
+    const active = TAB_OF[route.view] || route.view;
+    let activeTab = null;
     for (const tab of doc.querySelectorAll(".tabs a")) {
-      if (tab.dataset.view === active) tab.setAttribute("aria-current", "page"); else tab.removeAttribute("aria-current");
+      if (tab.dataset.view === active) { tab.setAttribute("aria-current", "page"); activeTab = tab; } else tab.removeAttribute("aria-current");
     }
+    if (activeTab && activeTab !== revealedTab) { revealedTab = activeTab; revealTab(activeTab); }
     doc.title = (TITLES[route.view] || "Explorer") + " · Intelligence Hub · TeamStarWolf";
   }
 
@@ -76,9 +101,10 @@ export function createApp(env) {
     const dialog = el("#record-dialog");
     if (!route.query.open || !Object.hasOwn(LIST_VIEWS, route.view)) { closeDialog(dialog); return; }
     const row = rows.find(item => item.id === route.query.open);
+    const lib = row ? await loadLibrary() : null;
     if (!current()) return;
     el("#record-title").textContent = row ? "Entry details" : "Entry not loaded";
-    el("#record-body").replaceChildren(...(row ? recordDetail(row, route, cveIndex) : [node("p", "", "This entry is not in the data loaded for this view. Clear the filters or choose its year, then open it again.")]));
+    el("#record-body").replaceChildren(...(row ? recordDetail(row, route, cveIndex, lib) : [node("p", "", "This entry is not in the data loaded for this view. Clear the filters or choose its year, then open it again.")]));
     openDialog(dialog);
   }
 
@@ -93,13 +119,13 @@ export function createApp(env) {
     el("#cve-body").replaceChildren(node("p", "muted", "Reading the saved brief. No lookup leaves this site."));
     openDialog(dialog);
     try {
-      const [record, index] = await Promise.all([store.brief(cve), store.cveIndex()]);
+      const [record, index, lib] = await Promise.all([store.brief(cve), store.cveIndex(), loadLibrary()]);
       if (!current()) return;
       // The entries already read (live months, and Today's recent.json) that name this CVE.
       const loadedRows = store.state.mode === "legacy" ? store.rows([]) : store.rows(store.listed("live/").filter(path => store.cached(path)));
       const seen = new Set(loadedRows.map(row => row.id));
       for (const row of store.state.mode === "v7" ? store.cached("recent.json")?.rows || [] : []) if (!seen.has(row.id)) { seen.add(row.id); loadedRows.push(row); }
-      el("#cve-body").replaceChildren(...(record ? briefBody(record, index.get(cve), loadedRows) : [node("p", "", "This CVE has no saved brief in this snapshot. No external lookup was made.")]));
+      el("#cve-body").replaceChildren(...(record ? briefBody(record, index.get(cve), loadedRows, lib) : [node("p", "", "This CVE has no saved brief in this snapshot. No external lookup was made.")]));
       dialog.dataset.revision = shown;
     } catch (error) {
       if (!current()) return;

@@ -3,7 +3,7 @@
 import { defaultRange, defaultSort, formatRoute, withQuery } from "../router.js";
 import { classOf, dateWindow, facets, filterRows, kevLinked, requiredAction } from "../filters.js";
 import { count, dateLabel, link, monthLabel, node, routeLink, stamp } from "../util.js";
-import { EXPLOITATION_LABELS, KIND_LABELS, dateBasisLabel, facetOptions, fillSelect, label, pager, resultCard } from "./common.js";
+import { EXPLOITATION_LABELS, KIND_LABELS, cveOrgLink, dateBasisLabel, facetOptions, fillSelect, label, libraryDoor, pager, pinnedDoor, resultCard } from "./common.js";
 
 const TITLES = { explore: "Intelligence Explorer", advisories: "Advisories", research: "Research", news: "News" };
 const INTROS = {
@@ -11,7 +11,7 @@ const INTROS = {
   research: "Research teams' posts, newest first.",
   news: "Press reporting: publisher headlines and links only."
 };
-const SELECTS = ["kind", "class", "event", "exp", "sector", "region", "vendor", "product", "actor", "malware", "source", "year", "month"];
+const SELECTS = ["kind", "class", "event", "exp", "sector", "region", "vendor", "product", "actor", "malware", "cwe", "tech", "source", "year", "month"];
 const FILTER_KEYS = [...SELECTS, "kev", "action", "range"];
 
 export function activeFilters(route) {
@@ -55,6 +55,8 @@ function fillFilters(ctx, rows) {
   fillSelect(el("#f-product"), "All products", facetOptions(found.product, plain), route.query.product);
   fillSelect(el("#f-actor"), "All actors", facetOptions(found.actor, plain), route.query.actor);
   fillSelect(el("#f-malware"), "All malware", facetOptions(found.malware, plain), route.query.malware);
+  fillSelect(el("#f-cwe"), "All weaknesses", facetOptions(found.cwe, value => value), route.query.cwe);
+  fillSelect(el("#f-tech"), "All techniques", facetOptions(found.tech, value => value), route.query.tech);
   fillSelect(el("#f-source"), "All sources", facetOptions(found.source, (value, entry) => entry.label), route.query.source);
   const first = store.state.mode === "v7" ? Number(store.state.index.window.history_start.slice(0, 4)) : 1998;
   const last = Number(store.contentDate().slice(0, 4));
@@ -136,7 +138,8 @@ function tagList(title, items, render) {
 const confidence = item => " (" + item[item.length - 1] + " confidence, " + item[item.length - 2].replaceAll("-", " ") + ")";
 
 // The detail dialog for one entry (open=<id>): every date, tag, method and confidence, and links.
-export function recordDetail(row, route, cveIndex) {
+// lib is the library-door module (common.js loadLibrary); without it no library door is shown.
+export function recordDetail(row, route, cveIndex, lib = null) {
   const body = [];
   const head = node("section", "detail-block");
   head.append(node("p", "card-meta", (KIND_LABELS[row.kind] || row.kind) + " · " + row.source_name + " · " + label("class:" + (classOf(row) || "unknown"))));
@@ -156,6 +159,9 @@ export function recordDetail(row, route, cveIndex) {
     const chips = node("p", "chips");
     for (const cve of row.cves) chips.append(routeLink(cve, formatRoute({ view: "cve", id: cve, query: {} }), "chip chip-cve"));
     block.append(chips);
+    const records = node("p", "muted", "CVE.org records: ");
+    row.cves.slice(0, 10).forEach((cve, position) => { if (position) records.append(", "); records.append(cveOrgLink(cve, cve)); });
+    block.append(records);
     const flags = [];
     if (kevLinked(row, cveIndex)) flags.push("KEV-linked: at least one CVE is in CISA's KEV catalog.");
     if (requiredAction(row, cveIndex)) flags.push("CISA required action: at least one CVE carries CISA's requiredAction text.");
@@ -167,9 +173,14 @@ export function recordDetail(row, route, cveIndex) {
   tags.append(node("h3", "", "Exploitation"), node("p", "", (EXPLOITATION_LABELS[row.exploited] || row.exploited) + (exploitation ? " (basis " + exploitation[1].replaceAll("-", " ") + ", " + exploitation[2] + " confidence)" : "") + ". Unknown never means safe."));
   if (row.t.cvss) tags.append(node("p", "", "CVSS " + row.t.cvss.base.toFixed(1) + (row.t.cvss.version ? " (version " + row.t.cvss.version + ")" : "") + (row.t.cvss.scorer ? ", scored by " + row.t.cvss.scorer : "") + (row.t.cvss.cve ? ", for " + row.t.cvss.cve : "") + ". Scores across versions are not normalized."));
   body.push(tags);
+  // An entry opened from a year (a History card's Details link) keeps that year on its entity
+  // links, so the Explorer they open still holds the history row they came from.
+  const year = route && route.query && route.query.year ? { year: route.query.year } : {};
   const entity = (field, key) => item => {
     const entry = node("li");
-    entry.append(routeLink(label(item[0]), formatRoute({ view: "explore", id: null, query: { [key]: item[0].replace(/^[a-z]+:/, "") } })), node("span", "muted", confidence(item)));
+    entry.append(routeLink(label(item[0]), formatRoute({ view: "explore", id: null, query: { [key]: item[0].replace(/^[a-z]+:/, ""), ...year } })), node("span", "muted", confidence(item)));
+    const door = libraryDoor(lib, item[0], "library page");
+    if (door) entry.append(node("span", "", " · "), door);
     return entry;
   };
   const blocks = [
@@ -192,7 +203,12 @@ export function recordDetail(row, route, cveIndex) {
   references.append(node("h3", "", "Links"));
   const list = node("ul", "detail-list");
   const original = node("li"); original.append(link("Original publisher record", row.url)); list.append(original);
-  for (const reference of row.references) { const item = node("li"); item.append(link(reference.label, reference.url)); list.append(item); }
+  for (const reference of row.references) {
+    const item = node("li"); item.append(link(reference.label, reference.url));
+    const door = pinnedDoor(lib, reference.url);
+    if (door) item.append(node("span", "", " · "), door);
+    list.append(item);
+  }
   references.append(list);
   body.push(references);
   return body;

@@ -30,9 +30,14 @@
     <a href="#/research" data-view="research">Research</a>
     <a href="#/news" data-view="news">News</a>
     <a href="#/cves" data-view="cves">CVEs</a>
+    <a href="#/history" data-view="history">History</a>
+    <a href="#/vendors" data-view="vendors">Vendors</a>
+    <a href="#/tags" data-view="tags">Tags</a>
+    <a href="#/actors" data-view="actors">Actors and malware</a>
     <a href="#/reports" data-view="reports">Reports</a>
-    <a href="#/sources" data-view="sources">Sources</a>
     <a href="#/data" data-view="data">Data</a>
+    <a href="#/sources" data-view="sources">Sources</a>
+    <a href="#/method" data-view="method">Method</a>
     <a href="#/about" data-view="about">About</a>
   </nav>
   <div id="layout" class="layout">
@@ -59,6 +64,8 @@
             <label class="field"><span>Product</span><select id="f-product" data-key="product"><option value="">All products</option></select></label>
             <label class="field"><span>Actor</span><select id="f-actor" data-key="actor"><option value="">All actors</option></select></label>
             <label class="field"><span>Malware</span><select id="f-malware" data-key="malware"><option value="">All malware</option></select></label>
+            <label class="field"><span>Weakness (CWE)</span><select id="f-cwe" data-key="cwe"><option value="">All weaknesses</option></select></label>
+            <label class="field"><span>ATT&amp;CK technique</span><select id="f-tech" data-key="tech"><option value="">All techniques</option></select></label>
             <label class="field"><span>Source</span><select id="f-source" data-key="source"><option value="">All sources</option></select></label>
             <label class="field"><span>Year</span><select id="f-year" data-key="year"><option value="">Live window</option></select></label>
             <label class="field"><span>Month</span><select id="f-month" data-key="month"><option value="">All months</option></select></label>
@@ -76,7 +83,7 @@
       <div id="notice" class="notice toast" role="alert" hidden><p id="notice-text" class="toast-text"></p><button id="notice-close" class="bar-button" type="button" aria-label="Dismiss this notice">Dismiss</button></div>
       <noscript><p class="notice">JavaScript is needed to read and filter the saved data. The page makes no request outside this site.</p></noscript>
     </main>
-    <aside id="sidebar" class="sidebar" aria-label="Today, reports and sources" hidden>
+    <aside id="sidebar" class="sidebar" aria-label="Today, reports, sources and the other views" hidden>
       <div class="sidebar-head"><h2 class="sidebar-title">Panels</h2><button id="sidebar-close" class="bar-button" type="button">Close</button></div>
       <div id="sidebar-body" class="sidebar-body"></div>
     </aside>

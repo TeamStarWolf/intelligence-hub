@@ -150,7 +150,7 @@ The nineteen additions returned direct HTTPS 200 responses with bounded, parseab
 | [Schneier on Security](https://www.schneier.com/) | [Atom](https://www.schneier.com/feed/atom/) | Commentary and reporting, including broader policy and occasional non-security posts |
 | [watchTowr Labs](https://labs.watchtowr.com/) | [RSS](https://labs.watchtowr.com/rss/) | Vendor vulnerability and exploitation research; added from the owner's further request |
 | [Dark Reading](https://www.darkreading.com/) | [RSS](https://www.darkreading.com/rss.xml) | Reporting; publisher's home page advertises this feed |
-| [Threatpost](https://threatpost.com/) | [RSS](https://threatpost.com/feed/) | Legacy archive; ten returned items are dated 18–31 August 2022, within the expanded decade window |
+| [Threatpost](https://threatpost.com/) | [RSS](https://threatpost.com/feed/) | Legacy archive; ten returned items are dated 18–31 August 2022, inside the collector's window from 1 January 1998 |
 
 Publisher role describes the source, not independent corroboration of every item. Research can contain demonstrations or hypotheses; reporting can repeat another publisher's claims. A source entry does not establish exploitation, urgency, a required patch or exposure of the reader's devices.
 
@@ -302,7 +302,7 @@ The bookmark repository is a discovery catalog, not a declaration that every lis
 - Microsoft's original [MSRC RSS link](https://msrc.microsoft.com/blog/rss/) redirected to the new HTML blog during intake. The official [Microsoft article advertising that link](https://www.microsoft.com/en-us/security/blog/2025/03/13/how-msrc-coordinates-vulnerability-research-and-disclosure-while-building-community/) was checked. This review did not establish a direct current MSRC RSS endpoint. The separate Microsoft Security Blog feed remains configured; it is not a substitute for complete Security Update Guide coverage.
 - Chrome Releases advertises a feed whose redirect points to FeedBurner. A separately inspected [HTTPS FeedBurner endpoint](https://feeds.feedburner.com/GoogleChromeReleases) returned Atom, but its alternate article links used HTTP. The current collector requires HTTPS article URLs, so Chrome was not added. No URL-upgrade exception or redirect relaxation was implemented.
 - CISA's advisory feed remains configured from the original catalog, with its initial production failure disclosed. The advisory landing page did not establish a reviewed replacement during this expansion. No precise cause is inferred from its generic production error. CISA KEV is separate and does not replace all advisory coverage.
-- Threatpost's feed was accessible, but all ten returned items were dated August 2022. It is labeled a legacy archive in the configuration. Those dates were outside the original recent-year window and are inside the expanded decade window. A successful feed fetch records transport/retrieval, not renewed publication; the latest production snapshot determines retained article counts.
+- Threatpost's feed was accessible, but all ten returned items were dated August 2022. It is labeled a legacy archive in the configuration. Those dates fall inside the collector's window, which runs from 1 January 1998. A successful feed fetch records transport/retrieval, not renewed publication; the latest production snapshot determines retained article counts.
 
 ### SEC cybersecurity filings: access prerequisite, not a connected feed
 
@@ -352,7 +352,7 @@ The owner requested broader coverage after the first 29-source intake. A further
 
 Discovery used the publishers’ own sites or advertised endpoints and the same bounded collector. Each proposed endpoint returned HTTP 200 without following redirects, parsed as RSS/Atom and yielded accepted HTTPS article links on its recorded exact hosts. Private receipts retain the received-byte hashes, UTC intervals, safe item counts and source-specific limits; no full article bodies enter the public output. Admission is a dated observation, not a future availability or correctness guarantee.
 
-Cisco PSIRT’s 50 admitted items had unknown dates under this parser, so they may appear as undated records without calendar-year matches. Snyk, F5 and Infosecurity reached the 150-item intake ceiling. F5 also returned publications before the decade boundary; the normal date filter still applies. Graham Cluley’s first observed response yielded six accepted same-publisher links; no extra article hosts were silently admitted. Counts in discovery receipts are neither net new articles nor evidence of complete archives.
+Cisco PSIRT’s 50 admitted items had unknown dates under this parser, so they may appear as undated records without calendar-year matches. Snyk, F5 and Infosecurity reached the 150-item intake ceiling. F5 also returned older publications; the normal date filter still applies. Graham Cluley’s first observed response yielded six accepted same-publisher links; no extra article hosts were silently admitted. Counts in discovery receipts are neither net new articles nor evidence of complete archives.
 
 This further intake rejected or held other attempts: Rapid7’s advertised feed was malformed XML; Fortinet yielded no accepted HTTPS article links; Elastic and Wordfence exceeded the response cap; ZDI contained rejected DTD/entity syntax. Some alternate news endpoints redirected, failed access or produced no accepted entries. Last Watchdog’s mixed press-release material and BankInfoSecurity’s undated results were held for editorial/date review. Those attempts are not configured sources, and the collector’s safeguards were not loosened to accept them. Qualys also failed the earlier **24 October 2026 UTC** whole-feed intake because one item exceeded the per-item CVE mention bound; its later admission under explicit partial accounting is documented below. Other sources not attempted remain unreviewed.
 
@@ -414,7 +414,7 @@ hashes and exact intake provenance remain in private receipts.
 The unchanged 3 MiB response, strict UTF-8, DTD/entity rejection, XML node/depth,
 150-processed-entry and 100-CVE-per-entry gates still apply. Later responses can
 fail these whole-response gates or yield no safe admission. Accepted items merge
-with retained history under the 600-item source limit and normal decade date
+with retained history under the 600-item source limit and the normal date
 filter; a rolling ten-entry response is not a complete Qualys archive. Admission
 does not establish live deployment, a later scheduled collection outcome,
 independent factual verification, exploitation or exposure of the reader's devices.

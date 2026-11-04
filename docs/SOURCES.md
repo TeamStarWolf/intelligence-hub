@@ -87,7 +87,7 @@ These ten additions use the same historical row interface and source-attributed 
 
 The CVE lists are selected indexes, not every vulnerability mentioned in a cumulative bulletin. Historical negative exploitation statements are not current safety verdicts. Google and Adobe describe dated first-party incidents; the source does not establish every subsequent victim or actor claim. GitHub’s March 27, 2015 publication, March 26 event and 2019 page update remain separate.
 
-## Earlier decade reading list
+## 2016 to 2025 reading list
 
 Each entry in `config/history.json` carries its primary URL, original summary, date basis, any supported CVEs, evidence label and references. The following list identifies the **41 additions**, without copying article bodies.
 
@@ -162,7 +162,7 @@ These are source citations, not endorsements, verified build artifacts or proof 
 
 The initial recent-year finding aid was the existing [TeamStarWolf AI case study](https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/case-studies/AI_THREATS_2026.md), published 7 October 2026. Its [case-study method](https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/case-studies/README.md) separates confirmed, reported and demonstrated evidence. Its [research index](https://github.com/TeamStarWolf/TeamStarWolf/blob/d85c7667dbcac953f27354c76f625085e632d71c/research/README.md) treats catalogs as dated finding aids. Those references were read at the pinned commit during the initial curation, without modifying the library.
 
-The decade extension was curated independently from primary pages. The original 22 records remain unchanged. `origin: library-curation` labels the manual curation workflow; it does not mean every record originated in the library or that the library independently verifies each claim.
+The 2016 to 2025 extension was curated independently from primary pages. The original 22 records remain unchanged. `origin: library-curation` labels the manual curation workflow; it does not mean every record originated in the library or that the library independently verifies each claim.
 
 Keep public curation in `config/history.json`. Research receipts, baseline preservation, access failures and excluded candidates belong in ignored local state. A page that cannot be read is not admitted from a search snippet alone. A current update date is not substituted for an unknown original date. The readable primary page and its explicit date must support each addition.
 
