@@ -130,6 +130,39 @@ test("History lists every year from 1998 with its coverage, and a year page stat
   assert.ok(partial.textContent.includes("Microsoft Security Bulletins: partial, 4 rows of 5 listed (1 listed item could not be read)."));
 });
 
+test("a history year written as calendar parts reads every part on its year page, in the Explorer and in the year index", async () => {
+  const part = (period, rows) => ({ schema_version: 7, kind: "articles", period, rows });
+  const app = files({ extra: {
+    "coverage.json": coverage(),
+    "history/2025-h1.json": part("2025-h1", [row("h-2025-feb", { ...MSRC, published_at: "2025-02-10", title: "February 2025 bulletin" }), row("h-2025-may", { ...MSRC, published_at: "2025-05-01", title: "May 2025 bulletin" })]),
+    "history/2025-h2.json": part("2025-h2", [row("h-2025-sep", { ...MSRC, published_at: "2025-09-09", title: "September 2025 bulletin" })]),
+    "live/2025-03.json": part("2025-03", [row("live-2025-mar", { published_at: "2025-03-04", title: "March 2025 live advisory" })])
+  } });
+  const shell = await boot({ hash: "#/history/2025", app });
+  const year = shell.doc.querySelector("#view");
+  assert.ok(year.textContent.includes("3 rows of 3 in 2025"), year.textContent);
+  assert.ok(year.textContent.indexOf("February 2025 bulletin") < year.textContent.indexOf("September 2025 bulletin"), "oldest first across the parts");
+  assert.ok(!year.textContent.includes("This snapshot has no history file"));
+  for (const path of ["./data/v7/history/2025-h1.json", "./data/v7/history/2025-h2.json"]) assert.ok(shell.http.requests.some(request => request.path === path), path);
+  assert.ok(!shell.http.requests.some(request => request.path === "./data/v7/history/2025.json"), "no single 2025 file is requested");
+  assert.deepEqual(shell.app.store.yearPaths("2025"), ["history/2025-h1.json", "history/2025-h2.json"]);
+  assert.deepEqual(shell.app.store.yearPaths("2003"), ["history/2003.json"]);
+  const index = await go(shell, "#/history");
+  const cells = [...index.querySelectorAll("tbody tr")].find(tr => tr.querySelector("th").textContent === "2025").querySelectorAll("td");
+  assert.equal(cells[0].textContent, "3", "the History rows column sums the parts");
+  const single = [...index.querySelectorAll("tbody tr")].find(tr => tr.querySelector("th").textContent === "2003").querySelectorAll("td");
+  assert.equal(single[0].textContent, "1");
+  const explorer = await boot({ hash: "#/explore?year=2025", app });
+  const status = explorer.doc.querySelector("#results-status").textContent;
+  assert.ok(status.includes("4 entries"), status);
+  for (const title of ["February 2025 bulletin", "September 2025 bulletin", "March 2025 live advisory"]) assert.ok(explorer.doc.querySelector("#results").textContent.includes(title), title);
+  for (const path of ["./data/v7/history/2025-h1.json", "./data/v7/history/2025-h2.json", "./data/v7/live/2025-03.json"]) assert.ok(explorer.http.requests.some(request => request.path === path), path);
+  const plain = await go(shell, "#/history/2003");
+  assert.ok(plain.textContent.includes("1 row of 1 in 2003"), "a year with one file still renders");
+  const empty = await go(shell, "#/history/2012");
+  assert.ok(empty.textContent.includes("This snapshot has no history file for 2012."));
+});
+
 test("a vendor page links its library platform page and its KEV entries", async () => {
   const shell = await boot({ hash: "#/vendors" });
   let view = shell.doc.querySelector("#view");

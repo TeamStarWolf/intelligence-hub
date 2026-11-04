@@ -45,7 +45,10 @@ const KINDS = ["advisory", "research", "reporting", "incident", "kev", "filing",
 const EXPLOITATION = ["known", "reported", "unknown"];
 const ORIGIN = /^(?:publisher-feed|cisa-kev|library-curation|history:[a-z0-9][a-z0-9-]{0,39})$/;
 const CVE = /^CVE-\d{4}-\d{4,19}$/;
-const SHARD_PATH = /^(?:(?:sources|coverage|reports|cve-index|recent)\.json|live\/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json|history\/(?:[0-9]{4}|undated)\.json|kev\/[0-9]{4}\.json|cve\/[0-9]{4}\/[0-9]{1,5}k\.json|patch-tuesday\/(?:index|[0-9]{4}-(?:0[1-9]|1[0-2]))\.json)$/;
+// The same pattern as SHARD_PATH in intelligence_hub/shards.py and the typed check in publish.yml;
+// tests/test_shards.py holds the three in step.
+const SHARD_PATTERN = String.raw`(?:sources|coverage|reports|cve-index|recent)\.json|live/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json|history/(?:[0-9]{4}(?:-(?:h[12]|q[1-4]|0[1-9]|1[0-2]))?|undated)\.json|kev/[0-9]{4}\.json|cve/[0-9]{4}/[0-9]{1,5}k\.json|patch-tuesday/(?:index|[0-9]{4}-(?:0[1-9]|1[0-2]))\.json`;
+const SHARD_PATH = new RegExp("^(?:" + SHARD_PATTERN + ")$");
 const EXPORT_PATH = /^exports\/(?:articles-(?:[0-9]{4}(?:-(?:0[1-9]|1[0-2]))?|undated)\.(?:csv|jsonl)|tags-(?:[0-9]{4}(?:-(?:0[1-9]|1[0-2]))?|undated)\.csv|manifest\.json|data-dictionary\.md)$/;
 
 // data/v7/index.json. Known fields are checked; fields a later collector adds are ignored.

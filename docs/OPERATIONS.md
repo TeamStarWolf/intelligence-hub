@@ -145,7 +145,8 @@ collector writes `site/data/v7/`:
 | --- | --- |
 | `index.json` | Schema, clocks, content date, the run record, counts, and every shard with path, rows, bytes, sha256 and date span |
 | `live/YYYY-MM.json` | Publisher and KEV rows whose primary date falls in that month, for the current month and the 23 before it; `live/undated.json` holds rows without a date |
-| `history/YYYY.json` | Rows older than the live window, plus every curated archive row and every committed history-adapter row (`history/` at the repository root, see [history/README.md](../history/README.md)) for that year |
+| `history/YYYY.json` | Rows older than the live window, plus every curated archive row and every committed history-adapter row (`history/` at the repository root, see [history/README.md](../history/README.md)) for that year; `history/undated.json` holds curated rows without a date |
+| `history/YYYY-h1.json`, `-h2.json`, `-q1.json` to `-q4.json` or `history/YYYY-01.json` to `-12.json` | The calendar parts of a year whose single file would pass the 3 MiB (3,145,728-byte) split threshold: halves first, then quarters, then months, the first rung whose every part is at or under it. If a single month still passes it, the months are kept and the 4 MiB shard bound applies. A part with no rows is not written, its `period` is the part label (`2025-h1`), and its rows keep the year file's order. A year at or under the threshold keeps its one `history/YYYY.json` with unchanged bytes. The page's `#/history/<year>` and the Explorer's year filter read every part the index lists for that year |
 | `kev/YYYY.json` | The whole KEV catalog by `dateAdded` year: due date, the directive parsed from `requiredAction` (for example BOD 22-01, BOD 26-04 or an Emergency Directive such as ED 26-03, which CISA writes out as "Emergency Directive 26-03" or "Emergency Directive (ED) 25-03"; several are joined as "BOD 22-01; ED 26-03"; null when none is cited), ransomware use, forensic triage, CWE and CISA's own text |
 | `cve-index.json` | One row per CVE with the list-view fields and where its full brief is read |
 | `recent.json` | The page's Today file: live rows from three days before the content date to the day after it, the KEV entries added in the last seven days or due in the next fourteen (from the whole catalog), and the `cve-index.json` rows those live rows name. Its size follows a few days of traffic, not a month or a KEV year. Left out when it would pass the shard bound; the page then reads the live months and KEV years |
@@ -157,7 +158,12 @@ collector writes `site/data/v7/`:
 
 Every file is canonical JSON: sorted keys, compact separators, UTF-8 and one
 trailing newline, rows in a fixed order. The same inputs give the same bytes, so
-a shard's sha256 changes only when its content does. Article rows keep the v6
+a shard's sha256 changes only when its content does. The history split threshold is
+an internal threshold under the 4 MiB per-file cap, not a raised bound: it keeps
+headroom as live months leave the live window and fold into their year. After the
+shards are serialized the collector prints one line per shard, for example
+`data/v7/history/2025-h1.json: 1,812,345 of 4,194,304 bytes (2,381,959 of headroom; 1,333,383 of headroom under the 3,145,728-byte history split threshold)`.
+Article rows keep the v6
 feed record unchanged. A `--resume-public` run reads `index.json`, the article and
 source shards it lists and `data/briefs.json`, checks each against its listed
 bytes and sha256, and never reads `data/feed.json`. If the index is missing or a
@@ -360,8 +366,10 @@ exports) is at most **4 MiB**, while `data/feed.json` and `data/briefs.json` kee
 the collector's own byte bounds (8 MiB and 12 MiB). Actual file content must total
 at most **192 MiB**. The check builds an in-memory tar and estimates compression
 using both gzip and zlib at level 6. If the larger estimate exceeds **48,000,000
-bytes**, it fails before artifact upload, and it prints every cap with its headroom
-on every run. The previous live site remains in place. The package caps (192 MiB
+bytes**, it fails before artifact upload. On every run it prints one line per file
+under `data/v7/` (shards, exports and `index.json`) with its bytes and headroom
+under the 4 MiB cap, and the history split headroom for history files, then every
+cap with its headroom. The previous live site remains in place. The package caps (192 MiB
 input, 4,000 files, 4 MiB per v7 file, 48,000,000-byte estimate) were raised in pull
 request #7; a further change needs the owner's approval in the pull request that
 makes it.

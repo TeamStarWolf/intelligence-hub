@@ -19,6 +19,14 @@ export function createStore(fetcher) {
   const entry = path => state.index ? state.index.shards.find(item => item.path === path) || null : null;
   const listed = prefix => state.index ? state.index.shards.filter(item => item.path.startsWith(prefix)).map(item => item.path) : [];
 
+  // Every listed history file for a year in period order: history/YYYY.json, or the calendar
+  // parts a large year is written as (history/YYYY-h1.json and -h2.json, quarters or months).
+  function yearPaths(year) {
+    // The index validator admits only SHARD_PATH names, so "history/YYYY-" can only start a part.
+    const single = "history/" + year + ".json"; const part = "history/" + year + "-";
+    return listed("history/").filter(path => path === single || path.startsWith(part)).sort();
+  }
+
   // Reads index.json (conditional). Returns {status: "loaded" | "same" | "unchanged", index}.
   // A 404 switches the store to the schema 6 feed.
   async function loadIndex() {
@@ -76,8 +84,7 @@ export function createStore(fetcher) {
     const window = dateWindow(route.view, route.query, contentDate());
     if (route.query.year) {
       const months = live.filter(path => path.slice(5, 9) === route.query.year && (!route.query.month || path.slice(10, 12) === route.query.month));
-      const history = entry("history/" + route.query.year + ".json") ? ["history/" + route.query.year + ".json"] : [];
-      return [...months, ...history];
+      return [...months, ...yearPaths(route.query.year)];
     }
     if (window) {
       const months = monthsBetween(window.from, window.to);
@@ -214,5 +221,5 @@ export function createStore(fetcher) {
     return briefs.map.get(cve) || null;
   }
 
-  return { state, loadIndex, articlePaths, todayPaths, kevPaths, ensure, loaded, rows, kevRows, cveIndex, sources, reports, coverage, brief, feed, contentDate, cached, listed, entry, patchTuesdayIndex, patchTuesday };
+  return { state, loadIndex, articlePaths, yearPaths, todayPaths, kevPaths, ensure, loaded, rows, kevRows, cveIndex, sources, reports, coverage, brief, feed, contentDate, cached, listed, entry, patchTuesdayIndex, patchTuesday };
 }
