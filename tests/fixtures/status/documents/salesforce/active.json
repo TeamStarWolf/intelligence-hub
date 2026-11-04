@@ -1,0 +1,63 @@
+[
+ {
+  "id": 20004559,
+  "externalId": "97401395",
+  "message": {
+   "rootCause": null,
+   "actionPlan": null,
+   "pathToResolution": null
+  },
+  "additionalInformation": "",
+  "isCore": false,
+  "affectsAll": false,
+  "status": "Active",
+  "type": "Degradation",
+  "createdAt": "2026-11-04T01:42:51.873Z",
+  "updatedAt": "2026-11-04T05:39:35.502Z",
+  "instanceKeys": [
+   "AP52",
+   "AP53",
+   "AP54",
+   "AP58",
+   "AP60"
+  ],
+  "serviceKeys": [
+   "Communities"
+  ],
+  "IncidentImpacts": [
+   {
+    "id": 20004895,
+    "startTime": "2026-10-27T19:00:00.000Z",
+    "endTime": null,
+    "type": "featurePerfDegradation",
+    "severity": "minor",
+    "createdAt": "2026-11-04T01:42:52.072Z",
+    "updatedAt": "2026-11-04T01:42:52.082Z",
+    "startTimeCreatedAt": "2026-11-04T01:42:52.073Z",
+    "startTimeModifiedAt": null,
+    "endTimeCreatedAt": null,
+    "endTimeModifiedAt": null
+   }
+  ],
+  "IncidentEvents": [
+   {
+    "id": 20006384,
+    "type": "update",
+    "message": "We have developed a fix to revert the earlier change and are completing the prerequisite tasks for deployment. For additional details, please refer to the Known Issue here :https://sfdc.co/kq6uu2\nWe'll provide an update in 60 minutes or sooner if additional information becomes available, and apologize for any inconvenience this issue may be causing. \n",
+    "createdAt": "2026-11-04T05:20:32.905Z",
+    "updatedAt": "2026-11-04T05:39:35.498Z"
+   }
+  ],
+  "timeline": [
+   {
+    "title": "Update",
+    "content": "We have developed a fix to revert the earlier change and are completing the prerequisite tasks for deployment. For additional details, please refer to the Known Issue here :https://sfdc.co/kq6uu2\nWe'll provide an update in 60 minutes or sooner if additional information becomes available, and apologize for any inconvenience this issue may be causing. \n",
+    "createdAt": "2026-11-04T05:20:32.905Z",
+    "updatedAt": "2026-11-04T05:39:35.498Z",
+    "entryType": "event",
+    "sourceId": 20006384,
+    "sourceType": "event"
+   }
+  ]
+ }
+]

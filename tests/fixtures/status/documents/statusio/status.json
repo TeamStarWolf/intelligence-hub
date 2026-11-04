@@ -1,0 +1,48 @@
+{
+ "result": {
+  "status_overall": {
+   "updated": "2026-11-03T18:51:14.249Z",
+   "status": "Operational",
+   "status_code": 100
+  },
+  "status": [
+   {
+    "id": "5b36dc6502d06804c0834a07",
+    "name": "Website",
+    "status": "Operational",
+    "status_code": 100,
+    "containers": [
+     {
+      "id": "5b36e11140e76c04b7220a31",
+      "name": "Google Compute Engine",
+      "updated": "2026-10-23T17:04:35.752Z",
+      "status": "Operational",
+      "status_code": 100
+     }
+    ],
+    "updated": "2026-10-23T17:04:35.752Z"
+   },
+   {
+    "id": "5b36e05f02d06804c0834a09",
+    "name": "API",
+    "status": "Operational",
+    "status_code": 100,
+    "containers": [
+     {
+      "id": "5b36e11140e76c04b7220a31",
+      "name": "Google Compute Engine",
+      "updated": "2026-10-16T17:24:52.435Z",
+      "status": "Operational",
+      "status_code": 100
+     }
+    ],
+    "updated": "2026-10-16T17:24:52.435Z"
+   }
+  ],
+  "incidents": [],
+  "maintenance": {
+   "active": [],
+   "upcoming": []
+  }
+ }
+}

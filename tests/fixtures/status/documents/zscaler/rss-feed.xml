@@ -1,0 +1,50 @@
+<rss version="2.0" xml:base="https://trust.zscaler.com/rss-feed" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>Trust</title>
+    <link>https://trust.zscaler.com/rss-feed</link>
+    <description>Trust Post Feeds.</description>
+        <generator>trust.zscaler.com</generator>
+    <language>en-us</language>
+    <atom:link href="https://trust.zscaler.com/rss-feed" rel="self" type="application/rss+xml"/>
+              <item>
+        <title>Reporting and Logging Issue - zscalerthree.net</title>
+                <link>https://trust.zscaler.com/zscalerthree.net/posts/32531</link>
+                                <description></description>
+                <pubDate>Wed, 04 Nov 2026 02:13:02 GMT</pubDate>
+                                        <startTime>Wed, 04 Nov 2026 02:10:53 GMT</startTime>
+                                                                            <eventType>Under Investigation</eventType>
+                                  <customerImpact>A subset of customers may experience delays or issues with logging and reporting.</customerImpact>
+                                  <nextUpdate>4 hours</nextUpdate>
+                          <HowFound>Internal Monitoring</HowFound>
+                          <Status>In Progress</Status>
+                                          <nextUpdate>4 hours</nextUpdate>
+                        <guid isPermaLink="false">32531 at https://trust.zscaler.com</guid>
+        <category domain="https://trust.zscaler.com">Recent incident</category>
+      </item>
+<item>
+        <title>Chennai II Datacenter Issue - zscaler.net, zscalertwo.net, zscloud.net, zscalerthree.net</title>
+                <link>https://trust.zscaler.com/zscaler.net/posts/32496</link>
+                                <description></description>
+                <pubDate>Mon, 02 Nov 2026 05:45:23 GMT</pubDate>
+                                        <startTime>Mon, 02 Nov 2026 05:41:44 GMT</startTime>
+                                                                            <eventType>Under Investigation</eventType>
+                                  <customerImpact>Customer Forwarding traffic to Chennai II datacenter might face issues with IPSEC / GRE tunnel connectivity.</customerImpact>
+                          <availableWorkaround>&lt;p&gt;If you’re currently experiencing any traffic impacting issues please failover to your secondary DC or any other alternate DC. If you’re currently experiencing any traffic impacting issues please failover to your secondary DC or any other alternate DC&lt;/p&gt;</availableWorkaround>
+                                  <HowFound>Internal Monitoring</HowFound>
+                          <Status>Cancelled</Status>
+                                                <guid isPermaLink="false">32496 at https://trust.zscaler.com</guid>
+        <category domain="https://trust.zscaler.com">Recent incident</category>
+      </item>
+<item>
+        <title>ZPA Service Maintenance - private.zscaler.com</title>
+                <link>https://trust.zscaler.com/private.zscaler.com/posts/32521</link>
+                                <description></description>
+                <pubDate>Tue, 03 Nov 2026 06:01:27 GMT</pubDate>
+                                                            <startTime>Thu, 05 Nov 2026 07:00:00 GMT</startTime>
+            <endTime>Fri, 06 Nov 2026 10:00:00 GMT</endTime>
+                                                                                            <Status>Upcoming</Status>
+                                                <guid isPermaLink="false">32521 at https://trust.zscaler.com</guid>
+        <category domain="https://trust.zscaler.com">Scheduled maintenance</category>
+      </item>
+</channel>
+</rss>

@@ -1,0 +1,413 @@
+"""Service health (intelligence_hub/status.py): the registry, every normalizer on trimmed real
+responses, observation and fallback, the month files and their caps, Explorer rows, the
+publication decision, and the page's connect-src list."""
+from datetime import date, datetime, timezone
+import json
+from pathlib import Path
+import re
+import unittest
+import urllib.parse
+
+import support
+from intelligence_hub import collect, shards, status
+
+DOCS = support.FIXTURES / "status" / "documents"
+REGISTRY = status.load_registry(support.ROOT)
+SOURCES = {source["id"]: source for source in REGISTRY["sources"]}
+CLOCK = "2026-11-01T12:00:00+00:00"
+
+
+def doc(name):
+    return (DOCS / name).read_bytes()
+
+
+def parse(source_id, **documents):
+    source = SOURCES[source_id]
+    return status.PARSERS[source["format"]](source, {key: doc(value) for key, value in documents.items()})
+
+
+def cache():
+    return json.loads((support.FIXTURES / "status-cache.json").read_text(encoding="utf-8"))["sources"]
+
+
+class RegistryTest(unittest.TestCase):
+    def test_the_registry_validates_and_every_endpoint_is_canonical_https(self):
+        self.assertGreaterEqual(len(status.tracked(REGISTRY)), 25)
+        for source in REGISTRY["sources"]:
+            for url in source["endpoints"].values():
+                self.assertEqual(collect.safe_url(url), url)
+                self.assertTrue(url.startswith("https://"))
+
+    def test_no_complaint_or_scraped_source_is_registered(self):
+        text = (support.ROOT / "config" / "status.json").read_text(encoding="utf-8").lower()
+        self.assertNotIn("downdetector", text)
+        for source in REGISTRY["sources"]:
+            self.assertNotRegex(" ".join(source["endpoints"].values()), r"\.html?\b")
+
+    def test_a_bad_registry_is_refused(self):
+        def broken(change):
+            value = json.loads((support.ROOT / "config" / "status.json").read_text(encoding="utf-8"))
+            change(value)
+            return value
+        cases = [lambda value: value["sources"][0].update(id="Bad Id"),
+                 lambda value: value["sources"][0]["endpoints"].update(status="http://status.tenable.com/api/v2/status.json"),
+                 lambda value: value["sources"][0]["endpoints"].update(status="https://status.tenable.com/api/v2/summary.json"),
+                 lambda value: value["sources"][0].update(group="elsewhere"),
+                 lambda value: value["sources"][0].update(cors="yes"),
+                 lambda value: value["sources"].append(dict(value["sources"][0])),
+                 lambda value: value["page_only"].append({"id": "tenable", "name": "x", "vendor": None, "home": None, "reason": "x"}),
+                 lambda value: value.update(extra=1)]
+        for change in cases:
+            with self.assertRaises(status.StatusError):
+                status.validate_registry(broken(change))
+
+    def test_connect_src_lists_exactly_the_live_hosts(self):
+        page = (support.ROOT / "site" / "index.html").read_text(encoding="utf-8")
+        policy = re.search(r'Content-Security-Policy" content="([^"]+)"', page)[1]
+        connect = next(part.strip() for part in policy.split(";") if part.strip().startswith("connect-src"))
+        hosts = connect.split()[2:]
+        self.assertEqual(connect.split()[1], "'self'")
+        self.assertEqual(hosts, ["https://" + host for host in status.live_hosts(REGISTRY)])
+        # Only CORS-open Statuspage status endpoints are read by a browser.
+        for source in REGISTRY["sources"]:
+            url = status.live_url(source)
+            if url:
+                self.assertTrue(source["cors"])
+                self.assertEqual(urllib.parse.urlsplit(url).path, "/api/v2/status.json")
+            if not source["cors"]:
+                self.assertIsNone(url)
+
+    def test_vendor_and_library_ids_exist_and_library_ids_open_a_platform_page(self):
+        from intelligence_hub import vocab
+        loaded = vocab.load(support.ROOT)
+        library = (support.ROOT / "site" / "js" / "library.js").read_text(encoding="utf-8")
+        for item in REGISTRY["sources"] + REGISTRY["page_only"]:
+            if item.get("vendor"):
+                self.assertIn(item["vendor"], loaded.entities, item["id"])
+            if item.get("library"):
+                self.assertRegex(library, re.escape(json.dumps(item["library"])) + r': "https://teamstarwolf\.github\.io/TeamStarWolf/#/platforms/')
+
+    def test_page_only_vendors_are_never_polled(self):
+        ids = {item["id"] for item in REGISTRY["page_only"]}
+        self.assertTrue({"crowdstrike", "okta", "datadog"} <= ids)
+        self.assertFalse(ids & set(SOURCES))
+
+
+class NormalizerTest(unittest.TestCase):
+    def test_statuspage_summary_and_incidents(self):
+        snap = parse("check-point", summary="statuspage/summary.json", incidents="statuspage/incidents.json")
+        self.assertEqual(snap["indicator"], "minor")
+        self.assertEqual(snap["description"], "Minor Service Outage")
+        rows = {row["id"]: row for row in snap["incidents"]}
+        self.assertEqual({row["id"] for row in rows.values() if status.is_open(row)}, {"ctxpqx5z4nb4", "dnncywl1n491"})
+        october = rows["lng6p1wpj7l2"]
+        self.assertEqual((october["status"], october["impact"], october["url"]), ("resolved", "major", "https://status.checkpoint.com/incidents/lng6p1wpj7l2"))
+        self.assertEqual(rows["h2cvvr768kn1"]["status"], "resolved", "postmortem reads as resolved")
+        self.assertEqual(rows["h2cvvr768kn1"]["status_raw"], "postmortem")
+        self.assertEqual(rows["bqhbqv8pf8gw"]["impact"], "none")
+        for row in rows.values():
+            self.assertTrue(status.valid_incident(row, "check-point"))
+            self.assertLessEqual(len(row["summary"] or ""), status.SUMMARY_MAX)
+            self.assertNotIn("<", row["summary"] or "")
+
+    def test_statuspage_maintenance_is_not_an_incident(self):
+        source = SOURCES["check-point"]
+        self.assertIsNone(status.statuspage_incident(source, {"id": "abcd1234", "name": "Window", "impact": "maintenance", "status": "completed", "created_at": "2026-10-01T00:00:00Z"}))
+        self.assertIsNone(status.statuspage_incident(source, {"id": "abcd1234", "name": "Window", "impact": "minor", "status": "scheduled", "created_at": "2026-10-01T00:00:00Z"}))
+        self.assertIsNone(status.statuspage_incident(source, {"id": "../etc", "name": "Bad id", "impact": "minor", "status": "resolved", "created_at": "2026-10-01T00:00:00Z"}))
+
+    def test_google_incidents_json(self):
+        snap = parse("google-cloud", incidents="google/incidents.json")
+        row = snap["incidents"][0]
+        self.assertEqual(row["url"], "https://status.cloud.google.com/incidents/" + row["id"])
+        self.assertEqual(row["impact_raw"], "SERVICE_DISRUPTION severity medium")
+        self.assertEqual(row["impact"], "minor")
+        self.assertEqual(row["status"], "resolved")
+        self.assertIn("AlloyDB for PostgreSQL", row["components"])
+        self.assertNotIn("**", row["name"])
+
+    def test_aws_events_in_utf16_with_a_byte_order_mark(self):
+        raw = doc("aws/currentevents.json")
+        self.assertEqual(raw[:2], b"\xff\xfe")
+        snap = parse("aws", events="aws/currentevents.json")
+        row = snap["incidents"][0]
+        self.assertTrue(row["id"].startswith("arn:aws:health:"))
+        self.assertEqual((row["impact"], row["impact_raw"]), ("major", "AWS status 3"))
+        self.assertTrue(status.is_open(row))
+        self.assertEqual(row["url"], "https://health.aws.amazon.com/health/status")
+        self.assertEqual(snap["indicator"], "major")
+        self.assertIn("Multiple services", row["components"])
+
+    def test_azure_rss_empty_channel_and_one_item(self):
+        self.assertEqual(parse("azure", feed="azure/feed.xml"), {"indicator": "none", "description": None, "incidents": []})
+        item = doc("azure/feed.xml").replace(b"</channel>", b"<item><title>Azure Front Door: degraded connectivity</title><link>https://azure.status.microsoft/en-us/status</link>"
+                                             b"<guid isPermaLink=\"false\">AFD-1</guid><pubDate>Tue, 03 Nov 2026 10:00:00 Z</pubDate><description>&lt;p&gt;Mitigation in progress&lt;/p&gt;</description></item></channel>")
+        snap = status.parse_azure(SOURCES["azure"], {"feed": item})
+        self.assertEqual(snap["indicator"], "minor")
+        self.assertEqual(snap["incidents"][0]["summary"], "Mitigation in progress")
+        self.assertIsNone(snap["incidents"][0]["impact_raw"], "Azure states no level; the minor floor keeps impact_raw null")
+
+    def test_an_incident_link_off_the_vendor_host_falls_back_to_its_status_page(self):
+        row = status.incident(SOURCES["slack"], "1", "Name", started="2026-11-01T00:00:00+00:00", url="https://evil.example.net/phish")
+        self.assertEqual(row["url"], "https://slack-status.com/")
+        row = status.incident(SOURCES["slack"], "1", "Name", started="2026-11-01T00:00:00+00:00", url="https://slack-status.com/2026-10/58a30c7fc8aa3e80")
+        self.assertEqual(row["url"], "https://slack-status.com/2026-10/58a30c7fc8aa3e80")
+
+    def test_rss_with_a_dtd_is_refused(self):
+        with self.assertRaises(ValueError):
+            status.parse_azure(SOURCES["azure"], {"feed": b'<?xml version="1.0"?><!DOCTYPE rss [<!ENTITY x "y">]><rss><channel></channel></rss>'})
+
+    def test_zscaler_recent_incidents_only(self):
+        snap = parse("zscaler", feed="zscaler/rss-feed.xml")
+        self.assertEqual(len(snap["incidents"]), 2, "scheduled maintenance is left out")
+        open_rows = [row for row in snap["incidents"] if status.is_open(row)]
+        self.assertEqual([row["id"] for row in open_rows], ["32531"])
+        self.assertEqual(open_rows[0]["status"], "investigating")
+        self.assertEqual(open_rows[0]["components"], ["zscalerthree.net"])
+
+    def test_statuspage_rss_oracle(self):
+        snap = parse("oracle-cloud", status="statuspage-rss/status.json", feed="statuspage-rss/history.rss")
+        self.assertEqual((snap["indicator"], snap["description"]), ("none", "Normal Performance"))
+        row = snap["incidents"][0]
+        self.assertEqual(row["status"], "resolved")
+        self.assertEqual(row["started"], "2026-03-04T10:10:00+00:00", "the start comes from the update's Start Time line")
+        self.assertEqual(row["url"], "https://ocistatus.oraclecloud.com/")
+
+    def test_json_formats(self):
+        slack = parse("slack", current="slack/current.json", history="slack/history.json")
+        self.assertEqual(slack["indicator"], "none")
+        self.assertTrue(all(row["url"].startswith("https://slack-status.com/") for row in slack["incidents"]))
+        heroku = parse("heroku", current="heroku/current-status.json")
+        self.assertEqual((heroku["indicator"], heroku["incidents"]), ("none", []), "scheduled maintenance is not an incident")
+        salesforce = parse("salesforce", active="salesforce/active.json")
+        self.assertEqual(salesforce["incidents"][0]["name"], "Communities: Degradation on 5 instances")
+        self.assertEqual(salesforce["incidents"][0]["started"], "2026-10-27T19:00:00+00:00")
+        gitlab = parse("gitlab", status="statusio/status.json")
+        self.assertEqual((gitlab["indicator"], gitlab["description"]), ("none", "Operational"))
+        azdo = parse("azure-devops", health="azure-devops/health.json")
+        self.assertEqual((azdo["indicator"], azdo["description"]), ("none", "Service maintenance is in effect"))
+        better = parse("chainguard", index="betterstack/index.json")
+        self.assertEqual(better["indicator"], "none")
+        self.assertTrue(all(row["url"].startswith("https://status.chainguard.dev/incident/") for row in better["incidents"]))
+        self.assertTrue(all(row["components"] for row in better["incidents"]))
+
+    def test_ioda_events(self):
+        until = datetime(2026, 11, 4, 6, 0, tzinfo=timezone.utc)
+        rows, notice = status.parse_ioda(doc("ioda/events.json"), until)
+        self.assertEqual(len(rows), 4)
+        self.assertTrue(notice.startswith("This data is Copyright"))
+        for row in rows:
+            self.assertRegex(row["url"], r"^https://ioda\.inetintel\.cc\.gatech\.edu/country/[A-Z]{2}$")
+            self.assertEqual(row["entity_type"], "country")
+        url = status.ioda_url(SOURCES["ioda"], until)
+        self.assertEqual(collect.safe_url(url), url)
+        self.assertIn("from=" + str(int(until.timestamp()) - 86400), url)
+
+    def test_radar_annotations_from_the_documented_example(self):
+        example = {"result": {"annotations": [{"id": "550", "asnsDetails": [{"asn": "189", "name": "LUMEN"}], "description": "Cable cut", "endDate": None,
+                   "linkedUrl": "http://example.com", "locationsDetails": [{"code": "US", "name": "United States"}], "outage": {"outageCause": "CABLE_CUT", "outageType": "NATIONWIDE"},
+                   "scope": "Colima", "startDate": "2026-11-03T18:11:19.117Z"}]}, "success": True}
+        rows = status.parse_radar(json.dumps(example).encode())
+        self.assertEqual(rows[0]["locations"], ["United States"])
+        self.assertEqual(rows[0]["url"], "https://radar.cloudflare.com/outage-center", "a non-HTTPS link falls back to Radar's own page")
+
+
+class ObserveTest(unittest.TestCase):
+    def test_only_registry_urls_are_read_and_radar_waits_for_its_token(self):
+        seen = []
+
+        def fetch(url, maximum=None, fresh=False):
+            seen.append(url)
+            raise OSError("offline")
+        observations = status.observe(REGISTRY, fetch, clock=CLOCK)
+        endpoints = {url for source in REGISTRY["sources"] for url in source["endpoints"].values()}
+        for url in seen:
+            self.assertTrue(url in endpoints or urllib.parse.urlunsplit(urllib.parse.urlsplit(url)._replace(query="")) in endpoints, url)
+        self.assertFalse(any("cloudflare.com/client" in url for url in seen))
+        self.assertEqual(observations["cloudflare-radar"]["status"], "not_configured")
+        self.assertTrue(all(item["status"] == "failed" for key, item in observations.items() if key != "cloudflare-radar"))
+
+    def test_a_failed_read_keeps_the_last_good_snapshot(self):
+        old = cache()["check-point"]
+        retained = {"check-point": {"indicator": old["indicator"], "description": old["description"], "incidents": [row for row in old["incidents"] if status.is_open(row)],
+                                    "last_success": old["last_success"]}}
+        chosen = {**REGISTRY, "sources": [SOURCES["check-point"]]}
+        observations = status.observe(chosen, lambda *args, **kwargs: (_ for _ in ()).throw(OSError("HTTP 503")), previous=retained, clock="2026-11-02T00:00:00+00:00")
+        item = observations["check-point"]
+        self.assertEqual((item["status"], item["indicator"], item["last_success"]), ("failed", "minor", CLOCK))
+        self.assertEqual(len(item["incidents"]), 2)
+        files, _summary = status.build_files(REGISTRY, observations, {}, date(2026, 11, 2), "2026-11-02T00:00:00+00:00")
+        board = next(source for source in files["status/current.json"]["sources"] if source["id"] == "check-point")
+        self.assertEqual((board["status"], board["indicator"], len(board["open"])), ("failed", "minor", 2), "a failure never blanks a card")
+
+    def test_the_radar_token_is_checked_and_never_reported(self):
+        with self.assertRaises(ValueError):
+            status.authorized_fetch("https://api.cloudflare.com/client/v4/radar/annotations/outages", "short")
+        value, error = status.read_source(SOURCES["cloudflare-radar"], None, datetime(2026, 11, 1, tzinfo=timezone.utc), "x" * 40 + "\n")
+        self.assertIsNone(value)
+        self.assertNotIn("x" * 40, error)
+
+    def test_the_cache_fixture_is_current_and_valid(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("status_build_cache", support.FIXTURES / "status" / "build_cache.py")
+        build_cache = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(build_cache)
+        self.assertEqual(build_cache.build(), (support.FIXTURES / "status-cache.json").read_bytes().replace(b"\r\n", b"\n"))
+        status.validate_observations({"schema_version": 1, "sources": cache()}, REGISTRY)
+        bad = cache()
+        bad["check-point"]["incidents"][0]["url"] = "javascript:alert(1)"
+        with self.assertRaises(status.StatusError):
+            status.validate_observations({"schema_version": 1, "sources": bad}, REGISTRY)
+
+
+class FilesTest(unittest.TestCase):
+    def build(self, previous=None, end=date(2026, 11, 1)):
+        return status.build_files(REGISTRY, cache(), previous or {}, end, CLOCK)
+
+    def test_the_files_and_their_paths(self):
+        files, summary = self.build()
+        self.assertTrue({"status/current.json", "status/outages.json", "status/index.json", "status/2026-10.json"} <= set(files))
+        for path in files:
+            self.assertRegex(path, shards.SHARD_PATH)
+            self.assertLessEqual(len(shards.canonical(files[path])), shards.SHARD_MAX_BYTES)
+        current = files["status/current.json"]
+        self.assertEqual([source["id"] for source in current["sources"]], [source["id"] for source in status.tracked(REGISTRY)])
+        self.assertEqual(summary["status"], "ok")
+        index = files["status/index.json"]
+        self.assertEqual([item["path"] for item in index["months"]], sorted(path for path in files if status.MONTH_PATH.fullmatch(path)))
+        self.assertEqual(files["status/outages.json"]["radar"]["status"], "not_fetched")
+
+    def test_rows_are_deduplicated_and_a_later_update_is_folded_in(self):
+        files, _summary = self.build()
+        october = files["status/2026-10.json"]["rows"]
+        row = next(item for item in october if item["id"] == "lng6p1wpj7l2")
+        later = {**row, "status": "resolved", "updated": "2026-10-30T00:00:00+00:00", "summary": "Later text"}
+        earlier = {**row, "updated": "2026-10-01T00:00:00+00:00", "summary": "Earlier text"}
+        files, _summary = self.build({"2026-10": [later, earlier]})
+        rows = [item for item in files["status/2026-10.json"]["rows"] if item["id"] == "lng6p1wpj7l2"]
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["summary"], "Later text")
+
+    def test_thirteen_months_are_kept_and_later_incidents_wait(self):
+        old = {**cache()["check-point"]["incidents"][0], "id": "old00001", "started": "2025-10-01T00:00:00+00:00", "updated": "2025-10-01T00:00:00+00:00"}
+        kept = {**old, "id": "kept0001", "started": "2025-11-01T00:00:00+00:00", "updated": "2025-11-01T00:00:00+00:00"}
+        files, _summary = self.build({"2025-10": [old], "2025-11": [kept]})
+        self.assertNotIn("status/2025-10.json", files)
+        self.assertIn("status/2025-11.json", files)
+        self.assertEqual(len(status.months_window(date(2026, 11, 1))), 13)
+        self.assertFalse(any(row["started"][:10] > "2026-11-01" for path in files if status.MONTH_PATH.fullmatch(path) for row in files[path]["rows"]))
+
+    def test_the_board_digest_ignores_clocks(self):
+        files, _summary = self.build()
+        current = files["status/current.json"]
+        moved = json.loads(json.dumps(current))
+        moved["generated_at"] = "2026-11-02T00:00:00+00:00"
+        for source in moved["sources"]:
+            source["fetched_at"] = "2026-11-02T00:00:00+00:00"
+        self.assertEqual(status.board_digest(current), status.board_digest(moved))
+        moved["sources"][0]["indicator"] = "critical"
+        self.assertNotEqual(status.board_digest(current), status.board_digest(moved))
+        _files, summary = status.build_files(REGISTRY, cache(), {}, date(2026, 11, 1), CLOCK, status.board_digest(current))
+        self.assertFalse(summary["board_changed"])
+
+    def test_shard_rows_and_spans(self):
+        files, _summary = self.build()
+        raw, entries = shards.serialize(files)
+        by_path = {entry["path"]: entry for entry in entries}
+        self.assertEqual(by_path["status/current.json"]["rows"], len(status.tracked(REGISTRY)))
+        self.assertEqual(by_path["status/2026-10.json"]["from"][:7], "2026-10")
+        self.assertEqual(by_path["status/outages.json"]["rows"], 4)
+        for path in raw:
+            self.assertTrue(shards.headroom_line(path, len(raw[path])).startswith("data/v7/" + path + ": "))
+
+
+class ExplorerRowTest(unittest.TestCase):
+    def test_minor_and_above_become_tagged_outage_rows_with_the_vendor(self):
+        files, _summary = status.build_files(REGISTRY, cache(), {}, date(2026, 11, 1), CLOCK)
+        rows = status.explorer_rows(files, REGISTRY)
+        every = [row for path in files if status.MONTH_PATH.fullmatch(path) for row in files[path]["rows"]]
+        self.assertEqual(len(rows), sum(1 for row in every if row["impact"] in status.EXPLORER_IMPACTS))
+        for row in rows:
+            self.assertEqual((row["origin"], row["kind"], row["date_basis"]), ("service-status", "incident", status.DATE_BASIS))
+            self.assertRegex(row["id"], r"^status-[a-z0-9-]+-[A-Za-z0-9._:-]+$")
+            self.assertLessEqual(len(row["id"]), 100)
+            self.assertEqual(collect.safe_url(row["url"]), row["url"])
+            self.assertTrue(row["source_id"].startswith("status-"))
+        from intelligence_hub import tagging, vocab
+        context = tagging.build_context(vocab.load(support.ROOT), [], None, {})
+        tagged = status.tag_rows(rows, REGISTRY, context, None, {})
+        checkpoint = next(row for row in tagged if row["source_id"] == "status-check-point")
+        self.assertIn(["outage", "status-incident", "high"], checkpoint["tagging"]["event_type"])
+        self.assertIn(["vendor:check-point", "source-identity", "high"], checkpoint["tagging"]["vendor"])
+        self.assertTrue(all(["outage", "status-incident", "high"] in row["tagging"]["event_type"] for row in tagged))
+        self.assertFalse(any(item[0] == "unclassified" for row in tagged for item in row["tagging"]["event_type"]))
+
+    def test_an_unsafe_incident_id_is_hashed_into_the_row_id(self):
+        row = {**cache()["aws"]["incidents"][0]}
+        self.assertTrue(status.row_id(row).startswith("status-aws-"))
+        self.assertRegex(status.row_id(row), r"^status-aws-[a-f0-9]{16}$")
+
+
+class BuildTest(unittest.TestCase):
+    def test_the_offline_build_writes_the_status_files_and_explorer_rows(self):
+        workspace = support.BuildCopy()
+        try:
+            code, result, output = workspace.run()
+            self.assertEqual(code, 0, output[-2000:])
+            base = workspace.root / "site" / "data" / "v7"
+            index = json.loads((base / "index.json").read_text(encoding="utf-8"))
+            listed = {entry["path"]: entry for entry in index["shards"]}
+            for path in ("status/current.json", "status/outages.json", "status/index.json", "status/2026-10.json"):
+                self.assertIn(path, listed)
+                raw = (base / path).read_bytes()
+                self.assertEqual((len(raw), shards.sha256(raw)), (listed[path]["bytes"], listed[path]["sha256"]))
+            self.assertGreater(index["counts"]["status_rows"], 0)
+            october = json.loads((base / "live" / "2026-10.json").read_text(encoding="utf-8"))["rows"]
+            incident = [row for row in october if row["origin"] == "service-status"]
+            self.assertTrue(incident)
+            self.assertTrue(any(["vendor:check-point", "source-identity", "high"] in row["tagging"].get("vendor", []) for row in incident))
+            self.assertEqual(result["status"]["status"], "ok")
+            self.assertIn("data/v7/status/current.json: ", output)
+            # The v6 feed is unchanged by service health: its rows stay publisher, KEV and curated.
+            self.assertFalse(any(row["origin"] == "service-status" for row in workspace.feed()["articles"]))
+        finally:
+            workspace.close()
+
+    def test_a_broken_registry_never_blocks_the_feed(self):
+        workspace = support.BuildCopy()
+        try:
+            (workspace.root / "config" / "status.json").write_text("{}", encoding="utf-8")
+            code, result, output = workspace.run()
+            self.assertEqual(code, 0, output[-2000:])
+            self.assertEqual(result["status"]["status"], "unavailable")
+            index = json.loads((workspace.root / "site" / "data" / "v7" / "index.json").read_text(encoding="utf-8"))
+            self.assertFalse(any(entry["path"].startswith("status/") for entry in index["shards"]))
+        finally:
+            workspace.close()
+
+    def test_clock_only_changes_never_republish(self):
+        self.assertEqual(status.QUIET, ("status/current.json", "status/index.json"))
+        source = (support.ROOT / "intelligence_hub" / "collect.py").read_text(encoding="utf-8")
+        self.assertIn('quiet = {"sources.json", *status_quiet}', source)
+        self.assertIn('service_health["summary"].get("board_changed") is True', source)
+
+
+class PageTest(unittest.TestCase):
+    def test_the_tab_is_last_and_the_explorer_stays_first(self):
+        page = (support.ROOT / "site" / "index.html").read_text(encoding="utf-8")
+        tabs = re.findall(r'<a href="#/([a-z-]+)" data-view="[a-z-]+">', page[page.index('<nav class="tabs"'):page.index("</nav>", page.index('<nav class="tabs"'))])
+        self.assertEqual(tabs[0], "explore")
+        self.assertEqual(tabs[-1], "status")
+        self.assertIn("js/views/status.js", json.loads((support.ROOT / "site" / "files.json").read_text(encoding="utf-8"))["files"])
+
+    def test_the_method_view_and_docs_carry_the_privacy_sentence(self):
+        method = (support.ROOT / "site" / "js" / "views" / "method.js").read_text(encoding="utf-8")
+        sentence = re.search(r'export const PRIVACY_SENTENCE = "([^"]+)";', method)[1]
+        self.assertIn("requests from your browser to the listed vendor status hosts", sentence)
+        self.assertIn("Pause live updates stops them", sentence)
+        for name in ("docs/METHOD.md", "docs/OPERATIONS.md"):
+            self.assertIn(sentence, (support.ROOT / name).read_text(encoding="utf-8").replace("\n", " "), name)
+
+
+if __name__ == "__main__":
+    unittest.main()

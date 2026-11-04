@@ -37,6 +37,10 @@ its method and confidence. The exports carry the same fields.
 - A region tag carries a role: `publisher` (the source's country) or `mentioned` (a country named
   in the headline). A mention does not say whether a place is a target, an origin or neither.
 - `analysis` and `unclassified` event types exist so that no row is forced into a label.
+- A service-health incident row carries the `outage` event type by method `status-incident`
+  (high), because the vendor filed it as an incident on its own status page, and its vendor by
+  `source-identity`. Its impact is the vendor's level; [SOURCES.md](SOURCES.md#service-health-sources)
+  says how each source's level is read.
 
 ## Dates and scores
 
@@ -109,6 +113,7 @@ vocabulary has no CVE, CAPEC or CWE entries yet, so those library links are not 
 | CWE weaknesses | MITRE CWE, through the library's pinned CWE list | The CWE notice below. |
 | CAPEC attack patterns | MITRE CAPEC, through the library's pinned CAPEC list | The CAPEC notice below. |
 | Curated summaries | Written for the Hub | Original paraphrases, each backed by a dated primary source that the row links. |
+| Service-health entries | The vendors' official status pages and feeds, IODA from Georgia Tech, and Cloudflare Radar once it is configured | Incident names, states, impact levels, affected components, times, a short excerpt of the vendor's latest update and the link. The status pages belong to their vendors, and IODA rows repeat IODA's own copyright line. |
 | The Hub's code | This repository | [MIT License](../LICENSE). |
 
 The MITRE designations, as the TeamStarWolf library records them in its
@@ -119,3 +124,11 @@ The MITRE designations, as the TeamStarWolf library records them in its
 > © The MITRE Corporation. Includes material from the Common Weakness Enumeration (CWE™), used under the CWE Terms of Use. https://cwe.mitre.org/
 
 > © The MITRE Corporation. Includes material from the Common Attack Pattern Enumeration and Classification (CAPEC™), used under the CAPEC Terms of Use. https://capec.mitre.org/
+
+## Service health and your browser
+
+The Service health view's live board makes requests from your browser to the listed vendor status hosts when the view opens and every five minutes while it stays open and the tab is visible. Pause live updates stops them, and so does leaving the view.
+
+Each live read asks for one small `status.json`, without cookies or credentials and with no
+referrer, and only the hosts the snapshot lists can be read: the page's content security policy
+names the same hosts. Every other view reads this site only.

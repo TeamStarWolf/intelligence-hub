@@ -169,3 +169,140 @@ Keep public curation in `config/history.json`. Research receipts, baseline prese
 Summaries are short original paraphrases. Full publisher articles, markup, private account data and local source locators are not republished. Primary-source status does not make a publisher infallible or establish the provenance or security of software it distributes.
 
 Treat all article and feed text as untrusted data. Render text and validated HTTPS links, with no publisher HTML, embedded scripts or active instructions. Reading a story authorizes no network probe, patch, credential change, model call or publication of private account data. Personal X content and a supported Grok search integration require their own explicit access and eligibility; a public source link does not connect either account.
+
+## Service health sources
+
+The **Service health** view (`#/status`) and the incident rows in the Explorer come from
+official, free, machine-readable status sources: each vendor's own status page API or feed, the
+cloud providers' public health feeds, and two internet-measurement services. The owner approved
+this source class on 4 November 2026 ("Go ahead with the Hub service-health package"). Every
+endpoint below answered on that date; the registry is [config/status.json](../config/status.json)
+and the collector is `intelligence_hub/status.py`.
+
+Not used, by design: complaint-count sites (their counts are reports from users, not the
+vendor's statement, and their terms forbid automated reads), any scraped HTML page, and any
+signed-in tenant API such as Microsoft Graph service health or the AWS Health API. A status
+entry describes the vendor's service as the vendor states it. It says nothing about one
+customer's tenant, region or account.
+
+There are **46 tracked status sources** and **2 internet outage signals** (IODA, and
+Cloudflare Radar once the owner adds its token). **CORS** says whether the endpoint answered a
+browser origin with `Access-Control-Allow-Origin` on 4 November 2026. The 34 sources with a
+Statuspage-format `status.json` that answered yes are the ones the live board reads from the
+visitor's browser; `site/index.html` lists exactly their hosts in `connect-src`, and a test holds
+the two lists equal.
+
+| Source | Id | Group | Class (format) | CORS | Endpoints the collector reads |
+| --- | --- | --- | --- | --- | --- |
+| Tenable | `tenable` | Security platforms | statuspage (statuspage) | yes | `https://status.tenable.com/api/v2/incidents.json`<br>`https://status.tenable.com/api/v2/summary.json`<br>live: `https://status.tenable.com/api/v2/status.json` |
+| Snyk | `snyk` | Security platforms | statuspage (statuspage) | yes | `https://status.snyk.io/api/v2/incidents.json`<br>`https://status.snyk.io/api/v2/summary.json`<br>live: `https://status.snyk.io/api/v2/status.json` |
+| Cisco Duo | `duo` | Security platforms | statuspage (statuspage) | yes | `https://status.duo.com/api/v2/incidents.json`<br>`https://status.duo.com/api/v2/summary.json`<br>live: `https://status.duo.com/api/v2/status.json` |
+| Wiz | `wiz` | Security platforms | statuspage (statuspage) | yes | `https://status.wiz.io/api/v2/incidents.json`<br>`https://status.wiz.io/api/v2/summary.json`<br>live: `https://status.wiz.io/api/v2/status.json` |
+| Check Point | `check-point` | Security platforms | statuspage (statuspage) | yes | `https://status.checkpoint.com/api/v2/incidents.json`<br>`https://status.checkpoint.com/api/v2/summary.json`<br>live: `https://status.checkpoint.com/api/v2/status.json` |
+| Akamai | `akamai` | Security platforms | statuspage (statuspage) | yes | `https://www.akamaistatus.com/api/v2/incidents.json`<br>`https://www.akamaistatus.com/api/v2/summary.json`<br>live: `https://www.akamaistatus.com/api/v2/status.json` |
+| Cloudflare | `cloudflare` | Security platforms | statuspage (statuspage) | yes | `https://www.cloudflarestatus.com/api/v2/incidents.json`<br>`https://www.cloudflarestatus.com/api/v2/summary.json`<br>live: `https://www.cloudflarestatus.com/api/v2/status.json` |
+| Palo Alto Networks | `palo-alto-networks` | Security platforms | statuspage (statuspage) | yes | `https://status.paloaltonetworks.com/api/v2/incidents.json`<br>`https://status.paloaltonetworks.com/api/v2/summary.json`<br>live: `https://status.paloaltonetworks.com/api/v2/status.json` |
+| SentinelOne | `sentinelone` | Security platforms | statuspage (statuspage) | yes | `https://status.sentinelone.com/api/v2/incidents.json`<br>`https://status.sentinelone.com/api/v2/summary.json`<br>live: `https://status.sentinelone.com/api/v2/status.json` |
+| Rapid7 | `rapid7` | Security platforms | statuspage (statuspage) | yes | `https://status.rapid7.com/api/v2/incidents.json`<br>`https://status.rapid7.com/api/v2/summary.json`<br>live: `https://status.rapid7.com/api/v2/status.json` |
+| Qualys | `qualys` | Security platforms | statuspage (statuspage) | yes | `https://status.qualys.com/api/v2/incidents.json`<br>`https://status.qualys.com/api/v2/summary.json`<br>live: `https://status.qualys.com/api/v2/status.json` |
+| Fortinet FortiCloud | `forticloud` | Security platforms | statuspage (statuspage) | yes | `https://status.forticloud.com/api/v2/incidents.json`<br>`https://status.forticloud.com/api/v2/summary.json`<br>live: `https://status.forticloud.com/api/v2/status.json` |
+| 1Password | `1password` | Security platforms | statuspage (statuspage) | yes | `https://status.1password.com/api/v2/incidents.json`<br>`https://status.1password.com/api/v2/summary.json`<br>live: `https://status.1password.com/api/v2/status.json` |
+| Zscaler | `zscaler` | Security platforms | rss (zscaler) | no | `https://trust.zscaler.com/rss-feed` |
+| Chainguard | `chainguard` | Security platforms | json (betterstack) | yes | `https://status.chainguard.dev/index.json` |
+| Zafran | `zafran` | Security platforms | json (betterstack) | yes | `https://us.zafranstatus.com/index.json` |
+| Amazon Web Services | `aws` | Cloud and SaaS | json (aws) | no | `https://health.aws.amazon.com/public/currentevents` |
+| Microsoft Azure | `azure` | Cloud and SaaS | rss (azure) | no | `https://azure.status.microsoft/en-us/status/feed/` |
+| Google Cloud | `google-cloud` | Cloud and SaaS | json (google) | yes | `https://status.cloud.google.com/incidents.json` |
+| Google Workspace | `google-workspace` | Cloud and SaaS | json (google) | yes | `https://www.google.com/appsstatus/dashboard/incidents.json` |
+| Oracle Cloud Infrastructure | `oracle-cloud` | Cloud and SaaS | rss (statuspage-rss) | yes | `https://ocistatus.oraclecloud.com/history.rss`<br>`https://ocistatus.oraclecloud.com/api/v2/status.json` |
+| OpenAI | `openai` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.openai.com/api/v2/incidents.json`<br>`https://status.openai.com/api/v2/summary.json`<br>live: `https://status.openai.com/api/v2/status.json` |
+| Anthropic (Claude) | `anthropic` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.claude.com/api/v2/incidents.json`<br>`https://status.claude.com/api/v2/summary.json`<br>live: `https://status.claude.com/api/v2/status.json` |
+| Atlassian | `atlassian` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.atlassian.com/api/v2/incidents.json`<br>`https://status.atlassian.com/api/v2/summary.json`<br>live: `https://status.atlassian.com/api/v2/status.json` |
+| Slack | `slack` | Cloud and SaaS | json (slack) | yes | `https://slack-status.com/api/v2.0.0/current`<br>`https://slack-status.com/api/v2.0.0/history` |
+| Salesforce | `salesforce` | Cloud and SaaS | json (salesforce) | yes | `https://api.status.salesforce.com/v1/incidents/active` |
+| Zoom | `zoom` | Cloud and SaaS | statuspage (statuspage) | yes | `https://www.zoomstatus.com/api/v2/incidents.json`<br>`https://www.zoomstatus.com/api/v2/summary.json`<br>live: `https://www.zoomstatus.com/api/v2/status.json` |
+| Twilio | `twilio` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.twilio.com/api/v2/incidents.json`<br>`https://status.twilio.com/api/v2/summary.json`<br>live: `https://status.twilio.com/api/v2/status.json` |
+| Snowflake | `snowflake` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.snowflake.com/api/v2/incidents.json`<br>`https://status.snowflake.com/api/v2/summary.json`<br>live: `https://status.snowflake.com/api/v2/status.json` |
+| MongoDB Cloud | `mongodb` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.mongodb.com/api/v2/incidents.json`<br>`https://status.mongodb.com/api/v2/summary.json`<br>live: `https://status.mongodb.com/api/v2/status.json` |
+| Elastic Cloud | `elastic` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.elastic.co/api/v2/incidents.json`<br>`https://status.elastic.co/api/v2/summary.json`<br>live: `https://status.elastic.co/api/v2/status.json` |
+| Red Hat | `red-hat` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.redhat.com/api/v2/incidents.json`<br>`https://status.redhat.com/api/v2/summary.json`<br>live: `https://status.redhat.com/api/v2/status.json` |
+| Dropbox | `dropbox` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.dropbox.com/api/v2/incidents.json`<br>`https://status.dropbox.com/api/v2/summary.json`<br>live: `https://status.dropbox.com/api/v2/status.json` |
+| Jamf | `jamf` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.jamf.com/api/v2/incidents.json`<br>`https://status.jamf.com/api/v2/summary.json`<br>live: `https://status.jamf.com/api/v2/status.json` |
+| DigitalOcean | `digitalocean` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.digitalocean.com/api/v2/incidents.json`<br>`https://status.digitalocean.com/api/v2/summary.json`<br>live: `https://status.digitalocean.com/api/v2/status.json` |
+| Discord | `discord` | Cloud and SaaS | statuspage (statuspage) | yes | `https://discordstatus.com/api/v2/incidents.json`<br>`https://discordstatus.com/api/v2/summary.json`<br>live: `https://discordstatus.com/api/v2/status.json` |
+| GitHub | `github` | Developer services | statuspage (statuspage) | yes | `https://www.githubstatus.com/api/v2/incidents.json`<br>`https://www.githubstatus.com/api/v2/summary.json`<br>live: `https://www.githubstatus.com/api/v2/status.json` |
+| GitLab | `gitlab` | Developer services | json (statusio) | yes | `https://status.gitlab.com/1.0/status/5b36dc6502d06804c08349f7` |
+| Azure DevOps | `azure-devops` | Developer services | json (azure-devops) | yes | `https://status.dev.azure.com/_apis/status/health?api-version=7.1-preview.1` |
+| npm | `npm` | Developer services | statuspage (statuspage) | yes | `https://status.npmjs.org/api/v2/incidents.json`<br>`https://status.npmjs.org/api/v2/summary.json`<br>live: `https://status.npmjs.org/api/v2/status.json` |
+| Python infrastructure (PyPI) | `python` | Developer services | statuspage (statuspage) | yes | `https://status.python.org/api/v2/incidents.json`<br>`https://status.python.org/api/v2/summary.json`<br>live: `https://status.python.org/api/v2/status.json` |
+| Docker | `docker` | Developer services | statuspage (statuspage) | yes | `https://www.dockerstatus.com/api/v2/incidents.json`<br>`https://www.dockerstatus.com/api/v2/summary.json`<br>live: `https://www.dockerstatus.com/api/v2/status.json` |
+| HashiCorp | `hashicorp` | Developer services | statuspage (statuspage) | yes | `https://status.hashicorp.com/api/v2/incidents.json`<br>`https://status.hashicorp.com/api/v2/summary.json`<br>live: `https://status.hashicorp.com/api/v2/status.json` |
+| Heroku | `heroku` | Developer services | json (heroku) | yes | `https://status.heroku.com/api/v4/current-status` |
+| Netlify | `netlify` | Developer services | statuspage (statuspage) | yes | `https://www.netlifystatus.com/api/v2/incidents.json`<br>`https://www.netlifystatus.com/api/v2/summary.json`<br>live: `https://www.netlifystatus.com/api/v2/status.json` |
+| Vercel | `vercel` | Developer services | statuspage (statuspage) | yes | `https://www.vercel-status.com/api/v2/incidents.json`<br>`https://www.vercel-status.com/api/v2/summary.json`<br>live: `https://www.vercel-status.com/api/v2/status.json` |
+| IODA (Georgia Tech) | `ioda` | Internet outage signals | ioda (ioda) | yes | `https://api.ioda.inetintel.cc.gatech.edu/v2/outages/events` |
+| Cloudflare Radar outage annotations | `cloudflare-radar` | Internet outage signals | radar (radar) | no | `https://api.cloudflare.com/client/v4/radar/annotations/outages` |
+
+### Formats
+
+- **statuspage**: Atlassian Statuspage's documented API v2 (also served by incident.io pages in
+  the same shape). The collector reads `summary.json` (the overall indicator, its description
+  and the unresolved incidents) and `incidents.json`, which returns the **50 most recent
+  incidents**; a `page` parameter is ignored (checked 4 November 2026). Scheduled maintenance is
+  not an incident. `postmortem` reads as resolved.
+- **google**: Google Cloud and Google Workspace publish the same `incidents.json`. Impact is read
+  from `status_impact`: `SERVICE_OUTAGE` is major, `SERVICE_DISRUPTION` minor and
+  `SERVICE_INFORMATION` none; the severity is kept beside it.
+- **aws**: `health.aws.amazon.com/public/currentevents` is JSON in UTF-16 with a byte-order mark;
+  every event it lists is current. AWS gives a numeric status: 1 is read as no impact, 2 as minor
+  and 3 as major, and the raw number is kept.
+- **slack**, **heroku**, **salesforce**, **statusio** (GitLab), **azure-devops** and
+  **betterstack** (Chainguard, Zafran): each provider's own JSON. Salesforce gives no incident
+  title, so the name is the affected services and the incident type.
+- **azure**: the Azure status RSS feed, which lists current incidents only; an empty channel
+  means none is posted. **zscaler**: the trust portal RSS feed, of which only the *Recent
+  incident* category is read. **statuspage-rss** (Oracle Cloud): a Statuspage-format
+  `status.json` for the indicator and an incident-history RSS feed.
+- **ioda**: IODA's `outages/events` API for countries, one request per run covering the 24 hours
+  before the read. IODA's API documentation recommends the events API, which removes some noise
+  from raw alerts, for most uses. Each response carries IODA's copyright line, which the site
+  repeats beside every IODA row; IODA publishes no other usage terms that this project found.
+- **radar**: Cloudflare Radar's outage annotations (`/radar/annotations/outages`, last 7 days),
+  which need a free API token. Until the owner adds it as the repository secret
+  `CLOUDFLARE_RADAR_TOKEN`, no Radar request is made and the view says so.
+
+### Normalized incident rows
+
+Every incident becomes one row: source, vendor id, the vendor's incident id, name, `status`
+(`investigating`, `identified`, `monitoring`, `resolved`, or `other` with the vendor's own word
+in `status_raw`), `impact` (`none`, `minor`, `major`, `critical`, or null when the source states
+none) with the vendor's own level in `impact_raw`, up to 12 affected components, the start,
+update and resolution times in UTC, the incident's link, and at most 280 characters of the
+vendor's latest update as plain text. A source that files an incident without a level (Azure,
+Zscaler without an event type, Oracle Cloud, Better Stack pages) is shown as **minor**, the
+lowest level that is still an incident, and its `impact_raw` stays null.
+
+Rows are kept by start month for the current month and the 12 before it, deduplicated on source
+and incident id; a later update replaces the row it updates. History therefore grows run by run
+from what each feed still lists: a busy Statuspage vendor's history starts where its 50 most
+recent incidents start. `data/v7/status/index.json` gives each source's first retained incident.
+
+### Vendors with no machine-readable status source
+
+These are linked from the view and never polled.
+
+| Vendor | Status page | Why it is not read |
+| --- | --- | --- |
+| CrowdStrike | none found | No public status page found: status.crowdstrike.com did not resolve on 2026-11-04. Falcon service notices are in the signed-in support portal. |
+| Tanium | none found | No public status page found: status.tanium.com did not resolve on 2026-11-04. |
+| ServiceNow | none found | No public status page found: status.servicenow.com did not resolve on 2026-11-04. Instance status is in the signed-in support portal. |
+| Proofpoint | none found | No public status page found at status.proofpoint.com or proofpoint.status.io on 2026-11-04. |
+| Okta | <https://status.okta.com/> | HTML page only: its status API answered HTTP 401 on 2026-11-04 and no feed was found. |
+| Datadog | <https://status.datadoghq.com/> | Its status API answered HTTP 403 to automated reads on 2026-11-04. |
+| PagerDuty | <https://status.pagerduty.com/> | A custom HTML page: no feed or JSON endpoint answered on 2026-11-04. |
+| Splunk | <https://www.splunk.com/en_us/products/system-status.html> | HTML page only on 2026-11-04. |
+| CyberArk | <https://status.cyberark.com/> | HTML page only: no feed answered on 2026-11-04. |
+| Invicti | <https://status.invicti.com/> | HTML page only: no feed or JSON endpoint answered on 2026-11-04. |
+| Cisco cloud services | <https://status.cisco.com/> | A script-rendered page: no documented feed was found on 2026-11-04. |
+| Webex | <https://status.webex.com/> | A script-rendered page: no documented feed was found on 2026-11-04. |
+| Microsoft 365 | <https://status.cloud.microsoft/> | HTML page only. Tenant service health needs a signed-in Microsoft Graph call, which the Hub does not make. |

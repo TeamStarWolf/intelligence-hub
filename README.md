@@ -29,6 +29,7 @@ history rows, back to 1998. Everything else is a tab, and every tab is also list
 | Sources | The run record, the history coverage matrix by source and year, and the source ledger. |
 | Method | The evidence rules, confidence levels, coverage statuses and licence notices. |
 | About | What the Hub is and what it covers. |
+| Service health | The vendors' own status pages and cloud health feeds by group, open incidents, internet outage signals from IODA, and the last 30 days of incidents. |
 
 Every view, filter, page and open entry has its own address; [docs/URLS.md](docs/URLS.md) is the
 route contract that the TeamStarWolf library's links follow.
@@ -39,11 +40,12 @@ written for this project. Full article bodies are not copied.
 ## How it works
 
 A Python collector (standard library only, in `intelligence_hub/`) runs in GitHub Actions. It
-reads 62 configured RSS and Atom feeds and the CISA KEV catalog under strict size, time and format
-bounds, enriches mentioned CVEs from the CVE Program's records, tags every row from controlled
-vocabularies, merges the committed history files, and writes static files that the page in `site/`
-reads. Your browser reads only those files, from this site; it never contacts publishers or the
-GitHub API.
+reads 62 configured RSS and Atom feeds, the CISA KEV catalog and 46 official status sources plus
+IODA's internet outage signals under strict size, time and format bounds, enriches mentioned CVEs
+from the CVE Program's records, tags every row from controlled vocabularies, merges the committed
+history files, and writes static files that the page in `site/` reads. Your browser reads those
+files from this site; it never contacts publishers or the GitHub API. The one exception is the
+Service health view's live board, described below.
 
 - `data/v7/index.json` lists every data file with its size and sha256, the content date and the
   collector's run record. Views read only the files they need: the Explorer reads the live months,
@@ -54,6 +56,10 @@ GitHub API.
 - Tags come from `config/vocab/` and a pinned copy of the library's shared vocabulary
   ([TAGGING.md](docs/TAGGING.md)). Links to the TeamStarWolf library are generated from that
   vocabulary into `site/js/library.js`; the page builds no library link by hand.
+- Service health reads each vendor's own status page API or feed, the cloud providers' public
+  health feeds and IODA's outage events ([SOURCES.md](docs/SOURCES.md#service-health-sources)).
+  Incidents of minor impact and above also appear in the Explorer as outage entries with their
+  vendor. The Service health view's live board makes requests from your browser to the listed vendor status hosts when the view opens and every five minutes while it stays open and the tab is visible. Pause live updates stops them, and so does leaving the view.
 - Report editions in `reports/` come from a separate desktop compiler that the owner runs; the
   collector only lists them. If the report catalog is missing, too large or invalid, the data still
   publishes and the Reports tab says the catalog is unavailable.
@@ -124,6 +130,10 @@ themes, the 12 px type floor and an em-dash lint. New code needs tests.
   `data/v7/index.json` lists enter Pages. A publication must fit 192 MiB of input, at most 4,000
   files, at most 4 MiB for each v7 file and a 48,000,000-byte compressed-size estimate, and the
   artifact is kept for one day.
+- **Service health is the vendor's word.** A status entry is what the vendor states about its
+  own service, and an IODA row is a measured signal, not a confirmed cause. Neither says anything
+  about your tenant, region or account, and the collector's snapshot is only as fresh as its last
+  run; the live board refreshes the CORS-open Statuspage cards from your browser.
 - **Read-only.** The site has no accounts, trackers or paid API fallback.
 
 ## Licences and notices

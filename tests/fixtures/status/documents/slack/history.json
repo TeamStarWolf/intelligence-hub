@@ -1,0 +1,68 @@
+[
+ {
+  "id": 1582,
+  "title": "Slack Real-Time Connection Disruption",
+  "type": "incident",
+  "status": "resolved",
+  "url": "https://slack-status.com/2026-10/58a30c7fc8aa3e80",
+  "date_created": "2026-10-22T11:50:50-07:00",
+  "date_updated": "2026-10-22T11:50:50-07:00",
+  "notes": [
+   {
+    "body": "<p>Some Slack customers experienced disrupted real-time connections, delayed message delivery, and errors loading conversation history on October 22, 2026, starting at 16:08 UTC. A large number of active connections closed at once and then reconnected, which briefly strained the services customers rely on to send and read messages. By 16:26 UTC, connections had reconnected and service had returned",
+    "date_created": "2026-10-22T11:50:50-07:00"
+   }
+  ],
+  "services": [
+   "Messaging"
+  ]
+ },
+ {
+  "id": 1581,
+  "title": "Single Sign On errors",
+  "type": "incident",
+  "status": "resolved",
+  "url": "https://slack-status.com/2026-10/6aeafd6248f59a8a",
+  "date_created": "2026-10-13T17:23:07-07:00",
+  "date_updated": "2026-10-13T17:28:54-07:00",
+  "notes": [
+   {
+    "body": "<p>Some users may have experienced trouble logging into Slack. We identified the trigger and resolved the issue and restored access. We’re sorry for the disruption.</p>",
+    "date_created": "2026-10-13T17:23:07-07:00"
+   }
+  ],
+  "services": [
+   "Login/SSO"
+  ]
+ },
+ {
+  "id": 1580,
+  "title": "Slack for iOS closing unexpectedly when opening channels",
+  "type": "incident",
+  "status": "resolved",
+  "url": "https://slack-status.com/2026-10/a0cfb0208a1d2032",
+  "date_created": "2026-10-09T08:35:31-07:00",
+  "date_updated": "2026-10-12T10:03:32-07:00",
+  "notes": [
+   {
+    "body": "<p>Users may experience iOS closing unexpectedly when opening channels.&nbsp; We're actively looking in to this, and we'll share another update as soon as we have more information. We appreciate your patience in the meantime.</p>",
+    "date_created": "2026-10-09T08:35:31-07:00"
+   },
+   {
+    "body": "<p>We've developed a fix for the iOS app issue and are working to validate it before releasing it to customers.&nbsp;</p><p>We'll share another update as soon as we have more information.</p><p><br></p>",
+    "date_created": "2026-10-09T09:20:04-07:00"
+   },
+   {
+    "body": "<p>An updated version of the Slack iOS app that fixes the crash was approved and began rolling out gradually. Customers who download the updated version from the app store can now open channels without the app closing unexpectedly. We'll provide an update once additional information becomes available.</p>",
+    "date_created": "2026-10-09T16:58:33-07:00"
+   },
+   {
+    "body": "<p>We've rolled out an updated version of the Slack iOS app to all impacted customers. Channels now open without the app closing unexpectedly. Users who are still experiencing this issue should update the Slack IOS app from the app store Store to resolve it.</p><p><br></p><p>We apologize for the inconvenience and thank you for your patience.</p>",
+    "date_created": "2026-10-12T10:03:31-07:00"
+   }
+  ],
+  "services": [
+   "Connectivity"
+  ]
+ }
+]

@@ -305,7 +305,10 @@ class BuildTest(unittest.TestCase):
     def test_workflow_typed_check_uses_the_shard_pattern(self):
         workflow = (support.ROOT / ".github" / "workflows" / "publish.yml").read_text(encoding="utf-8")
         self.assertIn("- cron: '7 */2 * * *'", workflow)
-        pieces = re.findall(r"r'([^']*)'", workflow[workflow.index("shard = re.compile("):])[:2]
+        # Every r'...' piece of the re.compile( call, up to the line that closes it.
+        start = workflow.index("shard = re.compile(")
+        call = workflow[start:workflow.index("')\n", start) + 2]
+        pieces = re.findall(r"r'([^']*)'", call)
         self.assertEqual("".join(pieces), shards.SHARD_PATH.pattern)
 
     def test_the_page_validator_uses_the_shard_pattern(self):
@@ -745,7 +748,10 @@ class SiteTest(unittest.TestCase):
     def test_csp_allows_only_this_site(self):
         page = (support.ROOT / "site" / "index.html").read_text(encoding="utf-8")
         policy = re.search(r'Content-Security-Policy" content="([^"]+)"', page)[1]
-        self.assertIn("connect-src 'self';", policy)
+        # This site, plus exactly the vendor status hosts the Service health live board reads.
+        from intelligence_hub import status
+        hosts = status.live_hosts(status.load_registry(support.ROOT))
+        self.assertIn("connect-src 'self' " + " ".join("https://" + host for host in hosts) + ";", policy)
         for name in support.site_files():
             self.assertNotIn("api.github.com", (support.ROOT / "site" / name).read_text(encoding="utf-8"))
 

@@ -101,8 +101,9 @@ SHARD_PATH = re.compile(r"(?:sources|coverage|reports|cve-index|recent)\.json"
                         r"|live/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json"
                         r"|history/(?:[0-9]{4}(?:-(?:h[12]|q[1-4]|0[1-9]|1[0-2]))?|undated)\.json"
                         r"|kev/[0-9]{4}\.json"
-                        r"|cve/[0-9]{4}/[0-9]{1,5}k\.json")
-SHARD_DIRECTORY = re.compile(r"live|history|kev|cve|cve/[0-9]{4}|exports")
+                        r"|cve/[0-9]{4}/[0-9]{1,5}k\.json"
+                        r"|status/(?:current|outages|index|[0-9]{4}-(?:0[1-9]|1[0-2]))\.json")
+SHARD_DIRECTORY = re.compile(r"live|history|kev|cve|cve/[0-9]{4}|exports|status")
 # The page files are the ones site/files.json lists (intelligence_hub/site.py), plus that list.
 V6_FILES = ("data/feed.json", "data/briefs.json")
 INDEX_KEYS = {"schema_version", "generated_at", "content_date", "content_revision", "feed_content_revision",
@@ -377,6 +378,9 @@ def _span(value):
         days = sorted(day.isoformat() for day in (row_day(row) for row in value["rows"]) if day)
     elif value["kind"] == "kev":
         days = [row["date_added"] for row in value["rows"]]
+    elif value["kind"] == "status-month":
+        # Service-health incidents (intelligence_hub/status.py) by start day.
+        days = sorted(row["started"][:10] for row in value["rows"])
     else:
         return None, None
     return (days[0], days[-1]) if days else (None, None)
@@ -387,6 +391,12 @@ def _rows(value):
         return len(value["briefs"])
     if value["kind"] == "reports":
         return len(value["catalog"]["reports"]) if value["status"] == "available" else 0
+    if value["kind"] == "status-current":
+        return len(value["sources"])
+    if value["kind"] == "status-index":
+        return len(value["months"])
+    if value["kind"] == "status-outages":
+        return sum(len(block["rows"]) for block in value.values() if isinstance(block, dict) and isinstance(block.get("rows"), list))
     return len(value["rows"])
 
 
