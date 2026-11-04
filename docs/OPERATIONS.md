@@ -16,8 +16,8 @@ address, so Back and Forward work and a copied link reopens the same view
 Every other view is a tab in the strip under the brand bar and an entry in the
 **Panels** sidebar, which starts closed: Today, Advisories, Known exploited,
 Research, News, CVEs, History, Vendors, Tags, Actors and malware, Reports, Data,
-Sources, Method and About. Nothing from those views is drawn above the Explorer
-on the default route.
+Sources, Method, About and Service health. Nothing from those views is drawn above
+the Explorer on the default route.
 
 - **CVEs** lists every CVE an entry mentions. A CVE opens its saved brief in a
   dialog with a link to its CVE.org record. One CVE can have several publisher
@@ -31,6 +31,16 @@ on the default route.
 - **Reports** lists every report edition and the collector's run record;
   **Sources** adds the coverage matrix and the source ledger of recorded
   collection outcomes; **Method** holds the evidence rules and the licence table.
+- **Service health** (`#/status`, or `#/status?source=<id>` for one source) shows
+  each tracked vendor status page and cloud health feed as a card, grouped as
+  security platforms, cloud and SaaS, and developer services; then the open
+  incidents, IODA's internet outage signals and the incidents of the last 30 days,
+  with links to the month files. A card says where its reading came from: **Live**
+  with the time this browser read it, or **Snapshot** with the collector's read
+  time. A failed live read falls back to the snapshot and never blanks a card.
+  Vendors with no machine-readable status page are linked under the board and never
+  read. The Service health view's live board makes requests from your browser to the listed vendor status hosts when the view opens and every five minutes while it stays open and the tab is visible. Pause live updates stops them, and so does leaving the view. Incidents of minor impact and above are also
+  Explorer entries of kind incident, tagged with the outage event and their vendor.
 
 Unknown scores remain unknown, and different CVSS versions are not normalized.
 An open dialog keeps the data it was opened with; close and reopen it to read a
@@ -38,7 +48,8 @@ newer snapshot.
 
 ## Interpret evidence before action
 
-The configured inputs are **62 RSS/Atom publisher feeds**, CISA KEV and **74 curated
+The configured inputs are the service-health sources in `config/status.json`
+([SOURCES.md](SOURCES.md#service-health-sources)), **62 RSS/Atom publisher feeds**, CISA KEV and **74 curated
 primary publications**. A configured feed is not necessarily healthy. Recent RSS,
 bounded retained items and manual curation do not form a complete historical archive.
 See [feed evidence](FEEDS.md) and [history coverage](SOURCES.md).
@@ -127,7 +138,11 @@ The collector records a typed Boolean `changed` decision in
 v7 paths whose sha256 differs from the previous index, and the paths it no longer
 lists. Article, guidance, source-outcome, intake-count/reason and layout changes
 can trigger publication, and so can any changed or removed shard except
-`sources.json`, which carries every run's attempt clocks. Publisher-feed response
+`sources.json`, which carries every run's attempt clocks, and `status/current.json`
+and `status/index.json`, which carry the service-health fetch clocks. The board
+republishes when its digest without clocks (`board_sha256` in `status/index.json`)
+changes: an indicator, an open incident, a vendor description, a failure or the
+source list. A changed incident publishes through its month file. Publisher-feed response
 hashes and collection attempt clocks alone do not; changes to retained CVE
 evidence, including its response hash, can. The workflow reads the file under a
 64 KiB bound and checks every field's type before the package step runs.
@@ -153,6 +168,10 @@ collector writes `site/data/v7/`:
 | `sources.json` | The source ledger |
 | `coverage.json` | One coverage statement per source and year from 1998 (complete, filtered, partial, sample, gap or unreachable), copied from the committed `history/coverage.json`, plus any adapter rows held back to keep a year shard inside its byte bound; a stub that says why when the committed file is missing or invalid |
 | `reports.json` | A copy of the validated `reports/catalog.json`, or status `unavailable` with the reason |
+| `status/current.json` | Service health: every tracked source from `config/status.json` with its group, overall indicator, the vendor's own description, open incidents, fetch status and fetch time, its live `status.json` URL when the browser may read it, and the vendors that are linked only. The one file the live board reads |
+| `status/YYYY-MM.json` | Service-health incidents by start month for the current month and the 12 before it, deduplicated on source and incident id, with a later update folded into the row it updates |
+| `status/outages.json` | IODA outage events for countries in the 24 hours before the read, with IODA's copyright line, and Cloudflare Radar outage annotations once the token exists (`not_configured` until then) |
+| `status/index.json` | The status month files, each source's first retained incident and incident count, and the board digest |
 
 Every file is canonical JSON: sorted keys, compact separators, UTF-8 and one
 trailing newline, rows in a fixed order. The same inputs give the same bytes, so
@@ -366,6 +385,24 @@ its own tools in each edition. Future article sharing from the collector needs
 owner review, supported access and settled eligibility/billing; automatic
 posting is not enabled. API keys must never enter JavaScript.
 
+### Service-health sources and the Radar token
+
+A new service-health source needs the owner's approval in the pull request that
+adds it to `config/status.json`, a fetch of every endpoint on that pull request's
+date, and, for a Statuspage-format source the browser may read, its host in the
+`connect-src` list of `site/index.html` (a test holds the two equal). Complaint
+counts, scraped HTML pages and signed-in tenant APIs are not added.
+
+Cloudflare Radar's outage annotations need a free Cloudflare API token. The owner
+action is one line: add a repository secret named `CLOUDFLARE_RADAR_TOKEN`
+(**Settings, Secrets and variables, Actions, New repository secret**) holding a
+Cloudflare API token that Radar accepts; Cloudflare's API reference for
+`GET /radar/annotations/outages` lists the User Details Read permission. The
+collect step passes the secret as an environment variable and the collector sends
+it only to `api.cloudflare.com`, never into a file, a log line or the page. Until
+the secret exists the collector makes no Radar request and `status/outages.json`
+says `not_configured`.
+
 Direct SEC filing intake is pending after HTTP 403. The SEC filter is not evidence
 that filings have been connected, and reporting about a filing is not complete
 Item 1.05/8.01 coverage. Accepted access and an operational contact policy remain
@@ -416,6 +453,8 @@ an oversized publication stays blocked rather than widening those guards.
 | Package exceeds its budget | Update was blocked; review scope before changing limits. |
 | SEC filter has no filings | Direct intake is pending, not a zero-incident finding. |
 | A story looks old | Check its publication/event/catalog date and origin; legacy feeds and curation intentionally include history. |
+| A service-health card says Snapshot with an old time | The collector's last read is that old; a CORS-open Statuspage card turns Live once this browser reads it. A failed collector read keeps the last good snapshot and names the failure. |
+| A service-health card says the live read failed | The vendor's host refused or timed out for this browser; the card keeps the collector's snapshot. Nothing is retried until the next five-minute read. |
 
 Keep actual collection/deployment dates, counts and scoped scanner input evidence
 privately. Distinguish source review, collection, packaging, deployment and browser

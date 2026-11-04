@@ -104,6 +104,17 @@ published runs and the observed median and longest gap. Each run reads every con
 new publisher item can take several hours to reach the site. Pushes to `main`
 and manual runs add extra collections.
 
+## Service-health feeds
+
+Vendor status pages, cloud health feeds and internet outage signals are a separate input with
+their own registry, [config/status.json](../config/status.json), described source by source in
+[SOURCES.md](SOURCES.md#service-health-sources). They are read once per run through the same
+bounded fetch as publisher feeds: canonical HTTPS only, no redirects, identity encoding, a
+12-second connection timeout, a 30-second read deadline and the 3 MiB default byte bound. A
+failed read keeps that source's last good snapshot with its own fetch time and records the
+failure; a broken registry leaves the status files out and never blocks the feed. These sources
+are not counted among the publisher feeds below.
+
 ## What is configured
 
 The catalog contains **62 publisher RSS/Atom sources**, counting feed definitions rather than unique publishers. The first 29 comprise ten retained sources, sixteen additions from the repository owner's public [cybersecurity-resources bookmarks](https://github.com/TeamStarWolf/cybersecurity-resources/blob/f95fb4a3fae14acfa172c22507a1554339cb3655/LINKS.md), and three further requested publishers: watchTowr Labs, Dark Reading and the legacy Threatpost archive. A further 30 advisory, research and reporting feeds (including the CISA ICS advisories feed added with schema 7), one separately scoped Talos category feed, the Qualys Security Blog and a separately scoped CISA category feed are listed below. The fixed configuration is [sources.json](../config/sources.json). CISA KEV is a separate JSON catalog and is not included in this RSS count. Curated historical publications are also a separate input. SEC filings are not connected by this feed intake.

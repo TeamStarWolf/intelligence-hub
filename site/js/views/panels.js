@@ -10,7 +10,8 @@ import { MITRE_NOTICES, licenceTable } from "./method.js";
 // Every view besides the Explorer, for the sidebar's list. The tab strip carries the same views.
 export const OTHER_VIEW_LINKS = [["today", "Today"], ["advisories", "Advisories"], ["kev", "Known exploited"], ["research", "Research"], ["news", "News"], ["cves", "CVE register"],
   ["history", "History, 1998 to today"], ["vendors", "Vendors"], ["tags", "Tags"], ["actors", "Actors and malware"], ["reports", "Reports and run record"],
-  ["data", "Data downloads"], ["sources", "Sources and coverage"], ["method", "Method"], ["about", "About"]];
+  ["data", "Data downloads"], ["sources", "Sources and coverage"], ["method", "Method"], ["about", "About"],
+  ["status", "Service health"]];
 
 export function cadenceText(index) {
   if (!index) return "The collector's run record could not be read, so no observed schedule is shown. The workflow asks GitHub for a run every two hours, and GitHub does not guarantee it.";

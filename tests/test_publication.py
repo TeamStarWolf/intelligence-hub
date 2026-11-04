@@ -60,7 +60,8 @@ class Workspace:
     """A temporary copy of the build inputs, built in this process with a fixed clock."""
 
     def __init__(self, cache=None):
-        self.copy = support.BuildCopy()
+        # Synthetic feeds are tested without the service-health rows (tests/test_status.py covers those).
+        self.copy = support.BuildCopy(status_cache=False)
         self.root = self.copy.root
         if cache is not None:
             (self.root / ".state" / "public-cache.json").write_text(json.dumps(cache), encoding="utf-8")

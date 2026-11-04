@@ -730,6 +730,9 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
             cache = {"sources": {key: future.result() for key, future in futures.items()}, "kev": kev_future.result()}
         validate_cache(cache, sources)
         require(any(item.get("status") in {"ok", "partial"} for item in [*cache["sources"].values(), cache["kev"]]), "No live source succeeded; the previously deployed snapshot must remain available.")
+    # Service health (intelligence_hub/status.py): vendor status pages, cloud health feeds and
+    # internet outage signals. A failure here leaves the status files out and never blocks the feed.
+    service_health = collect_status(refresh, previous, end)
     failures = [{"id": key, "error": item.get("error")} for key, item in [*sorted(cache["sources"].items()), ("cisa-kev", cache["kev"])]
                 if item.get("status") == "failed"]
     for failure in failures:
@@ -832,12 +835,16 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     # Exports are built (never written) before the index, so the index can list every export file.
     export_files, exported = build_analytics_exports(snapshot["articles"], tagged, sources)
     v7 = build_v7(snapshot, previous, kev.get("catalog"), reports, intelligence_inputs, end, feed_raw, briefs_raw, tagged,
-                  exports_index(export_files, exported))
+                  exports_index(export_files, exported), service_health=service_health)
     # sources.json carries every run's attempt clocks, so on its own it never republishes;
     # the v6 content revision above ignores those clocks in the same way. A change in the
-    # published export files (for example a new dictionary) republishes too.
-    changed = (changed or v7["removed_shards"] != [] or any(path != "sources.json" for path in v7["changed_shards"]) or
-               v7["exports_changed"])
+    # published export files (for example a new dictionary) republishes too. The service-health
+    # board and its index carry fetch clocks too; the board republishes when its digest without
+    # clocks changes, and incident history republishes through its month files.
+    from .status import QUIET as status_quiet
+    quiet = {"sources.json", *status_quiet}
+    changed = (changed or v7["removed_shards"] != [] or any(path not in quiet for path in v7["changed_shards"]) or
+               v7["exports_changed"] or service_health["summary"].get("board_changed") is True)
     if refresh:
         write_json(cache_path, cache)
         write_json(cve_path, projections, compact=True)
@@ -853,7 +860,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
         "coverage": snapshot["coverage"], "mitigations": mitigation_stats, "reports": reports, "changed": changed, "generated_at": snapshot["generated_at"],
         "schema_version": SNAPSHOT_VERSION, "publication": bounds, "rows": rows, "source_failures": failures[:100],
         "changed_shards": v7["changed_shards"], "removed_shards": v7["removed_shards"], "v7": v7["summary"],
-        "tagging": tagged["summary"], "exports": exported}
+        "tagging": tagged["summary"], "exports": exported, "status": service_health["summary"]}
     result_raw = (json.dumps(result, ensure_ascii=False, allow_nan=False, indent=2) + "\n").encode("utf-8")
     require(len(result_raw) <= RESULT_MAX_BYTES, "The collection result would exceed its " + format(RESULT_MAX_BYTES, ",") + "-byte bound.")
     write_raw(STATE / "collection-result.json", result_raw)
@@ -986,7 +993,36 @@ def tag_history(snapshot, tagged, catalog):
     return rows, summary
 
 
-def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs_raw, tagged=None, exports_entry=None):
+def collect_status(refresh, previous, end):
+    """This run's service-health files, untagged Explorer rows and summary (intelligence_hub/status.py).
+
+    Incident history is folded into the month files of the previous publication: the deployed
+    one on a --resume-public run, otherwise the files a previous local build left in site/.
+    """
+    from . import shards, status
+    deployed = previous is not None and "v7_index" in previous
+    index = previous["v7_index"] if deployed else None if previous is not None else shards.local_index(ROOT / "site")
+    return status.collect_status(ROOT, refresh=refresh, previous_index=index, deployed=deployed, end=end, state=STATE)
+
+
+def status_shards(service_health, tagged, catalog, briefs):
+    """(status files, tagged Explorer rows). Rows keep no tagging block when tagging is unavailable."""
+    from . import status
+    service_health = service_health or {}
+    files, rows = service_health.get("files") or {}, service_health.get("rows") or []
+    context = (tagged or {}).get("context")
+    if rows and context is not None:
+        try:
+            rows = status.tag_rows(rows, service_health["registry"], context, catalog, briefs)
+        except (ValueError, TypeError, KeyError, AttributeError) as error:
+            print("Status: incident rows untagged (" + (str(error) or type(error).__name__)[:200] + ").", file=sys.stderr)
+    if files:
+        print("Status: {:,} sources, {:,} incidents in {:,} month files, {:,} Explorer rows".format(
+            service_health["summary"]["sources"], service_health["summary"]["incidents"], service_health["summary"]["months"], len(rows)), file=sys.stderr)
+    return files, rows
+
+
+def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs_raw, tagged=None, exports_entry=None, service_health=None):
     """The schema 7 shards and index for this run, compared with the previous index. Nothing is written here."""
     from . import shards
     from .tagging.engine import compact
@@ -995,7 +1031,8 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
     blocks = (tagged or {}).get("blocks", {})
     rows = [{**article, "tagging": compact(blocks[article["id"]])} if article["id"] in blocks else article for article in snapshot["articles"]]
     history_rows, history_summary = tag_history(snapshot, tagged, catalog)
-    files = shards.build_shards(rows + history_rows, snapshot["sources"], catalog, snapshot["mitigations"],
+    health_files, health_rows = status_shards(service_health, tagged, catalog, snapshot["mitigations"])
+    files = shards.build_shards(rows + history_rows + health_rows, snapshot["sources"], catalog, snapshot["mitigations"],
                                 shards.reports_file(reports, catalog_value, catalog_sha), end,
                                 coverage=history_publish.coverage_file(ROOT, shards.SCHEMA_VERSION))
     # Adapter rows never push a year's history shard past its byte bound; any held back are named.
@@ -1018,6 +1055,9 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
         history_summary["held_back"] = held
         print("History: " + format(sum(item["rows"] for item in held), ",") + " adapter rows held back to keep " +
               ", ".join(sorted({item["path"] for item in held})) + " inside the shard bound", file=sys.stderr)
+    for path, value in health_files.items():
+        require(shards.SHARD_PATH.fullmatch(path) and path not in files, "Unexpected service-health shard " + path + ".")
+        files[path] = value
     raw, entries = shards.serialize(files)
     # Every shard's size against the per-file cap, and each history file's against its split threshold.
     for path in sorted(raw):
@@ -1036,7 +1076,9 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
               "history_adapter_rows": len(history_rows) - sum(item["rows"] for item in held),
               "kev": sum(entry["rows"] for entry in entries if entry["path"].startswith("kev/")),
               "kev_catalog_version": version if isinstance(version, str) and len(version) <= 40 else None,
-              "cves": len(snapshot["mitigations"]), "sources": len(snapshot["sources"]), "shards": len(entries)}
+              "cves": len(snapshot["mitigations"]), "sources": len(snapshot["sources"]), "shards": len(entries),
+              "status_sources": (service_health or {}).get("summary", {}).get("sources", 0),
+              "status_incidents": (service_health or {}).get("summary", {}).get("incidents", 0), "status_rows": len(health_rows)}
     index = shards.build_index(entries, generated_at=snapshot["generated_at"], end=end, feed_content_revision=snapshot["content_revision"],
                                layout_revision=snapshot["layout_revision"], runs=runs, counts=counts,
                                v6_files=[shards.file_entry("data/feed.json", feed_raw), shards.file_entry("data/briefs.json", briefs_raw)],
@@ -1102,9 +1144,11 @@ def deployed_v7():
         value = files[path]
         require(isinstance(value, dict) and value.get("kind") == "articles" and isinstance(value.get("rows"), list), "Invalid deployed v7 article shard.")
         # Tags are derived again on every run; the deployed tagging block is never an input.
-        # History-adapter rows are read from the repository on every run, never resumed.
+        # History-adapter rows are read from the repository on every run, never resumed; service-health
+        # rows are rebuilt on every run from the status month files (intelligence_hub/status.py).
         articles.extend({key: item for key, item in row.items() if key != "tagging"} if isinstance(row, dict) else row
-                        for row in value["rows"] if not (isinstance(row, dict) and str(row.get("origin", "")).startswith("history:")))
+                        for row in value["rows"] if not (isinstance(row, dict) and (str(row.get("origin", "")).startswith("history:") or
+                                                                                     row.get("origin") == "service-status")))
     sources = files.get("sources.json")
     require(isinstance(sources, dict) and sources.get("kind") == "sources" and isinstance(sources.get("rows"), list), "Invalid deployed v7 source ledger.")
     return {"schema_version": 7, "generated_at": index["generated_at"], "articles": articles, "sources": sources["rows"],

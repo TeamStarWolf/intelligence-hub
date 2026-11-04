@@ -1,0 +1,570 @@
+{
+ "schema_version": 1,
+ "sources": {
+  "aws": {
+   "description": null,
+   "error": null,
+   "fetched_at": "2026-11-01T12:00:00+00:00",
+   "incidents": [
+    {
+     "components": [
+      "Multiple services",
+      "AWS Private Certificate Authority",
+      "Amazon Managed Workflows for Apache Airflow",
+      "AWS Amplify"
+     ],
+     "id": "arn:aws:health:me-central-1::event/MULTIPLE_SERVICES/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE/AWS_MULTIPLE_SERVICES_OPERATIONAL_ISSUE_5E6B8_EF2498889B5",
+     "impact": "major",
+     "impact_raw": "AWS status 3",
+     "name": "Multiple services (UAE): Region Availability",
+     "resolved": null,
+     "source": "aws",
+     "started": "2026-03-01T12:51:25+00:00",
+     "status": "other",
+     "status_raw": "Increased Error Rates",
+     "summary": "We are investigating connectivity and power issues affecting APIs and instances in a single Availability Zone (mec1-az2) in the ME-CENTRAL-1 Region due to a localized power issue. Existing instances in this zone will also be affected. Other AWS Services may also be experiencing i",
+     "updated": "2026-03-01T13:19:12+00:00",
+     "url": "https://health.aws.amazon.com/health/status",
+     "vendor": "vendor:aws"
+    }
+   ],
+   "indicator": "major",
+   "last_success": "2026-11-01T12:00:00+00:00",
+   "status": "ok"
+  },
+  "azure": {
+   "description": null,
+   "error": null,
+   "fetched_at": "2026-11-01T12:00:00+00:00",
+   "incidents": [],
+   "indicator": "none",
+   "last_success": "2026-11-01T12:00:00+00:00",
+   "status": "ok"
+  },
+  "azure-devops": {
+   "description": "Service maintenance is in effect",
+   "error": null,
+   "fetched_at": "2026-11-01T12:00:00+00:00",
+   "incidents": [],
+   "indicator": "none",
+   "last_success": "2026-11-01T12:00:00+00:00",
+   "status": "ok"
+  },
+  "chainguard": {
+   "description": null,
+   "error": null,
+   "fetched_at": "2026-11-01T12:00:00+00:00",
+   "incidents": [
+    {
+     "components": [
+      "Image builds & releases"
+     ],
+     "id": "1098100",
+     "impact": "minor",
+     "impact_raw": null,
+     "name": "Critical PHP vulnerabilities require updates",
+     "resolved": "2026-10-22T22:52:00+00:00",
+     "source": "chainguard",
+     "started": "2026-10-21T22:08:03+00:00",
+     "status": "resolved",
+     "status_raw": "resolved",
+     "summary": "Updated Oct 22, 2026 at 5:30pm CDT Updated PHP images have been delivered to all customer registries. All Chainguard PHP images are now built on the official PHP releases: 8.2.35, 8.3.36, 8.4.27 and 8.5.12. The earlier packages (php-8.2 8.2.34-r4, php-8.3 8.3.35-r4, php-8.4 8.4.2",
+     "updated": "2026-10-22T22:52:00+00:00",
+     "url": "https://status.chainguard.dev/incident/1098100",
+     "vendor": "vendor:chainguard"
+    },
+    {
+     "components": [
+      "Image builds & releases"
+     ],
+     "id": "1096060",
+     "impact": "minor",
+     "impact_raw": null,
+     "name": "Removing trust in a compromised certificate authority (eMudhra emSign G3)",
+     "resolved": "2026-10-22T22:14:00+00:00",
+     "source": "chainguard",
+     "started": "2026-10-20T17:09:31+00:00",
+     "status": "resolved",
+     "status_raw": "resolved",
+     "summary": "Updated Oct 22, 2026 at 5:14 pm CDT The sync of updated images to customer registries is complete. Every Chainguard image and Helm chart now carries the new certificate bundle (ca-certificates-bundle 20260909-r3), except the spegel Helm chart, which is still being updated. If you",
+     "updated": "2026-10-22T22:14:00+00:00",
+     "url": "https://status.chainguard.dev/incident/1096060",
+     "vendor": "vendor:chainguard"
+    }
+   ],
+   "indicator": "none",
+   "last_success": "2026-11-01T12:00:00+00:00",
+   "status": "ok"
+  },
+  "check-point": {
+   "description": "Minor Service Outage",
+   "error": null,
+   "fetched_at": "2026-11-01T12:00:00+00:00",
+   "incidents": [
+    {
+     "components": [
+      "Check Point SASE Services - India Data Residency - Management Web-Console",
+      "Check Point SASE Services - Australia Data Residency - Management Web-Console",
+      "Management Web-Console"
+     ],
+     "id": "bfdjj7v1z8fx",
+     "impact": "major",
+     "impact_raw": "major",
+     "name": "SASE: Admin Portal Partially Available (IN, AU)",
+     "resolved": "2026-11-02T15:29:36+00:00",
+     "source": "check-point",
+     "started": "2026-11-02T08:58:48+00:00",
+     "status": "resolved",
+     "status_raw": "resolved",
+     "summary": "This incident has been resolved.",
+     "updated": "2026-11-02T15:29:36+00:00",
+     "url": "https://status.checkpoint.com/incidents/bfdjj7v1z8fx",
+     "vendor": "vendor:check-point"
+    },
+    {
+     "components": [
+      "Check Point Mobile Security - Check Point Mobile Security - EU Region",
+      "Check Point Mobile Security - Check Point Mobile Security - US Region",
+      "Check Point Mobile Security - Check Point Mobile Security - IN Region",
+      "Check Point Mobile Security - EU Region",
+      "Check Point Mobile Security - US Region",
+      "Check Point Mobile Security - IN Region"
+     ],
+     "id": "lng6p1wpj7l2",
+     "impact": "major",
+     "impact_raw": "major",
+     "name": "Service Down due to incident",
+     "resolved": "2026-10-25T21:42:42+00:00",
+     "source": "check-point",
+     "started": "2026-10-25T20:42:49+00:00",
+     "status": "resolved",
+     "status_raw": "resolved",
+     "summary": "This incident has been resolved.",
+     "updated": "2026-10-25T21:42:42+00:00",
+     "url": "https://status.checkpoint.com/incidents/lng6p1wpj7l2",
+     "vendor": "vendor:check-point"
+    },
+    {
+     "components": [
+      "Check Point Portal - Check Point Portal Data Services | Event Forwarding - AUS region",
+      "Check Point Portal Data Services | Event Forwarding - AUS region"
+     ],
+     "id": "h2cvvr768kn1",
+     "impact": "critical",
+     "impact_raw": "critical",
+     "name": "Infinity Portal Data Services (Datatube) - Data services outage on Australia and Canada regions",
+     "resolved": "2026-09-27T06:21:54+00:00",
+     "source": "check-point",
+     "started": "2026-09-27T05:44:22+00:00",
+     "status": "resolved",
+     "status_raw": "postmortem",
+     "summary": "Incident Duration: September 27, 02:30 - 06:00 UTC \\(~3.5 hours\\) Affected Services: DataTube - Canada, Australia regions ‌ ──────────────────────────── Overview On September 27, 2026, customers in the Canada and Australia regions experienced a service disruption due to a network",
+     "updated": "2026-09-29T06:29:11+00:00",
+     "url": "https://status.checkpoint.com/incidents/h2cvvr768kn1",
+     "vendor": "vendor:check-point"
+    },
+    {
+     "components": [],
+     "id": "bqhbqv8pf8gw",
+     "impact": "none",
+     "impact_raw": "none",
+     "name": "Spark Management - EU region - Error on save settings",
+     "resolved": "2026-08-03T07:00:00+00:00",
+     "source": "check-point",
+     "started": "2026-08-03T16:48:06+00:00",
+     "status": "resolved",
+     "status_raw": "resolved",
+     "summary": "Devices wrongly appeared disconnected during this time. Errors appeared when attempting to create or save settings - plan / gateway. No impact on existing gateways connectivity. Incident time 7:00-10:00 AM UTC.",
+     "updated": "2026-08-03T16:48:06+00:00",
+     "url": "https://status.checkpoint.com/incidents/bqhbqv8pf8gw",
+     "vendor": "vendor:check-point"
+    },
+    {
+     "components": [
+      "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management - UAE Region"
+     ],
+     "id": "ctxpqx5z4nb4",
+     "impact": "critical",
+     "impact_raw": "critical",
+     "name": "Smart-1 Cloud is not available in UAE region",
+     "resolved": null,
+     "source": "check-point",
+     "started": "2026-03-02T00:00:37+00:00",
+     "status": "identified",
+     "status_raw": "identified",
+     "summary": "We are continuing to work on a fix for this issue.",
+     "updated": "2026-03-03T16:04:29+00:00",
+     "url": "https://status.checkpoint.com/incidents/ctxpqx5z4nb4",
+     "vendor": "vendor:check-point"
+    },
+    {
+     "components": [
+      "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management - EU Region",
+      "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management – US Region",
+      "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management – AU Region",
+      "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management - IN Region",
+      "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management - UAE Region",
+      "Check Point Smart-1 Cloud Security Management - EU Region",
+      "Check Point Smart-1 Cloud Security Management – US Region",
+      "Check Point Smart-1 Cloud Security Management – AU Region",
+      "Check Point Smart-1 Cloud Security Management - IN Region"
+     ],
+     "id": "dnncywl1n491",
+     "impact": "major",
+     "impact_raw": "major",
+     "name": "Customers may experience logs delay",
+     "resolved": null,
+     "source": "check-point",
+     "started": "2026-03-01T08:52:26+00:00",
+     "status": "investigating",
+     "status_raw": "investigating",
+     "summary": "We are currently investigating this issue.",
+     "updated": "2026-03-03T16:04:29+00:00",
+     "url": "https://status.checkpoint.com/incidents/dnncywl1n491",
+     "vendor": "vendor:check-point"
+    }
+   ],
+   "indicator": "minor",
+   "last_success": "2026-11-01T12:00:00+00:00",
+   "status": "ok"
+  },
+  "gitlab": {
+   "description": "Operational",
+   "error": null,
+   "fetched_at": "2026-11-01T12:00:00+00:00",
+   "incidents": [],
+   "indicator": "none",
+   "last_success": "2026-11-01T12:00:00+00:00",
+   "status": "ok"
+  },
+  "google-cloud": {
+   "description": null,
+   "error": null,
+   "fetched_at": "2026-11-01T12:00:00+00:00",
+   "incidents": [
+    {
+     "components": [
+      "AlloyDB for PostgreSQL",
+      "Apigee",
+      "BigQuery Data Transfer Service",
+      "Cloud Data Fusion"
+     ],
+     "id": "Xs2XTHzAVC9YnafnPyzj",
+     "impact": "minor",
+     "impact_raw": "SERVICE_DISRUPTION severity medium",
+     "name": "Multiple services were experiencing issues in the europe-west2 region.",
+     "resolved": "2026-10-20T12:08:00+00:00",
+     "source": "google-cloud",
+     "started": "2026-10-20T06:00:00+00:00",
+     "status": "resolved",
+     "status_raw": "AVAILABLE",
+     "summary": "Incident Report Summary On Monday, 19 Oct 2026 (Tuesday, 20 Oct BST), a data center facility that hosts europe-west2-b, experienced an external electrical power disruption. This resulted in service unavailability for workloads located in this zone. As traffic was redirected to al",
+     "updated": "2026-10-28T00:38:39+00:00",
+     "url": "https://status.cloud.google.com/incidents/Xs2XTHzAVC9YnafnPyzj",
+     "vendor": "vendor:google"
+    },
+    {
+     "components": [
+      "Google Cloud Storage"
+     ],
+     "id": "mSFVt6PiP557bjRyYsut",
+     "impact": "minor",
+     "impact_raw": "SERVICE_DISRUPTION severity medium",
+     "name": "Google Cloud Storage (GCS) customers experienced elevated latencies and error rates when performing upload or write operations.",
+     "resolved": "2026-10-09T16:46:00+00:00",
+     "source": "google-cloud",
+     "started": "2026-10-08T11:00:00+00:00",
+     "status": "resolved",
+     "status_raw": "AVAILABLE",
+     "summary": "Incident Report Date/Time of the Issue (All time US/Pacific) Incident First Occurrence Incident Start: 08 October 2026 04:00 Incident End: 08 October 2026 16:30 Duration: 12 hours, 30 minutes Incident Recurrence Recurrence Start: 09 October 2026 04:05 Recurrence End: 09 October 2",
+     "updated": "2026-10-14T07:24:12+00:00",
+     "url": "https://status.cloud.google.com/incidents/mSFVt6PiP557bjRyYsut",
+     "vendor": "vendor:google"
+    },
+    {
+     "components": [
+      "AlloyDB for PostgreSQL",
+      "Apigee",
+      "Cloud Filestore",
+      "Cloud Firestore"
+     ],
+     "id": "J5ia5t9p3g9Q5Wi7r8Ev",
+     "impact": "minor",
+     "impact_raw": "SERVICE_DISRUPTION severity medium",
+     "name": "Multiple products in us-central1-b are experiencing network service degradation.",
+     "resolved": "2026-09-01T18:52:00+00:00",
+     "source": "google-cloud",
+     "started": "2026-09-01T14:42:00+00:00",
+     "status": "resolved",
+     "status_raw": "AVAILABLE",
+     "summary": "Addendum to Incident Report This addendum extends the Detailed Description of Impact from the previous message. Though only two clusters in a datacenter in us-central1-b and us-central1-f experienced network isolation, a few regional products with a dependency on the affected dat",
+     "updated": "2026-10-17T21:49:14+00:00",
+     "url": "https://status.cloud.google.com/incidents/J5ia5t9p3g9Q5Wi7r8Ev",
+     "vendor": "vendor:google"
+    }
+   ],
+   "indicator": "none",
+   "last_success": "2026-11-01T12:00:00+00:00",
+   "status": "ok"
+  },
+  "heroku": {
+   "description": null,
+   "error": null,
+   "fetched_at": "2026-11-01T12:00:00+00:00",
+   "incidents": [],
+   "indicator": "none",
+   "last_success": "2026-11-01T12:00:00+00:00",
+   "status": "ok"
+  },
+  "ioda": {
+   "copyright": "This data is Copyright (c) 2021-2025 Georgia Tech Research Corporation. All Rights Reserved.",
+   "error": null,
+   "fetched_at": "2026-11-01T12:00:00+00:00",
+   "last_success": "2026-11-01T12:00:00+00:00",
+   "rows": [
+    {
+     "datasource": "gtr",
+     "duration_seconds": 48600,
+     "end": null,
+     "entity_code": "TL",
+     "entity_name": "Timor-Leste",
+     "entity_type": "country",
+     "id": "country/TL@1793660400",
+     "score": 22241,
+     "source": "ioda",
+     "start": "2026-11-02T23:00:00+00:00",
+     "url": "https://ioda.inetintel.cc.gatech.edu/country/TL"
+    },
+    {
+     "datasource": "gtr",
+     "duration_seconds": 253258,
+     "end": null,
+     "entity_code": "NF",
+     "entity_name": "Norfolk Island",
+     "entity_type": "country",
+     "id": "country/NF@1793520000",
+     "score": 163679,
+     "source": "ioda",
+     "start": "2026-11-01T08:00:00+00:00",
+     "url": "https://ioda.inetintel.cc.gatech.edu/country/NF"
+    },
+    {
+     "datasource": "gtr",
+     "duration_seconds": 379258,
+     "end": null,
+     "entity_code": "FI",
+     "entity_name": "Finland",
+     "entity_type": "country",
+     "id": "country/FI@1793394000",
+     "score": 224280,
+     "source": "ioda",
+     "start": "2026-10-30T21:00:00+00:00",
+     "url": "https://ioda.inetintel.cc.gatech.edu/country/FI"
+    },
+    {
+     "datasource": "bgp",
+     "duration_seconds": 1209600,
+     "end": null,
+     "entity_code": "KW",
+     "entity_name": "Kuwait",
+     "entity_type": "country",
+     "id": "country/KW@1792512000",
+     "score": 38786,
+     "source": "ioda",
+     "start": "2026-10-20T16:00:00+00:00",
+     "url": "https://ioda.inetintel.cc.gatech.edu/country/KW"
+    }
+   ],
+   "status": "ok"
+  },
+  "oracle-cloud": {
+   "description": "Normal Performance",
+   "error": null,
+   "fetched_at": "2026-11-01T12:00:00+00:00",
+   "incidents": [
+    {
+     "components": [
+      "Oracle Cloud Infrastructure Virtual Cloud Network (VCN)",
+      "US East (Ashburn)"
+     ],
+     "id": "ocid1.oraclecloudincident.oc1.phx.amaaaaaavwew44aahmtvmmxusawis4baxh73alctlnntgb3jtf2lakwtp27a",
+     "impact": "minor",
+     "impact_raw": null,
+     "name": "Oracle Cloud Infrastructure Virtual Cloud Network (VCN) | US East (Ashburn)",
+     "resolved": "2026-03-05T05:12:50+00:00",
+     "source": "oracle-cloud",
+     "started": "2026-03-04T10:10:00+00:00",
+     "status": "resolved",
+     "status_raw": "Resolved",
+     "summary": "We have resolved the issue which affected multiple Oracle Cloud Infrastructure (OCI) services in the US East (Ashburn) region. Oracle engineers have validated that service functionality is now restored. Customer Impact: During the impact window, customers may have experienced iss",
+     "updated": "2026-03-05T05:12:50+00:00",
+     "url": "https://ocistatus.oraclecloud.com/",
+     "vendor": "vendor:oracle"
+    },
+    {
+     "components": [
+      "Networking",
+      "US East (Ashburn)"
+     ],
+     "id": "ocid1.oraclecloudincident.oc1.phx.amaaaaaavwew44aa6ucdwddpdoet46piglpgshbpz5hedvgbtryt4vrftxsa",
+     "impact": "minor",
+     "impact_raw": null,
+     "name": "Networking | US East (Ashburn)",
+     "resolved": "2026-03-04T09:24:51+00:00",
+     "source": "oracle-cloud",
+     "started": "2026-03-03T13:24:00+00:00",
+     "status": "resolved",
+     "status_raw": "Resolved",
+     "summary": "Our engineering teams have applied mitigations to address the service disruption which was affecting multiple Oracle Cloud Infrastructure (OCI) services in the US East (Ashburn) region, including the Oracle Cloud Network Infrastructure issue that started at 13:24 UTC on March 3rd",
+     "updated": "2026-03-04T09:24:51+00:00",
+     "url": "https://ocistatus.oraclecloud.com/",
+     "vendor": "vendor:oracle"
+    }
+   ],
+   "indicator": "none",
+   "last_success": "2026-11-01T12:00:00+00:00",
+   "status": "ok"
+  },
+  "salesforce": {
+   "description": null,
+   "error": null,
+   "fetched_at": "2026-11-01T12:00:00+00:00",
+   "incidents": [
+    {
+     "components": [
+      "Communities"
+     ],
+     "id": "20004559",
+     "impact": "minor",
+     "impact_raw": "Degradation",
+     "name": "Communities: Degradation on 5 instances",
+     "resolved": null,
+     "source": "salesforce",
+     "started": "2026-10-27T19:00:00+00:00",
+     "status": "other",
+     "status_raw": "Active",
+     "summary": "We have developed a fix to revert the earlier change and are completing the prerequisite tasks for deployment. For additional details, please refer to the Known Issue here :https://sfdc.co/kq6uu2 We'll provide an update in 60 minutes or sooner if additional information becomes av",
+     "updated": "2026-11-04T05:39:35+00:00",
+     "url": "https://status.salesforce.com/incidents/20004559",
+     "vendor": null
+    }
+   ],
+   "indicator": "minor",
+   "last_success": "2026-11-01T12:00:00+00:00",
+   "status": "ok"
+  },
+  "slack": {
+   "description": null,
+   "error": null,
+   "fetched_at": "2026-11-01T12:00:00+00:00",
+   "incidents": [
+    {
+     "components": [
+      "Messaging"
+     ],
+     "id": "1582",
+     "impact": "minor",
+     "impact_raw": "incident",
+     "name": "Slack Real-Time Connection Disruption",
+     "resolved": "2026-10-22T18:50:50+00:00",
+     "source": "slack",
+     "started": "2026-10-22T18:50:50+00:00",
+     "status": "resolved",
+     "status_raw": "resolved",
+     "summary": "Some Slack customers experienced disrupted real-time connections, delayed message delivery, and errors loading conversation history on October 22, 2026, starting at 16:08 UTC. A large number of active connections closed at once and then reconnected, which briefly strained the ser",
+     "updated": "2026-10-22T18:50:50+00:00",
+     "url": "https://slack-status.com/2026-10/58a30c7fc8aa3e80",
+     "vendor": null
+    },
+    {
+     "components": [
+      "Login/SSO"
+     ],
+     "id": "1581",
+     "impact": "minor",
+     "impact_raw": "incident",
+     "name": "Single Sign On errors",
+     "resolved": "2026-10-14T00:28:54+00:00",
+     "source": "slack",
+     "started": "2026-10-14T00:23:07+00:00",
+     "status": "resolved",
+     "status_raw": "resolved",
+     "summary": "Some users may have experienced trouble logging into Slack. We identified the trigger and resolved the issue and restored access. We’re sorry for the disruption.",
+     "updated": "2026-10-14T00:28:54+00:00",
+     "url": "https://slack-status.com/2026-10/6aeafd6248f59a8a",
+     "vendor": null
+    },
+    {
+     "components": [
+      "Connectivity"
+     ],
+     "id": "1580",
+     "impact": "minor",
+     "impact_raw": "incident",
+     "name": "Slack for iOS closing unexpectedly when opening channels",
+     "resolved": "2026-10-12T17:03:32+00:00",
+     "source": "slack",
+     "started": "2026-10-09T15:35:31+00:00",
+     "status": "resolved",
+     "status_raw": "resolved",
+     "summary": "We've rolled out an updated version of the Slack iOS app to all impacted customers. Channels now open without the app closing unexpectedly. Users who are still experiencing this issue should update the Slack IOS app from the app store Store to resolve it. We apologize for the inc",
+     "updated": "2026-10-12T17:03:32+00:00",
+     "url": "https://slack-status.com/2026-10/a0cfb0208a1d2032",
+     "vendor": null
+    }
+   ],
+   "indicator": "none",
+   "last_success": "2026-11-01T12:00:00+00:00",
+   "status": "ok"
+  },
+  "zscaler": {
+   "description": null,
+   "error": null,
+   "fetched_at": "2026-11-01T12:00:00+00:00",
+   "incidents": [
+    {
+     "components": [
+      "zscalerthree.net"
+     ],
+     "id": "32531",
+     "impact": "minor",
+     "impact_raw": "Under Investigation",
+     "name": "Reporting and Logging Issue - zscalerthree.net",
+     "resolved": null,
+     "source": "zscaler",
+     "started": "2026-11-04T02:10:53+00:00",
+     "status": "investigating",
+     "status_raw": "In Progress",
+     "summary": "A subset of customers may experience delays or issues with logging and reporting.",
+     "updated": "2026-11-04T02:13:02+00:00",
+     "url": "https://trust.zscaler.com/zscalerthree.net/posts/32531",
+     "vendor": "vendor:zscaler"
+    },
+    {
+     "components": [
+      "zscaler.net",
+      "zscalertwo.net",
+      "zscloud.net",
+      "zscalerthree.net"
+     ],
+     "id": "32496",
+     "impact": "minor",
+     "impact_raw": "Under Investigation",
+     "name": "Chennai II Datacenter Issue - zscaler.net, zscalertwo.net, zscloud.net, zscalerthree.net",
+     "resolved": null,
+     "source": "zscaler",
+     "started": "2026-11-02T05:41:44+00:00",
+     "status": "resolved",
+     "status_raw": "Cancelled",
+     "summary": "Customer Forwarding traffic to Chennai II datacenter might face issues with IPSEC / GRE tunnel connectivity.",
+     "updated": "2026-11-02T05:45:23+00:00",
+     "url": "https://trust.zscaler.com/zscaler.net/posts/32496",
+     "vendor": "vendor:zscaler"
+    }
+   ],
+   "indicator": "minor",
+   "last_success": "2026-11-01T12:00:00+00:00",
+   "status": "ok"
+  }
+ }
+}

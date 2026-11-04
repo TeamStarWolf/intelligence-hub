@@ -1,0 +1,174 @@
+[
+ {
+  "id": "Xs2XTHzAVC9YnafnPyzj",
+  "number": "7057439711403861453",
+  "begin": "2026-10-20T06:00:00+00:00",
+  "created": "2026-10-20T08:35:37+00:00",
+  "end": "2026-10-20T12:08:00+00:00",
+  "modified": "2026-10-28T00:38:39+00:00",
+  "external_desc": "Multiple services were experiencing issues in the europe-west2 region.",
+  "updates": [
+   {
+    "created": "2026-10-27T15:13:38+00:00",
+    "modified": "2026-10-28T00:38:39+00:00",
+    "when": "2026-10-27T15:13:38+00:00",
+    "text": "## Incident Report\n### **Summary**\nOn Monday, 19 Oct 2026 (Tuesday, 20 Oct BST), a data center facility that hosts europe-west2-b, experienced an external electrical power disruption. This resulted in service unavailability for workloads located in this zone. As traffic was redirected to alternative cloud regions or unaffected zones within europe-west2 cloud region, these workloads experienced transient latency and elevated errors affecting services across europe-west2. \nThe primary impact was mitigated after 6 hours 8 minutes.\n### **Root Cause**\n**Facility architecture and background:**\nThe d",
+    "status": "AVAILABLE",
+    "affected_locations": []
+   }
+  ],
+  "most_recent_update": {
+   "created": "2026-10-27T15:13:38+00:00",
+   "modified": "2026-10-28T00:38:39+00:00",
+   "when": "2026-10-27T15:13:38+00:00",
+   "text": "## Incident Report\n### **Summary**\nOn Monday, 19 Oct 2026 (Tuesday, 20 Oct BST), a data center facility that hosts europe-west2-b, experienced an external electrical power disruption. This resulted in service unavailability for workloads located in this zone. As traffic was redirected to alternative cloud regions or unaffected zones within europe-west2 cloud region, these workloads experienced transient latency and elevated errors affecting services across europe-west2. \nThe primary impact was mitigated after 6 hours 8 minutes.\n### **Root Cause**\n**Facility architecture and background:**\nThe d",
+   "status": "AVAILABLE",
+   "affected_locations": []
+  },
+  "status_impact": "SERVICE_DISRUPTION",
+  "severity": "medium",
+  "service_key": "zall",
+  "service_name": "Multiple Products",
+  "affected_products": [
+   {
+    "title": "AlloyDB for PostgreSQL",
+    "id": "fPovtKbaWN9UTepMm3kJ",
+    "current_title": "AlloyDB for PostgreSQL"
+   },
+   {
+    "title": "Apigee",
+    "id": "9Y13BNFy4fJydvjdsN3X",
+    "current_title": "Apigee"
+   },
+   {
+    "title": "BigQuery Data Transfer Service",
+    "id": "UdjkJSWTHMj2b11ftW6E",
+    "current_title": "BigQuery Data Transfer Service"
+   },
+   {
+    "title": "Cloud Data Fusion",
+    "id": "rLKDHeeaBiXTeutF1air",
+    "current_title": "Cloud Data Fusion"
+   }
+  ],
+  "uri": "incidents/Xs2XTHzAVC9YnafnPyzj",
+  "currently_affected_locations": [],
+  "previously_affected_locations": [
+   {
+    "title": "London (europe-west2)",
+    "id": "europe-west2"
+   }
+  ]
+ },
+ {
+  "id": "mSFVt6PiP557bjRyYsut",
+  "number": "2779651412601232975",
+  "begin": "2026-10-08T11:00:00+00:00",
+  "created": "2026-10-08T18:24:18+00:00",
+  "end": "2026-10-09T16:46:00+00:00",
+  "modified": "2026-10-14T07:24:12+00:00",
+  "external_desc": "Google Cloud Storage (GCS) customers experienced elevated latencies and error rates when performing upload or write operations.",
+  "updates": [
+   {
+    "created": "2026-10-14T07:15:32+00:00",
+    "modified": "2026-10-14T07:17:30+00:00",
+    "when": "2026-10-14T07:15:32+00:00",
+    "text": "## Incident Report\n## Date/Time of the Issue (All time US/Pacific)\n**Incident First Occurrence**\nIncident Start: 08 October 2026 04:00\nIncident End: 08 October 2026 16:30\nDuration: 12 hours, 30 minutes\n**Incident Recurrence**\nRecurrence Start: 09 October 2026 04:05\nRecurrence End: 09 October 2026 09:46\nDuration: 5 hours, 41 minutes\n**Total Duration:** 18 hours, 11 minutes\n## Summary\nOn Thursday, 08 October 2026, Google Cloud Storage experienced elevated write latency and write error rates while performing upload or write operations in the us-central1 region for a duration of 12 hours, 30 minut",
+    "status": "AVAILABLE",
+    "affected_locations": []
+   }
+  ],
+  "most_recent_update": {
+   "created": "2026-10-14T07:15:32+00:00",
+   "modified": "2026-10-14T07:17:30+00:00",
+   "when": "2026-10-14T07:15:32+00:00",
+   "text": "## Incident Report\n## Date/Time of the Issue (All time US/Pacific)\n**Incident First Occurrence**\nIncident Start: 08 October 2026 04:00\nIncident End: 08 October 2026 16:30\nDuration: 12 hours, 30 minutes\n**Incident Recurrence**\nRecurrence Start: 09 October 2026 04:05\nRecurrence End: 09 October 2026 09:46\nDuration: 5 hours, 41 minutes\n**Total Duration:** 18 hours, 11 minutes\n## Summary\nOn Thursday, 08 October 2026, Google Cloud Storage experienced elevated write latency and write error rates while performing upload or write operations in the us-central1 region for a duration of 12 hours, 30 minut",
+   "status": "AVAILABLE",
+   "affected_locations": []
+  },
+  "status_impact": "SERVICE_DISRUPTION",
+  "severity": "medium",
+  "service_key": "UwaYoXQ5bHYHG6EdiPB8",
+  "service_name": "Google Cloud Storage",
+  "affected_products": [
+   {
+    "title": "Google Cloud Storage",
+    "id": "UwaYoXQ5bHYHG6EdiPB8",
+    "current_title": "Google Cloud Storage"
+   }
+  ],
+  "uri": "incidents/mSFVt6PiP557bjRyYsut",
+  "currently_affected_locations": [],
+  "previously_affected_locations": [
+   {
+    "title": "Iowa (us-central1)",
+    "id": "us-central1"
+   }
+  ]
+ },
+ {
+  "id": "J5ia5t9p3g9Q5Wi7r8Ev",
+  "number": "847028556969787721",
+  "begin": "2026-09-01T14:42:00+00:00",
+  "created": "2026-09-01T16:03:12+00:00",
+  "end": "2026-09-01T18:52:00+00:00",
+  "modified": "2026-10-17T21:49:14+00:00",
+  "external_desc": "Multiple products in us-central1-b are experiencing network service degradation.",
+  "updates": [
+   {
+    "created": "2026-09-29T16:09:46+00:00",
+    "modified": "2026-10-17T21:49:14+00:00",
+    "when": "2026-09-29T16:09:46+00:00",
+    "text": "## Addendum to Incident Report\nThis addendum extends the Detailed Description of Impact from the previous message. Though only two clusters in a datacenter in us-central1-b and us-central1-f experienced network isolation, a few regional products with a dependency on the affected datacenter were also affected. Between 07:41 and 11:52 US/Pacific on Tuesday, September 1, 2026, the following products were affected:\n- **Compute Engine VMs**: VMs running in the affected data center lost network connectivity to resources located outside of their datacenter. From a Compute Engine perspective, this inc",
+    "status": "AVAILABLE",
+    "affected_locations": []
+   }
+  ],
+  "most_recent_update": {
+   "created": "2026-09-29T16:09:46+00:00",
+   "modified": "2026-10-17T21:49:14+00:00",
+   "when": "2026-09-29T16:09:46+00:00",
+   "text": "## Addendum to Incident Report\nThis addendum extends the Detailed Description of Impact from the previous message. Though only two clusters in a datacenter in us-central1-b and us-central1-f experienced network isolation, a few regional products with a dependency on the affected datacenter were also affected. Between 07:41 and 11:52 US/Pacific on Tuesday, September 1, 2026, the following products were affected:\n- **Compute Engine VMs**: VMs running in the affected data center lost network connectivity to resources located outside of their datacenter. From a Compute Engine perspective, this inc",
+   "status": "AVAILABLE",
+   "affected_locations": []
+  },
+  "status_impact": "SERVICE_DISRUPTION",
+  "severity": "medium",
+  "service_key": "zall",
+  "service_name": "Multiple Products",
+  "affected_products": [
+   {
+    "title": "AlloyDB for PostgreSQL",
+    "id": "fPovtKbaWN9UTepMm3kJ",
+    "current_title": "AlloyDB for PostgreSQL"
+   },
+   {
+    "title": "Apigee",
+    "id": "9Y13BNFy4fJydvjdsN3X",
+    "current_title": "Apigee"
+   },
+   {
+    "title": "Cloud Filestore",
+    "id": "jog4nyYkquiLeSK5s26q",
+    "current_title": "Cloud Filestore"
+   },
+   {
+    "title": "Cloud Firestore",
+    "id": "CETSkT92V21G6A1x28me",
+    "current_title": "Cloud Firestore"
+   }
+  ],
+  "uri": "incidents/J5ia5t9p3g9Q5Wi7r8Ev",
+  "currently_affected_locations": [],
+  "previously_affected_locations": [
+   {
+    "title": "Multi-region: nam5",
+    "id": "nam5"
+   },
+   {
+    "title": "Iowa (us-central1)",
+    "id": "us-central1"
+   }
+  ]
+ }
+]

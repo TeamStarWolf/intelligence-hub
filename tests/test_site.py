@@ -113,9 +113,13 @@ class StampTest(unittest.TestCase):
 
 class PageTest(unittest.TestCase):
     def test_the_content_security_policy_is_the_one_pull_request_6_set(self):
+        # Pull request 6 set the policy; the Service health live board adds exactly the
+        # CORS-open Statuspage hosts of config/status.json to connect-src, and nothing else.
+        from intelligence_hub import status
+        hosts = " ".join("https://" + host for host in status.live_hosts(status.load_registry(support.ROOT)))
         page = (SITE / "index.html").read_text(encoding="utf-8")
         policy = re.search(r'Content-Security-Policy" content="([^"]+)"', page)[1]
-        self.assertEqual(policy, "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; "
+        self.assertEqual(policy, "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self' " + hosts + "; "
                                  "font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'")
 
     def test_no_inline_script_or_style_and_no_markup_sinks(self):

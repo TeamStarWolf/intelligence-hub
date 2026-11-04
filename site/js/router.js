@@ -4,7 +4,7 @@
 // so nothing from the address bar is ever reflected into the page. docs/URLS.md publishes
 // this contract for links from the library.
 
-export const VIEWS = ["explore", "today", "advisories", "kev", "research", "news", "cves", "cve", "history", "vendors", "vendor", "tags", "actors", "actor", "malware", "reports", "sources", "method", "data", "about"];
+export const VIEWS = ["explore", "today", "advisories", "kev", "research", "news", "cves", "cve", "history", "vendors", "vendor", "tags", "actors", "actor", "malware", "reports", "sources", "method", "data", "about", "status"];
 // Views that are the Explorer with a fixed source-class constraint.
 export const LIST_VIEWS = { explore: null, advisories: ["vendor-primary", "government-cert"], research: ["researcher"], news: ["press"] };
 
@@ -64,7 +64,9 @@ const VIEW_KEYS = {
   // history is the year index; a history/<year> page reads the "history-year" keys.
   history: [], "history-year": ["source", "month", "page"],
   vendors: [], vendor: ["page"], tags: ["year"], actors: ["year"], actor: ["page"], malware: ["page"],
-  reports: [], sources: [], method: [], data: [], about: []
+  reports: [], sources: [], method: [], data: [], about: [],
+  // #/status?source=<id> shows one service-health source.
+  status: ["source"]
 };
 
 // Views with an id in the path: #/cve/<CVE-id>, #/history/<year>, #/vendor/<id>, #/actor/<id>

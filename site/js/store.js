@@ -5,6 +5,7 @@
 import { maximumBriefsBytes, maximumIndexBytes, maximumLegacyFeedBytes, maximumShardBytes } from "./limits.js";
 import { HttpError } from "./fetcher.js";
 import { normalizeArticleShard, normalizeBriefsFile, normalizeBucket, normalizeCoverage, normalizeCveIndex, normalizeIndex, normalizeKevShard, normalizeRecent, normalizeReports, normalizeSources } from "./validate.js";
+import { normalizeStatusCurrent, normalizeStatusIndex, normalizeStatusMonth, normalizeStatusOutages } from "./validate.js";
 import { addDays, monthsBetween } from "./util.js";
 import { dateWindow } from "./filters.js";
 
@@ -122,12 +123,16 @@ export function createStore(fetcher) {
     "sources.json": value => normalizeSources(value),
     "coverage.json": value => normalizeCoverage(value),
     "reports.json": value => normalizeReports(value),
-    "recent.json": value => normalizeRecent(value)
+    "recent.json": value => normalizeRecent(value),
+    // Service health (views/status.js): the board, the outage signals, the index and the months.
+    status: (value, path) => path === "status/current.json" ? normalizeStatusCurrent(value) : path === "status/outages.json" ? normalizeStatusOutages(value) :
+      path === "status/index.json" ? normalizeStatusIndex(value) : normalizeStatusMonth(value, path)
   };
 
   function reader(path) {
     if (path.startsWith("live/") || path.startsWith("history/")) return readers.article;
     if (path.startsWith("kev/")) return readers.kev;
+    if (path.startsWith("status/")) return readers.status;
     return readers[path];
   }
 
@@ -186,6 +191,8 @@ export function createStore(fetcher) {
     catch (error) { if (error.format) return unavailable("The coverage file did not validate: " + error.message); throw error; }
   }
   function cached(path) { return files.get(path)?.value || null; }
+  // A service-health file the index lists, validated; null when this index lists none.
+  async function statusFile(path) { return state.mode === "v7" && entry(path) ? load(path) : null; }
 
   // One CVE brief: from its bucket when buckets are published, otherwise from data/briefs.json.
   async function brief(cve) {
@@ -214,5 +221,5 @@ export function createStore(fetcher) {
     return briefs.map.get(cve) || null;
   }
 
-  return { state, loadIndex, articlePaths, yearPaths, todayPaths, kevPaths, ensure, loaded, rows, kevRows, cveIndex, sources, reports, coverage, brief, feed, contentDate, cached, listed, entry };
+  return { state, loadIndex, articlePaths, yearPaths, todayPaths, kevPaths, ensure, loaded, rows, kevRows, cveIndex, sources, reports, coverage, brief, feed, contentDate, cached, listed, entry, statusFile };
 }

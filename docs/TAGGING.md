@@ -39,7 +39,7 @@ python -E -s -m intelligence_hub.vocab --check --remote   # re-fetch upstream an
 | medium | An exact, case-sensitive name, or a headline term, with no conflicting signal. | "Volt Typhoon" or "Citrix NetScaler" in a headline; "hospital" for the healthcare sector. |
 | low | Derived through a taxonomy chain, a weak name confirmed by a context word, or exploitation wording in a press headline. | ATT&CK techniques from CWE through CAPEC; "Carbon" only beside "backdoor" or "Turla". |
 
-Every tag records its `method`: `source-kind`, `source-registry`, `source-identity`, `source-primary`, `kind-default`, `kev`, `kev-vendor`, `kev-product`, `kev-cwes`, `cna-affected`, `cna-problemtypes`, `product-vendor`, `title-match`, `title-term`, `exploitation-tag`, `curated-primary`, `vendor-structured`, `cwe-capec` or `none`.
+Every tag records its `method`: `source-kind`, `source-registry`, `source-identity`, `source-primary`, `kind-default`, `kev`, `kev-vendor`, `kev-product`, `kev-cwes`, `cna-affected`, `cna-problemtypes`, `product-vendor`, `title-match`, `title-term`, `exploitation-tag`, `curated-primary`, `vendor-structured`, `cwe-capec`, `status-incident` or `none`.
 
 ## The exploitation evidence rule
 
@@ -61,7 +61,7 @@ Where two entities of one type share a matched name, neither is tagged. Where on
 
 ## Fields
 
-- `event_type`: advisories, bulletins and notes get `disclosure` by kind (high when the source is vendor-primary or the row names a CVE, medium otherwise); vendor-primary advisories also get `patch`; `exploitation` mirrors a known or reported exploitation tag; `breach`, `outage`, `takedown`, `policy`, `patch` and `disclosure` also come from headline terms. A research row with none of these is `analysis`; any other row is `unclassified`.
+- `event_type`: a service-health incident row (origin `service-status`) gets `outage` by method `status-incident` (high); advisories, bulletins and notes get `disclosure` by kind (high when the source is vendor-primary or the row names a CVE, medium otherwise); vendor-primary advisories also get `patch`; `exploitation` mirrors a known or reported exploitation tag; `breach`, `outage`, `takedown`, `policy`, `patch` and `disclosure` also come from headline terms. A research row with none of these is `analysis`; any other row is `unclassified`.
 - `region`: each tag has a `role`. `publisher` comes from the source's country (high). `mentioned` comes from a country name or demonym in the headline (medium); a mention does not say whether the place is a target, an origin or neither. `target` and `vendor-hq` are reserved for structured fields from the history adapters.
 - `sector`: headline terms from `sector.json` (medium) and the library's multi-word sector names.
 - `cwe`: CNA `problemTypes` and KEV `cwes`, resolved against the pinned CWE list. Never from headline text.

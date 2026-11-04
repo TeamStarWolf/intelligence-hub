@@ -43,11 +43,11 @@ export function timestamp(value, nullable = true) {
 
 const KINDS = ["advisory", "research", "reporting", "incident", "kev", "filing", "bulletin", "note"];
 const EXPLOITATION = ["known", "reported", "unknown"];
-const ORIGIN = /^(?:publisher-feed|cisa-kev|library-curation|history:[a-z0-9][a-z0-9-]{0,39})$/;
+const ORIGIN = /^(?:publisher-feed|cisa-kev|library-curation|service-status|history:[a-z0-9][a-z0-9-]{0,39})$/;
 const CVE = /^CVE-\d{4}-\d{4,19}$/;
 // The same pattern as SHARD_PATH in intelligence_hub/shards.py and the typed check in publish.yml;
 // tests/test_shards.py holds the three in step.
-const SHARD_PATTERN = String.raw`(?:sources|coverage|reports|cve-index|recent)\.json|live/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json|history/(?:[0-9]{4}(?:-(?:h[12]|q[1-4]|0[1-9]|1[0-2]))?|undated)\.json|kev/[0-9]{4}\.json|cve/[0-9]{4}/[0-9]{1,5}k\.json`;
+const SHARD_PATTERN = String.raw`(?:sources|coverage|reports|cve-index|recent)\.json|live/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json|history/(?:[0-9]{4}(?:-(?:h[12]|q[1-4]|0[1-9]|1[0-2]))?|undated)\.json|kev/[0-9]{4}\.json|cve/[0-9]{4}/[0-9]{1,5}k\.json|status/(?:current|outages|index|[0-9]{4}-(?:0[1-9]|1[0-2]))\.json`;
 const SHARD_PATH = new RegExp("^(?:" + SHARD_PATTERN + ")$");
 const EXPORT_PATH = /^exports\/(?:articles-(?:[0-9]{4}(?:-(?:0[1-9]|1[0-2]))?|undated)\.(?:csv|jsonl)|tags-(?:[0-9]{4}(?:-(?:0[1-9]|1[0-2]))?|undated)\.csv|manifest\.json|data-dictionary\.md)$/;
 
@@ -412,4 +412,114 @@ export function normalizeBriefsFile(raw, index) {
 export function normalizeBucket(raw, path) {
   requireValue(isObject(raw) && raw.schema_version === 7 && raw.kind === "cve-briefs" && "cve/" + raw.bucket + ".json" === path && isObject(raw.briefs));
   return new Map(Object.entries(raw.briefs).map(([key, value]) => [key, normalizeBrief(value, key)]));
+}
+
+// Service health (intelligence_hub/status.py): data/v7/status/current.json, the month files
+// status/YYYY-MM.json, status/outages.json and status/index.json, and the Statuspage status.json
+// the live board reads from a vendor's host. Every link must pass safeUrl; text is rendered as
+// text nodes only.
+export const STATUS_GROUPS = ["security-platforms", "cloud-and-saas", "developer-services", "internet"];
+export const STATUS_INDICATORS = ["none", "minor", "major", "critical", "maintenance", "unknown"];
+const STATUS_IMPACTS = ["none", "minor", "major", "critical"];
+const STATUS_STATES = ["investigating", "identified", "monitoring", "resolved", "other"];
+const STATUS_ID = /^[a-z0-9][a-z0-9-]{0,40}$/;
+const STATUS_VOCAB = /^(?:vendor|product):[a-z0-9][a-z0-9-]{0,80}$/;
+const STATUS_MONTH = /^status\/([0-9]{4}-(?:0[1-9]|1[0-2]))\.json$/;
+export const LIVE_STATUS_PATH = "/api/v2/status.json";
+
+function statusLink(value, nullable = false) {
+  if (nullable && value === null) return null;
+  requireValue(typeof value === "string" && safeUrl(value) !== null, "A service-health link is not a safe HTTPS link.");
+  return value;
+}
+function vocabId(value) { requireValue(value === null || (typeof value === "string" && STATUS_VOCAB.test(value))); return value; }
+function statusId(value) { requireValue(typeof value === "string" && STATUS_ID.test(value)); return value; }
+
+// The only URLs the live board may read: https, the Statuspage status path, no query or fragment.
+export function liveStatusUrl(value) {
+  if (value === null) return null;
+  const url = safeUrl(value);
+  requireValue(url !== null && url === value, "A live status URL is not canonical.");
+  const parsed = new URL(url);
+  requireValue(parsed.pathname === LIVE_STATUS_PATH && !parsed.search && !parsed.hash, "A live status URL is not a Statuspage status.json.");
+  return value;
+}
+
+export function normalizeIncident(item, source = null) {
+  requireValue(isObject(item) && STATUS_STATES.includes(item.status) && (item.impact === null || STATUS_IMPACTS.includes(item.impact)));
+  const row = {
+    source: statusId(item.source), vendor: vocabId(item.vendor), id: boundedText(item.id, 200), name: boundedText(item.name, 200),
+    status: item.status, status_raw: optionalText(item.status_raw, 60), impact: item.impact, impact_raw: optionalText(item.impact_raw, 60),
+    components: textList(item.components, 12, 120), started: timestamp(item.started, false), updated: timestamp(item.updated),
+    resolved: timestamp(item.resolved), url: statusLink(item.url), summary: optionalText(item.summary, 280)
+  };
+  requireValue(source === null || row.source === source, "An incident sits under another source.");
+  return row;
+}
+
+export function normalizeStatusCurrent(raw) {
+  requireValue(isObject(raw) && raw.schema_version === 7 && raw.kind === "status-current", "The service-health board is not a schema 7 file.");
+  const groups = list(raw.groups, 8).map(group => { requireValue(isObject(group) && STATUS_GROUPS.includes(group.id)); return { id: group.id, label: boundedText(group.label, 60) }; });
+  const seen = new Set();
+  const sources = list(raw.sources, 80).map(item => {
+    requireValue(isObject(item) && STATUS_GROUPS.includes(item.group) && ["ok", "failed", "not_fetched", "not_configured"].includes(item.status) && STATUS_INDICATORS.includes(item.indicator) && typeof item.cors === "boolean");
+    const id = statusId(item.id);
+    requireValue(!seen.has(id), "A service-health source is listed twice.");
+    seen.add(id);
+    return { id, name: boundedText(item.name, 80), vendor: vocabId(item.vendor), group: item.group, class: boundedText(item.class, 20), format: boundedText(item.format, 30),
+      home: statusLink(item.home), library: vocabId(item.library), cors: item.cors, live: liveStatusUrl(item.live), status: item.status,
+      fetched_at: timestamp(item.fetched_at), last_success: timestamp(item.last_success), error: optionalText(item.error, 400),
+      indicator: item.indicator, description: optionalText(item.description, 160), open: list(item.open, 25).map(row => normalizeIncident(row, id)) };
+  });
+  const pageOnly = list(raw.page_only, 40).map(item => {
+    requireValue(isObject(item));
+    return { id: statusId(item.id), name: boundedText(item.name, 80), vendor: vocabId(item.vendor), home: statusLink(item.home, true), reason: boundedText(item.reason, 300) };
+  });
+  return { generated_at: timestamp(raw.generated_at, false), groups, sources, page_only: pageOnly, notes: textList(raw.notes, 12, 600) };
+}
+
+export function normalizeStatusMonth(raw, path) {
+  const match = STATUS_MONTH.exec(path);
+  requireValue(match && isObject(raw) && raw.schema_version === 7 && raw.kind === "status-month" && raw.period === match[1], "A service-health month file does not match its path.");
+  return list(raw.rows, 6000).map(row => normalizeIncident(row));
+}
+
+function outageBlock(value, kind) {
+  if (value === undefined) return null;
+  requireValue(isObject(value) && ["ok", "failed", "not_fetched", "not_configured"].includes(value.status));
+  const rows = list(value.rows, 300).map(item => {
+    requireValue(isObject(item));
+    if (kind === "ioda") {
+      requireValue(["country", "region", "asn"].includes(item.entity_type) && (item.duration_seconds === null || nonnegative(item.duration_seconds) >= 0) && (item.score === null || Number.isSafeInteger(item.score)));
+      return { id: boundedText(item.id, 80), entity_type: item.entity_type, entity_code: boundedText(item.entity_code, 20), entity_name: boundedText(item.entity_name, 80),
+        datasource: optionalText(item.datasource, 40), start: timestamp(item.start, false), end: timestamp(item.end), duration_seconds: item.duration_seconds, score: item.score, url: statusLink(item.url) };
+    }
+    return { id: boundedText(item.id, 40), locations: textList(item.locations, 12, 80), asns: textList(item.asns, 12, 80), cause: optionalText(item.cause, 60), type: optionalText(item.type, 60),
+      scope: optionalText(item.scope, 120), description: optionalText(item.description, 280), start: timestamp(item.start), end: timestamp(item.end), url: statusLink(item.url) };
+  });
+  return { name: boundedText(value.name, 80), home: statusLink(value.home), status: value.status, fetched_at: timestamp(value.fetched_at), last_success: timestamp(value.last_success),
+    error: optionalText(value.error, 400), copyright: optionalText(value.copyright, 200), note: optionalText(value.note, 300), rows };
+}
+
+export function normalizeStatusOutages(raw) {
+  requireValue(isObject(raw) && raw.schema_version === 7 && raw.kind === "status-outages", "The outage file is not a schema 7 file.");
+  return { generated_at: timestamp(raw.generated_at, false), window_hours: nonnegative(raw.window_hours), ioda: outageBlock(raw.ioda, "ioda"), radar: outageBlock(raw.radar, "radar") };
+}
+
+export function normalizeStatusIndex(raw) {
+  requireValue(isObject(raw) && raw.schema_version === 7 && raw.kind === "status-index", "The service-health index is not a schema 7 file.");
+  const months = list(raw.months, 24).map(item => {
+    requireValue(isObject(item) && typeof item.path === "string" && STATUS_MONTH.test(item.path) && item.path === "status/" + item.period + ".json");
+    return { period: item.period, path: item.path, rows: nonnegative(item.rows) };
+  });
+  const coverage = list(raw.coverage, 80).map(item => { requireValue(isObject(item)); return { source: statusId(item.source), first_incident: calendarDay(item.first_incident), incidents: nonnegative(item.incidents) }; });
+  return { generated_at: timestamp(raw.generated_at, false), months, coverage, sources: nonnegative(raw.sources), page_only: nonnegative(raw.page_only), notes: textList(raw.notes, 12, 600) };
+}
+
+// The Statuspage status.json a vendor's host returns to the live board: only the indicator and its
+// description are read.
+export function normalizeLiveStatus(raw) {
+  requireValue(isObject(raw) && isObject(raw.status) && STATUS_INDICATORS.includes(raw.status.indicator), "The status page answered in an unexpected format.");
+  const description = typeof raw.status.description === "string" ? raw.status.description.replace(/\s+/g, " ").trim().slice(0, 160) : null;
+  return { indicator: raw.status.indicator, description: description || null };
 }

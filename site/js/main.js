@@ -18,20 +18,25 @@ import { renderVendor, renderVendors } from "./views/vendors.js";
 import { renderTags } from "./views/tags.js";
 import { renderActors, renderEntity } from "./views/actors.js";
 import { renderMethod } from "./views/method.js";
+import { createLiveBoard, renderStatus } from "./views/status.js";
 
 const TITLES = { explore: "Explorer", today: "Today", advisories: "Advisories", kev: "Known exploited", research: "Research", news: "News", cves: "CVE register", cve: "CVE",
-  history: "History", vendors: "Vendors", vendor: "Vendor", tags: "Tags", actors: "Actors and malware", actor: "Actor", malware: "Malware", reports: "Reports", sources: "Sources", method: "Method", data: "Data", about: "About" };
+  history: "History", vendors: "Vendors", vendor: "Vendor", tags: "Tags", actors: "Actors and malware", actor: "Actor", malware: "Malware", reports: "Reports", sources: "Sources", method: "Method", data: "Data", about: "About", status: "Service health" };
 const OTHER_VIEWS = { today: renderToday, kev: renderKev, cves: renderCves, cve: renderCves, history: renderHistory, vendors: renderVendors, vendor: renderVendor, tags: renderTags,
-  actors: renderActors, actor: renderEntity, malware: renderEntity, reports: renderReports, sources: renderSources, method: renderMethod, data: renderData, about: renderAbout };
+  actors: renderActors, actor: renderEntity, malware: renderEntity, reports: renderReports, sources: renderSources, method: renderMethod, data: renderData, about: renderAbout,
+  status: renderStatus };
 // The tab a view sits under: a page with an id lights its index tab.
 const TAB_OF = { cve: "cves", vendor: "vendors", actor: "actors", malware: "actors" };
 
 export function createApp(env) {
-  const { doc, win, location, history, storage = null, session = null, fetchImpl, subtle, moduleUrl = null, now = () => Date.now(), every = (fn, ms) => setInterval(fn, ms), loadLabels = () => import("./labels.js") } = env;
+  const { doc, win, location, history, storage = null, session = null, fetchImpl, subtle, moduleUrl = null, now = () => Date.now(), every = (fn, ms) => setInterval(fn, ms), clear = id => clearInterval(id), loadLabels = () => import("./labels.js") } = env;
   const el = selector => doc.querySelector(selector);
   const fetcher = createFetcher({ fetchImpl, subtle });
   const store = createStore(fetcher);
   const running = runningRevision(moduleUrl);
+  // The Service health view's live board: it reads the listed vendor status pages from this
+  // browser only while that view is open and the tab is visible, and stops when the view closes.
+  const live = createLiveBoard({ fetchImpl, every, clear, now, doc });
   const stats = { renders: 0, polls: 0, skippedHidden: 0, reloads: 0 };
   let route = parseRoute(location.hash, location.search);
   if (route.rewrite) history.replaceState(null, "", location.pathname + formatRoute(route));
@@ -142,8 +147,9 @@ export function createApp(env) {
     const list = Object.hasOwn(LIST_VIEWS, route.view);
     el("#explore").hidden = !list;
     el("#view").hidden = list;
+    if (route.view !== "status") live.stop();
     if (!store.state.mode || fatal) return;
-    const ctx = { route, store, el, doc, navigate, current, target: el("#view") };
+    const ctx = { route, store, el, doc, navigate, current, target: el("#view"), live };
     try {
       if (list) {
         const { rows, cveIndex } = await renderExplore(ctx);
@@ -244,7 +250,7 @@ export function createApp(env) {
     return app;
   }
 
-  const app = { start, poll, render, navigate, store, fetcher, stats, route: () => route, stop: () => clearInterval(pollTimer) };
+  const app = { start, poll, render, navigate, store, fetcher, stats, live, route: () => route, stop: () => { clearInterval(pollTimer); live.stop(); } };
   return app;
 }
 

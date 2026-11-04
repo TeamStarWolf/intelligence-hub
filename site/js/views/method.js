@@ -5,6 +5,9 @@ import { link, node, routeLink } from "../util.js";
 import { formatRoute } from "../router.js";
 import { section } from "./common.js";
 
+// The live board's privacy statement; docs/METHOD.md and docs/OPERATIONS.md carry the same words.
+export const PRIVACY_SENTENCE = "The Service health view's live board makes requests from your browser to the listed vendor status hosts when the view opens and every five minutes while it stays open and the tab is visible. Pause live updates stops them, and so does leaving the view.";
+
 // The designations, as the TeamStarWolf library records them in THIRD_PARTY_NOTICES.md.
 export const MITRE_NOTICES = [
   "© 2026 The MITRE Corporation. This work is reproduced and distributed with the permission of The MITRE Corporation. License: ATT&CK Terms of Use (https://attack.mitre.org/resources/legal-and-branding/terms-of-use/). ATT&CK® and MITRE ATT&CK® are registered trademarks of The MITRE Corporation. This project is not affiliated with or endorsed by MITRE.",
@@ -22,6 +25,7 @@ export const LICENCES = [
   ["CWE weaknesses", "MITRE CWE, through the library's pinned CWE list", MITRE_NOTICES[1], "https://cwe.mitre.org/"],
   ["CAPEC attack patterns", "MITRE CAPEC, through the library's pinned CAPEC list", MITRE_NOTICES[2], "https://capec.mitre.org/"],
   ["Curated summaries", "Written for the Hub", "Original paraphrases, each backed by a dated primary source that the row links.", null],
+  ["Service-health entries", "The vendors' official status pages and feeds, IODA from Georgia Tech, and Cloudflare Radar once it is configured", "Incident names, states, impact levels, affected components, times, a short excerpt of the vendor's latest update and the link. The status pages belong to their vendors, and IODA rows repeat IODA's own copyright line.", null],
   ["The Hub's code", "TeamStarWolf/intelligence-hub", "MIT License.", "https://github.com/TeamStarWolf/intelligence-hub/blob/main/LICENSE"]
 ];
 
@@ -103,6 +107,10 @@ export function renderMethod(ctx) {
   const matrix = node("p", "more"); matrix.append(routeLink("The source-by-year matrix", formatRoute({ view: "sources", id: null, query: {} }), "more-link"));
   coverage.append(matrix);
   parts.push(coverage);
+  const privacy = section("Service health and your browser");
+  privacy.append(node("p", "", PRIVACY_SENTENCE),
+    node("p", "", "Each live read asks for one small status.json, without cookies or credentials and with no referrer, and only the hosts the snapshot lists can be read: the page's content security policy names the same hosts. Every other view reads this site only."));
+  parts.push(privacy);
   const cadence = section("How often the data changes");
   cadence.append(node("p", "", "A collector run by GitHub Actions publishes the data. The workflow asks GitHub for a run every two hours, and GitHub starts scheduled runs late or skips them, so the gap between runs varies. The content date is the only freshness promise. The Reports and Sources views list the recent runs and the observed gap between them."));
   parts.push(cadence);

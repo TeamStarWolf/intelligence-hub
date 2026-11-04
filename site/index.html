@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self' https://discordstatus.com https://ocistatus.oraclecloud.com https://status.1password.com https://status.atlassian.com https://status.checkpoint.com https://status.claude.com https://status.digitalocean.com https://status.dropbox.com https://status.duo.com https://status.elastic.co https://status.forticloud.com https://status.hashicorp.com https://status.jamf.com https://status.mongodb.com https://status.npmjs.org https://status.openai.com https://status.paloaltonetworks.com https://status.python.org https://status.qualys.com https://status.rapid7.com https://status.redhat.com https://status.sentinelone.com https://status.snowflake.com https://status.snyk.io https://status.tenable.com https://status.twilio.com https://status.wiz.io https://www.akamaistatus.com https://www.cloudflarestatus.com https://www.dockerstatus.com https://www.githubstatus.com https://www.netlifystatus.com https://www.vercel-status.com https://www.zoomstatus.com; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
   <meta name="theme-color" content="#10151b" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#f4f7f5" media="(prefers-color-scheme: light)">
   <meta name="description" content="Open security news, advisories, and known exploited vulnerabilities for the community, linked to their original sources. Part of TeamStarWolf.">
@@ -39,6 +39,7 @@
     <a href="#/sources" data-view="sources">Sources</a>
     <a href="#/method" data-view="method">Method</a>
     <a href="#/about" data-view="about">About</a>
+    <a href="#/status" data-view="status">Service health</a>
   </nav>
   <div id="layout" class="layout">
     <main id="main" class="main" tabindex="-1">
@@ -81,7 +82,7 @@
       </section>
       <section id="view" class="view" hidden></section>
       <div id="notice" class="notice toast" role="alert" hidden><p id="notice-text" class="toast-text"></p><button id="notice-close" class="bar-button" type="button" aria-label="Dismiss this notice">Dismiss</button></div>
-      <noscript><p class="notice">JavaScript is needed to read and filter the saved data. The page makes no request outside this site.</p></noscript>
+      <noscript><p class="notice">JavaScript is needed to read and filter the saved data. Without it the page makes no request outside this site.</p></noscript>
     </main>
     <aside id="sidebar" class="sidebar" aria-label="Today, reports, sources and the other views" hidden>
       <div class="sidebar-head"><h2 class="sidebar-title">Panels</h2><button id="sidebar-close" class="bar-button" type="button">Close</button></div>

@@ -220,6 +220,25 @@ a.chip:hover { border-color: var(--tsw-link); color: var(--tsw-chip-fg); }
 .library-link { font-weight: 600; }
 .side-views { padding-left: 18px; }
 
+/* Service health. Cards sit on surface-2 inside a panel; badges keep the measured chip pairs. */
+.status-grid { list-style: none; margin: 6px 0 14px; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.status-card { padding: 10px 12px; border: 1px solid var(--tsw-border); border-radius: 8px; background: var(--tsw-surface-2); color: var(--tsw-text); min-width: 0; }
+.status-card.status-live { border-color: var(--tsw-border-strong); }
+.status-card p { margin: 4px 0; overflow-wrap: anywhere; }
+.status-name { margin: 0 0 4px; font-size: var(--text-md); color: var(--tsw-heading); overflow-wrap: anywhere; }
+.status-state { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.status-words { font-size: var(--text-sm); }
+.status-basis { font-size: var(--text-xs); color: var(--tsw-text-muted); }
+.status-open, .status-door { font-size: var(--text-sm); }
+.status-subtitle { margin: 14px 0 4px; font-size: var(--text-md); }
+.status-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.status-ok { color: var(--tsw-chip-fg); }
+.status-minor { color: var(--tsw-amber-text); }
+.status-major { color: var(--tsw-red-text); }
+.status-quiet { color: var(--tsw-text-muted); }
+.status-pages { margin: 8px 0; font-size: var(--text-sm); }
+.status-pages summary { cursor: pointer; color: var(--tsw-link); min-height: 28px; }
+
 /* Sidebar: collapsed by default; a docked column at 1024 px and wider, a drawer below. */
 .sidebar { position: fixed; inset: 0 0 0 auto; width: min(380px, 92vw); z-index: 30; overflow-y: auto; background: var(--tsw-bg-alt); border-left: 1px solid var(--tsw-border); box-shadow: -12px 0 32px var(--tsw-shadow); padding: 12px 16px 32px; }
 .sidebar { font-size: var(--text-sm); }

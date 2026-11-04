@@ -1,0 +1,248 @@
+{
+ "page": {
+  "id": "23tk2y3t5qh7",
+  "name": "Check Point Services Status",
+  "url": "https://status.checkpoint.com",
+  "time_zone": "Etc/UTC",
+  "updated_at": "2026-11-04T06:24:38.506Z"
+ },
+ "components": [
+  {
+   "id": "b2pj3pb57dyq",
+   "name": "UserCenter / PMAP",
+   "status": "operational",
+   "created_at": "2017-08-08T13:52:22.704Z",
+   "updated_at": "2026-07-12T06:33:24.731Z",
+   "position": 1,
+   "description": null,
+   "showcase": true,
+   "start_date": null,
+   "group_id": "r2b7rtnb0kny",
+   "page_id": "23tk2y3t5qh7",
+   "group": false,
+   "only_show_if_degraded": false
+  },
+  {
+   "id": "twyljvlbk3ft",
+   "name": "ThreatCloud EU Region",
+   "status": "operational",
+   "created_at": "2017-08-09T09:54:32.549Z",
+   "updated_at": "2025-08-12T19:03:00.375Z",
+   "position": 1,
+   "description": null,
+   "showcase": true,
+   "start_date": null,
+   "group_id": "5v53hrd51v3v",
+   "page_id": "23tk2y3t5qh7",
+   "group": false,
+   "only_show_if_degraded": false
+  },
+  {
+   "id": "r2b7rtnb0kny",
+   "name": "Check Point Web Sites",
+   "status": "operational",
+   "created_at": "2017-09-24T10:10:02.379Z",
+   "updated_at": "2025-07-08T10:55:36.840Z",
+   "position": 1,
+   "description": null,
+   "showcase": false,
+   "start_date": null,
+   "group_id": null,
+   "page_id": "23tk2y3t5qh7",
+   "group": true,
+   "only_show_if_degraded": false,
+   "components": [
+    "b2pj3pb57dyq",
+    "z0mcw3vvdvn5",
+    "m9qlpmptybph",
+    "6x2k7j7cd4fm"
+   ]
+  }
+ ],
+ "incidents": [
+  {
+   "id": "ctxpqx5z4nb4",
+   "name": "Smart-1 Cloud is not available in UAE region",
+   "status": "identified",
+   "created_at": "2026-03-02T06:42:37.410Z",
+   "updated_at": "2026-03-03T16:04:29.122Z",
+   "monitoring_at": null,
+   "resolved_at": null,
+   "impact": "critical",
+   "shortlink": "https://stspg.io/vcrt91xjs9z9",
+   "started_at": "2026-03-02T00:00:37.000Z",
+   "page_id": "23tk2y3t5qh7",
+   "incident_updates": [
+    {
+     "id": "8k3bdkdtvnqb",
+     "status": "identified",
+     "body": "We are continuing to work on a fix for this issue.",
+     "incident_id": "ctxpqx5z4nb4",
+     "created_at": "2026-03-03T16:04:29.120Z",
+     "updated_at": "2026-03-03T16:04:29.120Z",
+     "display_at": "2026-03-03T16:04:29.120Z",
+     "affected_components": [
+      {
+       "code": "df6l9qlmzf0m",
+       "name": "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management - UAE Region",
+       "old_status": "degraded_performance",
+       "new_status": "major_outage"
+      }
+     ],
+     "deliver_notifications": false,
+     "custom_tweet": null,
+     "tweet_id": null
+    },
+    {
+     "id": "js55p0yxbqpv",
+     "status": "identified",
+     "body": "AWS is still working on it internally and estimating at least one more day before returning power.\nWe are continuing to be in contact with AWS on this matter",
+     "incident_id": "ctxpqx5z4nb4",
+     "created_at": "2026-03-02T06:44:38.278Z",
+     "updated_at": "2026-03-03T16:04:04.802Z",
+     "display_at": "2026-03-02T06:44:38.000Z",
+     "affected_components": [
+      {
+       "code": "df6l9qlmzf0m",
+       "name": "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management - UAE Region",
+       "old_status": "degraded_performance",
+       "new_status": "degraded_performance"
+      }
+     ],
+     "deliver_notifications": false,
+     "custom_tweet": null,
+     "tweet_id": null
+    }
+   ],
+   "components": [],
+   "reminder_intervals": null
+  },
+  {
+   "id": "dnncywl1n491",
+   "name": "Customers may experience logs delay",
+   "status": "investigating",
+   "created_at": "2026-03-01T08:52:26.650Z",
+   "updated_at": "2026-03-03T16:04:29.089Z",
+   "monitoring_at": null,
+   "resolved_at": null,
+   "impact": "major",
+   "shortlink": "https://stspg.io/4j49mqtx7rjb",
+   "started_at": "2026-03-01T08:52:26.636Z",
+   "page_id": "23tk2y3t5qh7",
+   "incident_updates": [
+    {
+     "id": "367lfzpkzf2z",
+     "status": "investigating",
+     "body": "We are currently investigating this issue.",
+     "incident_id": "dnncywl1n491",
+     "created_at": "2026-03-01T08:52:26.841Z",
+     "updated_at": "2026-03-01T08:52:26.841Z",
+     "display_at": "2026-03-01T08:52:26.841Z",
+     "affected_components": [
+      {
+       "code": "h5sk2mx0gz27",
+       "name": "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management - EU Region",
+       "old_status": "operational",
+       "new_status": "degraded_performance"
+      },
+      {
+       "code": "8mlc1fxlzkd5",
+       "name": "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management – US Region",
+       "old_status": "operational",
+       "new_status": "degraded_performance"
+      },
+      {
+       "code": "9h6rhqzq3gqj",
+       "name": "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management – AU Region",
+       "old_status": "operational",
+       "new_status": "degraded_performance"
+      },
+      {
+       "code": "prjvfbnprn19",
+       "name": "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management - IN Region",
+       "old_status": "operational",
+       "new_status": "degraded_performance"
+      },
+      {
+       "code": "df6l9qlmzf0m",
+       "name": "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management - UAE Region",
+       "old_status": "operational",
+       "new_status": "degraded_performance"
+      }
+     ],
+     "deliver_notifications": true,
+     "custom_tweet": null,
+     "tweet_id": null
+    }
+   ],
+   "components": [
+    {
+     "id": "h5sk2mx0gz27",
+     "name": "Check Point Smart-1 Cloud Security Management - EU Region",
+     "status": "operational",
+     "created_at": "2020-01-30T08:05:22.305Z",
+     "updated_at": "2026-06-18T07:43:22.307Z",
+     "position": 1,
+     "description": null,
+     "showcase": true,
+     "start_date": null,
+     "group_id": "5r71jp917ks1",
+     "page_id": "23tk2y3t5qh7",
+     "group": false,
+     "only_show_if_degraded": false
+    },
+    {
+     "id": "8mlc1fxlzkd5",
+     "name": "Check Point Smart-1 Cloud Security Management – US Region",
+     "status": "operational",
+     "created_at": "2021-03-25T10:37:42.867Z",
+     "updated_at": "2026-06-18T07:45:02.806Z",
+     "position": 2,
+     "description": null,
+     "showcase": true,
+     "start_date": "2019-09-01",
+     "group_id": "5r71jp917ks1",
+     "page_id": "23tk2y3t5qh7",
+     "group": false,
+     "only_show_if_degraded": false
+    },
+    {
+     "id": "9h6rhqzq3gqj",
+     "name": "Check Point Smart-1 Cloud Security Management – AU Region",
+     "status": "operational",
+     "created_at": "2021-03-25T10:38:09.405Z",
+     "updated_at": "2026-06-18T07:45:49.317Z",
+     "position": 3,
+     "description": null,
+     "showcase": true,
+     "start_date": "2019-09-29",
+     "group_id": "5r71jp917ks1",
+     "page_id": "23tk2y3t5qh7",
+     "group": false,
+     "only_show_if_degraded": false
+    },
+    {
+     "id": "prjvfbnprn19",
+     "name": "Check Point Smart-1 Cloud Security Management - IN Region",
+     "status": "operational",
+     "created_at": "2024-10-02T13:33:24.161Z",
+     "updated_at": "2026-06-18T07:46:42.778Z",
+     "position": 4,
+     "description": null,
+     "showcase": true,
+     "start_date": "2024-09-29",
+     "group_id": "5r71jp917ks1",
+     "page_id": "23tk2y3t5qh7",
+     "group": false,
+     "only_show_if_degraded": false
+    }
+   ],
+   "reminder_intervals": null
+  }
+ ],
+ "scheduled_maintenances": [],
+ "status": {
+  "indicator": "minor",
+  "description": "Minor Service Outage"
+ }
+}
