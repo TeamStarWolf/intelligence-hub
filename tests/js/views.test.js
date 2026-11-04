@@ -15,11 +15,12 @@ import { normalizeArticleShard, normalizeCoverage } from "../../site/js/validate
 import { safeUrl } from "../../site/js/util.js";
 import { LIBRARY_PREFIX } from "../../site/js/views/common.js";
 import * as library from "../../site/js/library.js";
+import { coverageSentence } from "../../site/js/views/history.js";
 
 const PINNED_EVIDENCE = Object.keys(library.PINNED)[0];
 const MSRC = { source_id: "microsoft-bulletins", source_name: "Microsoft Security Bulletins", kind: "bulletin", origin: "history:msrc-bulletins", tagging: { source_class: "vendor-primary", event_type: [["disclosure", "kind-default", "high"]], exploitation: ["unknown", "none", "high"], vendor: [["vendor:microsoft", "source-identity", "high"]] } };
 
-function coverage() {
+function coverage({ givenUp = 0 } = {}) {
   const sources = [
     { source_id: "adobe-psirt", name: "Adobe Security Bulletins", adapter: null, home: "https://helpx.adobe.com/security/security-bulletin.html", first_year: null, last_year: null, filter: null, licence: null },
     { source_id: "microsoft-bulletins", name: "Microsoft Security Bulletins", adapter: "msrc-bulletins", home: "https://learn.microsoft.com/en-us/security-updates/securitybulletins/securitybulletins", first_year: 1998, last_year: 2017, filter: null, licence: "Microsoft; ids, titles, dates and links only." }
@@ -30,6 +31,8 @@ function coverage() {
     rows.push({ source_id: source.source_id, adapter: source.adapter, year, status: ms ? (year === 1998 ? "complete" : year <= 2017 ? "partial" : "gap") : "unreachable",
       upstream_count: ms ? (year === 1998 ? 2 : year <= 2017 ? 5 : 0) : null, admitted: ms && year === 1998 ? 2 : ms && year <= 2017 ? 4 : 0, filter: null,
       reason: ms ? (year > 2017 ? "the series ended in 2017" : year === 1998 ? null : "1 listed item could not be read") : "the bulletin index returned HTTP 403 to automated reads (2026-11-03)", checked_at: "2026-11-03", licence: ms ? "Microsoft; ids, titles, dates and links only." : null });
+    // The collector's after-deduplication numbers, when the test asks for them.
+    if (givenUp) { const last = rows[rows.length - 1]; last.given_up = ms && year === 1998 ? givenUp : 0; last.shown = ms ? last.admitted - last.given_up : 0; }
   }
   return { schema_version: 7, kind: "coverage", status: "ok", published_rows: true, first_year: 1998, end_year: 2026, statuses: ["complete", "filtered", "partial", "sample", "gap", "unreachable"], sources, rows, held_back: [] };
 }
@@ -364,6 +367,56 @@ test("every library link in the generated module and on every view is a library 
     assert.equal(safeUrl(href), href);
     assert.ok(values.includes(href), href + " comes from site/js/library.js");
   }
+});
+
+test("a statement whose row another source holds by link says so, and the counts use the rows shown", async () => {
+  const app = files({ extra: { "coverage.json": coverage({ givenUp: 1 }), "history/1998.json": {
+    schema_version: 7, kind: "articles", period: "1998", rows: [
+      row("h-ms98-002", { ...MSRC, published_at: "1998-06-25", title: "MS98-002: Error in Admin Rights in Microsoft Windows NT" }),
+      row("hist-ms98-001", { source_id: "microsoft-msrc", source_name: "Microsoft Security Response Center", kind: "advisory", origin: "library-curation", published_at: "1998-06-01", title: "MS98-001: Disabling Creation of Local Groups",
+        tagging: { source_class: "vendor-primary", event_type: [["disclosure", "kind-default", "high"]], exploitation: ["unknown", "none", "high"] } })
+    ] } } });
+  const shell = await boot({ hash: "#/history", app });
+  let view = shell.doc.querySelector("#view");
+  assert.ok(view.textContent.includes("Microsoft Security Bulletins 1"), "the year index counts the rows shown");
+  assert.ok(!view.textContent.includes("Microsoft Security Bulletins 2"));
+  view = await go(shell, "#/history/1998");
+  assert.ok(view.textContent.includes("Microsoft Security Bulletins: complete, 2 rows, 1 shown under another source."), view.textContent.slice(0, 600));
+  const table = view.querySelector(".history-sources table");
+  const cells = [...table.querySelectorAll("tbody tr")].map(tr => [...tr.querySelectorAll("td")].map(td => td.textContent));
+  assert.ok(cells.some(([name, rows]) => name === "Microsoft Security Bulletins" && rows === "1"), JSON.stringify(cells));
+  view = await go(shell, "#/sources");
+  const cell = [...view.querySelectorAll("table.coverage-matrix td")].find(td => (td.getAttribute("title") || "").startsWith("Microsoft Security Bulletins 1998"));
+  assert.equal(cell.textContent, "C 1");
+  assert.equal(cell.getAttribute("title"), "Microsoft Security Bulletins 1998: complete, 2 rows, 1 shown under another source.");
+});
+
+test("coverageSentence names the rows shown under another source only when there are some", () => {
+  const row = { status: "complete", admitted: 20, upstream_count: 20, reason: null, filter: null };
+  assert.equal(coverageSentence({ ...row, given_up: 1, shown: 19 }, "Microsoft Security Bulletins"), "Microsoft Security Bulletins: complete, 20 rows, 1 shown under another source.");
+  assert.equal(coverageSentence({ ...row, given_up: 0, shown: 20 }, "Microsoft Security Bulletins"), "Microsoft Security Bulletins: complete, 20 rows.");
+  assert.equal(coverageSentence(row, "Microsoft Security Bulletins"), "Microsoft Security Bulletins: complete, 20 rows.", "a file without the new fields reads as before");
+  const partial = { status: "partial", admitted: 4, upstream_count: 5, reason: "1 listed item could not be read", filter: null };
+  assert.equal(coverageSentence({ ...partial, given_up: 2, shown: 2 }, "M"), "M: partial, 4 rows of 5 listed, 2 shown under another source (1 listed item could not be read).");
+  assert.equal(coverageSentence({ ...partial, given_up: 0, shown: 4 }, "M"), coverageSentence(partial, "M"));
+});
+
+test("the coverage validator reads given_up and shown, defaults them for an older file and refuses more than admitted", () => {
+  const old = normalizeCoverage(coverage());
+  const ms1998 = old.rows.find(item => item.source_id === "microsoft-bulletins" && item.year === 1998);
+  assert.deepEqual([ms1998.admitted, ms1998.given_up, ms1998.shown], [2, 0, 2]);
+  assert.ok(old.rows.every(item => item.given_up === 0 && item.shown === item.admitted));
+  const annotated = normalizeCoverage(coverage({ givenUp: 1 }));
+  const after = annotated.rows.find(item => item.source_id === "microsoft-bulletins" && item.year === 1998);
+  assert.deepEqual([after.admitted, after.given_up, after.shown], [2, 1, 1]);
+  const raw = coverage();
+  const index = raw.rows.findIndex(item => item.source_id === "microsoft-bulletins" && item.year === 1998);
+  const bad = (fields) => ({ ...raw, rows: raw.rows.map((item, at) => at === index ? { ...item, ...fields } : item) });
+  assert.throws(() => normalizeCoverage(bad({ given_up: 1, shown: 2 })), "given_up + shown over admitted");
+  assert.throws(() => normalizeCoverage(bad({ given_up: 3 })), "given_up alone over admitted, shown defaulting to admitted");
+  assert.throws(() => normalizeCoverage(bad({ shown: -1 })));
+  assert.throws(() => normalizeCoverage(bad({ given_up: "1" })));
+  assert.equal(normalizeCoverage(bad({ given_up: 1, shown: 0 })).rows[index].shown, 0, "held-back rows can leave fewer shown");
 });
 
 test("the coverage validator refuses a status outside the list and reads a stub as no claim", () => {

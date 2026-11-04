@@ -29,9 +29,11 @@ export function statusSummary(rows) {
   return STATUS_ORDER.filter(status => counts.has(status)).map(status => counts.get(status) + " " + STATUS_LABELS[status]).join(", ");
 }
 
-// One coverage statement as a sentence: who, the status, how many rows, and why.
+// One coverage statement as a sentence: who, the status, how many rows, how many of them another
+// source's row already holds by link, and why.
 export function coverageSentence(row, name) {
-  const rows = row.admitted ? ", " + count(row.admitted, "row") + (row.upstream_count !== null && row.upstream_count !== row.admitted ? " of " + row.upstream_count.toLocaleString("en-US") + " listed" : "") : "";
+  const elsewhere = row.given_up ? ", " + row.given_up.toLocaleString("en-US") + " shown under another source" : "";
+  const rows = row.admitted ? ", " + count(row.admitted, "row") + (row.upstream_count !== null && row.upstream_count !== row.admitted ? " of " + row.upstream_count.toLocaleString("en-US") + " listed" : "") + elsewhere : "";
   const why = row.reason || row.filter;
   return name + ": " + STATUS_LABELS[row.status] + rows + (why ? " (" + why + ")" : "") + ".";
 }
@@ -64,10 +66,11 @@ async function renderIndex(ctx) {
   for (const year of historyYears(store)) {
     const parts = store.yearPaths(year);
     const rows = coverage.status === "ok" ? yearCoverage(coverage, year) : [];
-    const supplied = rows.filter(row => row.admitted > 0);
+    // The rows each source shows in this year's file, after rows another source holds by link.
+    const supplied = rows.filter(row => row.shown > 0).sort((a, b) => b.shown - a.shown || a.name.localeCompare(b.name));
     const tr = node("tr");
     const cell = node("th"); cell.scope = "row"; cell.append(routeLink(String(year), formatRoute({ view: "history", id: String(year), query: {} })));
-    const sources = node("td", "", supplied.length ? supplied.slice(0, 3).map(row => row.name + " " + row.admitted.toLocaleString("en-US")).join(", ") + (supplied.length > 3 ? ", and " + count(supplied.length - 3, "more source") : "") : "None");
+    const sources = node("td", "", supplied.length ? supplied.slice(0, 3).map(row => row.name + " " + row.shown.toLocaleString("en-US")).join(", ") + (supplied.length > 3 ? ", and " + count(supplied.length - 3, "more source") : "") : "None");
     tr.append(cell, node("td", "", parts.length ? parts.reduce((sum, path) => sum + store.entry(path).rows, 0).toLocaleString("en-US") : "No shard"), sources, node("td", "", rows.length ? statusSummary(rows) : "Not published"));
     body.append(tr);
   }
@@ -183,7 +186,7 @@ export function coverageMatrix(coverage) {
   for (let year = coverage.first_year; year <= coverage.end_year; year++) years.push(year);
   const byKey = new Map(coverage.rows.map(row => [row.source_id + " " + row.year, row]));
   const table = node("table", "data-table coverage-matrix");
-  table.append(node("caption", "", "Coverage by source and year. Letters: C complete, F filtered, P partial, S sample, G gap, U unreachable; the number is the rows kept. A cell's title gives the reason."));
+  table.append(node("caption", "", "Coverage by source and year. Letters: C complete, F filtered, P partial, S sample, G gap, U unreachable; the number is the rows shown under that source. A cell's title gives the full statement."));
   const head = node("tr");
   const corner = node("th", "", "Source"); corner.scope = "col"; head.append(corner);
   for (const year of years) { const cell = node("th", "", String(year)); cell.scope = "col"; head.append(cell); }
@@ -197,7 +200,7 @@ export function coverageMatrix(coverage) {
     tr.append(name);
     for (const year of years) {
       const row = byKey.get(source.source_id + " " + year);
-      const cell = node("td", row ? "cov cov-" + row.status : "cov", row ? letters[row.status] + (row.admitted ? " " + row.admitted.toLocaleString("en-US") : "") : "");
+      const cell = node("td", row ? "cov cov-" + row.status : "cov", row ? letters[row.status] + (row.shown ? " " + row.shown.toLocaleString("en-US") : "") : "");
       if (row) cell.setAttribute("title", coverageSentence(row, source.name + " " + year));
       tr.append(cell);
     }
