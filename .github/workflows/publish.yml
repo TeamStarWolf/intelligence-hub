@@ -63,7 +63,7 @@ jobs:
           if not isinstance(result, dict) or type(result.get('changed')) is not bool:
               raise SystemExit('The collection result requires a Boolean changed field.')
           shard = re.compile(r'(?:sources|coverage|reports|cve-index|recent)\.json|live/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json'
-                             r'|history/(?:[0-9]{4}|undated)\.json|kev/[0-9]{4}\.json|cve/[0-9]{4}/[0-9]{1,5}k\.json')
+                             r'|history/(?:[0-9]{4}(?:-(?:h[12]|q[1-4]|0[1-9]|1[0-2]))?|undated)\.json|kev/[0-9]{4}\.json|cve/[0-9]{4}/[0-9]{1,5}k\.json')
           for field in ('changed_shards', 'removed_shards'):
               paths = result.get(field)
               if (type(paths) is not list or len(paths) > 1000 or

@@ -1,6 +1,7 @@
 // History (#/history and #/history/<year>): security events from 1998 on, one page per year.
 // The year index needs only index.json and coverage.json; a year page reads that year's history
-// shard. Every year page opens with the per-source coverage statement, so a quiet year is never
+// file, or every calendar part of it when a large year is written as parts (store.yearPaths).
+// Every year page opens with the per-source coverage statement, so a quiet year is never
 // read as a year when nothing happened.
 import { formatRoute, withQuery } from "../router.js";
 import { sortRows } from "../filters.js";
@@ -61,13 +62,13 @@ async function renderIndex(ctx) {
   const thead = node("thead"); thead.append(head);
   const body = node("tbody");
   for (const year of historyYears(store)) {
-    const entry = store.entry("history/" + year + ".json");
+    const parts = store.yearPaths(year);
     const rows = coverage.status === "ok" ? yearCoverage(coverage, year) : [];
     const supplied = rows.filter(row => row.admitted > 0);
     const tr = node("tr");
     const cell = node("th"); cell.scope = "row"; cell.append(routeLink(String(year), formatRoute({ view: "history", id: String(year), query: {} })));
     const sources = node("td", "", supplied.length ? supplied.slice(0, 3).map(row => row.name + " " + row.admitted.toLocaleString("en-US")).join(", ") + (supplied.length > 3 ? ", and " + count(supplied.length - 3, "more source") : "") : "None");
-    tr.append(cell, node("td", "", entry ? entry.rows.toLocaleString("en-US") : "No shard"), sources, node("td", "", rows.length ? statusSummary(rows) : "Not published"));
+    tr.append(cell, node("td", "", parts.length ? parts.reduce((sum, path) => sum + store.entry(path).rows, 0).toLocaleString("en-US") : "No shard"), sources, node("td", "", rows.length ? statusSummary(rows) : "Not published"));
     body.append(tr);
   }
   table.append(thead, body);
@@ -133,9 +134,8 @@ async function renderYear(ctx) {
   const statement = section("Coverage this year");
   statement.append(node("p", "muted", "Reading the coverage statements."));
   target.replaceChildren(nav, node("h1", "view-title", "History: " + year), statement, status);
-  const path = "history/" + year + ".json";
-  const listed = Boolean(store.entry(path));
-  const [coverage] = await Promise.all([store.coverage(), listed ? store.ensure([path]) : Promise.resolve([])]);
+  const parts = store.yearPaths(year);
+  const [coverage] = await Promise.all([store.coverage(), parts.length ? store.ensure(parts) : Promise.resolve([])]);
   if (!ctx.current()) return;
   statement.replaceChildren(node("h2", "panel-title", "Coverage this year"));
   if (coverage.status === "ok") {
@@ -153,15 +153,15 @@ async function renderYear(ctx) {
       quiet.append(more);
       statement.append(quiet);
     }
-    const held = coverage.held_back.filter(item => item.path === path);
+    const held = coverage.held_back.filter(item => parts.includes(item.path));
     for (const item of held) statement.append(node("p", "notice-inline", count(item.rows, "row") + " from " + item.adapter + " were held back to keep this year's file inside its size bound."));
     statement.append(node("p", "muted", "Curated rows and press feeds are not part of these statements. A source's own archive can hold more than the Hub keeps."));
   } else statement.append(node("p", "muted", "Coverage statements are not published in this snapshot: " + (coverage.note || "no reason recorded") + "."));
-  if (!listed) {
+  if (!parts.length) {
     status.textContent = "This snapshot has no history file for " + year + ".";
     return coverage;
   }
-  const all = store.rows([path]);
+  const all = store.rows(parts);
   const scoped = all.filter(row => (!route.query.source || row.source_id === route.query.source) && (!route.query.month || row.month === route.query.month));
   sortRows(scoped, "date-asc");
   const pages = node("nav", "pager"); pages.setAttribute("aria-label", "History pages");

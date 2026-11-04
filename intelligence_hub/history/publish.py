@@ -3,7 +3,8 @@
 The publish workflow never fetches a history source. It reads the committed
 history/<adapter>/<year>.jsonl files, checks every row, turns each into a v7 article
 row with origin "history:<adapter>" and an empty summary, tags it with the same engine
-as every other row, and the shard writer files it under history/YYYY.json.
+as every other row, and the shard writer files it under history/YYYY.json (or that year's
+calendar parts, history/YYYY-h1.json and so on, when the year passes the split threshold).
 
 A missing, unreadable or invalid history/ never blocks the feed: the run continues
 without adapter rows and records why. Nor can the adapter rows push a year's shard past
@@ -37,7 +38,7 @@ def hold_back_order(row):
 
 
 def fit(files, limit, encode):
-    """Hold back adapter rows from every history year shard whose encode() bytes pass limit.
+    """Hold back adapter rows from every history shard (a year or one of its parts) whose encode() bytes pass limit.
 
     files is the shard map from shards.build_shards and is changed in place. Returns
     [{"path", "adapter", "rows"}] for every adapter with rows held back. A shard that is
