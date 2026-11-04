@@ -965,7 +965,11 @@ def tag_history(snapshot, tagged, catalog):
     from .history import publish as history_publish, registry
     from . import tagging
     from .tagging.engine import compact
-    rows, summary = history_publish.articles(ROOT, {article["url"] for article in snapshot["articles"]})
+    # Each URL a feed, KEV or curated row already holds, with that row's source (the first one wins).
+    existing = {}
+    for article in snapshot["articles"]:
+        existing.setdefault(article["url"], article.get("source_id") or "unknown")
+    rows, summary = history_publish.articles(ROOT, existing)
     context = (tagged or {}).get("context")
     if rows and context is not None:
         try:
@@ -987,7 +991,7 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
     from . import shards
     from .tagging.engine import compact
     catalog_value, catalog_sha, _reason = inputs[2]
-    from .history import publish as history_publish
+    from .history import base as history_base, publish as history_publish
     blocks = (tagged or {}).get("blocks", {})
     rows = [{**article, "tagging": compact(blocks[article["id"]])} if article["id"] in blocks else article for article in snapshot["articles"]]
     history_rows, history_summary = tag_history(snapshot, tagged, catalog)
@@ -998,6 +1002,16 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
     held = history_publish.fit(files, shards.SHARD_MAX_BYTES, shards.canonical)
     if files["coverage.json"].get("status") == "ok":
         files["coverage.json"]["held_back"] = held
+        # Each statement also says how many rows another source's row took and how many the shards show.
+        # A statement that cannot agree with the shards is replaced by the stub; the feed carries on.
+        try:
+            history_publish.annotate_coverage(files["coverage.json"], history_summary.get("given_up", []), held,
+                                              published=history_summary["status"] == "ok")
+        except (history_base.HistoryError, KeyError, TypeError, ValueError) as error:
+            reason = (str(error) or type(error).__name__)[:300]
+            files["coverage.json"] = history_publish.stub(shards.SCHEMA_VERSION, reason)
+            history_summary["coverage"] = "stub: " + reason
+            print("History: coverage published as the stub (" + reason + ")", file=sys.stderr)
     if held:
         history_summary["held_back"] = held
         print("History: " + format(sum(item["rows"] for item in held), ",") + " adapter rows held back to keep " +
