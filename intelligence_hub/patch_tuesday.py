@@ -314,11 +314,13 @@ def _cell_text(value, maximum=240):
 
 
 def _us_date(value):
-    match = re.fullmatch(r"([0-9]{1,2})/([0-9]{1,2})/([0-9]{4})", value or "")
+    """MM/DD/YYYY, or MM/DD/YY read as 20YY (Adobe dates some 2022 rows 09/13/22)."""
+    match = re.fullmatch(r"([0-9]{1,2})/([0-9]{1,2})/([0-9]{4}|[0-9]{2})", value or "")
     if not match:
         return None
+    year = int(match.group(3)) + (2000 if len(match.group(3)) == 2 else 0)
     try:
-        return date(int(match.group(3)), int(match.group(1)), int(match.group(2))).isoformat()
+        return date(year, int(match.group(1)), int(match.group(2))).isoformat()
     except ValueError:
         return None
 
@@ -340,15 +342,22 @@ def parse_adobe(raw, safe_url):
         label = _cell_text(cell, 300) or ""
         ident = re.match(r"(APSB(\d{2})-\d{1,4})\s*:?\s*(.*)", label)
         posted, updated = _us_date(_cell_text(cells[1][:200], 20)), _us_date(_cell_text(cells[2][:200], 20))
-        if not anchor or not ident or posted is None or posted[2:4] != ident.group(2):
+        if not anchor or not ident or posted is None:
             continue
         href = anchor.group(1)
+        # The id comes from the link's apsbNN-NN slug, not the visible label: Adobe's index labels
+        # the Substance 3D Stager row APSB26-22 while it links to apsb26-29.html, and keying on the
+        # label would fold that bulletin into the real APSB26-22. The label is the fallback only
+        # when the link carries no slug.
+        slug = re.search(r"/apsb(\d{2})-(\d{1,4})\.html?(?:[?#]|$)", href, re.I)
+        key, year = ("APSB%s-%s" % (slug.group(1), slug.group(2)), slug.group(1)) if slug else (ident.group(1), ident.group(2))
+        if posted[2:4] != year:
+            continue
         url = safe_url(("https://helpx.adobe.com" + href) if href.startswith("/") else href)
         if url is None or not url.startswith("https://helpx.adobe.com/security/products/"):
             continue
         product = next((name for start, name in reversed(headings) if start < match.start()), None)
-        title = text(ident.group(3).lstrip(":").strip(), 200) or ident.group(1)
-        key = ident.group(1)
+        title = text(ident.group(3).lstrip(":").strip(), 200) or key
         row = found.setdefault(key, [key, title, [], url, posted, updated if updated and updated > posted else None])
         if product and product not in row[2]:
             row[2].append(product)

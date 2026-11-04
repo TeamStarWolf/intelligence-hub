@@ -197,9 +197,42 @@ class JoinTest(unittest.TestCase):
                 '<td>04/8/2025</td><td>04/8/2025</td></tr><tr><td><a href="/security/products/example/apsb25-112.html"><b>APSB25-112 </b>: Two</a></td>'
                 '<td valign="top">11/11/2025<br />\n</td><td valign="top">11/11/2025<br />\n</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td>'
                 '<td>&nbsp;</td></tr><tr><td><a href="/security/products/example/apsb24-98.html"><b>APSB24-98</b>: Three</a></td>'
-                '<td>12/10/2024</td><td>12/10/2024</td></tr></table>').encode("utf-8")
+                '<td>12/10/2024</td><td>12/10/2024</td></tr>'
+                # The two 2022 rows of the live index, dated with a two-digit year.
+                '<tr><td><a href="/security/products/experience-manager/apsb22-40.html"><b>APSB22-40</b>: Security updates available for Experience Manager<br />\n </a></td>\n'
+                '<td>09/13/22</td>\n<td>09/13/22</td>\n</tr>'
+                '<tr><td><a href="/security/products/bridge/apsb22-49.html"><b>APSB22-49 </b>: Security updates available for Adobe Bridge<br />\n </a></td>\n'
+                '<td>09/13/22</td>\n<td>09/13/22</td>\n</tr></table>').encode("utf-8")
         rows = pt.parse_adobe(page, collect.safe_url)
-        self.assertEqual([[row[0], row[4]] for row in rows], [["APSB24-98", "2024-12-10"], ["APSB25-15", "2025-04-08"], ["APSB25-112", "2025-11-11"]])
+        self.assertEqual([[row[0], row[4]] for row in rows], [["APSB22-40", "2022-09-13"], ["APSB22-49", "2022-09-13"], ["APSB24-98", "2024-12-10"],
+                                                              ["APSB25-15", "2025-04-08"], ["APSB25-112", "2025-11-11"]])
+        self.assertEqual(rows[1][1], "Security updates available for Adobe Bridge")
+        self.assertEqual(rows[1][3], "https://helpx.adobe.com/security/products/bridge/apsb22-49.html")
+
+    def test_two_digit_and_four_digit_years_read_the_same_day(self):
+        self.assertEqual(pt._us_date("09/13/22"), "2022-09-13")
+        self.assertEqual(pt._us_date("09/13/2022"), "2022-09-13")
+        self.assertIsNone(pt._us_date("09/13/222"))
+        self.assertIsNone(pt._us_date("13/09/22"))
+
+    def test_adobe_bulletin_id_comes_from_the_link_not_the_label(self):
+        # The two real rows of the live index: Adobe labels the Substance 3D Stager row APSB26-22,
+        # but it links to apsb26-29.html; the real APSB26-22 is Substance 3D Modeler.
+        page = ('<h2>Adobe Substance 3D Modeler</h2><table>'
+                '<tr><td><a href="/security/products/substance3d-modeler/apsb26-22.html"><b>APSB26-22</b> : Security update available for Adobe Substance 3D Modeler </a></td>\n'
+                '<td>02/10/2026</td>\n<td>02/10/2026</td>\n</tr></table>'
+                '<h2>Adobe Substance 3D Stager</h2><table>'
+                '<tr><td><a href="/security/products/substance3d_stager/apsb26-29.html"><b>APSB26-22</b> : Security update available for Adobe Substance 3D Stager </a></td>\n'
+                '<td>03/10/2026</td>\n<td>03/10/2026</td>\n</tr></table>').encode("utf-8")
+        rows = pt.parse_adobe(page, collect.safe_url)
+        self.assertEqual(rows, [
+            ["APSB26-22", "Security update available for Adobe Substance 3D Modeler", ["Adobe Substance 3D Modeler"],
+             "https://helpx.adobe.com/security/products/substance3d-modeler/apsb26-22.html", "2026-02-10", None],
+            ["APSB26-29", "Security update available for Adobe Substance 3D Stager", ["Adobe Substance 3D Stager"],
+             "https://helpx.adobe.com/security/products/substance3d_stager/apsb26-29.html", "2026-03-10", None],
+        ])
+        march = pt.adobe_block({"status": "ok", "rows": rows}, "2026-03-10T07:00:00Z", "https://helpx.adobe.com/security.html")
+        self.assertEqual([row[0] for row in march["rows"]], ["APSB26-29"])
 
     def test_sap_month_page_and_year_page_rows(self):
         october = pt.parse_sap((DOCUMENTS / "sap-october-2026.html").read_bytes(), collect.safe_url, "2026-10")["2026-10"]

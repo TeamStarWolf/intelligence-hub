@@ -192,7 +192,12 @@ without exports and records `exports.status: unavailable` with the reason.
    time, and starts no new read after 420 seconds. New months come first, newest first. The
    publish workflow passes 200 on a push to `main`, so a merge reads every missing or revised
    month at once, and 12 on a scheduled run.
-3. It reads Adobe's bulletin index and the SAP pages it needs (at most 16 a run).
+3. It reads Adobe's bulletin index and the SAP pages it needs (at most 16 a run). An Adobe
+   row's bulletin id comes from its link's `apsbNN-NN` slug, not the visible label, because
+   the index mislabels some rows (the Substance 3D Stager row reads APSB26-22 and links to
+   APSB26-29). Dates read as MM/DD/YYYY or MM/DD/YY (20YY). A row whose label is split over
+   two links (APSB21-98, posted 10/26/2021) is not read; it was not posted on a release day,
+   so no brief loses it.
 4. It joins the CISA KEV catalog, the Hub's CVE briefs and the vocabulary tags to every month,
    applies the fixed priority rules and writes the shards. A brief that would pass the 4 MiB
    per-file bound drops its tags first, then its Moderate, Low and unrated rows, keeping every
