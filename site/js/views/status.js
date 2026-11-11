@@ -23,9 +23,14 @@ export const LIVE_TIMEOUT = 15000;
 const LIVE_BATCH = 6;
 const RECENT_DAYS = 30;
 const RECENT_SHOWN = 150;
+const ATTENTION_SHOWN = 16;
 
 export const INDICATOR_LABELS = { none: "Operational", minor: "Minor incident", major: "Major incident", critical: "Critical incident", maintenance: "Maintenance", unknown: "Not known" };
 const INDICATOR_CLASS = { none: "status-ok", minor: "status-minor", major: "status-major", critical: "status-major", maintenance: "status-quiet", unknown: "status-quiet" };
+// Problems sort first and read first in the posture summary; higher rank is more urgent.
+const INDICATOR_RANK = { critical: 5, major: 4, minor: 3, maintenance: 2, unknown: 1, none: 0 };
+// The short word for each state in a group heading's tally (none is left for "all operational").
+const TALLY_WORD = { critical: "critical", major: "major", minor: "minor", maintenance: "in maintenance", unknown: "not known" };
 const IMPACT_LABELS = { none: "No impact stated", minor: "Minor", major: "Major", critical: "Critical" };
 const STATE_LABELS = { investigating: "Investigating", identified: "Identified", monitoring: "Monitoring", resolved: "Resolved", other: "Open" };
 
@@ -216,6 +221,81 @@ function outagesSection(outages) {
   return block;
 }
 
+// A source needs a look when a vendor states an incident, or the collector could not read it this run.
+function needsAttention(source) { return source.indicator === "minor" || source.indicator === "major" || source.indicator === "critical" || source.status !== "ok"; }
+
+// Problems first: by the vendor's stated severity, then an unread collector read, then open-incident
+// count, then name. Operational, fully read sources fall to the end of their group.
+function compareAttention(a, b) {
+  return (INDICATOR_RANK[b.indicator] - INDICATOR_RANK[a.indicator])
+    || ((b.status !== "ok") - (a.status !== "ok"))
+    || (b.open.length - a.open.length)
+    || a.name.localeCompare(b.name);
+}
+
+function tallyIndicators(sources) {
+  const counts = { critical: 0, major: 0, minor: 0, maintenance: 0, unknown: 0, none: 0 };
+  for (const source of sources) counts[source.indicator] = (counts[source.indicator] || 0) + 1;
+  return counts;
+}
+
+// A group heading's own count: "16, all operational" or "16: 1 major, 2 minor, 1 not read".
+function groupTally(members) {
+  const counts = tallyIndicators(members);
+  const unread = members.filter(source => source.status !== "ok").length;
+  const parts = [];
+  for (const indicator of ["critical", "major", "minor", "maintenance", "unknown"]) if (counts[indicator]) parts.push(counts[indicator] + " " + TALLY_WORD[indicator]);
+  if (unread) parts.push(unread + " not read");
+  return " (" + (parts.length ? members.length + ": " + parts.join(", ") : members.length + ", all operational") + ")";
+}
+
+// One colour-coded tally chip: "42 Operational", "1 Major incident".
+function badgeCount(indicator, total) {
+  return node("span", "badge status-badge " + INDICATOR_CLASS[indicator], total.toLocaleString("en-US") + " " + INDICATOR_LABELS[indicator]);
+}
+
+// The posture summary at the top of the full board: a headline, a colour-coded tally of the vendors'
+// stated states, a freshness note when a read failed, and quick links to anything that needs a look.
+// Every number is the vendors' own wording at the collector's read, not a reading of your own tenant.
+function postureBlock(sources) {
+  const counts = tallyIndicators(sources);
+  const unread = sources.filter(source => source.status !== "ok").length;
+  const total = sources.length;
+  const incidents = counts.critical + counts.major + counts.minor;
+  const notOperational = total - counts.none;
+  const wrap = node("div", "status-posture");
+  const headline = node("p", "status-posture-headline");
+  if (notOperational === 0 && unread === 0) {
+    headline.append(node("strong", "", "All " + count(total, "tracked source") + " operational"), node("span", "", " at the collector's read."));
+  } else if (notOperational === 0) {
+    headline.append(node("strong", "", "Every source read was operational"), node("span", "", "; " + count(unread, "source") + " of " + total + " could not be read this run and " + (unread === 1 ? "shows" : "show") + " an earlier reading."));
+  } else if (incidents) {
+    headline.append(node("strong", "status-major", count(incidents, "source") + " with a vendor-stated incident"), node("span", "", " of " + count(total, "tracked source") + " at the collector's read."));
+  } else {
+    headline.append(node("strong", "", count(notOperational, "source") + " in maintenance or not known"), node("span", "", " of " + count(total, "tracked source") + "; none reported an incident at the collector's read."));
+  }
+  wrap.append(headline);
+  const tally = node("ul", "status-tally");
+  for (const indicator of ["critical", "major", "minor", "maintenance", "unknown", "none"]) {
+    if (!counts[indicator]) continue;
+    const item = node("li", "status-tally-item"); item.append(badgeCount(indicator, counts[indicator])); tally.append(item);
+  }
+  wrap.append(tally);
+  if (unread && notOperational > 0) wrap.append(node("p", "status-posture-note muted", count(unread, "source") + " could not be read this run; each shows an earlier read or none, dated on its card."));
+  const attention = sources.filter(needsAttention).sort(compareAttention);
+  if (attention.length) {
+    const line = node("p", "status-posture-attention");
+    line.append(node("span", "", "Needs a look: "));
+    attention.slice(0, ATTENTION_SHOWN).forEach((source, position) => {
+      if (position) line.append(node("span", "", " · "));
+      line.append(routeLink(source.name, formatRoute({ view: "status", id: null, query: { source: source.id } })));
+    });
+    if (attention.length > ATTENTION_SHOWN) line.append(node("span", "muted", " and " + (attention.length - ATTENTION_SHOWN) + " more below"));
+    wrap.append(line);
+  }
+  return wrap;
+}
+
 export async function renderStatus(ctx) {
   const { target, store, route, live } = ctx;
   const title = node("h1", "view-title", "Service health");
@@ -241,12 +321,13 @@ export async function renderStatus(ctx) {
   const liveNote = node("span", "muted", " " + count(liveSources.length, "card") + " " + (liveSources.length === 1 ? "is" : "are") + " read live from this browser every five minutes while this tab is visible; the others show the collector's snapshot.");
   controls.append(toggle, liveNote);
   if (chosen) { const all = routeLink("Show every source", formatRoute({ view: "status", id: null, query: {} })); controls.append(node("span", "", " "), all); }
+  if (!chosen) board.append(postureBlock(current.sources));
   board.append(node("p", "", "The collector read every source at " + stamp(current.generated_at) + ". It runs when GitHub starts the scheduled workflow, which is every few hours in practice; the Sources view lists the observed gap between runs."), controls);
   const views = new Map();
   for (const group of current.groups) {
-    const members = shown.filter(source => source.group === group.id);
+    const members = shown.filter(source => source.group === group.id).sort(compareAttention);
     if (!members.length) continue;
-    board.append(node("h3", "status-subtitle", group.label));
+    board.append(node("h3", "status-subtitle", chosen ? group.label : group.label + groupTally(members)));
     const grid = node("ul", "status-grid");
     for (const source of members) { const view = card(source, lib, Boolean(chosen)); grid.append(view.item); if (source.live) views.set(source.live, view); }
     board.append(grid);

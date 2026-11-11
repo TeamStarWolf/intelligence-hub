@@ -238,6 +238,11 @@ a.chip:hover { border-color: var(--tsw-link); color: var(--tsw-chip-fg); }
 .status-quiet { color: var(--tsw-text-muted); }
 .status-pages { margin: 8px 0; font-size: var(--text-sm); }
 .status-pages summary { cursor: pointer; color: var(--tsw-link); min-height: 28px; }
+.status-posture { margin: 0 0 10px; display: grid; gap: 6px; }
+.status-posture-headline { margin: 0; }
+.status-tally { list-style: none; margin: 2px 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.status-tally-item { margin: 0; }
+.status-posture-attention, .status-posture-note { margin: 2px 0 0; font-size: var(--text-sm); }
 
 /* Sidebar: collapsed by default; a docked column at 1024 px and wider, a drawer below. */
 .sidebar { position: fixed; inset: 0 0 0 auto; width: min(380px, 92vw); z-index: 30; overflow-y: auto; background: var(--tsw-bg-alt); border-left: 1px solid var(--tsw-border); box-shadow: -12px 0 32px var(--tsw-shadow); padding: 12px 16px 32px; }
