@@ -30,7 +30,7 @@ function source(id, fields = {}) {
     description: "All Systems Operational", open: [], ...fields };
 }
 
-function statusSite() {
+function statusSite(adjust = outages => outages) {
   const open = incident("tenable", "abcd1234", { status: "investigating", status_raw: "investigating", impact: "major", impact_raw: "major", resolved: null, url: "https://status.tenable.com/incidents/abcd1234", vendor: "vendor:tenable" });
   const current = { schema_version: 7, kind: "status-current", generated_at: "2026-11-03T12:00:00+00:00",
     groups: [{ id: "security-platforms", label: "Security platforms" }, { id: "cloud-and-saas", label: "Cloud and SaaS" }, { id: "developer-services", label: "Developer services" }, { id: "internet", label: "Internet outage signals" }],
@@ -47,6 +47,7 @@ function statusSite() {
       rows: [{ source: "ioda", id: "country/TL@1", entity_type: "country", entity_code: "TL", entity_name: "Timor-Leste", datasource: "gtr", start: "2026-11-03T00:00:00+00:00", end: null, duration_seconds: 22858, score: 8570, url: "https://ioda.inetintel.cc.gatech.edu/country/TL" }] },
     radar: { id: "cloudflare-radar", name: "Cloudflare Radar outage annotations", home: "https://radar.cloudflare.com/", status: "not_configured", fetched_at: null, last_success: null, error: null, copyright: null, rows: [],
       note: "Cloudflare Radar needs an API token." } };
+  adjust(outages);
   const index = { schema_version: 7, kind: "status-index", generated_at: "2026-11-03T12:00:00+00:00", months_kept: 13, months: [{ period: "2026-11", path: "status/2026-11.json", rows: 2 }],
     coverage: [{ source: "github", first_incident: "2026-11-02", incidents: 1 }], sources: 3, page_only: 1, truncated_rows: 0, board_sha256: "a".repeat(64), notes: ["A note."] };
   const outage = row("status-github-zzzz0001", { title: "GitHub: Incident zzzz0001", url: "https://www.githubstatus.com/incidents/zzzz0001", source_id: "status-github", source_name: "GitHub status page",
@@ -73,10 +74,10 @@ function network(site, answers) {
   return { http, vendor, fetchImpl };
 }
 
-async function boot({ hash = "", answers = { [GITHUB]: { page: {}, status: { indicator: "minor", description: "Minor Service Outage" } }, [TENABLE]: 503 }, hidden = false } = {}) {
+async function boot({ hash = "", answers = { [GITHUB]: { page: {}, status: { indicator: "minor", description: "Minor Service Outage" } }, [TENABLE]: 503 }, hidden = false, site = statusSite() } = {}) {
   const shell = page(hash, "");
   shell.doc.hidden = hidden;
-  const net = network(statusSite(), answers);
+  const net = network(site, answers);
   const timers = [];
   const app = createApp({ doc: shell.doc, win: shell.win, location: shell.location, history: shell.history, storage: storage(), session: storage(), fetchImpl: net.fetchImpl,
     subtle: webcrypto.subtle, every: (fn, ms) => { timers.push({ fn, ms, cleared: false }); return timers.length; }, clear: id => { if (timers[id - 1]) timers[id - 1].cleared = true; },
@@ -247,6 +248,33 @@ test("the whole view shows open incidents, internet outage signals with IODA's n
   assert.ok([...view.querySelectorAll("a")].some(anchor => anchor.getAttribute("href") === "./data/v7/status/2026-11.json"));
   assert.ok([...view.querySelectorAll("a")].some(anchor => anchor.getAttribute("href") === "#/explore?kind=incident&event=outage"));
   assert.ok(text.includes("Incident zzzz0001"), "the last 30 days lists the month file's incidents");
+});
+
+test("after a failed outage read the kept IODA and Radar rows are dated by the last good read, not the failed one", async () => {
+  const good = "2026-11-04T07:20:23+00:00";
+  const failed = "2026-11-10T12:00:00+00:00";
+  const site = statusSite(outages => {
+    outages.generated_at = failed;
+    Object.assign(outages.ioda, { status: "failed", fetched_at: failed, last_success: good, error: "IODA answered HTTP 503." });
+    Object.assign(outages.radar, { status: "failed", fetched_at: failed, last_success: good, error: "Radar answered HTTP 503.", note: null,
+      rows: [{ id: "radar-1", locations: ["Timor-Leste"], asns: [], cause: "POWER_OUTAGE", type: "NATIONWIDE", scope: null, description: null, start: "2026-11-04T01:00:00+00:00", end: null, url: "https://radar.cloudflare.com/outage-center" }] });
+  });
+  const shell = await boot({ hash: "#/status", site });
+  const view = shell.doc.querySelector("#view");
+  const caption = [...view.querySelectorAll("caption")].find(item => item.textContent.startsWith("IODA outage events"));
+  assert.ok(caption, "the IODA table is still shown");
+  const goodLabel = "4 Nov 2026, 07:20 UTC";
+  const failedLabel = "10 Nov 2026, 12:00 UTC";
+  assert.equal(caption.textContent, "IODA outage events for countries in the 24 hours before the collector's last good read at " + goodLabel + "; the read at " + failedLabel + " failed. Score is IODA's own severity score.");
+  assert.ok(!caption.textContent.includes("hours before the collector's read at " + failedLabel), "the caption does not date the kept rows by the failed read");
+  const ioda = [...caption.closest("table").querySelectorAll("tbody tr")];
+  assert.equal(ioda.length, 1);
+  assert.ok(ioda[0].textContent.includes("Ongoing at that read"));
+  assert.ok(view.textContent.includes("The collector's last IODA read failed (IODA answered HTTP 503.)."));
+  assert.ok(view.textContent.includes("The collector's last Radar read failed (Radar answered HTTP 503.)."));
+  assert.ok(view.textContent.includes("These Radar rows are from the collector's last good read at " + goodLabel + "."));
+  assert.ok(view.textContent.includes(", ongoing at that read"));
+  assert.ok(!view.textContent.includes("last good read at " + failedLabel));
 });
 
 test("an incident row sits in the Explorer timeline tagged outage with its vendor", async () => {

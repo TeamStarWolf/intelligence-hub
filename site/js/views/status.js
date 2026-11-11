@@ -179,15 +179,20 @@ function outagesSection(outages) {
     block.append(node("h3", "status-subtitle", ioda.name));
     if (ioda.status !== "ok") block.append(node("p", "notice-inline", "The collector's last IODA read " + (ioda.status === "failed" ? "failed (" + (ioda.error || "no reason") + ")." : "has not run.")));
     if (ioda.rows.length) {
+      // After a failed read the collector keeps the last good rows: date them by that read, not the failed one.
+      const retained = ioda.status !== "ok" && Boolean(ioda.last_success);
+      const basis = retained
+        ? "the collector's last good read at " + stamp(ioda.last_success) + (ioda.status === "failed" && ioda.fetched_at ? "; the read at " + stamp(ioda.fetched_at) + " failed" : "")
+        : "the collector's read at " + stamp(ioda.fetched_at);
       const table = node("table", "data-table");
-      table.append(node("caption", "", "IODA outage events for countries in the " + outages.window_hours + " hours before the collector's read at " + stamp(ioda.fetched_at) + ". Score is IODA's own severity score."));
+      table.append(node("caption", "", "IODA outage events for countries in the " + outages.window_hours + " hours before " + basis + ". Score is IODA's own severity score."));
       const head = node("tr");
       for (const text of ["Country", "Signal", "Started", "Duration", "Score"]) { const cell = node("th", "", text); cell.scope = "col"; head.append(cell); }
       const thead = node("thead"); thead.append(head);
       const body = node("tbody");
       for (const row of ioda.rows) {
         const tr = node("tr"); const where = node("td"); where.append(link(row.entity_name, row.url));
-        tr.append(where, node("td", "", row.datasource || "Not stated"), node("td", "", stamp(row.start)), node("td", "", row.end ? durationLabel(row.duration_seconds) : "Ongoing at the read"), node("td", "", row.score === null ? "Not stated" : row.score.toLocaleString("en-US")));
+        tr.append(where, node("td", "", row.datasource || "Not stated"), node("td", "", stamp(row.start)), node("td", "", row.end ? durationLabel(row.duration_seconds) : retained ? "Ongoing at that read" : "Ongoing at the read"), node("td", "", row.score === null ? "Not stated" : row.score.toLocaleString("en-US")));
         body.append(tr);
       }
       table.append(thead, body);
@@ -200,9 +205,11 @@ function outagesSection(outages) {
     block.append(node("h3", "status-subtitle", radar.name));
     if (radar.status === "not_configured") block.append(node("p", "muted", radar.note || "Cloudflare Radar is not configured, so no Radar request is made."));
     else if (radar.status !== "ok") block.append(node("p", "notice-inline", "The collector's last Radar read failed (" + (radar.error || "no reason") + ")."));
+    const radarRetained = radar.status === "failed" && Boolean(radar.last_success) && radar.rows.length > 0;
+    if (radarRetained) block.append(node("p", "muted", "These Radar rows are from the collector's last good read at " + stamp(radar.last_success) + "."));
     for (const row of radar.rows) {
       const line = node("p");
-      line.append(link((row.locations.join(", ") || row.scope || "Outage") + (row.cause ? ": " + row.cause.toLowerCase().replaceAll("_", " ") : ""), row.url), node("span", "muted", " " + stamp(row.start) + (row.end ? " to " + stamp(row.end) : ", ongoing")));
+      line.append(link((row.locations.join(", ") || row.scope || "Outage") + (row.cause ? ": " + row.cause.toLowerCase().replaceAll("_", " ") : ""), row.url), node("span", "muted", " " + stamp(row.start) + (row.end ? " to " + stamp(row.end) : radarRetained ? ", ongoing at that read" : ", ongoing")));
       block.append(line);
     }
   }
