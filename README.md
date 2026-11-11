@@ -29,6 +29,7 @@ history rows, back to 1998. Everything else is a tab, and every tab is also list
 | Sources | The run record, the history coverage matrix by source and year, and the source ledger. |
 | Method | The evidence rules, confidence levels, coverage statuses and licence notices. |
 | About | What the Hub is and what it covers. |
+| Patch Tuesday | Microsoft's monthly security release from the MSRC CVRF data: the headline numbers, what to prioritize by fixed rules, the exploited and publicly disclosed CVEs, the Critical CVEs, the product families, the KEV join, Adobe's and SAP's same-day bulletins as headline rows, and a brief for every monthly release back to January 2016. |
 
 Every view, filter, page and open entry has its own address; [docs/URLS.md](docs/URLS.md) is the
 route contract that the TeamStarWolf library's links follow.
@@ -54,6 +55,10 @@ GitHub API.
 - Tags come from `config/vocab/` and a pinned copy of the library's shared vocabulary
   ([TAGGING.md](docs/TAGGING.md)). Links to the TeamStarWolf library are generated from that
   vocabulary into `site/js/library.js`; the page builds no library link by hand.
+- Patch Tuesday briefs come from the Microsoft Security Response Center CVRF API. Every run reads MSRC's list of monthly releases and
+  rebuilds a month when its release first appears or its revision changes; the second Tuesday is never assumed. The CISA KEV
+  catalog, the Hub's CVE briefs, Adobe's bulletin index and SAP's Security Patch Day page are joined to each month
+  ([OPERATIONS.md](docs/OPERATIONS.md#patch-tuesday-briefs)).
 - Report editions in `reports/` come from a separate desktop compiler that the owner runs; the
   collector only lists them. If the report catalog is missing, too large or invalid, the data still
   publishes and the Reports tab says the catalog is unavailable.
@@ -124,6 +129,11 @@ themes, the 12 px type floor and an em-dash lint. New code needs tests.
   `data/v7/index.json` lists enter Pages. A publication must fit 192 MiB of input, at most 4,000
   files, at most 4 MiB for each v7 file and a 48,000,000-byte compressed-size estimate, and the
   artifact is kept for one day.
+- **Patch Tuesday is Microsoft's data.** Rows, severities, CVSS scores and the exploited, publicly disclosed and exploitability
+  values are the MSRC CVRF document's at its last revision. Azure Linux, CBL-Mariner and open-source package CVEs that the
+  documents also list are counted and left out. Adobe and SAP appear as headline rows only (ids, titles, dates, priorities and
+  links), and SAP rows start in 2024 because earlier years are PDF bulletins. The priority list follows fixed rules, not an
+  assessment of your environment.
 - **Read-only.** The site has no accounts, trackers or paid API fallback.
 
 ## Licences and notices
