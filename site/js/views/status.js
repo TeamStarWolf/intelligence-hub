@@ -39,8 +39,10 @@ export function createLiveBoard({ fetchImpl, every = (fn, ms) => setInterval(fn,
   let timer = null;
   let paused = false;
   let running = null;
+  // Each start() and stop() opens a new generation; a round from an older one ends at its next batch.
+  let generation = 0;
 
-  async function readOne(url) {
+  async function readOne(url, round) {
     stats.requests++;
     try {
       const { value } = await fetcher.getJson(url, { maximum: LIVE_MAX_BYTES, label: "status page", cacheMode: "no-store" });
@@ -49,7 +51,7 @@ export function createLiveBoard({ fetchImpl, every = (fn, ms) => setInterval(fn,
       stats.failures++;
       results.set(url, { ok: false, error: error && error.message ? error.message.slice(0, 200) : "The status page could not be read.", at: now() });
     }
-    if (listener) listener(url, results.get(url));
+    if (listener && round === generation) listener(url, results.get(url));
   }
 
   async function tick() {
@@ -57,19 +59,24 @@ export function createLiveBoard({ fetchImpl, every = (fn, ms) => setInterval(fn,
     if (doc && doc.hidden) { stats.skippedHidden++; return; }
     if (running) return running;
     stats.ticks++;
-    running = (async () => {
-      // Pause, a hidden tab or stop() between batches ends the round: no further batch starts.
-      for (let start = 0; start < urls.length; start += LIVE_BATCH) {
-        if (paused || (doc && doc.hidden)) break;
-        await Promise.all(urls.slice(start, start + LIVE_BATCH).map(readOne));
+    // The round walks the list it started with; a source switch starts a fresh round over the new list.
+    const round = generation;
+    const list = urls;
+    const current = (async () => {
+      // Pause, a hidden tab, stop() or a new start() between batches ends the round: no further batch starts.
+      for (let start = 0; start < list.length; start += LIVE_BATCH) {
+        if (paused || (doc && doc.hidden) || round !== generation) break;
+        await Promise.all(list.slice(start, start + LIVE_BATCH).map(url => readOne(url, round)));
       }
-    })().finally(() => { running = null; });
-    return running;
+    })().finally(() => { if (running === current) running = null; });
+    running = current;
+    return current;
   }
 
   function stop() {
     if (timer !== null) clear(timer);
     timer = null; listener = null; urls = [];
+    generation++; running = null;
   }
 
   // Starts reading urls now and every LIVE_INTERVAL; onResult(url, result) runs after each read.

@@ -197,6 +197,32 @@ test("pausing or hiding the tab during the first batch starts no further batch",
   }
 });
 
+test("switching to one source during a live batch reads the chosen source at once", async () => {
+  const urls = Array.from({ length: 12 }, (_, position) => "https://status" + position + ".example.org/api/v2/status.json");
+  const chosen = "https://chosen.example.org/api/v2/status.json";
+  const body = new TextEncoder().encode(JSON.stringify({ status: { indicator: "minor", description: "Partial outage" } }));
+  const requested = [];
+  const release = [];
+  const heard = [];
+  let held = true;
+  const reply = () => ({ ok: true, status: 200, headers: { get: () => null }, body: null, arrayBuffer: async () => body.buffer.slice(0) });
+  const fetchImpl = url => { requested.push(url); return held ? new Promise(resolve => release.push(() => resolve(reply()))) : Promise.resolve(reply()); };
+  const board = createLiveBoard({ fetchImpl, every: () => 1, clear: () => {}, now: () => Date.UTC(2026, 10, 3, 12, 0) });
+  const first = board.start(urls, () => {});
+  await settle(20);
+  assert.equal(requested.length, 6, "the first batch is six reads");
+  // The source changes while the first batch is still in flight.
+  held = false;
+  const second = board.start([chosen], url => heard.push(url));
+  for (const done of release.splice(0)) done();
+  await Promise.all([first, second]); await settle(20);
+  assert.ok(requested.includes(chosen), "the chosen source is read in this round, not five minutes later");
+  assert.equal(board.result(chosen).indicator, "minor");
+  assert.deepEqual(heard, [chosen], "the old round's reads never reach the new listener");
+  assert.equal(requested.length, 7, "the old round starts no second batch over the new list");
+  board.stop();
+});
+
 test("the deep link shows one source, its open incidents and its recent incidents", async () => {
   const shell = await boot({ hash: "#/status?source=tenable" });
   const found = cards(shell.doc);
