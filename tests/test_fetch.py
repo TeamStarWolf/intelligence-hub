@@ -80,6 +80,23 @@ class FetchTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             collect.fetch(URL, maximum=collect.FETCH_CEILING + 1)
 
+    def test_an_unbounded_read_passes_the_fetch_ceiling_and_a_bounded_one_does_not(self):
+        body = b"x" * (collect.FETCH_CEILING + 1)
+        raw = b"HTTP/1.1 200 OK\r\nContent-Length: " + str(len(body)).encode() + b"\r\n\r\n" + body
+        with serve(raw):
+            self.assertEqual(len(collect.fetch(URL, None, ceiling=collect.UNBOUNDED)), collect.FETCH_CEILING + 1)
+        with serve(raw):
+            with self.assertRaises(collect.ResponseByteLimitExceeded):
+                collect.fetch(URL, maximum=collect.FETCH_CEILING)
+
+    def test_unbounded_is_taken_only_by_name_with_no_bound(self):
+        with self.assertRaises(ValueError):
+            collect.fetch(URL, None)
+        with self.assertRaises(ValueError):
+            collect.fetch(URL, 10, ceiling=collect.UNBOUNDED)
+        with self.assertRaises(ValueError):
+            collect.fetch(URL, 64 * 1024 * 1024, ceiling=64 * 1024 * 1024)
+
 
 class PerSourceBoundTest(unittest.TestCase):
     def test_cisa_feeds_carry_8_mib_bounds(self):

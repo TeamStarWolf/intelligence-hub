@@ -169,8 +169,8 @@ def load_config(registry, safe_url):
     """The patch_tuesday block of config/sources.json, checked. Raises PatchTuesdayError."""
     value = registry.get("patch_tuesday") if isinstance(registry, dict) else None
     require(isinstance(value, dict) and set(value) == {"msrc", "adobe", "sap"}, "config/sources.json has no valid patch_tuesday block.")
-    from .collect import FETCH_CEILING, LARGE_DOCUMENT_CEILING
-    checks = {"msrc": ({"name", "home", "updates", "updates_max_bytes", "document", "document_max_bytes"}, {"api.msrc.microsoft.com"}),
+    from .collect import FETCH_CEILING
+    checks = {"msrc": ({"name", "home", "updates", "updates_max_bytes", "document"}, {"api.msrc.microsoft.com"}),
               "adobe": ({"name", "home", "index", "max_bytes"}, {"helpx.adobe.com"}),
               "sap": ({"name", "home", "index", "year", "max_bytes"}, {"support.sap.com"})}
     for key, (fields, hosts) in checks.items():
@@ -179,8 +179,7 @@ def load_config(registry, safe_url):
         require(isinstance(entry["name"], str) and 1 <= len(entry["name"]) <= 100, "Invalid patch_tuesday." + key + " name.")
         for field in fields - {"name"}:
             if field.endswith("max_bytes"):
-                ceiling = LARGE_DOCUMENT_CEILING if field == "document_max_bytes" else FETCH_CEILING
-                require(type(entry[field]) is int and 1 <= entry[field] <= ceiling, "Invalid patch_tuesday." + key + " byte bound.")
+                require(type(entry[field]) is int and 1 <= entry[field] <= FETCH_CEILING, "Invalid patch_tuesday." + key + " byte bound.")
                 continue
             sample = entry[field].replace("{id}", "2026-Oct").replace("{year}", "2025")
             require(isinstance(entry[field], str) and safe_url(sample) == sample and (field == "home" or
@@ -580,18 +579,20 @@ class Reader:
     def __init__(self, fetch=None, offline=None):
         self.fetch, self.offline = fetch, Path(offline) if offline else None
 
-    def get(self, url, maximum, accept, name, large=False):
+    def get(self, url, maximum, accept, name):
+        """The bytes at url inside maximum bytes. maximum None is the one unbounded read, an MSRC release
+        document, which the owner directed on 2026-11-11 to carry no byte ceiling."""
         if self.offline is not None:
             path = self.offline / name
             if not path.is_file():
                 raise OSError(name + " is not in the offline documents")
             with path.open("rb") as stream:
-                raw = stream.read(maximum + 1)
-            require(len(raw) <= maximum, name + " exceeds its byte bound.")
+                raw = stream.read() if maximum is None else stream.read(maximum + 1)
+            require(maximum is None or len(raw) <= maximum, name + " exceeds its byte bound.")
             return raw
-        from .collect import FETCH_CEILING, LARGE_DOCUMENT_CEILING
+        from .collect import FETCH_CEILING, UNBOUNDED
         return self.fetch(url, maximum, accept=accept, language="en-US" if accept == "text/html" else None,
-                          ceiling=LARGE_DOCUMENT_CEILING if large else FETCH_CEILING)
+                          ceiling=UNBOUNDED if maximum is None else FETCH_CEILING)
 
 
 def _reason(error):
@@ -623,8 +624,8 @@ def collect(state_dir, config, reader, *, limit=DEFAULT_DOCUMENTS, previous_inde
         if monotonic() - started > RUN_DEADLINE:
             return entry, None, "the run's Patch Tuesday time budget was spent"
         try:
-            raw = reader.get(msrc["document"].replace("{id}", entry["id"]), msrc["document_max_bytes"], "application/json",
-                             "cvrf/" + entry["id"] + ".json", large=True)
+            raw = reader.get(msrc["document"].replace("{id}", entry["id"]), None, "application/json",
+                             "cvrf/" + entry["id"] + ".json")
             return entry, parse_document(raw, entry, clock_now()), None
         except (OSError, ValueError, UnicodeDecodeError, KeyError, TypeError, AttributeError) as error:
             return entry, None, _reason(error)
