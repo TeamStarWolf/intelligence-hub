@@ -18,13 +18,14 @@ import { renderVendor, renderVendors } from "./views/vendors.js";
 import { renderTags } from "./views/tags.js";
 import { renderActors, renderEntity } from "./views/actors.js";
 import { renderMethod } from "./views/method.js";
+import { renderPatchTuesday } from "./views/patch-tuesday.js";
 import { createLiveBoard, renderStatus } from "./views/status.js";
 
 const TITLES = { explore: "Explorer", today: "Today", advisories: "Advisories", kev: "Known exploited", research: "Research", news: "News", cves: "CVE register", cve: "CVE",
-  history: "History", vendors: "Vendors", vendor: "Vendor", tags: "Tags", actors: "Actors and malware", actor: "Actor", malware: "Malware", reports: "Reports", sources: "Sources", method: "Method", data: "Data", about: "About", status: "Service health" };
+  history: "History", vendors: "Vendors", vendor: "Vendor", tags: "Tags", actors: "Actors and malware", actor: "Actor", malware: "Malware", reports: "Reports", sources: "Sources", method: "Method", data: "Data", about: "About", "patch-tuesday": "Patch Tuesday", status: "Service health" };
 const OTHER_VIEWS = { today: renderToday, kev: renderKev, cves: renderCves, cve: renderCves, history: renderHistory, vendors: renderVendors, vendor: renderVendor, tags: renderTags,
   actors: renderActors, actor: renderEntity, malware: renderEntity, reports: renderReports, sources: renderSources, method: renderMethod, data: renderData, about: renderAbout,
-  status: renderStatus };
+  "patch-tuesday": renderPatchTuesday, status: renderStatus };
 // The tab a view sits under: a page with an id lights its index tab.
 const TAB_OF = { cve: "cves", vendor: "vendors", actor: "actors", malware: "actors" };
 

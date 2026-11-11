@@ -38,14 +38,17 @@ server rewrite is needed. Values are percent-encoded; a space in `q` may be writ
 | `#/method` | Evidence rules, confidence levels, coverage statuses, dates and scores, and the licence and notice table | none |
 | `#/data` | Per-year analytics exports, the manifest, the data dictionary and the licence table | none |
 | `#/about` | What the Hub is, what it covers, how fresh it is, and the notices | none |
+| `#/patch-tuesday` | The latest Patch Tuesday brief: Microsoft's monthly release with its headline numbers, priority list, exploited and disclosed CVEs, Critical CVEs, product families, KEV join, Adobe and SAP rows, the month history and the rules | none |
+| `#/patch-tuesday/<YYYY-MM>` | The brief for one release month, such as `2026-10` | none |
 | `#/status` | Service health: the live board of vendor status pages and cloud health feeds by group, open incidents, internet outage signals and the incidents of the last 30 days | the 30 days before the snapshot's read |
 | `#/status?source=<id>` | Service health for one source from `config/status.json`, such as `github` | the 30 days before the snapshot's read |
 
 A `<CVE-id>` matches `CVE-YYYY-NNNN` with 4 to 19 digits after the year. A `<year>` is `1998` to
-`2099`. A vendor `<id>` is a vocabulary vendor id without its prefix (`fortinet`); an actor or
+`2099`. A `<YYYY-MM>` is a year from `1998` to `2099` and a month from `01` to `12`. A vendor `<id>` is a vocabulary vendor id without its prefix (`fortinet`); an actor or
 malware `<id>` is an ATT&CK id (`G0016`, `S0154`) or a vocabulary slug (`storm-0940`). Any other
 path opens the Explorer; `#/cve`, `#/vendor`, `#/actor` and `#/malware` with no valid id open
-their index view, and `#/history/<year>` with an invalid year opens the year index.
+their index view, and `#/history/<year>` with an invalid year opens the year index. `#/patch-tuesday/<YYYY-MM>` with an invalid month opens
+`#/patch-tuesday`, and a valid month with no brief shows the month history.
 
 `#/tag/<field>/<value>` is an alias: the page rewrites it to the Explorer filter for that value,
 so `#/tag/vendor/fortinet` becomes `#/explore?vendor=fortinet`. `<field>` is a query key from the
@@ -133,6 +136,8 @@ address to the hash route and drops the query string.
 | One year of history with its coverage | `https://teamstarwolf.github.io/intelligence-hub/#/history/1998` |
 | Every tag value in one year | `https://teamstarwolf.github.io/intelligence-hub/#/tags?year=2024` |
 | KEV additions in the last 90 days | `https://teamstarwolf.github.io/intelligence-hub/#/kev?range=90` |
+| The latest Patch Tuesday brief | `https://teamstarwolf.github.io/intelligence-hub/#/patch-tuesday` |
+| One month's Patch Tuesday brief | `https://teamstarwolf.github.io/intelligence-hub/#/patch-tuesday/2026-10` |
 
 A change to this contract changes `site/js/router.js`, its tests and this page in the same pull
 request, and the library's generator follows.

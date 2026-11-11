@@ -42,6 +42,8 @@ jobs:
         run: |
           mkdir -p .state
           cp tests/fixtures/public-cache.json .state/public-cache.json
+          # The trimmed MSRC, Adobe and SAP documents the Patch Tuesday step reads offline.
+          cp -R tests/fixtures/patch-tuesday/documents .state/patch-tuesday-documents
           # Service-health observations made by the real normalizers from tests/fixtures/status/documents.
           cp tests/fixtures/status-cache.json .state/status-cache.json
           python -E -s -m intelligence_hub --cached --start 1998-01-01 --end 2026-11-01

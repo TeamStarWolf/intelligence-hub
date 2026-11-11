@@ -27,6 +27,18 @@ test("a view that needs an id falls back to its index, and a bad id is never ref
   assert.equal(parseRoute("#/vendor", "").rewrite, true);
 });
 
+test("a Patch Tuesday month round-trips, and a bad month opens the latest brief without reflecting it", () => {
+  for (const hash of ["#/patch-tuesday", "#/patch-tuesday/2016-01", "#/patch-tuesday/2026-10"]) assert.equal(roundTrip(hash), hash);
+  assert.deepEqual(parseRoute("#/patch-tuesday/2026-10", ""), { view: "patch-tuesday", id: "2026-10", query: {}, rewrite: false });
+  for (const hash of ["#/patch-tuesday/2026-00", "#/patch-tuesday/2026-1", "#/patch-tuesday/1997-12", "#/patch-tuesday/%3Cscript%3E"]) {
+    assert.equal(roundTrip(hash), "#/patch-tuesday", hash);
+    assert.equal(parseRoute(hash, "").rewrite, true, hash);
+  }
+  // The view reads no query key, so one is dropped and the month stays.
+  assert.equal(roundTrip("#/patch-tuesday/2026-10?page=2"), "#/patch-tuesday/2026-10");
+  assert.equal(parseRoute("#/patch-tuesday/2026-10?page=2", "").rewrite, true);
+});
+
 test("history, vendor, tag and actor views keep only their own keys", () => {
   assert.equal(roundTrip("#/history/2003?month=07&source=microsoft-bulletins&page=2"), "#/history/2003?source=microsoft-bulletins&month=07&page=2");
   assert.equal(roundTrip("#/history?month=07&source=x&page=2"), "#/history", "the year index reads no key");

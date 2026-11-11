@@ -4,7 +4,7 @@
 // so nothing from the address bar is ever reflected into the page. docs/URLS.md publishes
 // this contract for links from the library.
 
-export const VIEWS = ["explore", "today", "advisories", "kev", "research", "news", "cves", "cve", "history", "vendors", "vendor", "tags", "actors", "actor", "malware", "reports", "sources", "method", "data", "about", "status"];
+export const VIEWS = ["explore", "today", "advisories", "kev", "research", "news", "cves", "cve", "history", "vendors", "vendor", "tags", "actors", "actor", "malware", "reports", "sources", "method", "data", "about", "patch-tuesday", "status"];
 // Views that are the Explorer with a fixed source-class constraint.
 export const LIST_VIEWS = { explore: null, advisories: ["vendor-primary", "government-cert"], research: ["researcher"], news: ["press"] };
 
@@ -64,19 +64,21 @@ const VIEW_KEYS = {
   // history is the year index; a history/<year> page reads the "history-year" keys.
   history: [], "history-year": ["source", "month", "page"],
   vendors: [], vendor: ["page"], tags: ["year"], actors: ["year"], actor: ["page"], malware: ["page"],
-  reports: [], sources: [], method: [], data: [], about: [],
+  reports: [], sources: [], method: [], data: [], about: [], "patch-tuesday": [],
   // #/status?source=<id> shows one service-health source.
   status: ["source"]
 };
 
-// Views with an id in the path: #/cve/<CVE-id>, #/history/<year>, #/vendor/<id>, #/actor/<id>
-// and #/malware/<id>. Without a valid id, a view that needs one falls back to its index view.
+// Views with an id in the path: #/cve/<CVE-id>, #/history/<year>, #/vendor/<id>, #/actor/<id>,
+// #/malware/<id> and #/patch-tuesday/<YYYY-MM>. Without a valid id, a view that needs one falls
+// back to its index view; #/patch-tuesday with no month opens the latest brief.
 export const ID_VIEWS = {
   cve: { check: value => CVE_ID.test(value), fallback: "cves" },
   history: { check: year, fallback: null },
   vendor: { check: slug, fallback: "vendors" },
   actor: { check: entity, fallback: "actors" },
-  malware: { check: entity, fallback: "actors" }
+  malware: { check: entity, fallback: "actors" },
+  "patch-tuesday": { check: value => /^(?:199[89]|20[0-9]{2})-(?:0[1-9]|1[0-2])$/.test(value), fallback: null }
 };
 
 export function viewKeys(view, id = null) {

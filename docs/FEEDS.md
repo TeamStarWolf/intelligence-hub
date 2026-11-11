@@ -300,6 +300,28 @@ Older generic policy errors do not establish a byte-limit cause. The explicit
 reason describes only the attempt that records it; it does not repair intake,
 increase any limit or imply complete publisher coverage.
 
+## Patch Tuesday sources
+
+The Patch Tuesday briefs read three vendor sources besides the feeds above. They live in the
+`patch_tuesday` block of [sources.json](../config/sources.json), not in the RSS list, and the
+collector checks each URL's host and byte bound before it reads anything
+(`intelligence_hub/patch_tuesday.py`).
+
+| Source | Read | Bound | What is taken |
+| --- | --- | --- | --- |
+| [MSRC CVRF API](https://api.msrc.microsoft.com/cvrf/v3.0/updates) updates list | every run | 1 MiB | Each monthly release's id (`2026-Oct`), title, initial release date and current release date. Mariner Release Notes are skipped. |
+| MSRC CVRF release document, `https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/<id>` | when a month is new or its current release date changed | 64 MiB | Per CVE: Microsoft's title, severity and impact (for the Microsoft products, or the highest across the CVE's package products when MSRC rates only those, matching MSRC's Max Severity), CVSS base score and vector, product families, component tag, issuing CNA, the Exploited and Publicly Disclosed flags, the exploitability index, CWE ids and revision dates. Descriptions, FAQs, acknowledgments and remediation tables are not read. |
+| [Adobe Security Bulletins and Advisories](https://helpx.adobe.com/security.html) | every run | 2 MiB | Each APSB bulletin's id, title, product sections, link and posted dates. |
+| [SAP Security Patch Day](https://support.sap.com/en/my-support/knowledge-base/security-notes-news.html) and its month and year pages | for months rebuilt this run and months with no SAP rows yet, at most 16 pages a run | 1 MiB each | Each Security Note's number, title, CVE ids, priority, CVSS score and link. |
+
+The MSRC release documents carry the Azure Linux and CBL-Mariner package CVEs that Microsoft
+ships, which makes recent months large: the October 2026 document was 30,083,214 bytes when
+read on 3 November 2026. The 64 MiB bound for that one document type is
+`LARGE_DOCUMENT_CEILING` in `intelligence_hub/collect.py`; every other read keeps the 16 MiB
+`FETCH_CEILING`. Adobe's index answers an automated read only when it sends `Accept: text/html`
+and `Accept-Language: en-US`, so those two reads send both. Every read keeps the collector's
+user agent, the 30-second deadline, `read1` and the refusal of redirects and compressed bodies.
+
 ## Bookmarks that are not connected feeds
 
 The bookmark repository is a discovery catalog, not a declaration that every listed service is integrated. This expansion reviewed a selected publisher subset. Other bookmarked news sources remain unreviewed unless listed above; they are not labeled unavailable merely because they were not attempted.

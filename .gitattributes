@@ -2,5 +2,6 @@
 # so no checkout may rewrite their line endings.
 history/** -text
 tests/history/fixtures/** -text
+tests/fixtures/patch-tuesday/** -text
 # Service-health fixtures are byte-exact responses; the AWS one is UTF-16.
 tests/fixtures/status/documents/** -text
