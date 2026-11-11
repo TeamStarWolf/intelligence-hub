@@ -25,9 +25,11 @@ CATALOG_URL = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vu
 # max_bytes in config/sources.json, never above FETCH_CEILING.
 MAX_BYTES = 3 * 1024 * 1024
 FETCH_CEILING = 16 * 1024 * 1024
-# The one larger bound: a Microsoft CVRF monthly release document (intelligence_hub/patch_tuesday.py).
-# The October 2026 document was 30,083,214 bytes when read on 2026-11-03, mostly Azure Linux rows.
-LARGE_DOCUMENT_CEILING = 64 * 1024 * 1024
+# The one unbounded read: a Microsoft CVRF monthly release document (intelligence_hub/patch_tuesday.py).
+# The October 2026 document was 30,083,214 bytes when read on 2026-11-03, mostly Azure Linux rows,
+# and the owner directed on 2026-11-11 that these documents carry no byte ceiling. fetch() takes
+# UNBOUNDED only by name, with maximum None; the 30-second read deadline still applies to it.
+UNBOUNDED = None
 # Byte bounds for the two public data files. Rows are never evicted to fit:
 # a run that would cross a bound fails and the deployed publication stays.
 FEED_MAX_BYTES = 8 * 1024 * 1024
@@ -109,10 +111,13 @@ class ResponseByteLimitExceeded(ValueError):
 def fetch(url, maximum=MAX_BYTES, fresh=False, *, accept=None, language=None, ceiling=FETCH_CEILING):
     """One bounded HTTPS read. accept and language replace the default Accept header and add an
     Accept-Language header (Adobe's bulletin index refuses a read without both); ceiling is
-    FETCH_CEILING, or LARGE_DOCUMENT_CEILING for an MSRC release document."""
+    FETCH_CEILING, or UNBOUNDED (None, with maximum None) for an MSRC release document."""
     require(safe_url(url) == url, "Source URL must be a canonical public HTTPS URL.")
-    require(ceiling in (FETCH_CEILING, LARGE_DOCUMENT_CEILING), "Invalid fetch ceiling.")
-    require(type(maximum) is int and 1 <= maximum <= ceiling, "Invalid bounded read size.")
+    require(ceiling == FETCH_CEILING or ceiling is UNBOUNDED, "Invalid fetch ceiling.")
+    if ceiling is UNBOUNDED:
+        require(maximum is None, "An unbounded read takes no byte bound.")
+    else:
+        require(type(maximum) is int and 1 <= maximum <= ceiling, "Invalid bounded read size.")
     require(accept is None or accept in {"application/json", "text/html"}, "Invalid Accept value.")
     require(language is None or language == "en-US", "Invalid Accept-Language value.")
     started = time.monotonic()
@@ -137,7 +142,7 @@ def fetch(url, maximum=MAX_BYTES, fresh=False, *, accept=None, language=None, ce
                 if not block:
                     break
                 size += len(block)
-                if size > maximum:
+                if maximum is not None and size > maximum:
                     raise ResponseByteLimitExceeded("Source exceeded its bounded read limit.")
                 chunks.append(block)
             if getattr(response, "length", None):

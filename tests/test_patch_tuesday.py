@@ -453,20 +453,55 @@ class ConfigTest(unittest.TestCase):
     def test_hosts_and_byte_bounds_are_checked(self):
         registry = json.loads((support.ROOT / "config/sources.json").read_text(encoding="utf-8"))
         for change in ({"msrc": {**registry["patch_tuesday"]["msrc"], "document": "https://api.example.org/cvrf/{id}"}},
-                       {"msrc": {**registry["patch_tuesday"]["msrc"], "document_max_bytes": collect.LARGE_DOCUMENT_CEILING + 1}},
+                       {"msrc": {**registry["patch_tuesday"]["msrc"], "document_max_bytes": 64 * 1024 * 1024}},
+                       {"msrc": {**registry["patch_tuesday"]["msrc"], "updates_max_bytes": collect.FETCH_CEILING + 1}},
                        {"adobe": {**registry["patch_tuesday"]["adobe"], "max_bytes": collect.FETCH_CEILING + 1}},
                        {"sap": {**registry["patch_tuesday"]["sap"], "extra": 1}}):
             broken = {**registry, "patch_tuesday": {**registry["patch_tuesday"], **change}}
             with self.assertRaises(pt.PatchTuesdayError):
                 pt.load_config(broken, collect.safe_url)
 
-    def test_fetch_takes_the_large_ceiling_only_by_name(self):
+    def test_fetch_is_unbounded_only_by_name(self):
+        updates = "https://api.msrc.microsoft.com/cvrf/v3.0/updates"
         with self.assertRaises(ValueError):
-            collect.fetch("https://api.msrc.microsoft.com/cvrf/v3.0/updates", collect.FETCH_CEILING + 1)
+            collect.fetch(updates, collect.FETCH_CEILING + 1)
         with self.assertRaises(ValueError):
-            collect.fetch("https://api.msrc.microsoft.com/cvrf/v3.0/updates", 10, ceiling=collect.LARGE_DOCUMENT_CEILING * 2)
+            collect.fetch(updates, None)
         with self.assertRaises(ValueError):
-            collect.fetch("https://api.msrc.microsoft.com/cvrf/v3.0/updates", 10, accept="text/javascript")
+            collect.fetch(updates, 10, ceiling=collect.UNBOUNDED)
+        with self.assertRaises(ValueError):
+            collect.fetch(updates, 64 * 1024 * 1024, ceiling=64 * 1024 * 1024)
+        with self.assertRaises(ValueError):
+            collect.fetch(updates, 10, accept="text/javascript")
+        self.assertIsNone(collect.UNBOUNDED)
+        self.assertNotIn("document_max_bytes", CONFIG["msrc"])
+
+
+class ReaderTest(unittest.TestCase):
+    def test_the_release_document_is_the_one_unbounded_read(self):
+        calls = []
+
+        def fake_fetch(url, maximum, *, accept=None, language=None, ceiling=collect.FETCH_CEILING):
+            calls.append((url, maximum, accept, language, ceiling))
+            return b"{}"
+
+        reader = pt.Reader(fetch=fake_fetch)
+        reader.get(CONFIG["msrc"]["updates"], CONFIG["msrc"]["updates_max_bytes"], "application/json", "updates.json")
+        reader.get(CONFIG["msrc"]["document"].replace("{id}", "2026-Oct"), None, "application/json", "cvrf/2026-Oct.json")
+        reader.get(CONFIG["adobe"]["index"], CONFIG["adobe"]["max_bytes"], "text/html", "adobe-security.html")
+        self.assertEqual(calls, [
+            (CONFIG["msrc"]["updates"], CONFIG["msrc"]["updates_max_bytes"], "application/json", None, collect.FETCH_CEILING),
+            ("https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/2026-Oct", None, "application/json", None, collect.UNBOUNDED),
+            (CONFIG["adobe"]["index"], CONFIG["adobe"]["max_bytes"], "text/html", "en-US", collect.FETCH_CEILING)])
+
+    def test_the_offline_reader_reads_a_whole_document_and_keeps_every_other_bound(self):
+        reader = pt.Reader(offline=DOCUMENTS)
+        raw = reader.get("https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/2026-Oct", None, "application/json", "cvrf/2026-Oct.json")
+        self.assertEqual(raw, (DOCUMENTS / "cvrf" / "2026-Oct.json").read_bytes())
+        with self.assertRaises(ValueError):
+            reader.get("https://api.msrc.microsoft.com/cvrf/v3.0/updates", 10, "application/json", "updates.json")
+        with self.assertRaises(OSError):
+            reader.get("https://api.msrc.microsoft.com/cvrf/v3.0/cvrf/2019-Jan", None, "application/json", "cvrf/2019-Jan.json")
 
 
 class BuildTest(unittest.TestCase):
