@@ -1062,6 +1062,22 @@ def previous_observations(current):
     return found
 
 
+def previous_outage_observations(outages):
+    """The last good IODA and Radar reads, from a previous outages.json, so a failed read keeps them.
+
+    current.json lists only the tracked status pages, so the outage blocks are seeded from here.
+    """
+    found = {}
+    for name in sorted(OUTAGE_FORMATS):
+        block = (outages or {}).get(name)
+        if not isinstance(block, dict) or not isinstance(block.get("id"), str) or not block.get("last_success"):
+            continue
+        rows = block.get("rows")
+        found[block["id"]] = {"rows": [row for row in rows if isinstance(row, dict)][:MAX_OUTAGE_ROWS] if isinstance(rows, list) else [],
+                              "copyright": block.get("copyright"), "last_success": block["last_success"]}
+    return found
+
+
 def deployed_index(fetch):
     """The deployed v7 index's status entries, for a run that resumed from data/feed.json because the
     v7 index was not usable for articles: the deployed status files are still the only copy of older
@@ -1141,6 +1157,8 @@ def collect_status(root, *, refresh, previous_index, deployed, end, fetch=None, 
         registry = load_registry(root)
         months, current = previous_state(carried)
         retained = previous_observations(current)
+        outages = carried.get(DIRECTORY + "/outages.json")
+        retained.update(previous_outage_observations(outages if isinstance(outages, dict) else None))
         cache_path = state / CACHE
         if refresh:
             token = os.environ.get(RADAR_TOKEN_ENV, "").strip() or None
