@@ -1,7 +1,7 @@
 """Service health (intelligence_hub/status.py): the registry, every normalizer on trimmed real
 responses, observation and fallback, the month files and their caps, Explorer rows, the
 publication decision, and the page's connect-src list."""
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 import io
 import json
 from pathlib import Path
@@ -315,6 +315,47 @@ class FilesTest(unittest.TestCase):
         _files, summary = status.build_files(REGISTRY, cache(), {}, date(2026, 11, 1), CLOCK, status.board_digest(current))
         self.assertFalse(summary["board_changed"])
 
+    def test_the_outages_digest_ignores_clocks(self):
+        files, summary = self.build()
+        outages = files["status/outages.json"]
+        self.assertTrue(summary["outages_changed"], "no previous digest counts as a change")
+        moved = json.loads(json.dumps(outages))
+        moved["generated_at"] = "2026-11-02T00:00:00+00:00"
+        for block in ("ioda", "radar"):
+            moved[block]["fetched_at"] = "2026-11-02T00:00:00+00:00"
+            moved[block]["last_success"] = "2026-11-02T00:00:00+00:00"
+        self.assertEqual(status.outages_digest(outages), status.outages_digest(moved))
+        moved["ioda"]["rows"] = moved["ioda"]["rows"][1:]
+        self.assertNotEqual(status.outages_digest(outages), status.outages_digest(moved))
+        _files, summary = status.build_files(REGISTRY, cache(), {}, date(2026, 11, 1), CLOCK, None, status.outages_digest(outages))
+        self.assertFalse(summary["outages_changed"])
+
+    def test_a_month_over_the_shard_bound_drops_its_oldest_rows_to_fit(self):
+        template = cache()["check-point"]["incidents"][0]
+        base = datetime(2026, 10, 1, tzinfo=timezone.utc)
+        big = []
+        for number in range(2400):
+            clock = (base + timedelta(minutes=number)).isoformat(timespec="seconds")
+            big.append({**template, "id": "big{:05d}".format(number), "name": "N" * status.NAME_MAX, "summary": "S" * status.SUMMARY_MAX,
+                        "components": ["C" * status.COMPONENT_MAX] * status.COMPONENTS_MAX, "started": clock, "updated": clock,
+                        "resolved": clock, "status": "resolved"})
+        self.assertTrue(all(status.valid_incident(row) for row in big))
+        self.assertGreater(len(shards.canonical({"rows": big})), shards.SHARD_MAX_BYTES, "the rows really are over the bound")
+        files, summary = self.build({"2026-10": big})
+        path = "status/2026-10.json"
+        month = files[path]
+        self.assertLessEqual(len(shards.canonical(month)), shards.SHARD_MAX_BYTES)
+        kept = {row["id"] for row in month["rows"]}
+        dropped = [row for row in big if row["id"] not in kept]
+        self.assertTrue(dropped)
+        self.assertLess(max(row["started"] for row in dropped), min(row["started"] for row in month["rows"]), "the oldest rows go first")
+        # No more than needed: one dropped row back puts the month over the bound.
+        self.assertGreater(len(shards.canonical({**month, "rows": [dropped[-1]] + month["rows"]})), shards.SHARD_MAX_BYTES)
+        self.assertEqual(summary["truncated_rows"], len(dropped))
+        self.assertEqual(files["status/index.json"]["truncated_rows"], len(dropped))
+        self.assertEqual(next(entry["rows"] for entry in files["status/index.json"]["months"] if entry["path"] == path), len(month["rows"]))
+        shards.serialize(files)  # every file fits, so serialization no longer fails the run
+
     def test_shard_rows_and_spans(self):
         files, _summary = self.build()
         raw, entries = shards.serialize(files)
@@ -391,10 +432,45 @@ class BuildTest(unittest.TestCase):
             workspace.close()
 
     def test_clock_only_changes_never_republish(self):
-        self.assertEqual(status.QUIET, ("status/current.json", "status/index.json"))
+        self.assertEqual(status.QUIET, ("status/current.json", "status/index.json", "status/outages.json"))
         source = (support.ROOT / "intelligence_hub" / "collect.py").read_text(encoding="utf-8")
-        self.assertIn('quiet = {"sources.json", *status_quiet}', source)
-        self.assertIn('service_health["summary"].get("board_changed") is True', source)
+        self.assertIn('changed = publication_changed(changed, v7["changed_shards"], v7["removed_shards"], v7["exports_changed"], service_health["summary"])', source)
+        quiet = {"board_changed": False, "outages_changed": False}
+        clocks = ["sources.json", "status/current.json", "status/index.json", "status/outages.json"]
+        self.assertFalse(collect.publication_changed(False, clocks, [], False, quiet))
+        self.assertTrue(collect.publication_changed(False, clocks, [], False, {**quiet, "outages_changed": True}))
+        self.assertTrue(collect.publication_changed(False, clocks, [], False, {**quiet, "board_changed": True}))
+        self.assertTrue(collect.publication_changed(False, clocks + ["status/2026-10.json"], [], False, quiet))
+        self.assertTrue(collect.publication_changed(False, [], ["status/2025-10.json"], False, quiet))
+        self.assertTrue(collect.publication_changed(True, [], [], False, quiet))
+        self.assertTrue(collect.publication_changed(False, [], [], True, quiet))
+
+    def test_two_builds_whose_status_clocks_differ_and_nothing_else_publish_nothing(self):
+        workspace = support.BuildCopy()
+        try:
+            code, _result, output = workspace.run()
+            self.assertEqual(code, 0, output[-2000:])
+            path = workspace.root / ".state" / "status-cache.json"
+            value = json.loads(path.read_text(encoding="utf-8"))
+            for item in value["sources"].values():
+                for field in ("fetched_at", "last_success"):
+                    if item.get(field):
+                        item[field] = (datetime.fromisoformat(item[field]) + timedelta(hours=1)).isoformat(timespec="seconds")
+            path.write_text(json.dumps(value), encoding="utf-8")
+            code, result, output = workspace.run()
+            self.assertEqual(code, 0, output[-2000:])
+            # The clocks did move: the board, its index and the outage file have new bytes.
+            self.assertTrue({"status/current.json", "status/index.json", "status/outages.json"} <= set(result["changed_shards"]), result["changed_shards"])
+            self.assertFalse(result["status"]["board_changed"])
+            self.assertFalse(result["status"]["outages_changed"])
+            self.assertEqual(result["removed_shards"], [])
+            self.assertFalse(result["exports_changed"])
+            # An offline --cached build has no deployed snapshot, so its v6 content always counts as
+            # new; with the v6 content unchanged, as it is when only status clocks move, nothing deploys.
+            self.assertFalse(collect.publication_changed(False, result["changed_shards"], result["removed_shards"], result["exports_changed"], result["status"]),
+                             "clock-only changes must not deploy")
+        finally:
+            workspace.close()
 
 
 class PreviousPublicationTest(unittest.TestCase):

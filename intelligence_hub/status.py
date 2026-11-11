@@ -90,8 +90,9 @@ VOCAB_ID = re.compile(r"(?:vendor|product):[a-z0-9][a-z0-9-]{0,80}")
 SAFE_ROW_ID = re.compile(r"[A-Za-z0-9._:-]{1,60}")
 MONTH_PATH = re.compile(r"status/([0-9]{4}-(?:0[1-9]|1[0-2]))\.json")
 PATH = re.compile(r"status/(?:current|outages|index|[0-9]{4}-(?:0[1-9]|1[0-2]))\.json")
-# Shards that change on every run only because of their clocks; publication follows the board digest instead.
-QUIET = ("status/current.json", "status/index.json")
+# Shards that change on every run only because of their clocks; publication follows the board and
+# outage digests instead, which leave the clocks out.
+QUIET = ("status/current.json", "status/index.json", "status/outages.json")
 INCIDENT_FIELDS = ("source", "vendor", "id", "name", "status", "status_raw", "impact", "impact_raw", "components", "started", "updated",
                    "resolved", "url", "summary")
 NOTES = [
@@ -796,8 +797,28 @@ def fold(rows):
     return kept
 
 
-def build_files(registry, observations, previous_months, end, generated_at, previous_board=None):
-    """({path under data/v7: value}, summary). previous_months is {YYYY-MM: [rows]} from the last publication."""
+def fit_month(document):
+    """Drops the oldest rows of a month file until its canonical bytes fit under the shard bound;
+    returns how many were dropped. A month over the bound would otherwise fail shards.serialize
+    outside this step and hold the whole feed."""
+    from . import shards
+    rows = document["rows"]
+    excess = len(shards.canonical(document)) - shards.SHARD_MAX_BYTES
+    drop = 0
+    # A row costs its own canonical bytes less the newline, plus the comma that joins it: the same count.
+    while excess > 0 and drop < len(rows):
+        excess -= len(shards.canonical(rows[drop]))
+        drop += 1
+    document["rows"] = rows[drop:]
+    while document["rows"] and len(shards.canonical(document)) > shards.SHARD_MAX_BYTES:
+        document["rows"] = document["rows"][1:]
+        drop += 1
+    return drop
+
+
+def build_files(registry, observations, previous_months, end, generated_at, previous_board=None, previous_outages=None):
+    """({path under data/v7: value}, summary). previous_months is {YYYY-MM: [rows]} from the last publication;
+    previous_board and previous_outages are the digests of the last publication's current.json and outages.json."""
     window = months_window(end)
     known = {source["id"] for source in tracked(registry)}
     rows = [row for month, items in (previous_months or {}).items() if month in window for row in items
@@ -819,6 +840,8 @@ def build_files(registry, observations, previous_months, end, generated_at, prev
             items = items[-MAX_MONTH_ROWS:]
         path = DIRECTORY + "/" + month + ".json"
         files[path] = {"schema_version": SCHEMA_VERSION, "kind": "status-month", "period": month, "rows": items}
+        truncated += fit_month(files[path])
+        items = files[path]["rows"]
         entries.append({"period": month, "path": path, "rows": len(items)})
         for row in items:
             item = coverage.setdefault(row["source"], {"source": row["source"], "first_incident": row["started"][:10], "incidents": 0})
@@ -826,8 +849,10 @@ def build_files(registry, observations, previous_months, end, generated_at, prev
             item["first_incident"] = min(item["first_incident"], row["started"][:10])
     current = current_file(registry, observations, folded, generated_at)
     files[DIRECTORY + "/current.json"] = current
-    files[DIRECTORY + "/outages.json"] = outages_file(registry, observations, generated_at)
+    outages = outages_file(registry, observations, generated_at)
+    files[DIRECTORY + "/outages.json"] = outages
     digest = board_digest(current)
+    outages_sha = outages_digest(outages)
     files[DIRECTORY + "/index.json"] = {"schema_version": SCHEMA_VERSION, "kind": "status-index", "generated_at": generated_at,
                                         "months_kept": MONTHS_KEPT, "months": entries, "coverage": [coverage[key] for key in sorted(coverage)],
                                         "sources": len(tracked(registry)), "page_only": len(registry["page_only"]), "truncated_rows": truncated,
@@ -837,7 +862,8 @@ def build_files(registry, observations, previous_months, end, generated_at, prev
     summary = {"status": "ok", "sources": len(tracked(registry)), "ok": sum(1 for source in tracked(registry) if (observations.get(source["id"]) or {}).get("status") == "ok"),
                "failed": sorted(source["id"] for source in registry["sources"] if (observations.get(source["id"]) or {}).get("status") == "failed"),
                "incidents": len(folded), "open": sum(len(item["open"]) for item in current["sources"]), "months": len(entries),
-               "board_changed": previous_board is None or previous_board != digest, "truncated_rows": truncated}
+               "board_changed": previous_board is None or previous_board != digest,
+               "outages_changed": previous_outages is None or previous_outages != outages_sha, "truncated_rows": truncated}
     return files, summary
 
 
@@ -880,6 +906,15 @@ def board_digest(current):
     def strip(value):
         return {key: item for key, item in value.items() if key not in {"fetched_at", "last_success", "generated_at"}}
     value = {**strip(current), "sources": [strip(source) for source in current["sources"]]}
+    return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
+def outages_digest(outages):
+    """sha256 of outages.json without its clocks (generated_at and each block's fetched_at and
+    last_success): the outage signals changed only when a row, a status, an error or a note changed."""
+    clocks = {"fetched_at", "last_success", "generated_at"}
+    value = {key: ({name: part for name, part in item.items() if name not in clocks} if isinstance(item, dict) else item)
+             for key, item in outages.items() if key not in clocks}
     return hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
 
 
@@ -1012,7 +1047,7 @@ def carried_summary(files, reason):
     index = files.get(DIRECTORY + "/index.json") or {}
     months = [path for path in files if MONTH_PATH.fullmatch(path)]
     return {"status": "carried", "reason": reason, "sources": index["sources"] if isinstance(index.get("sources"), int) else 0,
-            "incidents": sum(len(files[path]["rows"]) for path in months), "months": len(months), "board_changed": False,
+            "incidents": sum(len(files[path]["rows"]) for path in months), "months": len(months), "board_changed": False, "outages_changed": False,
             "carried": sorted(files)}
 
 
@@ -1080,7 +1115,7 @@ def read_time(observations, end):
 def held(reason):
     """The step's result when a previous status file cannot be read: the collector stops on it."""
     print("Status: " + reason + "; holding this run so no incident history is lost.", file=sys.stderr)
-    return {"files": {}, "rows": [], "registry": None, "summary": {"status": "held", "reason": reason[:300], "board_changed": False}}
+    return {"files": {}, "rows": [], "registry": None, "summary": {"status": "held", "reason": reason[:300], "board_changed": False, "outages_changed": False}}
 
 
 def collect_status(root, *, refresh, previous_index, deployed, end, fetch=None, state=None, clock=None):
@@ -1120,7 +1155,9 @@ def collect_status(root, *, refresh, previous_index, deployed, end, fetch=None, 
         # The files carry the collector's read time, not the build time, so a --cached rebuild of
         # the same observations gives the same bytes.
         generated = read_time(observations, end)
-        files, summary = build_files(registry, observations, months, end, generated, board_digest(current) if current else None)
+        before = carried.get(DIRECTORY + "/outages.json")
+        files, summary = build_files(registry, observations, months, end, generated, board_digest(current) if current else None,
+                                     outages_digest(before) if isinstance(before, dict) else None)
         return {"files": files, "rows": explorer_rows(files, registry), "registry": registry, "summary": summary}
     except (OSError, ValueError, TypeError, KeyError, AttributeError, RecursionError) as error:
         reason = (str(error) or type(error).__name__)[:300]
@@ -1133,7 +1170,7 @@ def collect_status(root, *, refresh, previous_index, deployed, end, fetch=None, 
                 rows = []
             return {"files": carried, "rows": rows, "registry": registry if rows else None, "summary": carried_summary(carried, reason)}
         print("Status: service health not built (" + reason + ").", file=sys.stderr)
-        return {"files": {}, "rows": [], "registry": None, "summary": {"status": "unavailable", "reason": reason, "board_changed": False}}
+        return {"files": {}, "rows": [], "registry": None, "summary": {"status": "unavailable", "reason": reason, "board_changed": False, "outages_changed": False}}
 
 
 def headroom(files, canonical, cap):
