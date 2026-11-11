@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHash, webcrypto } from "node:crypto";
-import { createFetcher, HttpError } from "../../site/js/fetcher.js";
+import { createFetcher, HttpError, sizeLabel } from "../../site/js/fetcher.js";
 
 const response = (status, text = "", etag = null) => {
   const bytes = new TextEncoder().encode(text);
@@ -32,6 +32,18 @@ test("bounds, status and JSON errors are refused", async () => {
   await assert.rejects(fetcher.getJson("./big.json", { maximum: 1024, label: "big file" }), /exceeds/);
   await assert.rejects(fetcher.getJson("./gone.json", { maximum: 1024 }), error => error instanceof HttpError && error.status === 404);
   await assert.rejects(fetcher.getJson("./bad.json", { maximum: 1024 }), /not valid JSON/);
+});
+
+test("the size in a too-large message is never rounded down to 0 MiB", async () => {
+  assert.equal(sizeLabel(65536), "64 KiB");
+  assert.equal(sizeLabel(1024), "1 KiB");
+  assert.equal(sizeLabel(100), "1 KiB");
+  assert.equal(sizeLabel(1048576), "1 MiB");
+  assert.equal(sizeLabel(24 * 1048576), "24 MiB");
+  const fetcher = createFetcher({ fetchImpl: async () => response(200, "x".repeat(2048)) });
+  await assert.rejects(fetcher.getJson("./big.json", { maximum: 1024, label: "big file" }), { message: "The big file exceeds the supported 1 KiB download size." });
+  const large = createFetcher({ fetchImpl: async () => response(200, "x".repeat(2048)) });
+  await assert.rejects(large.getJson("./big.json", { maximum: 2047, label: "big file" }), { message: "The big file exceeds the supported 2 KiB download size." });
 });
 
 test("a shard is versioned by its sha256, checked, and read once more past the cache on a mismatch", async () => {

@@ -224,6 +224,29 @@ test("the live reader bounds its reads and never throws", async () => {
   assert.match(results[0].error, /exceeds the supported/);
 });
 
+test("an oversized live response names the 64 KiB bound, with or without a content-length", async () => {
+  const big = new TextEncoder().encode(JSON.stringify({ status: { indicator: "none", description: "x".repeat(70000) } }));
+  const stream = () => {
+    let sent = false;
+    return { getReader: () => ({ read: async () => { if (sent) return { done: true }; sent = true; return { done: false, value: big }; }, cancel: async () => {} }) };
+  };
+  const replies = [
+    { ok: true, status: 200, headers: { get: key => key === "content-length" ? String(big.byteLength) : null }, body: null, arrayBuffer: async () => big.buffer },
+    { ok: true, status: 200, headers: { get: () => null }, body: stream(), arrayBuffer: async () => big.buffer },
+    { ok: true, status: 200, headers: { get: () => null }, body: null, arrayBuffer: async () => big.buffer },
+  ];
+  for (const reply of replies) {
+    const results = [];
+    const board = createLiveBoard({ fetchImpl: async () => reply, every: () => 1, clear: () => {}, now: () => Date.UTC(2026, 10, 3, 12, 0) });
+    await board.start([GITHUB], (url, result) => results.push(result));
+    board.stop();
+    assert.equal(results.length, 1);
+    assert.equal(results[0].ok, false);
+    assert.equal(results[0].error, "The status page exceeds the supported 64 KiB download size.");
+    assert.doesNotMatch(results[0].error, / 0 MiB/);
+  }
+});
+
 test("site/files.json lists the view and index.html names it in no other way", () => {
   const listed = JSON.parse(readFileSync(ROOT + "site/files.json", "utf8")).files;
   assert.ok(listed.includes("js/views/status.js"));
