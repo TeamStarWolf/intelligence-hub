@@ -58,7 +58,11 @@ export function createLiveBoard({ fetchImpl, every = (fn, ms) => setInterval(fn,
     if (running) return running;
     stats.ticks++;
     running = (async () => {
-      for (let start = 0; start < urls.length; start += LIVE_BATCH) await Promise.all(urls.slice(start, start + LIVE_BATCH).map(readOne));
+      // Pause, a hidden tab or stop() between batches ends the round: no further batch starts.
+      for (let start = 0; start < urls.length; start += LIVE_BATCH) {
+        if (paused || (doc && doc.hidden)) break;
+        await Promise.all(urls.slice(start, start + LIVE_BATCH).map(readOne));
+      }
     })().finally(() => { running = null; });
     return running;
   }
@@ -124,6 +128,8 @@ function applyLive(view, result) {
     view.basis.textContent = "Live: read from " + new URL(source.live).hostname + " by this browser at " + timeLabel(result.at) + ".";
     view.item.classList.add("status-live");
   } else {
+    // Back to the snapshot's own indicator and words, so an earlier live read never sits under a Snapshot label.
+    view.state.replaceChildren(badge(source.indicator), node("span", "status-words", source.description || ""));
     view.basis.textContent = "Live read failed at " + timeLabel(result.at) + " (" + result.error + "). " + snapshotLabel(source);
     view.item.classList.remove("status-live");
   }

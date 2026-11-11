@@ -157,6 +157,46 @@ test("pausing stops the reads, resuming reads again, a hidden tab reads nothing 
   assert.equal(shell.net.vendor.length, after, "a stopped board reads nothing");
 });
 
+test("a refresh that fails after a live read puts the snapshot's indicator and words back on the card", async () => {
+  const answers = { [GITHUB]: { page: {}, status: { indicator: "minor", description: "Minor Service Outage" } }, [TENABLE]: 503 };
+  const shell = await boot({ hash: "#/status", answers });
+  const github = () => cards(shell.doc).github;
+  assert.equal(github().querySelector(".status-badge").textContent, "Minor incident");
+  assert.ok(github().classList.contains("status-live"));
+  answers[GITHUB] = 503;
+  await liveTimer(shell.timers).fn(); await settle(60);
+  assert.equal(github().querySelector(".status-badge").textContent, "Operational", "the snapshot's indicator, not the earlier live one");
+  assert.equal(github().querySelector(".status-words").textContent, "All Systems Operational");
+  assert.equal(github().querySelectorAll(".status-badge").length, 1);
+  assert.match(github().querySelector(".status-basis").textContent, /^Live read failed at \d{2}:\d{2} UTC \(The status page could not be read \(HTTP 503\)\.\)\. Snapshot from the collector's read/);
+  assert.ok(!github().classList.contains("status-live"));
+});
+
+test("pausing or hiding the tab during the first batch starts no further batch", async () => {
+  const urls = Array.from({ length: 12 }, (_, position) => "https://status" + position + ".example.org/api/v2/status.json");
+  const body = new TextEncoder().encode(JSON.stringify({ status: { indicator: "none", description: "All Systems Operational" } }));
+  for (const how of ["pause", "hide"]) {
+    const doc = { hidden: false };
+    const requested = [];
+    const release = [];
+    let held = true;
+    const reply = () => ({ ok: true, status: 200, headers: { get: () => null }, body: null, arrayBuffer: async () => body.buffer.slice(0) });
+    // The first batch is held until the test pauses or hides; any later read would answer at once.
+    const fetchImpl = url => { requested.push(url); return held ? new Promise(resolve => release.push(() => resolve(reply()))) : Promise.resolve(reply()); };
+    const board = createLiveBoard({ fetchImpl, every: () => 1, clear: () => {}, now: () => Date.UTC(2026, 10, 3, 12, 0), doc });
+    const round = board.start(urls, () => {});
+    await settle(20);
+    assert.equal(requested.length, 6, how + ": the first batch is six reads");
+    if (how === "pause") board.setPaused(true); else doc.hidden = true;
+    held = false;
+    for (const done of release.splice(0)) done();
+    await round; await settle(20);
+    assert.equal(requested.length, 6, how + ": no second batch starts");
+    assert.equal(board.stats.requests, 6);
+    board.stop();
+  }
+});
+
 test("the deep link shows one source, its open incidents and its recent incidents", async () => {
   const shell = await boot({ hash: "#/status?source=tenable" });
   const found = cards(shell.doc);
