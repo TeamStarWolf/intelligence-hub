@@ -62,6 +62,7 @@ export function dateBasisLabel(row) {
   if (!row.time) return "Date unknown";
   if (row.date_basis === "event") return "Event date";
   if (row.kind === "kev") return "Catalog added";
+  if (row.origin === "service-status") return "Incident start";
   if (row.date_basis.startsWith("publisher update")) return "Updated";
   return "Published";
 }

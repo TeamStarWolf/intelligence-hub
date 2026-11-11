@@ -102,8 +102,9 @@ SHARD_PATH = re.compile(r"(?:sources|coverage|reports|cve-index|recent)\.json"
                         r"|history/(?:[0-9]{4}(?:-(?:h[12]|q[1-4]|0[1-9]|1[0-2]))?|undated)\.json"
                         r"|kev/[0-9]{4}\.json"
                         r"|cve/[0-9]{4}/[0-9]{1,5}k\.json"
-                        r"|patch-tuesday/(?:index|[0-9]{4}-(?:0[1-9]|1[0-2]))\.json")
-SHARD_DIRECTORY = re.compile(r"live|history|kev|cve|cve/[0-9]{4}|exports|patch-tuesday")
+                        r"|patch-tuesday/(?:index|[0-9]{4}-(?:0[1-9]|1[0-2]))\.json"
+                        r"|status/(?:current|outages|index|[0-9]{4}-(?:0[1-9]|1[0-2]))\.json")
+SHARD_DIRECTORY = re.compile(r"live|history|kev|cve|cve/[0-9]{4}|exports|patch-tuesday|status")
 # The Patch Tuesday briefs (intelligence_hub/patch_tuesday.py): one per Microsoft monthly release.
 PATCH_TUESDAY_MONTH = re.compile(r"patch-tuesday/[0-9]{4}-(?:0[1-9]|1[0-2])\.json")
 # The page files are the ones site/files.json lists (intelligence_hub/site.py), plus that list.
@@ -389,6 +390,9 @@ def _span(value):
         days = [value["msrc"]["initial_release"][:10]]
     elif value["kind"] == "patch-tuesday-index" and value["months"]:
         days = sorted(item["initial_release"][:10] for item in value["months"])
+    elif value["kind"] == "status-month":
+        # Service-health incidents (intelligence_hub/status.py) by start day.
+        days = sorted(row["started"][:10] for row in value["rows"])
     else:
         return None, None
     return (days[0], days[-1]) if days else (None, None)
@@ -401,6 +405,12 @@ def _rows(value):
         return len(value["catalog"]["reports"]) if value["status"] == "available" else 0
     if value["kind"] == "patch-tuesday-index":
         return len(value["months"])
+    if value["kind"] == "status-current":
+        return len(value["sources"])
+    if value["kind"] == "status-index":
+        return len(value["months"])
+    if value["kind"] == "status-outages":
+        return sum(len(block["rows"]) for block in value.values() if isinstance(block, dict) and isinstance(block.get("rows"), list))
     return len(value["rows"])
 
 

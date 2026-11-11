@@ -39,6 +39,24 @@ test("a Patch Tuesday month round-trips, and a bad month opens the latest brief 
   assert.equal(parseRoute("#/patch-tuesday/2026-10?page=2", "").rewrite, true);
 });
 
+test("Service health round-trips, keeps its source and drops every other key and a bad source", () => {
+  assert.equal(roundTrip("#/status"), "#/status");
+  assert.deepEqual(parseRoute("#/status", ""), { view: "status", id: null, query: {}, rewrite: false });
+  assert.equal(roundTrip("#/status?source=github"), "#/status?source=github");
+  assert.deepEqual(parseRoute("#/status?source=github", ""), { view: "status", id: null, query: { source: "github" }, rewrite: false });
+  assert.equal(formatRoute({ view: "status", id: null, query: { source: "github" } }), "#/status?source=github");
+  // Unknown keys and keys other views read are dropped; the source stays.
+  for (const hash of ["#/status?source=github&q=x", "#/status?kind=incident&source=github&utm_source=z", "#/status?source=github&page=2&event=outage"]) {
+    assert.equal(roundTrip(hash), "#/status?source=github", hash);
+    assert.equal(parseRoute(hash, "").rewrite, true, hash);
+  }
+  // A source that is not a lowercase slug is never reflected.
+  for (const hash of ["#/status?source=GitHub", "#/status?source=%3Cscript%3E", "#/status?source=..%2Fetc", "#/status?source=", "#/status?source=github%20x", "#/status?q=x"]) {
+    assert.equal(roundTrip(hash), "#/status", hash);
+    assert.equal(parseRoute(hash, "").rewrite, true, hash);
+  }
+});
+
 test("history, vendor, tag and actor views keep only their own keys", () => {
   assert.equal(roundTrip("#/history/2003?month=07&source=microsoft-bulletins&page=2"), "#/history/2003?source=microsoft-bulletins&month=07&page=2");
   assert.equal(roundTrip("#/history?month=07&source=x&page=2"), "#/history", "the year index reads no key");

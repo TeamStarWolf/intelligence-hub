@@ -30,6 +30,7 @@ history rows, back to 1998. Everything else is a tab, and every tab is also list
 | Method | The evidence rules, confidence levels, coverage statuses and licence notices. |
 | About | What the Hub is and what it covers. |
 | Patch Tuesday | Microsoft's monthly security release from the MSRC CVRF data: the headline numbers, what to prioritize by fixed rules, the exploited and publicly disclosed CVEs, the Critical CVEs, the product families, the KEV join, Adobe's and SAP's same-day bulletins as headline rows, and a brief for every monthly release back to January 2016. |
+| Service health | The vendors' own status pages and cloud health feeds by group, open incidents, internet outage signals from IODA, and the last 30 days of incidents. |
 
 Every view, filter, page and open entry has its own address; [docs/URLS.md](docs/URLS.md) is the
 route contract that the TeamStarWolf library's links follow.
@@ -40,11 +41,12 @@ written for this project. Full article bodies are not copied.
 ## How it works
 
 A Python collector (standard library only, in `intelligence_hub/`) runs in GitHub Actions. It
-reads 62 configured RSS and Atom feeds and the CISA KEV catalog under strict size, time and format
-bounds, enriches mentioned CVEs from the CVE Program's records, tags every row from controlled
-vocabularies, merges the committed history files, and writes static files that the page in `site/`
-reads. Your browser reads only those files, from this site; it never contacts publishers or the
-GitHub API.
+reads 62 configured RSS and Atom feeds, the CISA KEV catalog and 46 official status sources plus
+IODA's internet outage signals under strict size, time and format bounds, enriches mentioned CVEs
+from the CVE Program's records, tags every row from controlled vocabularies, merges the committed
+history files, and writes static files that the page in `site/` reads. Your browser reads those
+files from this site; it never contacts publishers or the GitHub API. The one exception is the
+Service health view's live board, described below.
 
 - `data/v7/index.json` lists every data file with its size and sha256, the content date and the
   collector's run record. Views read only the files they need: the Explorer reads the live months,
@@ -59,6 +61,10 @@ GitHub API.
   rebuilds a month when its release first appears or its revision changes; the second Tuesday is never assumed. The CISA KEV
   catalog, the Hub's CVE briefs, Adobe's bulletin index and SAP's Security Patch Day page are joined to each month
   ([OPERATIONS.md](docs/OPERATIONS.md#patch-tuesday-briefs)).
+- Service health reads each vendor's own status page API or feed, the cloud providers' public
+  health feeds and IODA's outage events ([SOURCES.md](docs/SOURCES.md#service-health-sources)).
+  Incidents of minor impact and above also appear in the Explorer as outage entries with their
+  vendor. The Service health view's live board makes requests from your browser to the listed vendor status hosts when the view opens and every five minutes while it stays open and the tab is visible. Pause live updates stops them, and so does leaving the view.
 - Report editions in `reports/` come from a separate desktop compiler that the owner runs; the
   collector only lists them. If the report catalog is missing, too large or invalid, the data still
   publishes and the Reports tab says the catalog is unavailable.
@@ -134,6 +140,10 @@ themes, the 12 px type floor and an em-dash lint. New code needs tests.
   documents also list are counted and left out. Adobe and SAP appear as headline rows only (ids, titles, dates, priorities and
   links), and SAP rows start in 2024 because earlier years are PDF bulletins. The priority list follows fixed rules, not an
   assessment of your environment.
+- **Service health is the vendor's word.** A status entry is what the vendor states about its
+  own service, and an IODA row is a measured signal, not a confirmed cause. Neither says anything
+  about your tenant, region or account, and the collector's snapshot is only as fresh as its last
+  run; the live board refreshes the CORS-open Statuspage cards from your browser.
 - **Read-only.** The site has no accounts, trackers or paid API fallback.
 
 ## Licences and notices

@@ -48,7 +48,7 @@ test("the tab sits after the existing tabs, and the default route renders the Ex
   const { doc } = shell;
   const tabs = [...doc.querySelectorAll(".tabs a")].map(tab => tab.getAttribute("data-view"));
   assert.equal(tabs[0], "explore");
-  assert.equal(tabs[tabs.length - 1], "patch-tuesday");
+  assert.ok(tabs.indexOf("patch-tuesday") > tabs.indexOf("about"), "the Patch Tuesday tab sits after the existing tabs");
   assert.equal(doc.querySelector("#explore").hidden, false);
   assert.equal(doc.querySelector("#view").hidden, true);
   assert.ok(!shell.http.requests.some(request => request.path.includes("patch-tuesday")), "the Explorer reads no Patch Tuesday file");

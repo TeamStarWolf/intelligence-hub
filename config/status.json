@@ -1,0 +1,858 @@
+{
+  "schema_version": 1,
+  "comment": "The service-health registry that intelligence_hub/status.py reads. Every endpoint is an official, free, machine-readable status source that answered on probed_at. cors records whether the endpoint sent Access-Control-Allow-Origin to a browser origin on that date. Only Statuspage-format status endpoints with cors true are read by the visitor's browser, and the connect-src list in site/index.html names exactly their hosts. page_only lists vendors with no machine-readable status source: they are linked and never polled. docs/SOURCES.md describes every field.",
+  "probed_at": "2026-11-04",
+  "groups": [
+    {
+      "id": "security-platforms",
+      "label": "Security platforms"
+    },
+    {
+      "id": "cloud-and-saas",
+      "label": "Cloud and SaaS"
+    },
+    {
+      "id": "developer-services",
+      "label": "Developer services"
+    },
+    {
+      "id": "internet",
+      "label": "Internet outage signals"
+    }
+  ],
+  "sources": [
+    {
+      "id": "tenable",
+      "name": "Tenable",
+      "vendor": "vendor:tenable",
+      "group": "security-platforms",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.tenable.com/api/v2/status.json",
+        "summary": "https://status.tenable.com/api/v2/summary.json",
+        "incidents": "https://status.tenable.com/api/v2/incidents.json"
+      },
+      "home": "https://status.tenable.com/",
+      "cors": true,
+      "library": "vendor:tenable"
+    },
+    {
+      "id": "snyk",
+      "name": "Snyk",
+      "vendor": "vendor:snyk",
+      "group": "security-platforms",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.snyk.io/api/v2/status.json",
+        "summary": "https://status.snyk.io/api/v2/summary.json",
+        "incidents": "https://status.snyk.io/api/v2/incidents.json"
+      },
+      "home": "https://status.snyk.io/",
+      "cors": true,
+      "library": "vendor:snyk"
+    },
+    {
+      "id": "duo",
+      "name": "Cisco Duo",
+      "vendor": "vendor:cisco",
+      "group": "security-platforms",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.duo.com/api/v2/status.json",
+        "summary": "https://status.duo.com/api/v2/summary.json",
+        "incidents": "https://status.duo.com/api/v2/incidents.json"
+      },
+      "home": "https://status.duo.com/",
+      "cors": true,
+      "library": "product:cisco-duo"
+    },
+    {
+      "id": "wiz",
+      "name": "Wiz",
+      "vendor": "vendor:wiz",
+      "group": "security-platforms",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.wiz.io/api/v2/status.json",
+        "summary": "https://status.wiz.io/api/v2/summary.json",
+        "incidents": "https://status.wiz.io/api/v2/incidents.json"
+      },
+      "home": "https://status.wiz.io/",
+      "cors": true,
+      "library": "vendor:wiz"
+    },
+    {
+      "id": "check-point",
+      "name": "Check Point",
+      "vendor": "vendor:check-point",
+      "group": "security-platforms",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.checkpoint.com/api/v2/status.json",
+        "summary": "https://status.checkpoint.com/api/v2/summary.json",
+        "incidents": "https://status.checkpoint.com/api/v2/incidents.json"
+      },
+      "home": "https://status.checkpoint.com/",
+      "cors": true,
+      "library": "vendor:check-point"
+    },
+    {
+      "id": "akamai",
+      "name": "Akamai",
+      "vendor": "vendor:akamai",
+      "group": "security-platforms",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://www.akamaistatus.com/api/v2/status.json",
+        "summary": "https://www.akamaistatus.com/api/v2/summary.json",
+        "incidents": "https://www.akamaistatus.com/api/v2/incidents.json"
+      },
+      "home": "https://www.akamaistatus.com/",
+      "cors": true,
+      "library": "vendor:akamai"
+    },
+    {
+      "id": "cloudflare",
+      "name": "Cloudflare",
+      "vendor": "vendor:cloudflare",
+      "group": "security-platforms",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://www.cloudflarestatus.com/api/v2/status.json",
+        "summary": "https://www.cloudflarestatus.com/api/v2/summary.json",
+        "incidents": "https://www.cloudflarestatus.com/api/v2/incidents.json"
+      },
+      "home": "https://www.cloudflarestatus.com/",
+      "cors": true,
+      "library": "vendor:cloudflare"
+    },
+    {
+      "id": "palo-alto-networks",
+      "name": "Palo Alto Networks",
+      "vendor": "vendor:palo-alto-networks",
+      "group": "security-platforms",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.paloaltonetworks.com/api/v2/status.json",
+        "summary": "https://status.paloaltonetworks.com/api/v2/summary.json",
+        "incidents": "https://status.paloaltonetworks.com/api/v2/incidents.json"
+      },
+      "home": "https://status.paloaltonetworks.com/",
+      "cors": true,
+      "library": "vendor:palo-alto-networks"
+    },
+    {
+      "id": "sentinelone",
+      "name": "SentinelOne",
+      "vendor": "vendor:sentinelone",
+      "group": "security-platforms",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.sentinelone.com/api/v2/status.json",
+        "summary": "https://status.sentinelone.com/api/v2/summary.json",
+        "incidents": "https://status.sentinelone.com/api/v2/incidents.json"
+      },
+      "home": "https://status.sentinelone.com/",
+      "cors": true,
+      "library": "vendor:sentinelone"
+    },
+    {
+      "id": "rapid7",
+      "name": "Rapid7",
+      "vendor": "vendor:rapid7",
+      "group": "security-platforms",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.rapid7.com/api/v2/status.json",
+        "summary": "https://status.rapid7.com/api/v2/summary.json",
+        "incidents": "https://status.rapid7.com/api/v2/incidents.json"
+      },
+      "home": "https://status.rapid7.com/",
+      "cors": true,
+      "library": "vendor:rapid7"
+    },
+    {
+      "id": "qualys",
+      "name": "Qualys",
+      "vendor": "vendor:qualys",
+      "group": "security-platforms",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.qualys.com/api/v2/status.json",
+        "summary": "https://status.qualys.com/api/v2/summary.json",
+        "incidents": "https://status.qualys.com/api/v2/incidents.json"
+      },
+      "home": "https://status.qualys.com/",
+      "cors": true,
+      "library": "vendor:qualys"
+    },
+    {
+      "id": "forticloud",
+      "name": "Fortinet FortiCloud",
+      "vendor": "vendor:fortinet",
+      "group": "security-platforms",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.forticloud.com/api/v2/status.json",
+        "summary": "https://status.forticloud.com/api/v2/summary.json",
+        "incidents": "https://status.forticloud.com/api/v2/incidents.json"
+      },
+      "home": "https://status.forticloud.com/",
+      "cors": true,
+      "library": "vendor:fortinet"
+    },
+    {
+      "id": "1password",
+      "name": "1Password",
+      "vendor": null,
+      "group": "security-platforms",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.1password.com/api/v2/status.json",
+        "summary": "https://status.1password.com/api/v2/summary.json",
+        "incidents": "https://status.1password.com/api/v2/incidents.json"
+      },
+      "home": "https://status.1password.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "zscaler",
+      "name": "Zscaler",
+      "vendor": "vendor:zscaler",
+      "group": "security-platforms",
+      "class": "rss",
+      "format": "zscaler",
+      "endpoints": {
+        "feed": "https://trust.zscaler.com/rss-feed"
+      },
+      "home": "https://trust.zscaler.com/",
+      "cors": false,
+      "library": "vendor:zscaler"
+    },
+    {
+      "id": "chainguard",
+      "name": "Chainguard",
+      "vendor": "vendor:chainguard",
+      "group": "security-platforms",
+      "class": "json",
+      "format": "betterstack",
+      "endpoints": {
+        "index": "https://status.chainguard.dev/index.json"
+      },
+      "home": "https://status.chainguard.dev/",
+      "cors": true,
+      "library": "vendor:chainguard"
+    },
+    {
+      "id": "zafran",
+      "name": "Zafran",
+      "vendor": "vendor:zafran",
+      "group": "security-platforms",
+      "class": "json",
+      "format": "betterstack",
+      "endpoints": {
+        "index": "https://us.zafranstatus.com/index.json"
+      },
+      "home": "https://us.zafranstatus.com/",
+      "cors": true,
+      "library": "vendor:zafran"
+    },
+    {
+      "id": "aws",
+      "name": "Amazon Web Services",
+      "vendor": "vendor:aws",
+      "group": "cloud-and-saas",
+      "class": "json",
+      "format": "aws",
+      "endpoints": {
+        "events": "https://health.aws.amazon.com/public/currentevents"
+      },
+      "home": "https://health.aws.amazon.com/health/status",
+      "cors": false,
+      "library": null
+    },
+    {
+      "id": "azure",
+      "name": "Microsoft Azure",
+      "vendor": "vendor:microsoft",
+      "group": "cloud-and-saas",
+      "class": "rss",
+      "format": "azure",
+      "endpoints": {
+        "feed": "https://azure.status.microsoft/en-us/status/feed/"
+      },
+      "home": "https://azure.status.microsoft/en-us/status",
+      "cors": false,
+      "library": null
+    },
+    {
+      "id": "google-cloud",
+      "name": "Google Cloud",
+      "vendor": "vendor:google",
+      "group": "cloud-and-saas",
+      "class": "json",
+      "format": "google",
+      "endpoints": {
+        "incidents": "https://status.cloud.google.com/incidents.json"
+      },
+      "home": "https://status.cloud.google.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "google-workspace",
+      "name": "Google Workspace",
+      "vendor": "vendor:google",
+      "group": "cloud-and-saas",
+      "class": "json",
+      "format": "google",
+      "endpoints": {
+        "incidents": "https://www.google.com/appsstatus/dashboard/incidents.json"
+      },
+      "home": "https://www.google.com/appsstatus/dashboard/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "oracle-cloud",
+      "name": "Oracle Cloud Infrastructure",
+      "vendor": "vendor:oracle",
+      "group": "cloud-and-saas",
+      "class": "rss",
+      "format": "statuspage-rss",
+      "endpoints": {
+        "status": "https://ocistatus.oraclecloud.com/api/v2/status.json",
+        "feed": "https://ocistatus.oraclecloud.com/history.rss"
+      },
+      "home": "https://ocistatus.oraclecloud.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.openai.com/api/v2/status.json",
+        "summary": "https://status.openai.com/api/v2/summary.json",
+        "incidents": "https://status.openai.com/api/v2/incidents.json"
+      },
+      "home": "https://status.openai.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "anthropic",
+      "name": "Anthropic (Claude)",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.claude.com/api/v2/status.json",
+        "summary": "https://status.claude.com/api/v2/summary.json",
+        "incidents": "https://status.claude.com/api/v2/incidents.json"
+      },
+      "home": "https://status.claude.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "atlassian",
+      "name": "Atlassian",
+      "vendor": "vendor:atlassian",
+      "group": "cloud-and-saas",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.atlassian.com/api/v2/status.json",
+        "summary": "https://status.atlassian.com/api/v2/summary.json",
+        "incidents": "https://status.atlassian.com/api/v2/incidents.json"
+      },
+      "home": "https://status.atlassian.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "slack",
+      "name": "Slack",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "class": "json",
+      "format": "slack",
+      "endpoints": {
+        "current": "https://slack-status.com/api/v2.0.0/current",
+        "history": "https://slack-status.com/api/v2.0.0/history"
+      },
+      "home": "https://slack-status.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "salesforce",
+      "name": "Salesforce",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "class": "json",
+      "format": "salesforce",
+      "endpoints": {
+        "active": "https://api.status.salesforce.com/v1/incidents/active"
+      },
+      "home": "https://status.salesforce.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "zoom",
+      "name": "Zoom",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://www.zoomstatus.com/api/v2/status.json",
+        "summary": "https://www.zoomstatus.com/api/v2/summary.json",
+        "incidents": "https://www.zoomstatus.com/api/v2/incidents.json"
+      },
+      "home": "https://www.zoomstatus.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "twilio",
+      "name": "Twilio",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.twilio.com/api/v2/status.json",
+        "summary": "https://status.twilio.com/api/v2/summary.json",
+        "incidents": "https://status.twilio.com/api/v2/incidents.json"
+      },
+      "home": "https://status.twilio.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "snowflake",
+      "name": "Snowflake",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.snowflake.com/api/v2/status.json",
+        "summary": "https://status.snowflake.com/api/v2/summary.json",
+        "incidents": "https://status.snowflake.com/api/v2/incidents.json"
+      },
+      "home": "https://status.snowflake.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "mongodb",
+      "name": "MongoDB Cloud",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.mongodb.com/api/v2/status.json",
+        "summary": "https://status.mongodb.com/api/v2/summary.json",
+        "incidents": "https://status.mongodb.com/api/v2/incidents.json"
+      },
+      "home": "https://status.mongodb.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "elastic",
+      "name": "Elastic Cloud",
+      "vendor": "vendor:elastic",
+      "group": "cloud-and-saas",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.elastic.co/api/v2/status.json",
+        "summary": "https://status.elastic.co/api/v2/summary.json",
+        "incidents": "https://status.elastic.co/api/v2/incidents.json"
+      },
+      "home": "https://status.elastic.co/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "red-hat",
+      "name": "Red Hat",
+      "vendor": "vendor:red-hat",
+      "group": "cloud-and-saas",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.redhat.com/api/v2/status.json",
+        "summary": "https://status.redhat.com/api/v2/summary.json",
+        "incidents": "https://status.redhat.com/api/v2/incidents.json"
+      },
+      "home": "https://status.redhat.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "dropbox",
+      "name": "Dropbox",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.dropbox.com/api/v2/status.json",
+        "summary": "https://status.dropbox.com/api/v2/summary.json",
+        "incidents": "https://status.dropbox.com/api/v2/incidents.json"
+      },
+      "home": "https://status.dropbox.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "jamf",
+      "name": "Jamf",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.jamf.com/api/v2/status.json",
+        "summary": "https://status.jamf.com/api/v2/summary.json",
+        "incidents": "https://status.jamf.com/api/v2/incidents.json"
+      },
+      "home": "https://status.jamf.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "digitalocean",
+      "name": "DigitalOcean",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.digitalocean.com/api/v2/status.json",
+        "summary": "https://status.digitalocean.com/api/v2/summary.json",
+        "incidents": "https://status.digitalocean.com/api/v2/incidents.json"
+      },
+      "home": "https://status.digitalocean.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "discord",
+      "name": "Discord",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://discordstatus.com/api/v2/status.json",
+        "summary": "https://discordstatus.com/api/v2/summary.json",
+        "incidents": "https://discordstatus.com/api/v2/incidents.json"
+      },
+      "home": "https://discordstatus.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "vendor": null,
+      "group": "developer-services",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://www.githubstatus.com/api/v2/status.json",
+        "summary": "https://www.githubstatus.com/api/v2/summary.json",
+        "incidents": "https://www.githubstatus.com/api/v2/incidents.json"
+      },
+      "home": "https://www.githubstatus.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "gitlab",
+      "name": "GitLab",
+      "vendor": "vendor:gitlab",
+      "group": "developer-services",
+      "class": "json",
+      "format": "statusio",
+      "endpoints": {
+        "status": "https://status.gitlab.com/1.0/status/5b36dc6502d06804c08349f7"
+      },
+      "home": "https://status.gitlab.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "azure-devops",
+      "name": "Azure DevOps",
+      "vendor": "vendor:microsoft",
+      "group": "developer-services",
+      "class": "json",
+      "format": "azure-devops",
+      "endpoints": {
+        "health": "https://status.dev.azure.com/_apis/status/health?api-version=7.1-preview.1"
+      },
+      "home": "https://status.dev.azure.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "npm",
+      "name": "npm",
+      "vendor": null,
+      "group": "developer-services",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.npmjs.org/api/v2/status.json",
+        "summary": "https://status.npmjs.org/api/v2/summary.json",
+        "incidents": "https://status.npmjs.org/api/v2/incidents.json"
+      },
+      "home": "https://status.npmjs.org/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "python",
+      "name": "Python infrastructure (PyPI)",
+      "vendor": null,
+      "group": "developer-services",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.python.org/api/v2/status.json",
+        "summary": "https://status.python.org/api/v2/summary.json",
+        "incidents": "https://status.python.org/api/v2/incidents.json"
+      },
+      "home": "https://status.python.org/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "docker",
+      "name": "Docker",
+      "vendor": null,
+      "group": "developer-services",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://www.dockerstatus.com/api/v2/status.json",
+        "summary": "https://www.dockerstatus.com/api/v2/summary.json",
+        "incidents": "https://www.dockerstatus.com/api/v2/incidents.json"
+      },
+      "home": "https://www.dockerstatus.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "hashicorp",
+      "name": "HashiCorp",
+      "vendor": null,
+      "group": "developer-services",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.hashicorp.com/api/v2/status.json",
+        "summary": "https://status.hashicorp.com/api/v2/summary.json",
+        "incidents": "https://status.hashicorp.com/api/v2/incidents.json"
+      },
+      "home": "https://status.hashicorp.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "heroku",
+      "name": "Heroku",
+      "vendor": null,
+      "group": "developer-services",
+      "class": "json",
+      "format": "heroku",
+      "endpoints": {
+        "current": "https://status.heroku.com/api/v4/current-status"
+      },
+      "home": "https://status.heroku.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "netlify",
+      "name": "Netlify",
+      "vendor": null,
+      "group": "developer-services",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://www.netlifystatus.com/api/v2/status.json",
+        "summary": "https://www.netlifystatus.com/api/v2/summary.json",
+        "incidents": "https://www.netlifystatus.com/api/v2/incidents.json"
+      },
+      "home": "https://www.netlifystatus.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "vercel",
+      "name": "Vercel",
+      "vendor": null,
+      "group": "developer-services",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://www.vercel-status.com/api/v2/status.json",
+        "summary": "https://www.vercel-status.com/api/v2/summary.json",
+        "incidents": "https://www.vercel-status.com/api/v2/incidents.json"
+      },
+      "home": "https://www.vercel-status.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "ioda",
+      "name": "IODA (Georgia Tech)",
+      "vendor": null,
+      "group": "internet",
+      "class": "ioda",
+      "format": "ioda",
+      "endpoints": {
+        "events": "https://api.ioda.inetintel.cc.gatech.edu/v2/outages/events"
+      },
+      "home": "https://ioda.inetintel.cc.gatech.edu/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "cloudflare-radar",
+      "name": "Cloudflare Radar outage annotations",
+      "vendor": "vendor:cloudflare",
+      "group": "internet",
+      "class": "radar",
+      "format": "radar",
+      "endpoints": {
+        "outages": "https://api.cloudflare.com/client/v4/radar/annotations/outages"
+      },
+      "home": "https://radar.cloudflare.com/",
+      "cors": false,
+      "library": null
+    }
+  ],
+  "page_only": [
+    {
+      "id": "crowdstrike",
+      "name": "CrowdStrike",
+      "vendor": "vendor:crowdstrike",
+      "home": null,
+      "reason": "No public status page found: status.crowdstrike.com did not resolve on 2026-11-04. Falcon service notices are in the signed-in support portal."
+    },
+    {
+      "id": "tanium",
+      "name": "Tanium",
+      "vendor": "vendor:tanium",
+      "home": null,
+      "reason": "No public status page found: status.tanium.com did not resolve on 2026-11-04."
+    },
+    {
+      "id": "servicenow",
+      "name": "ServiceNow",
+      "vendor": "vendor:servicenow",
+      "home": null,
+      "reason": "No public status page found: status.servicenow.com did not resolve on 2026-11-04. Instance status is in the signed-in support portal."
+    },
+    {
+      "id": "proofpoint",
+      "name": "Proofpoint",
+      "vendor": "vendor:proofpoint",
+      "home": null,
+      "reason": "No public status page found at status.proofpoint.com or proofpoint.status.io on 2026-11-04."
+    },
+    {
+      "id": "okta",
+      "name": "Okta",
+      "vendor": "vendor:okta",
+      "home": "https://status.okta.com/",
+      "reason": "HTML page only: its status API answered HTTP 401 on 2026-11-04 and no feed was found."
+    },
+    {
+      "id": "datadog",
+      "name": "Datadog",
+      "vendor": null,
+      "home": "https://status.datadoghq.com/",
+      "reason": "Its status API answered HTTP 403 to automated reads on 2026-11-04."
+    },
+    {
+      "id": "pagerduty",
+      "name": "PagerDuty",
+      "vendor": null,
+      "home": "https://status.pagerduty.com/",
+      "reason": "A custom HTML page: no feed or JSON endpoint answered on 2026-11-04."
+    },
+    {
+      "id": "splunk",
+      "name": "Splunk",
+      "vendor": "vendor:splunk",
+      "home": "https://www.splunk.com/en_us/products/system-status.html",
+      "reason": "HTML page only on 2026-11-04."
+    },
+    {
+      "id": "cyberark",
+      "name": "CyberArk",
+      "vendor": "vendor:cyberark",
+      "home": "https://status.cyberark.com/",
+      "reason": "HTML page only: no feed answered on 2026-11-04."
+    },
+    {
+      "id": "invicti",
+      "name": "Invicti",
+      "vendor": "vendor:invicti",
+      "home": "https://status.invicti.com/",
+      "reason": "HTML page only: no feed or JSON endpoint answered on 2026-11-04."
+    },
+    {
+      "id": "cisco",
+      "name": "Cisco cloud services",
+      "vendor": "vendor:cisco",
+      "home": "https://status.cisco.com/",
+      "reason": "A script-rendered page: no documented feed was found on 2026-11-04."
+    },
+    {
+      "id": "webex",
+      "name": "Webex",
+      "vendor": "vendor:cisco",
+      "home": "https://status.webex.com/",
+      "reason": "A script-rendered page: no documented feed was found on 2026-11-04."
+    },
+    {
+      "id": "microsoft-365",
+      "name": "Microsoft 365",
+      "vendor": "vendor:microsoft",
+      "home": "https://status.cloud.microsoft/",
+      "reason": "HTML page only. Tenant service health needs a signed-in Microsoft Graph call, which the Hub does not make."
+    }
+  ]
+}

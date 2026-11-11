@@ -748,7 +748,10 @@ class SiteTest(unittest.TestCase):
     def test_csp_allows_only_this_site(self):
         page = (support.ROOT / "site" / "index.html").read_text(encoding="utf-8")
         policy = re.search(r'Content-Security-Policy" content="([^"]+)"', page)[1]
-        self.assertIn("connect-src 'self';", policy)
+        # This site, plus exactly the vendor status hosts the Service health live board reads.
+        from intelligence_hub import status
+        hosts = status.live_hosts(status.load_registry(support.ROOT))
+        self.assertIn("connect-src 'self' " + " ".join("https://" + host for host in hosts) + ";", policy)
         for name in support.site_files():
             self.assertNotIn("api.github.com", (support.ROOT / "site" / name).read_text(encoding="utf-8"))
 

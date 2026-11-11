@@ -1,0 +1,886 @@
+{
+ "data": {
+  "id": "204104",
+  "type": "status_page",
+  "attributes": {
+   "company_name": "Chainguard, Inc.",
+   "company_url": "chainguard.dev",
+   "contact_url": null,
+   "logo_url": "https://d1lppblt9t2x15.cloudfront.net/logos/0cf9c5bd2084860bdcb42ff9bc19e06f.png",
+   "timezone": "Pacific Time (US & Canada)",
+   "subdomain": "chainguard-inc",
+   "custom_domain": "status.chainguard.dev",
+   "announcement": null,
+   "logo_remote_url": null,
+   "aggregate_state": "operational",
+   "created_at": "2024-12-19T16:54:48.631Z",
+   "updated_at": "2026-11-04T06:20:02.491Z"
+  },
+  "relationships": {
+   "sections": {
+    "data": [
+     {
+      "id": "244372",
+      "type": "status_page_section"
+     },
+     {
+      "id": "338762",
+      "type": "status_page_section"
+     }
+    ]
+   },
+   "resources": {
+    "data": [
+     {
+      "id": "8506736",
+      "type": "status_page_resource"
+     },
+     {
+      "id": "8506739",
+      "type": "status_page_resource"
+     },
+     {
+      "id": "8506738",
+      "type": "status_page_resource"
+     },
+     {
+      "id": "8506737",
+      "type": "status_page_resource"
+     },
+     {
+      "id": "8603555",
+      "type": "status_page_resource"
+     },
+     {
+      "id": "8662313",
+      "type": "status_page_resource"
+     },
+     {
+      "id": "8662314",
+      "type": "status_page_resource"
+     },
+     {
+      "id": "8662315",
+      "type": "status_page_resource"
+     },
+     {
+      "id": "8961850",
+      "type": "status_page_resource"
+     },
+     {
+      "id": "9016570",
+      "type": "status_page_resource"
+     },
+     {
+      "id": "9024164",
+      "type": "status_page_resource"
+     },
+     {
+      "id": "8961851",
+      "type": "status_page_resource"
+     }
+    ]
+   },
+   "status_reports": {
+    "data": [
+     {
+      "id": "1098100",
+      "type": "status_report"
+     },
+     {
+      "id": "1096060",
+      "type": "status_report"
+     },
+     {
+      "id": "1083228",
+      "type": "status_report"
+     },
+     {
+      "id": "1084331",
+      "type": "status_report"
+     },
+     {
+      "id": "1079460",
+      "type": "status_report"
+     },
+     {
+      "id": "1076570",
+      "type": "status_report"
+     },
+     {
+      "id": "1057953",
+      "type": "status_report"
+     },
+     {
+      "id": "1057679",
+      "type": "status_report"
+     }
+    ]
+   }
+  }
+ },
+ "included": [
+  {
+   "id": "8961850",
+   "type": "status_page_resource",
+   "attributes": {
+    "status_page_section_id": 244372,
+    "resource_id": 60050,
+    "resource_type": "ManuallyTrackedItem",
+    "public_name": "Image builds & releases",
+    "explanation": "Publication of new image tags and package updates",
+    "position": 8,
+    "availability": 0.997901,
+    "status": "operational",
+    "status_history": [
+     {
+      "day": "2026-08-06",
+      "status": "downtime",
+      "downtime_duration": 18900.0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-07",
+      "status": "degraded",
+      "downtime_duration": 1620.0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-08",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-09",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-10",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-11",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-12",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-13",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-14",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-15",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-16",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-17",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-18",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-19",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-20",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-21",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-22",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-23",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-24",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-25",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-26",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-27",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-28",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-29",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-30",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-08-31",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-01",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-02",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-03",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-04",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-05",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-06",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-07",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-08",
+      "status": "degraded",
+      "downtime_duration": 53400.0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-09",
+      "status": "degraded",
+      "downtime_duration": 33120.0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-10",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-11",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-12",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-13",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-14",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-15",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-16",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-17",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-18",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-19",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-20",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-21",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-22",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-23",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-24",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-25",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-26",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-27",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-28",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-29",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-09-30",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-01",
+      "status": "degraded",
+      "downtime_duration": 3660.0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-02",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-03",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-04",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-05",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-06",
+      "status": "degraded",
+      "downtime_duration": 57120.0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-07",
+      "status": "degraded",
+      "downtime_duration": 86400.0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-08",
+      "status": "degraded",
+      "downtime_duration": 86400.0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-09",
+      "status": "degraded",
+      "downtime_duration": 86400.0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-10",
+      "status": "degraded",
+      "downtime_duration": 86400.0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-11",
+      "status": "degraded",
+      "downtime_duration": 86400.0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-12",
+      "status": "degraded",
+      "downtime_duration": 86400.0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-13",
+      "status": "degraded",
+      "downtime_duration": 86400.0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-14",
+      "status": "degraded",
+      "downtime_duration": 86400.0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-15",
+      "status": "degraded",
+      "downtime_duration": 86400.0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-16",
+      "status": "degraded",
+      "downtime_duration": 48773.203247,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-17",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-18",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-19",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-20",
+      "status": "degraded",
+      "downtime_duration": 49828.429125,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-21",
+      "status": "degraded",
+      "downtime_duration": 86400.0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-22",
+      "status": "degraded",
+      "downtime_duration": 57120.0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-23",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-24",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-25",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-26",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-27",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-28",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-29",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-30",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-10-31",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-11-01",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-11-02",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     },
+     {
+      "day": "2026-11-03",
+      "status": "operational",
+      "downtime_duration": 0,
+      "maintenance_duration": 0
+     }
+    ]
+   }
+  },
+  {
+   "id": "5955794",
+   "type": "status_update",
+   "attributes": {
+    "message": "Updated Oct 21, 2026 at 4:40pm CDT\n\nTwo critical PHP vulnerabilities, CVE-2026-109618 and CVE-2026-109619, were disclosed by the PHP project on October 21 at 14:00 UTC. Patched Chainguard packages and images are available now. We recommend you pull and redeploy any image that includes PHP 8.2 through 8.5. You're patched if your image has php-8.2 8.2.34-r4, php-8.3 8.3.35-r4, php-8.4 8.4.26-r4 or p",
+    "published_at": "2026-10-21T22:08:03.458Z",
+    "published_at_timezone": "Dublin",
+    "notify_subscribers": true,
+    "affected_resources": [
+     {
+      "status_page_resource_id": "8961850",
+      "status": "degraded"
+     }
+    ]
+   }
+  },
+  {
+   "id": "5963740",
+   "type": "status_update",
+   "attributes": {
+    "message": "Updated Oct 22, 2026 at 5:30pm CDT\n\nUpdated PHP images have been delivered to all customer registries. All Chainguard PHP images are now built on the official PHP releases: 8.2.35, 8.3.36, 8.4.27 and 8.5.12. The earlier packages (php-8.2 8.2.34-r4, php-8.3 8.3.35-r4, php-8.4 8.4.26-r4, php-8.5 8.5.11-r4, and the matching frankenphp packages) contain the same fix, so an image on either set of versi",
+    "published_at": "2026-10-22T22:52:00.000Z",
+    "published_at_timezone": "Dublin",
+    "notify_subscribers": true,
+    "affected_resources": [
+     {
+      "status_page_resource_id": "8961850",
+      "status": "resolved"
+     }
+    ]
+   }
+  },
+  {
+   "id": "1098100",
+   "type": "status_report",
+   "attributes": {
+    "title": "Critical PHP vulnerabilities require updates",
+    "report_type": "manual",
+    "starts_at": "2026-10-21T22:08:03.458Z",
+    "ends_at": null,
+    "affected_resources": [
+     {
+      "status_page_resource_id": "8961850",
+      "status": "resolved"
+     }
+    ],
+    "aggregate_state": "resolved"
+   },
+   "relationships": {
+    "status_updates": {
+     "data": [
+      {
+       "id": "5955794",
+       "type": "status_update"
+      },
+      {
+       "id": "5963740",
+       "type": "status_update"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "5947700",
+   "type": "status_update",
+   "attributes": {
+    "message": "Our image catalog is almost completely rebuilt with updated certificates. However, catalog synchronization and publishing are still underway. Check your registry often to see the build status of your own images. Official communications are coming soon with detailed guidance on impact and workarounds. Check your communication opt-ins in the Chainguard Console to ensure you see them.",
+    "published_at": "2026-10-20T21:59:51.130Z",
+    "published_at_timezone": "Eastern Time (US & Canada)",
+    "notify_subscribers": true,
+    "affected_resources": [
+     {
+      "status_page_resource_id": "8961850",
+      "status": "degraded"
+     }
+    ]
+   }
+  },
+  {
+   "id": "5948072",
+   "type": "status_update",
+   "attributes": {
+    "message": "We continue rebuilding all Chainguard images onto the updated certificate bundle that removes trust in the compromised eMudhra certificate authorities. Nearly all images are rebuilt, and rebuilt images are syncing into customer registries as they complete. We have published a remediation guide with the steps to update, confirm the fix, and handle applications that bundle their own certificates:\n\n[",
+    "published_at": "2026-10-20T23:58:09.128Z",
+    "published_at_timezone": "Pacific Time (US & Canada)",
+    "notify_subscribers": true,
+    "affected_resources": [
+     {
+      "status_page_resource_id": "8961850",
+      "status": "degraded"
+     }
+    ]
+   }
+  },
+  {
+   "id": "5946484",
+   "type": "status_update",
+   "attributes": {
+    "message": "We are aware of the recently disclosed compromise of the eMudhra emSign G3 certificate authority, which has been distrusted across the ecosystem (including by Mozilla and the Go project). Our services are operating normally. As a precaution we are actively updating all Chainguard container images to remove trust in the affected certificate authority, matching the wider ecosystem.",
+    "published_at": "2026-10-20T17:09:31.570Z",
+    "published_at_timezone": "Pacific Time (US & Canada)",
+    "notify_subscribers": true,
+    "affected_resources": [
+     {
+      "status_page_resource_id": "8961850",
+      "status": "degraded"
+     }
+    ]
+   }
+  },
+  {
+   "id": "5954294",
+   "type": "status_update",
+   "attributes": {
+    "message": "Updated Oct 21, 2026 at 1:05pm CDT\n\nSync of updated images to customer registries continues. As of 17:51 UTC, 96.5% of the image tags customers actively sync carry the new certificate bundle (ca-certificates-bundle 20260909-r3), up from 95% at 16:06 UTC. We recommend you pull and redeploy now to pick up every updated image already in your registry. We have increased sync capacity, and based on cur",
+    "published_at": "2026-10-21T18:30:42.965Z",
+    "published_at_timezone": "Dublin",
+    "notify_subscribers": true,
+    "affected_resources": [
+     {
+      "status_page_resource_id": "8961850",
+      "status": "degraded"
+     }
+    ]
+   }
+  },
+  {
+   "id": "5952425",
+   "type": "status_update",
+   "attributes": {
+    "message": "We have updated 99.8% of Chainguard container images to the new certificate bundle (`ca-certificates-bundle 20260909-r3`), and these images are syncing to customer registries now. We recommend you pull and redeploy now to pick up every updated image already in your registry. We’re adding sync capacity, and based on current rates, we estimate all remaining images will reach customer registries by O",
+    "published_at": "2026-10-21T14:52:46.819Z",
+    "published_at_timezone": "Pacific Time (US & Canada)",
+    "notify_subscribers": true,
+    "affected_resources": [
+     {
+      "status_page_resource_id": "8961850",
+      "status": "degraded"
+     }
+    ]
+   }
+  },
+  {
+   "id": "5963412",
+   "type": "status_update",
+   "attributes": {
+    "message": "Updated Oct 22, 2026 at 5:14 pm CDT\n\nThe sync of updated images to customer registries is complete. Every Chainguard image and Helm chart now carries the new certificate bundle (ca-certificates-bundle 20260909-r3), except the spegel Helm chart, which is still being updated. If you have not pulled and redeployed since October 21, do so now to pick up every updated image in your registry.\n\nFixes for",
+    "published_at": "2026-10-22T22:14:00.000Z",
+    "published_at_timezone": "Dublin",
+    "notify_subscribers": true,
+    "affected_resources": [
+     {
+      "status_page_resource_id": "8961850",
+      "status": "resolved"
+     }
+    ]
+   }
+  },
+  {
+   "id": "1096060",
+   "type": "status_report",
+   "attributes": {
+    "title": " Removing trust in a compromised certificate authority (eMudhra emSign G3)",
+    "report_type": "manual",
+    "starts_at": "2026-10-20T17:09:31.570Z",
+    "ends_at": null,
+    "affected_resources": [
+     {
+      "status_page_resource_id": "8961850",
+      "status": "resolved"
+     }
+    ],
+    "aggregate_state": "resolved"
+   },
+   "relationships": {
+    "status_updates": {
+     "data": [
+      {
+       "id": "5947700",
+       "type": "status_update"
+      },
+      {
+       "id": "5948072",
+       "type": "status_update"
+      },
+      {
+       "id": "5946484",
+       "type": "status_update"
+      },
+      {
+       "id": "5954294",
+       "type": "status_update"
+      },
+      {
+       "id": "5952425",
+       "type": "status_update"
+      },
+      {
+       "id": "5963412",
+       "type": "status_update"
+      }
+     ]
+    }
+   }
+  }
+ ]
+}

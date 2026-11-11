@@ -5,6 +5,7 @@
 import { maximumBriefsBytes, maximumIndexBytes, maximumLegacyFeedBytes, maximumShardBytes } from "./limits.js";
 import { HttpError } from "./fetcher.js";
 import { normalizeArticleShard, normalizeBriefsFile, normalizeBucket, normalizeCoverage, normalizeCveIndex, normalizeIndex, normalizeKevShard, normalizePatchTuesday, normalizePatchTuesdayIndex, normalizeRecent, normalizeReports, normalizeSources } from "./validate.js";
+import { normalizeStatusCurrent, normalizeStatusIndex, normalizeStatusMonth, normalizeStatusOutages } from "./validate.js";
 import { addDays, monthsBetween } from "./util.js";
 import { dateWindow } from "./filters.js";
 
@@ -124,13 +125,17 @@ export function createStore(fetcher) {
     "reports.json": value => normalizeReports(value),
     "recent.json": value => normalizeRecent(value),
     "patch-tuesday/index.json": value => normalizePatchTuesdayIndex(value),
-    "patch-tuesday": (value, path) => normalizePatchTuesday(value, path)
+    "patch-tuesday": (value, path) => normalizePatchTuesday(value, path),
+    // Service health (views/status.js): the board, the outage signals, the index and the months.
+    status: (value, path) => path === "status/current.json" ? normalizeStatusCurrent(value) : path === "status/outages.json" ? normalizeStatusOutages(value) :
+      path === "status/index.json" ? normalizeStatusIndex(value) : normalizeStatusMonth(value, path)
   };
 
   function reader(path) {
     if (path.startsWith("live/") || path.startsWith("history/")) return readers.article;
     if (path.startsWith("kev/")) return readers.kev;
     if (path.startsWith("patch-tuesday/") && path !== "patch-tuesday/index.json") return readers["patch-tuesday"];
+    if (path.startsWith("status/")) return readers.status;
     return readers[path];
   }
 
@@ -189,6 +194,8 @@ export function createStore(fetcher) {
     catch (error) { if (error.format) return unavailable("The coverage file did not validate: " + error.message); throw error; }
   }
   function cached(path) { return files.get(path)?.value || null; }
+  // A service-health file the index lists, validated; null when this index lists none.
+  async function statusFile(path) { return state.mode === "v7" && entry(path) ? load(path) : null; }
 
   // The Patch Tuesday index, or null when this index lists none; one month's brief by its path.
   async function patchTuesdayIndex() { return state.mode === "v7" && entry("patch-tuesday/index.json") ? load("patch-tuesday/index.json") : null; }
@@ -221,5 +228,5 @@ export function createStore(fetcher) {
     return briefs.map.get(cve) || null;
   }
 
-  return { state, loadIndex, articlePaths, yearPaths, todayPaths, kevPaths, ensure, loaded, rows, kevRows, cveIndex, sources, reports, coverage, brief, feed, contentDate, cached, listed, entry, patchTuesdayIndex, patchTuesday };
+  return { state, loadIndex, articlePaths, yearPaths, todayPaths, kevPaths, ensure, loaded, rows, kevRows, cveIndex, sources, reports, coverage, brief, feed, contentDate, cached, listed, entry, patchTuesdayIndex, patchTuesday, statusFile };
 }

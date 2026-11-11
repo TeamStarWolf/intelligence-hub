@@ -30,7 +30,9 @@ jobs:
       - name: Unit tests
         run: python -I -m unittest discover -s tests -v
       - name: Fixture is current
-        run: python -I tests/fixtures/build_fixture.py --check
+        run: |
+          python -I tests/fixtures/build_fixture.py --check
+          python -I tests/fixtures/status/build_cache.py --check
       - name: History check (offline)
         # Schema, sort order, unique ids, URL safety, in-year dates, caps, coverage agreement
         # and every fixture re-parsed to its golden file. -E -s for the same reason as below.
@@ -42,6 +44,8 @@ jobs:
           cp tests/fixtures/public-cache.json .state/public-cache.json
           # The trimmed MSRC, Adobe and SAP documents the Patch Tuesday step reads offline.
           cp -R tests/fixtures/patch-tuesday/documents .state/patch-tuesday-documents
+          # Service-health observations made by the real normalizers from tests/fixtures/status/documents.
+          cp tests/fixtures/status-cache.json .state/status-cache.json
           python -E -s -m intelligence_hub --cached --start 1998-01-01 --end 2026-11-01
       - name: Validate the offline snapshot
         shell: python

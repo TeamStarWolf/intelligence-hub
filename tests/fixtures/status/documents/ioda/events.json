@@ -1,0 +1,80 @@
+{
+ "type": "outages.events",
+ "metadata": {
+  "requestTime": "2026-11-04T06:20:59+00:00",
+  "responseTime": "2026-11-04T06:21:00+00:00"
+ },
+ "requestParameters": {
+  "from": "1793686858",
+  "until": "1793773258",
+  "datasource": null,
+  "includeAlerts": false,
+  "format": "codf",
+  "limit": 500,
+  "page": null,
+  "relatedTo": null,
+  "entityType": "country",
+  "entityCode": null,
+  "orderBy": null,
+  "overall": false,
+  "ignoreMethods": null,
+  "extendWindow": 1209600
+ },
+ "error": null,
+ "perf": null,
+ "data": [
+  {
+   "location": "country/KW",
+   "start": 1792512000,
+   "duration": 1209600,
+   "uncertainty": null,
+   "method": "median",
+   "datasource": "bgp",
+   "status": 0,
+   "fraction": null,
+   "score": 38786.182772190645,
+   "location_name": "Kuwait",
+   "overlaps_window": true
+  },
+  {
+   "location": "country/FI",
+   "start": 1793394000,
+   "duration": 379258,
+   "uncertainty": null,
+   "method": "sarima",
+   "datasource": "gtr",
+   "status": 0,
+   "fraction": null,
+   "score": 224280.4712229316,
+   "location_name": "Finland",
+   "overlaps_window": true
+  },
+  {
+   "location": "country/NF",
+   "start": 1793520000,
+   "duration": 253258,
+   "uncertainty": null,
+   "method": "sarima",
+   "datasource": "gtr",
+   "status": 0,
+   "fraction": null,
+   "score": 163678.8156306366,
+   "location_name": "Norfolk Island",
+   "overlaps_window": true
+  },
+  {
+   "location": "country/TL",
+   "start": 1793660400,
+   "duration": 48600,
+   "uncertainty": null,
+   "method": "sarima",
+   "datasource": "gtr",
+   "status": 0,
+   "fraction": null,
+   "score": 22240.50924273354,
+   "location_name": "Timor-Leste",
+   "overlaps_window": true
+  }
+ ],
+ "copyright": "This data is Copyright (c) 2021-2025 Georgia Tech Research Corporation. All Rights Reserved."
+}

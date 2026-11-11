@@ -39,7 +39,7 @@ class BuildCopy:
     is read or written.
     """
 
-    def __init__(self):
+    def __init__(self, status_cache=True):
         self.directory = tempfile.TemporaryDirectory(prefix="hub-build-")
         self.root = Path(self.directory.name)
         shutil.copytree(ROOT / "intelligence_hub", self.root / "intelligence_hub",
@@ -54,6 +54,11 @@ class BuildCopy:
             shutil.copyfile(ROOT / "reports" / name, self.root / "reports" / name)
         (self.root / ".state").mkdir()
         shutil.copyfile(FIXTURES / "public-cache.json", self.root / ".state" / "public-cache.json")
+        # The service-health observations a live run leaves (tests/fixtures/status/build_cache.py), as
+        # the pull-request check's offline build has them. status_cache=False leaves them out, so a
+        # synthetic feed's rows are the only rows in the live shards.
+        if status_cache:
+            shutil.copyfile(FIXTURES / "status-cache.json", self.root / ".state" / "status-cache.json")
 
     def write_report_input(self, name, data):
         (self.root / "reports" / name).write_bytes(data)

@@ -709,6 +709,21 @@ def check_bounds(feed_raw, briefs_raw):
     return reports
 
 
+def publication_changed(content_changed, changed_shards, removed_shards, exports_changed, status_summary):
+    """Whether this run deploys: the typed 'changed' decision.
+
+    sources.json carries every run's attempt clocks, so on its own it never republishes; the v6
+    content revision ignores those clocks in the same way. A change in the published export files
+    (for example a new dictionary) republishes too. The service-health board, its index and the
+    outage signals carry fetch clocks too; the board and the outage signals republish when their
+    digests without clocks change, and incident history republishes through its month files.
+    """
+    from .status import QUIET as status_quiet
+    quiet = {"sources.json", *status_quiet}
+    return bool(content_changed or removed_shards != [] or any(path not in quiet for path in changed_shards) or exports_changed or
+                status_summary.get("board_changed") is True or status_summary.get("outages_changed") is True)
+
+
 def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=40, patch_limit=None):
     from .mitigations import brief_index, build_briefs, merge_retained, split_publication
     from .intelligence import compose_with_reports, load_inputs
@@ -747,6 +762,13 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
             cache = {"sources": {key: future.result() for key, future in futures.items()}, "kev": kev_future.result()}
         validate_cache(cache, sources)
         require(any(item.get("status") in {"ok", "partial"} for item in [*cache["sources"].values(), cache["kev"]]), "No live source succeeded; the previously deployed snapshot must remain available.")
+    # Service health (intelligence_hub/status.py): vendor status pages, cloud health feeds and
+    # internet outage signals. A later failure in that step publishes the previous status files
+    # again and never blocks the feed; a previous status file that cannot be read holds the run,
+    # because the month files are the only copy of incidents the vendors no longer list.
+    service_health = collect_status(refresh, previous, end)
+    require(service_health["summary"].get("status") != "held", "Service health: " + str(service_health["summary"].get("reason")) +
+            ". Nothing was written; the deployed publication is preserved and the next run reads the status files again.")
     patch = collect_patch_tuesday(registry, refresh, previous, patch_limit)
     failures = [{"id": key, "error": item.get("error")} for key, item in [*sorted(cache["sources"].items()), ("cisa-kev", cache["kev"])]
                 if item.get("status") == "failed"]
@@ -850,12 +872,8 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     # Exports are built (never written) before the index, so the index can list every export file.
     export_files, exported = build_analytics_exports(snapshot["articles"], tagged, sources)
     v7 = build_v7(snapshot, previous, kev.get("catalog"), reports, intelligence_inputs, end, feed_raw, briefs_raw, tagged,
-                  exports_index(export_files, exported), patch)
-    # sources.json carries every run's attempt clocks, so on its own it never republishes;
-    # the v6 content revision above ignores those clocks in the same way. A change in the
-    # published export files (for example a new dictionary) republishes too.
-    changed = (changed or v7["removed_shards"] != [] or any(path != "sources.json" for path in v7["changed_shards"]) or
-               v7["exports_changed"])
+                  exports_index(export_files, exported), patch, service_health=service_health)
+    changed = publication_changed(changed, v7["changed_shards"], v7["removed_shards"], v7["exports_changed"], service_health["summary"])
     if refresh:
         write_json(cache_path, cache)
         write_json(cve_path, projections, compact=True)
@@ -872,8 +890,8 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
         "source_partial": sum(item["status"] == "partial" for item in health), "source_total": len(health),
         "coverage": snapshot["coverage"], "mitigations": mitigation_stats, "reports": reports, "changed": changed, "generated_at": snapshot["generated_at"],
         "schema_version": SNAPSHOT_VERSION, "publication": bounds, "rows": rows, "source_failures": failures[:100],
-        "changed_shards": v7["changed_shards"], "removed_shards": v7["removed_shards"], "v7": v7["summary"],
-        "tagging": tagged["summary"], "exports": exported, "patch_tuesday": v7["patch_tuesday"]}
+        "changed_shards": v7["changed_shards"], "removed_shards": v7["removed_shards"], "exports_changed": v7["exports_changed"], "v7": v7["summary"],
+        "tagging": tagged["summary"], "exports": exported, "patch_tuesday": v7["patch_tuesday"], "status": service_health["summary"]}
     result_raw = (json.dumps(result, ensure_ascii=False, allow_nan=False, indent=2) + "\n").encode("utf-8")
     require(len(result_raw) <= RESULT_MAX_BYTES, "The collection result would exceed its " + format(RESULT_MAX_BYTES, ",") + "-byte bound.")
     write_raw(STATE / "collection-result.json", result_raw)
@@ -1006,6 +1024,88 @@ def tag_history(snapshot, tagged, catalog):
     return rows, summary
 
 
+def collect_status(refresh, previous, end):
+    """This run's service-health files, untagged Explorer rows and summary (intelligence_hub/status.py).
+
+    Incident history is folded into the month files of the previous publication: the deployed
+    one on a --resume-public run, otherwise the files a previous local build left in site/.
+    A run that resumed from data/feed.json reads the deployed v7 index once more for its status
+    entries; when that read fails, the step holds the run (status.deployed_index).
+    """
+    from . import shards, status
+    deployed = previous is not None
+    if previous is None:
+        index = shards.local_index(ROOT / "site")
+    elif "v7_index" in previous:
+        index = previous["v7_index"]
+    else:
+        try:
+            index = status.deployed_index(fetch)
+        except status.StatusHold as error:
+            return status.held(str(error))
+    return status.collect_status(ROOT, refresh=refresh, previous_index=index, deployed=deployed, end=end, fetch=fetch, state=STATE)
+
+
+def status_shards(service_health, tagged, catalog, briefs):
+    """(status files, tagged Explorer rows). Rows keep no tagging block when tagging is unavailable."""
+    from . import status
+    service_health = service_health or {}
+    files, rows = service_health.get("files") or {}, service_health.get("rows") or []
+    context = (tagged or {}).get("context")
+    if rows and context is not None:
+        try:
+            rows = status.tag_rows(rows, service_health["registry"], context, catalog, briefs)
+        except (ValueError, TypeError, KeyError, AttributeError) as error:
+            print("Status: incident rows untagged (" + (str(error) or type(error).__name__)[:200] + ").", file=sys.stderr)
+    if files:
+        print("Status: {:,} sources, {:,} incidents in {:,} month files, {:,} Explorer rows".format(
+            service_health["summary"]["sources"], service_health["summary"]["incidents"], service_health["summary"]["months"], len(rows)), file=sys.stderr)
+    return files, rows
+
+
+def fit_status_rows(articles, status_rows, end, limit=None):
+    """(status rows kept, how many were held back) so no live month shard passes its byte bound.
+
+    fit_month bounds each status month file, but the Explorer rows built from it share the
+    live/YYYY-MM.json article shard with the month's publisher rows, and a shard over the bound
+    would fail shards.serialize and hold the whole feed. In a month whose shard would pass the
+    bound, the oldest status rows are held back until it fits; publisher, KEV and curated rows are
+    never dropped here. Done before build_shards, so recent.json never names a held-back row.
+    """
+    from . import shards
+    limit = shards.SHARD_MAX_BYTES if limit is None else limit
+    if not status_rows:
+        return status_rows, 0
+    live_from = shards.live_start(end)
+    groups = {}
+    for article in list(articles) + list(status_rows):
+        groups.setdefault(shards.article_path(article, live_from), []).append(article)
+    owned = {id(row) for row in status_rows}
+    held = set()
+    for path in sorted(groups):
+        items = groups[path]
+        mine = sorted((row for row in items if id(row) in owned), key=shards.row_order)
+        if not mine:
+            continue
+        period = path.split("/", 1)[1][:-5]
+        excess = len(shards.canonical(shards.article_shard(period, sorted(items, key=shards.row_order)))) - limit
+        # A row costs its canonical bytes less the newline, plus the comma that joins it: the same count.
+        dropped = 0
+        while excess > 0 and dropped < len(mine):
+            excess -= len(shards.canonical(mine[dropped]))
+            dropped += 1
+        while 0 < dropped < len(mine):
+            gone = {id(row) for row in mine[:dropped]}
+            kept = sorted((row for row in items if id(row) not in gone), key=shards.row_order)
+            if len(shards.canonical(shards.article_shard(period, kept))) <= limit:
+                break
+            dropped += 1
+        held.update(id(row) for row in mine[:dropped])
+    if not held:
+        return status_rows, 0
+    return [row for row in status_rows if id(row) not in held], len(held)
+
+
 def collect_patch_tuesday(registry, refresh, previous, limit):
     """The Patch Tuesday state for this run: {"state", "report", "config", "reason"}. Never raises.
 
@@ -1059,7 +1159,7 @@ def build_patch_tuesday(patch, catalog, briefs, tagged):
     return files, {"status": "ok", **patch_tuesday.summary(files, patch["report"])}
 
 
-def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs_raw, tagged=None, exports_entry=None, patch=None):
+def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs_raw, tagged=None, exports_entry=None, patch=None, service_health=None):
     """The schema 7 shards and index for this run, compared with the previous index. Nothing is written here."""
     from . import shards
     from .tagging.engine import compact
@@ -1069,7 +1169,14 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
     rows = [{**article, "tagging": compact(blocks[article["id"]])} if article["id"] in blocks else article for article in snapshot["articles"]]
     history_rows, history_summary = tag_history(snapshot, tagged, catalog)
     patch_files, patch_summary = build_patch_tuesday(patch, catalog, snapshot["mitigations"], tagged)
-    files = shards.build_shards(rows + history_rows, snapshot["sources"], catalog, snapshot["mitigations"],
+    health_files, health_rows = status_shards(service_health, tagged, catalog, snapshot["mitigations"])
+    health_rows, health_held = fit_status_rows(rows + history_rows, health_rows, end)
+    if isinstance((service_health or {}).get("summary"), dict):
+        service_health["summary"]["explorer_rows_held"] = health_held
+    if health_held:
+        print("Status: " + format(health_held, ",") + " Explorer incident rows held back to keep their live month shards inside the shard bound",
+              file=sys.stderr)
+    files = shards.build_shards(rows + history_rows + health_rows, snapshot["sources"], catalog, snapshot["mitigations"],
                                 shards.reports_file(reports, catalog_value, catalog_sha), end,
                                 coverage=history_publish.coverage_file(ROOT, shards.SCHEMA_VERSION), extra=patch_files)
     # Adapter rows never push a year's history shard past its byte bound; any held back are named.
@@ -1092,6 +1199,9 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
         history_summary["held_back"] = held
         print("History: " + format(sum(item["rows"] for item in held), ",") + " adapter rows held back to keep " +
               ", ".join(sorted({item["path"] for item in held})) + " inside the shard bound", file=sys.stderr)
+    for path, value in health_files.items():
+        require(shards.SHARD_PATH.fullmatch(path) and path not in files, "Unexpected service-health shard " + path + ".")
+        files[path] = value
     raw, entries = shards.serialize(files)
     # Every shard's size against the per-file cap, and each history file's against its split threshold.
     for path in sorted(raw):
@@ -1111,7 +1221,9 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
               "kev": sum(entry["rows"] for entry in entries if entry["path"].startswith("kev/")),
               "kev_catalog_version": version if isinstance(version, str) and len(version) <= 40 else None,
               "cves": len(snapshot["mitigations"]), "sources": len(snapshot["sources"]), "shards": len(entries),
-              "patch_tuesday_months": sum(1 for entry in entries if shards.PATCH_TUESDAY_MONTH.fullmatch(entry["path"]))}
+              "patch_tuesday_months": sum(1 for entry in entries if shards.PATCH_TUESDAY_MONTH.fullmatch(entry["path"])),
+              "status_sources": (service_health or {}).get("summary", {}).get("sources", 0),
+              "status_incidents": (service_health or {}).get("summary", {}).get("incidents", 0), "status_rows": len(health_rows)}
     index = shards.build_index(entries, generated_at=snapshot["generated_at"], end=end, feed_content_revision=snapshot["content_revision"],
                                layout_revision=snapshot["layout_revision"], runs=runs, counts=counts,
                                v6_files=[shards.file_entry("data/feed.json", feed_raw), shards.file_entry("data/briefs.json", briefs_raw)],
@@ -1177,9 +1289,11 @@ def deployed_v7():
         value = files[path]
         require(isinstance(value, dict) and value.get("kind") == "articles" and isinstance(value.get("rows"), list), "Invalid deployed v7 article shard.")
         # Tags are derived again on every run; the deployed tagging block is never an input.
-        # History-adapter rows are read from the repository on every run, never resumed.
+        # History-adapter rows are read from the repository on every run, never resumed; service-health
+        # rows are rebuilt on every run from the status month files (intelligence_hub/status.py).
         articles.extend({key: item for key, item in row.items() if key != "tagging"} if isinstance(row, dict) else row
-                        for row in value["rows"] if not (isinstance(row, dict) and str(row.get("origin", "")).startswith("history:")))
+                        for row in value["rows"] if not (isinstance(row, dict) and (str(row.get("origin", "")).startswith("history:") or
+                                                                                     row.get("origin") == "service-status")))
     sources = files.get("sources.json")
     require(isinstance(sources, dict) and sources.get("kind") == "sources" and isinstance(sources.get("rows"), list), "Invalid deployed v7 source ledger.")
     return {"schema_version": 7, "generated_at": index["generated_at"], "articles": articles, "sources": sources["rows"],

@@ -6,6 +6,7 @@ import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { ROOT } from "./fixtures.js";
 import { normalizeArticleShard, normalizeBriefsFile, normalizeCoverage, normalizeCveIndex, normalizeIndex, normalizeKevShard, normalizePatchTuesday, normalizePatchTuesdayIndex, normalizeRecent, normalizeReports, normalizeSources } from "../../site/js/validate.js";
+import { normalizeStatusCurrent, normalizeStatusIndex, normalizeStatusMonth, normalizeStatusOutages } from "../../site/js/validate.js";
 import { recentCovers } from "../../site/js/views/today.js";
 import { cveRegister, filterRows } from "../../site/js/filters.js";
 
@@ -19,6 +20,7 @@ test("every shard of the offline build validates and matches its manifest sha256
   let recent = null;
   let patchIndex = null;
   const patchMonths = [];
+  const status = { current: null, incidents: 0 };
   for (const entry of index.shards) {
     const raw = readFileSync(base + "v7/" + entry.path);
     assert.equal(createHash("sha256").update(raw).digest("hex"), entry.sha256, entry.path);
@@ -29,11 +31,18 @@ test("every shard of the offline build validates and matches its manifest sha256
     else if (entry.path === "sources.json") rows += normalizeSources(value).length;
     else if (entry.path === "reports.json") normalizeReports(value);
     else if (entry.path === "recent.json") recent = normalizeRecent(value);
+    // Service health: the board, the outage signals, the index and every month file.
+    else if (entry.path === "status/current.json") status.current = normalizeStatusCurrent(value);
+    else if (entry.path === "status/outages.json") normalizeStatusOutages(value);
+    else if (entry.path === "status/index.json") normalizeStatusIndex(value);
+    else if (entry.path.startsWith("status/")) status.incidents += normalizeStatusMonth(value, entry.path).length;
     else if (entry.path === "patch-tuesday/index.json") patchIndex = normalizePatchTuesdayIndex(value);
     else if (entry.path.startsWith("patch-tuesday/")) patchMonths.push(normalizePatchTuesday(value, entry.path).month);
   }
   // Every brief the Patch Tuesday index lists is a shard the manifest lists too.
   if (patchIndex) assert.deepEqual(patchIndex.months.map(item => item.month).sort(), patchMonths.sort());
+  assert.ok(status.current && status.current.sources.length > 0, "the build writes status/current.json");
+  assert.ok(status.incidents > 0, "the build writes a status month file");
   // recent.json covers the content date and holds only live rows the live shards also hold.
   assert.ok(recent, "the build writes recent.json");
   assert.ok(recentCovers(recent, index.content_date || index.window.end));

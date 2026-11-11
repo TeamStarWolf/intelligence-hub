@@ -40,6 +40,8 @@ server rewrite is needed. Values are percent-encoded; a space in `q` may be writ
 | `#/about` | What the Hub is, what it covers, how fresh it is, and the notices | none |
 | `#/patch-tuesday` | The latest Patch Tuesday brief: Microsoft's monthly release with its headline numbers, priority list, exploited and disclosed CVEs, Critical CVEs, product families, KEV join, Adobe and SAP rows, the month history and the rules | none |
 | `#/patch-tuesday/<YYYY-MM>` | The brief for one release month, such as `2026-10` | none |
+| `#/status` | Service health: the live board of vendor status pages and cloud health feeds by group, open incidents, internet outage signals and the incidents of the last 30 days | the 30 days before the snapshot's read |
+| `#/status?source=<id>` | Service health for one source from `config/status.json`, such as `github` | the 30 days before the snapshot's read |
 
 A `<CVE-id>` matches `CVE-YYYY-NNNN` with 4 to 19 digits after the year. A `<year>` is `1998` to
 `2099`. A `<YYYY-MM>` is a year from `1998` to `2099` and a month from `01` to `12`. A vendor `<id>` is a vocabulary vendor id without its prefix (`fortinet`); an actor or
@@ -75,7 +77,8 @@ are dropped.
 | `tech` | list | an ATT&CK technique id, such as `T1190` or `T1059.001` | technique tag (reached through CWE and CAPEC, low confidence) |
 | `sector` | list | a sector id without its prefix, such as `healthcare-public-health` | sector tag `sector:<value>` |
 | `region` | list | an ISO 3166-1 alpha-2 code, `EU`, or `M49-` and three digits | region tag |
-| `source` | list, `history/<year>` | a source id from `config/sources.json` or a history source id from `data/v7/coverage.json`, such as `cisa-advisories` or `microsoft-bulletins` | one source |
+| `source` | list, `history/<year>` | a source id from `config/sources.json`, a history source id from `data/v7/coverage.json`, or `status-` and a service-health source id for its incident rows, such as `cisa-advisories`, `microsoft-bulletins` or `status-github` | one source |
+| `source` | `status` | a service-health source id from `config/status.json`, such as `github` | that source's card, open incidents and recent incidents |
 | `year` | list, `kev`, `tags`, `actors` | `1998` to `2099` | that calendar year; on a list view, `tags` and `actors` it also reads that year's history rows |
 | `month` | list, `history/<year>` | `01` to `12`, with `year` on a list view | that month |
 | `range` | list, `kev` | `3`, `7`, `30`, `90`, `365`, `all` | the last N days ending on the content date; `year` replaces it |

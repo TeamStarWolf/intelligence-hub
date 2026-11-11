@@ -1,0 +1,513 @@
+{
+ "page": {
+  "id": "23tk2y3t5qh7",
+  "name": "Check Point Services Status",
+  "url": "https://status.checkpoint.com",
+  "time_zone": "Etc/UTC",
+  "updated_at": "2026-11-04T06:24:38.506Z"
+ },
+ "incidents": [
+  {
+   "id": "bfdjj7v1z8fx",
+   "name": "SASE: Admin Portal Partially Available (IN, AU)",
+   "status": "resolved",
+   "created_at": "2026-11-02T08:58:48.884Z",
+   "updated_at": "2026-11-02T15:29:36.264Z",
+   "monitoring_at": "2026-11-02T11:49:42.392Z",
+   "resolved_at": "2026-11-02T15:29:36.240Z",
+   "impact": "major",
+   "shortlink": "https://stspg.io/r2rjv8y2k2d7",
+   "started_at": "2026-11-02T08:58:48.873Z",
+   "page_id": "23tk2y3t5qh7",
+   "incident_updates": [
+    {
+     "id": "fmtgb08zkkg7",
+     "status": "resolved",
+     "body": "This incident has been resolved.",
+     "incident_id": "bfdjj7v1z8fx",
+     "created_at": "2026-11-02T15:29:36.240Z",
+     "updated_at": "2026-11-02T15:29:36.240Z",
+     "display_at": "2026-11-02T15:29:36.240Z",
+     "affected_components": [
+      {
+       "code": "z230qmmrf8tv",
+       "name": "Check Point SASE Services - India Data Residency - Management Web-Console",
+       "old_status": "operational",
+       "new_status": "operational"
+      },
+      {
+       "code": "p4j5dqg8c3my",
+       "name": "Check Point SASE Services - Australia Data Residency - Management Web-Console",
+       "old_status": "operational",
+       "new_status": "operational"
+      }
+     ],
+     "deliver_notifications": false,
+     "custom_tweet": null,
+     "tweet_id": null
+    },
+    {
+     "id": "yj5547mj96c5",
+     "status": "monitoring",
+     "body": "Issue is resolved\nWe are monitoring the services",
+     "incident_id": "bfdjj7v1z8fx",
+     "created_at": "2026-11-02T12:48:13.864Z",
+     "updated_at": "2026-11-02T12:48:13.864Z",
+     "display_at": "2026-11-02T12:48:13.864Z",
+     "affected_components": [
+      {
+       "code": "z230qmmrf8tv",
+       "name": "Check Point SASE Services - India Data Residency - Management Web-Console",
+       "old_status": "partial_outage",
+       "new_status": "operational"
+      },
+      {
+       "code": "p4j5dqg8c3my",
+       "name": "Check Point SASE Services - Australia Data Residency - Management Web-Console",
+       "old_status": "partial_outage",
+       "new_status": "operational"
+      }
+     ],
+     "deliver_notifications": true,
+     "custom_tweet": null,
+     "tweet_id": null
+    }
+   ],
+   "components": [
+    {
+     "id": "z230qmmrf8tv",
+     "name": "Management Web-Console",
+     "status": "operational",
+     "created_at": "2025-07-08T22:41:29.658Z",
+     "updated_at": "2026-11-02T12:48:13.761Z",
+     "position": 4,
+     "description": null,
+     "showcase": true,
+     "start_date": "2025-05-19",
+     "group_id": "jy2m9d950skk",
+     "page_id": "23tk2y3t5qh7",
+     "group": false,
+     "only_show_if_degraded": false
+    },
+    {
+     "id": "p4j5dqg8c3my",
+     "name": "Management Web-Console",
+     "status": "operational",
+     "created_at": "2025-07-08T22:44:40.082Z",
+     "updated_at": "2026-11-02T12:48:13.795Z",
+     "position": 4,
+     "description": null,
+     "showcase": true,
+     "start_date": "2025-05-19",
+     "group_id": "xc4vf66gz4r3",
+     "page_id": "23tk2y3t5qh7",
+     "group": false,
+     "only_show_if_degraded": false
+    }
+   ],
+   "reminder_intervals": null
+  },
+  {
+   "id": "lng6p1wpj7l2",
+   "name": "Service Down due to incident",
+   "status": "resolved",
+   "created_at": "2026-10-25T20:42:49.709Z",
+   "updated_at": "2026-10-25T21:42:42.998Z",
+   "monitoring_at": null,
+   "resolved_at": "2026-10-25T21:42:42.969Z",
+   "impact": "major",
+   "shortlink": "https://stspg.io/b5fp71shynqb",
+   "started_at": "2026-10-25T20:42:49.696Z",
+   "page_id": "23tk2y3t5qh7",
+   "incident_updates": [
+    {
+     "id": "vbplqcm62q37",
+     "status": "resolved",
+     "body": "This incident has been resolved.",
+     "incident_id": "lng6p1wpj7l2",
+     "created_at": "2026-10-25T21:42:42.969Z",
+     "updated_at": "2026-10-25T21:42:42.969Z",
+     "display_at": "2026-10-25T21:42:42.969Z",
+     "affected_components": [
+      {
+       "code": "wmkj0khy61zg",
+       "name": "Check Point Mobile Security - Check Point Mobile Security - EU Region",
+       "old_status": "partial_outage",
+       "new_status": "operational"
+      },
+      {
+       "code": "6gs5nx9hmqfg",
+       "name": "Check Point Mobile Security - Check Point Mobile Security - US Region",
+       "old_status": "major_outage",
+       "new_status": "operational"
+      },
+      {
+       "code": "p3c3x7xzmkm9",
+       "name": "Check Point Mobile Security - Check Point Mobile Security - IN Region",
+       "old_status": "partial_outage",
+       "new_status": "operational"
+      }
+     ],
+     "deliver_notifications": true,
+     "custom_tweet": null,
+     "tweet_id": null
+    },
+    {
+     "id": "3dlwvkqkjmrn",
+     "status": "identified",
+     "body": "The issue has been identified and a fix is being implemented.",
+     "incident_id": "lng6p1wpj7l2",
+     "created_at": "2026-10-25T20:42:49.880Z",
+     "updated_at": "2026-10-25T20:42:49.880Z",
+     "display_at": "2026-10-25T20:42:49.880Z",
+     "affected_components": [
+      {
+       "code": "wmkj0khy61zg",
+       "name": "Check Point Mobile Security - Check Point Mobile Security - EU Region",
+       "old_status": "operational",
+       "new_status": "partial_outage"
+      },
+      {
+       "code": "6gs5nx9hmqfg",
+       "name": "Check Point Mobile Security - Check Point Mobile Security - US Region",
+       "old_status": "operational",
+       "new_status": "major_outage"
+      },
+      {
+       "code": "p3c3x7xzmkm9",
+       "name": "Check Point Mobile Security - Check Point Mobile Security - IN Region",
+       "old_status": "operational",
+       "new_status": "partial_outage"
+      }
+     ],
+     "deliver_notifications": true,
+     "custom_tweet": null,
+     "tweet_id": null
+    }
+   ],
+   "components": [
+    {
+     "id": "wmkj0khy61zg",
+     "name": "Check Point Mobile Security - EU Region",
+     "status": "operational",
+     "created_at": "2022-09-16T19:09:41.647Z",
+     "updated_at": "2026-10-25T21:42:42.864Z",
+     "position": 2,
+     "description": null,
+     "showcase": true,
+     "start_date": "2020-12-27",
+     "group_id": "b6hgq6vll9l5",
+     "page_id": "23tk2y3t5qh7",
+     "group": false,
+     "only_show_if_degraded": false
+    },
+    {
+     "id": "6gs5nx9hmqfg",
+     "name": "Check Point Mobile Security - US Region",
+     "status": "operational",
+     "created_at": "2022-09-16T19:10:21.435Z",
+     "updated_at": "2026-10-25T21:42:42.893Z",
+     "position": 3,
+     "description": null,
+     "showcase": true,
+     "start_date": "2020-07-26",
+     "group_id": "b6hgq6vll9l5",
+     "page_id": "23tk2y3t5qh7",
+     "group": false,
+     "only_show_if_degraded": false
+    },
+    {
+     "id": "p3c3x7xzmkm9",
+     "name": "Check Point Mobile Security - IN Region",
+     "status": "operational",
+     "created_at": "2023-06-29T11:25:04.291Z",
+     "updated_at": "2026-10-25T21:42:42.919Z",
+     "position": 7,
+     "description": null,
+     "showcase": true,
+     "start_date": "2022-03-02",
+     "group_id": "b6hgq6vll9l5",
+     "page_id": "23tk2y3t5qh7",
+     "group": false,
+     "only_show_if_degraded": false
+    }
+   ],
+   "reminder_intervals": null
+  },
+  {
+   "id": "h2cvvr768kn1",
+   "name": "Infinity Portal Data Services (Datatube) - Data services outage on Australia and Canada regions",
+   "status": "postmortem",
+   "created_at": "2026-09-27T05:44:22.227Z",
+   "updated_at": "2026-09-29T06:29:11.925Z",
+   "monitoring_at": "2026-09-27T06:12:39.338Z",
+   "resolved_at": "2026-09-27T06:21:54.347Z",
+   "impact": "critical",
+   "shortlink": "https://stspg.io/72ygychp6p5d",
+   "started_at": "2026-09-27T05:44:22.219Z",
+   "page_id": "23tk2y3t5qh7",
+   "incident_updates": [
+    {
+     "id": "k5ksd4hg29vg",
+     "status": "postmortem",
+     "body": "Incident Duration: September 27, 02:30 - 06:00 UTC \\(~3.5 hours\\) \n\nAffected Services: DataTube - Canada, Australia regions\n\n‌\n\n────────────────────────────\n\nOverview\n\nOn September 27, 2026, customers in the Canada and Australia regions experienced a service disruption due to a network configuration issue affecting connectivity to backend services.\n\n‌\n\n────────────────────────────\n\nCustomer Impact",
+     "incident_id": "h2cvvr768kn1",
+     "created_at": "2026-09-28T12:55:35.878Z",
+     "updated_at": "2026-09-29T06:29:11.923Z",
+     "display_at": null,
+     "affected_components": null,
+     "deliver_notifications": true,
+     "custom_tweet": null,
+     "tweet_id": null
+    },
+    {
+     "id": "bt9xrcldn8hh",
+     "status": "resolved",
+     "body": "This incident has been resolved.",
+     "incident_id": "h2cvvr768kn1",
+     "created_at": "2026-09-27T06:21:54.347Z",
+     "updated_at": "2026-09-27T06:21:54.347Z",
+     "display_at": "2026-09-27T06:21:54.347Z",
+     "affected_components": [
+      {
+       "code": "vw0g7j3j7ctm",
+       "name": "Check Point Portal - Check Point Portal Data Services | Event Forwarding - AUS region",
+       "old_status": "major_outage",
+       "new_status": "operational"
+      }
+     ],
+     "deliver_notifications": true,
+     "custom_tweet": null,
+     "tweet_id": null
+    }
+   ],
+   "components": [
+    {
+     "id": "vw0g7j3j7ctm",
+     "name": "Check Point Portal Data Services | Event Forwarding - AUS region",
+     "status": "operational",
+     "created_at": "2023-06-05T14:09:52.435Z",
+     "updated_at": "2026-09-27T06:21:54.272Z",
+     "position": 14,
+     "description": "The platform allows the end user to forward selected events to his SIEM solution.",
+     "showcase": true,
+     "start_date": "2023-01-01",
+     "group_id": "v5sgtdnw2vg7",
+     "page_id": "23tk2y3t5qh7",
+     "group": false,
+     "only_show_if_degraded": false
+    }
+   ],
+   "reminder_intervals": null
+  },
+  {
+   "id": "bqhbqv8pf8gw",
+   "name": "Spark Management - EU region - Error on save settings",
+   "status": "resolved",
+   "created_at": "2026-08-03T07:00:00.000Z",
+   "updated_at": "2026-08-03T16:48:06.820Z",
+   "monitoring_at": null,
+   "resolved_at": "2026-08-03T07:00:00.000Z",
+   "impact": "none",
+   "shortlink": "https://stspg.io/btpgkpw71g4y",
+   "started_at": "2026-08-03T16:48:06.737Z",
+   "page_id": "23tk2y3t5qh7",
+   "incident_updates": [
+    {
+     "id": "y82zbz2hbnz2",
+     "status": "resolved",
+     "body": "Devices wrongly appeared disconnected during this time.\nErrors appeared when attempting to create or save settings - plan / gateway.\nNo impact on existing gateways connectivity.\n\nIncident time 7:00-10:00 AM UTC.",
+     "incident_id": "bqhbqv8pf8gw",
+     "created_at": "2026-08-03T16:48:06.809Z",
+     "updated_at": "2026-08-03T16:48:06.809Z",
+     "display_at": "2026-08-03T07:00:00.000Z",
+     "affected_components": null,
+     "deliver_notifications": false,
+     "custom_tweet": null,
+     "tweet_id": null
+    }
+   ],
+   "components": [],
+   "reminder_intervals": null
+  },
+  {
+   "id": "ctxpqx5z4nb4",
+   "name": "Smart-1 Cloud is not available in UAE region",
+   "status": "identified",
+   "created_at": "2026-03-02T06:42:37.410Z",
+   "updated_at": "2026-03-03T16:04:29.122Z",
+   "monitoring_at": null,
+   "resolved_at": null,
+   "impact": "critical",
+   "shortlink": "https://stspg.io/vcrt91xjs9z9",
+   "started_at": "2026-03-02T00:00:37.000Z",
+   "page_id": "23tk2y3t5qh7",
+   "incident_updates": [
+    {
+     "id": "8k3bdkdtvnqb",
+     "status": "identified",
+     "body": "We are continuing to work on a fix for this issue.",
+     "incident_id": "ctxpqx5z4nb4",
+     "created_at": "2026-03-03T16:04:29.120Z",
+     "updated_at": "2026-03-03T16:04:29.120Z",
+     "display_at": "2026-03-03T16:04:29.120Z",
+     "affected_components": [
+      {
+       "code": "df6l9qlmzf0m",
+       "name": "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management - UAE Region",
+       "old_status": "degraded_performance",
+       "new_status": "major_outage"
+      }
+     ],
+     "deliver_notifications": false,
+     "custom_tweet": null,
+     "tweet_id": null
+    },
+    {
+     "id": "js55p0yxbqpv",
+     "status": "identified",
+     "body": "AWS is still working on it internally and estimating at least one more day before returning power.\nWe are continuing to be in contact with AWS on this matter",
+     "incident_id": "ctxpqx5z4nb4",
+     "created_at": "2026-03-02T06:44:38.278Z",
+     "updated_at": "2026-03-03T16:04:04.802Z",
+     "display_at": "2026-03-02T06:44:38.000Z",
+     "affected_components": [
+      {
+       "code": "df6l9qlmzf0m",
+       "name": "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management - UAE Region",
+       "old_status": "degraded_performance",
+       "new_status": "degraded_performance"
+      }
+     ],
+     "deliver_notifications": false,
+     "custom_tweet": null,
+     "tweet_id": null
+    }
+   ],
+   "components": [],
+   "reminder_intervals": null
+  },
+  {
+   "id": "dnncywl1n491",
+   "name": "Customers may experience logs delay",
+   "status": "investigating",
+   "created_at": "2026-03-01T08:52:26.650Z",
+   "updated_at": "2026-03-03T16:04:29.089Z",
+   "monitoring_at": null,
+   "resolved_at": null,
+   "impact": "major",
+   "shortlink": "https://stspg.io/4j49mqtx7rjb",
+   "started_at": "2026-03-01T08:52:26.636Z",
+   "page_id": "23tk2y3t5qh7",
+   "incident_updates": [
+    {
+     "id": "367lfzpkzf2z",
+     "status": "investigating",
+     "body": "We are currently investigating this issue.",
+     "incident_id": "dnncywl1n491",
+     "created_at": "2026-03-01T08:52:26.841Z",
+     "updated_at": "2026-03-01T08:52:26.841Z",
+     "display_at": "2026-03-01T08:52:26.841Z",
+     "affected_components": [
+      {
+       "code": "h5sk2mx0gz27",
+       "name": "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management - EU Region",
+       "old_status": "operational",
+       "new_status": "degraded_performance"
+      },
+      {
+       "code": "8mlc1fxlzkd5",
+       "name": "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management – US Region",
+       "old_status": "operational",
+       "new_status": "degraded_performance"
+      },
+      {
+       "code": "9h6rhqzq3gqj",
+       "name": "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management – AU Region",
+       "old_status": "operational",
+       "new_status": "degraded_performance"
+      },
+      {
+       "code": "prjvfbnprn19",
+       "name": "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management - IN Region",
+       "old_status": "operational",
+       "new_status": "degraded_performance"
+      },
+      {
+       "code": "df6l9qlmzf0m",
+       "name": "Check Point Smart-1 Cloud Security Management - Check Point Smart-1 Cloud Security Management - UAE Region",
+       "old_status": "operational",
+       "new_status": "degraded_performance"
+      }
+     ],
+     "deliver_notifications": true,
+     "custom_tweet": null,
+     "tweet_id": null
+    }
+   ],
+   "components": [
+    {
+     "id": "h5sk2mx0gz27",
+     "name": "Check Point Smart-1 Cloud Security Management - EU Region",
+     "status": "operational",
+     "created_at": "2020-01-30T08:05:22.305Z",
+     "updated_at": "2026-06-18T07:43:22.307Z",
+     "position": 1,
+     "description": null,
+     "showcase": true,
+     "start_date": null,
+     "group_id": "5r71jp917ks1",
+     "page_id": "23tk2y3t5qh7",
+     "group": false,
+     "only_show_if_degraded": false
+    },
+    {
+     "id": "8mlc1fxlzkd5",
+     "name": "Check Point Smart-1 Cloud Security Management – US Region",
+     "status": "operational",
+     "created_at": "2021-03-25T10:37:42.867Z",
+     "updated_at": "2026-06-18T07:45:02.806Z",
+     "position": 2,
+     "description": null,
+     "showcase": true,
+     "start_date": "2019-09-01",
+     "group_id": "5r71jp917ks1",
+     "page_id": "23tk2y3t5qh7",
+     "group": false,
+     "only_show_if_degraded": false
+    },
+    {
+     "id": "9h6rhqzq3gqj",
+     "name": "Check Point Smart-1 Cloud Security Management – AU Region",
+     "status": "operational",
+     "created_at": "2021-03-25T10:38:09.405Z",
+     "updated_at": "2026-06-18T07:45:49.317Z",
+     "position": 3,
+     "description": null,
+     "showcase": true,
+     "start_date": "2019-09-29",
+     "group_id": "5r71jp917ks1",
+     "page_id": "23tk2y3t5qh7",
+     "group": false,
+     "only_show_if_degraded": false
+    },
+    {
+     "id": "prjvfbnprn19",
+     "name": "Check Point Smart-1 Cloud Security Management - IN Region",
+     "status": "operational",
+     "created_at": "2024-10-02T13:33:24.161Z",
+     "updated_at": "2026-06-18T07:46:42.778Z",
+     "position": 4,
+     "description": null,
+     "showcase": true,
+     "start_date": "2024-09-29",
+     "group_id": "5r71jp917ks1",
+     "page_id": "23tk2y3t5qh7",
+     "group": false,
+     "only_show_if_degraded": false
+    }
+   ],
+   "reminder_intervals": null
+  }
+ ]
+}

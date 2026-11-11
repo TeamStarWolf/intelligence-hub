@@ -10,12 +10,17 @@ export class HttpError extends Error {
 
 function hex(buffer) { return [...new Uint8Array(buffer)].map(byte => byte.toString(16).padStart(2, "0")).join(""); }
 
+// A byte bound as people read it: whole MiB from 1 MiB up, KiB below (the live board's 64 KiB).
+export function sizeLabel(bytes) {
+  return bytes >= 1048576 ? Math.round(bytes / 1048576) + " MiB" : Math.max(1, Math.round(bytes / 1024)) + " KiB";
+}
+
 export function createFetcher({ fetchImpl = globalThis.fetch, subtle = globalThis.crypto?.subtle, parse = JSON.parse, timeout = 45000 } = {}) {
   const cache = new Map();
   const stats = { requests: 0, parses: 0, notModified: 0 };
 
   async function readBytes(response, maximum, label) {
-    const tooLarge = "The " + label + " exceeds the supported " + Math.round(maximum / 1048576) + " MiB download size.";
+    const tooLarge = "The " + label + " exceeds the supported " + sizeLabel(maximum) + " download size.";
     const length = Number(response.headers.get("content-length"));
     if (Number.isFinite(length) && length > maximum) throw new Error(tooLarge);
     if (response.body && typeof response.body.getReader === "function") {
