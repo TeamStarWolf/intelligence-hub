@@ -24,6 +24,9 @@ const LIVE_BATCH = 6;
 const RECENT_DAYS = 30;
 const RECENT_SHOWN = 150;
 const ATTENTION_SHOWN = 16;
+const RELIABILITY_WEEKS = 13;
+const RELIABILITY_DAYS = RELIABILITY_WEEKS * 7;
+const COMPONENTS_SHOWN = 8;
 
 export const INDICATOR_LABELS = { none: "Operational", minor: "Minor incident", major: "Major incident", critical: "Critical incident", maintenance: "Maintenance", unknown: "Not known" };
 const INDICATOR_CLASS = { none: "status-ok", minor: "status-minor", major: "status-major", critical: "status-major", maintenance: "status-quiet", unknown: "status-quiet" };
@@ -296,6 +299,46 @@ function postureBlock(sources) {
   return wrap;
 }
 
+// The vendors' own incident history is the Hub's lawful stand-in for a crowd-report trend: how often
+// a service has had an incident, by week, over the last 13 weeks. It counts the vendor's own posted
+// incidents in the status month files, not user reports, and says nothing about any one tenant.
+function weeklyCounts(rows, endDay) {
+  const counts = new Array(RELIABILITY_WEEKS).fill(0);
+  const endMs = Date.parse(endDay + "T00:00:00Z");
+  for (const row of rows) {
+    const ageDays = Math.floor((endMs - Date.parse(row.started.slice(0, 10) + "T00:00:00Z")) / 86400000);
+    if (ageDays < 0 || ageDays >= RELIABILITY_DAYS) continue;
+    counts[RELIABILITY_WEEKS - 1 - Math.floor(ageDays / 7)]++;
+  }
+  return counts;
+}
+
+// A class-only cell strip (no inline style, so it holds under the page's style-src 'self'): one cell
+// per week, oldest first, shaded by how many incidents fell in that week. The reading is in the text
+// label and the aria-label; the cells are a decorative summary of it.
+function reliabilityStrip(counts) {
+  const total = counts.reduce((sum, value) => sum + value, 0);
+  const summary = total ? count(total, "incident") + " in the last " + RELIABILITY_WEEKS + " weeks" : "No incident in the last " + RELIABILITY_WEEKS + " weeks";
+  const wrap = node("p", "status-reliability");
+  const strip = node("span", "rel-strip");
+  strip.setAttribute("role", "img");
+  strip.setAttribute("aria-label", summary + ", the vendor's own posted incidents by week");
+  for (const value of counts) {
+    const level = value === 0 ? 0 : value <= 2 ? 1 : 2;
+    const cell = node("span", "rel-cell rel-" + level); cell.setAttribute("aria-hidden", "true"); strip.append(cell);
+  }
+  wrap.append(strip, node("span", "rel-count muted", summary));
+  return wrap;
+}
+
+// Which sub-services the vendor named most often across its posted incidents in the window: the Hub's
+// lawful stand-in for a "most reported problems" breakdown, from the vendor's component labels.
+function componentTally(rows) {
+  const counts = new Map();
+  for (const row of rows) for (const component of row.components) counts.set(component, (counts.get(component) || 0) + 1);
+  return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+}
+
 export async function renderStatus(ctx) {
   const { target, store, route, live } = ctx;
   const title = node("h1", "view-title", "Service health");
@@ -324,12 +367,13 @@ export async function renderStatus(ctx) {
   if (!chosen) board.append(postureBlock(current.sources));
   board.append(node("p", "", "The collector read every source at " + stamp(current.generated_at) + ". It runs when GitHub starts the scheduled workflow, which is every few hours in practice; the Sources view lists the observed gap between runs."), controls);
   const views = new Map();
+  const cards = new Map();
   for (const group of current.groups) {
     const members = shown.filter(source => source.group === group.id).sort(compareAttention);
     if (!members.length) continue;
     board.append(node("h3", "status-subtitle", chosen ? group.label : group.label + groupTally(members)));
     const grid = node("ul", "status-grid");
-    for (const source of members) { const view = card(source, lib, Boolean(chosen)); grid.append(view.item); if (source.live) views.set(source.live, view); }
+    for (const source of members) { const view = card(source, lib, Boolean(chosen)); grid.append(view.item); cards.set(source.id, view); if (source.live) views.set(source.live, view); }
     board.append(grid);
   }
   if (!chosen && current.page_only.length) {
@@ -355,7 +399,9 @@ export async function renderStatus(ctx) {
   const recent = section("The last 30 days");
   const day = current.generated_at.slice(0, 10);
   const first = addDays(day, -RECENT_DAYS);
-  const months = store.listed("status/").filter(path => /^status\/\d{4}-\d{2}\.json$/.test(path) && path.slice(7, 14) >= first.slice(0, 7)).sort().reverse();
+  const firstReliability = addDays(day, -RELIABILITY_DAYS);
+  const monthsAll = store.listed("status/").filter(path => /^status\/\d{4}-\d{2}\.json$/.test(path) && path.slice(7, 14) >= firstReliability.slice(0, 7)).sort().reverse();
+  const months = monthsAll.filter(path => path.slice(7, 14) >= first.slice(0, 7));
   const files = node("p", "muted");
   files.append(node("span", "", "Month files: "));
   months.forEach((path, position) => {
@@ -377,8 +423,27 @@ export async function renderStatus(ctx) {
   for (const [url, view] of views) { const known = live.result(url); if (known) applyLive(view, known); }
   live.start([...views.keys()], onResult);
 
-  const monthRows = (await Promise.all(months.map(path => store.statusFile(path).catch(() => [])))).flat();
+  const monthRows = (await Promise.all(monthsAll.map(path => store.statusFile(path).catch(() => [])))).flat();
   if (!ctx.current()) return;
+
+  // The vendor-incident trend, by source, over the reliability window. Each card gets a weekly strip.
+  const historyBySource = new Map();
+  for (const row of monthRows) {
+    if (row.started.slice(0, 10) < firstReliability) continue;
+    if (!historyBySource.has(row.source)) historyBySource.set(row.source, []);
+    historyBySource.get(row.source).push(row);
+  }
+  for (const [id, view] of cards) view.item.append(reliabilityStrip(weeklyCounts(historyBySource.get(id) || [], day)));
+  if (chosen) {
+    const components = componentTally(historyBySource.get(chosen.id) || []);
+    const line = node("p", "status-components muted");
+    if (components.length) {
+      line.append(node("span", "", "Most affected components in the last " + RELIABILITY_WEEKS + " weeks: "));
+      components.slice(0, COMPONENTS_SHOWN).forEach(([name, total], position) => { if (position) line.append(node("span", "", ", ")); line.append(node("span", "", name + " (" + total + ")")); });
+    } else line.append(node("span", "", "No component was named on an incident in the last " + RELIABILITY_WEEKS + " weeks."));
+    recent.append(line);
+  }
+
   const rows = monthRows.filter(row => row.started.slice(0, 10) >= first && (!chosen || row.source === chosen.id)).sort((a, b) => b.started.localeCompare(a.started));
   recent.append(rows.length ? incidentTable(rows.slice(0, RECENT_SHOWN), sources, count(rows.length, "incident") + " started from " + dateLabel(first) + " to " + dateLabel(day) + (rows.length > RECENT_SHOWN ? "; the newest " + RECENT_SHOWN + " are shown, and the month files hold every one." : "."))
     : node("p", "muted", "No incident in the month files started in that window."));
