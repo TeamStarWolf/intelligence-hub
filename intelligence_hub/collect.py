@@ -1063,6 +1063,49 @@ def status_shards(service_health, tagged, catalog, briefs):
     return files, rows
 
 
+def fit_status_rows(articles, status_rows, end, limit=None):
+    """(status rows kept, how many were held back) so no live month shard passes its byte bound.
+
+    fit_month bounds each status month file, but the Explorer rows built from it share the
+    live/YYYY-MM.json article shard with the month's publisher rows, and a shard over the bound
+    would fail shards.serialize and hold the whole feed. In a month whose shard would pass the
+    bound, the oldest status rows are held back until it fits; publisher, KEV and curated rows are
+    never dropped here. Done before build_shards, so recent.json never names a held-back row.
+    """
+    from . import shards
+    limit = shards.SHARD_MAX_BYTES if limit is None else limit
+    if not status_rows:
+        return status_rows, 0
+    live_from = shards.live_start(end)
+    groups = {}
+    for article in list(articles) + list(status_rows):
+        groups.setdefault(shards.article_path(article, live_from), []).append(article)
+    owned = {id(row) for row in status_rows}
+    held = set()
+    for path in sorted(groups):
+        items = groups[path]
+        mine = sorted((row for row in items if id(row) in owned), key=shards.row_order)
+        if not mine:
+            continue
+        period = path.split("/", 1)[1][:-5]
+        excess = len(shards.canonical(shards.article_shard(period, sorted(items, key=shards.row_order)))) - limit
+        # A row costs its canonical bytes less the newline, plus the comma that joins it: the same count.
+        dropped = 0
+        while excess > 0 and dropped < len(mine):
+            excess -= len(shards.canonical(mine[dropped]))
+            dropped += 1
+        while 0 < dropped < len(mine):
+            gone = {id(row) for row in mine[:dropped]}
+            kept = sorted((row for row in items if id(row) not in gone), key=shards.row_order)
+            if len(shards.canonical(shards.article_shard(period, kept))) <= limit:
+                break
+            dropped += 1
+        held.update(id(row) for row in mine[:dropped])
+    if not held:
+        return status_rows, 0
+    return [row for row in status_rows if id(row) not in held], len(held)
+
+
 def collect_patch_tuesday(registry, refresh, previous, limit):
     """The Patch Tuesday state for this run: {"state", "report", "config", "reason"}. Never raises.
 
@@ -1127,6 +1170,12 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
     history_rows, history_summary = tag_history(snapshot, tagged, catalog)
     patch_files, patch_summary = build_patch_tuesday(patch, catalog, snapshot["mitigations"], tagged)
     health_files, health_rows = status_shards(service_health, tagged, catalog, snapshot["mitigations"])
+    health_rows, health_held = fit_status_rows(rows + history_rows, health_rows, end)
+    if isinstance((service_health or {}).get("summary"), dict):
+        service_health["summary"]["explorer_rows_held"] = health_held
+    if health_held:
+        print("Status: " + format(health_held, ",") + " Explorer incident rows held back to keep their live month shards inside the shard bound",
+              file=sys.stderr)
     files = shards.build_shards(rows + history_rows + health_rows, snapshot["sources"], catalog, snapshot["mitigations"],
                                 shards.reports_file(reports, catalog_value, catalog_sha), end,
                                 coverage=history_publish.coverage_file(ROOT, shards.SCHEMA_VERSION), extra=patch_files)

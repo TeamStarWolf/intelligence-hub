@@ -394,6 +394,49 @@ class ExplorerRowTest(unittest.TestCase):
         self.assertRegex(status.row_id(row), r"^status-aws-[a-f0-9]{16}$")
 
 
+class LiveShardBoundTest(unittest.TestCase):
+    def test_a_month_of_six_thousand_minor_incidents_never_pushes_its_live_shard_over_the_bound(self):
+        template = cache()["check-point"]["incidents"][0]
+        base = datetime(2026, 10, 1, tzinfo=timezone.utc)
+        incidents = []
+        for number in range(6000):
+            clock = (base + timedelta(minutes=7 * number)).isoformat(timespec="seconds")
+            incidents.append({**template, "id": "minor{:05d}".format(number), "name": "Degraded performance in region " + str(number % 40) + " " + "N" * 60,
+                              "summary": "S" * 160, "impact": "minor", "impact_raw": "minor", "started": clock, "updated": clock, "resolved": clock,
+                              "status": "resolved"})
+        self.assertTrue(all(status.valid_incident(row) for row in incidents))
+        files, _summary = status.build_files(REGISTRY, {}, {"2026-10": incidents}, date(2026, 11, 1), CLOCK)
+        month = files["status/2026-10.json"]
+        self.assertLessEqual(len(shards.canonical(month)), shards.SHARD_MAX_BYTES, "fit_month bounds the status month file")
+        explorer = status.explorer_rows(files, REGISTRY)
+        self.assertEqual(len(explorer), len(month["rows"]))
+        self.assertGreater(len(explorer), 5000)
+        # The month's publisher rows share live/2026-10.json with the status rows.
+        publisher = [{**explorer[number], "id": "feed-row-{:05d}".format(number), "origin": "feed", "kind": "news", "source_id": "example-feed"}
+                     for number in range(0, len(explorer), 3)]
+        end = date(2026, 11, 1)
+        live = shards.live_start(end)
+        path = shards.article_path(explorer[0], live)
+        self.assertEqual(path, "live/2026-10.json")
+        whole = shards.article_shard("2026-10", sorted(publisher + explorer, key=shards.row_order))
+        self.assertGreater(len(shards.canonical(whole)), shards.SHARD_MAX_BYTES, "together the rows really are over the bound")
+        kept, held = collect.fit_status_rows(publisher, explorer, end)
+        self.assertGreater(held, 0)
+        self.assertEqual(len(kept) + held, len(explorer))
+        shard = shards.article_shard("2026-10", sorted(publisher + kept, key=shards.row_order))
+        self.assertLessEqual(len(shards.canonical(shard)), shards.SHARD_MAX_BYTES)
+        self.assertEqual(sum(row["origin"] == "feed" for row in shard["rows"]), len(publisher), "publisher rows are never dropped")
+        kept_ids = {row["id"] for row in kept}
+        dropped = sorted((row for row in explorer if row["id"] not in kept_ids), key=shards.row_order)
+        self.assertLessEqual(max(shards.row_order(row) for row in dropped), min(shards.row_order(row) for row in kept), "the oldest rows go first")
+        # No more than needed: the newest held-back row put back passes the bound again.
+        again = shards.article_shard("2026-10", sorted(publisher + kept + [dropped[-1]], key=shards.row_order))
+        self.assertGreater(len(shards.canonical(again)), shards.SHARD_MAX_BYTES)
+        shards.serialize({"live/2026-10.json": shard})
+        # A month inside the bound keeps every row.
+        self.assertEqual(collect.fit_status_rows([], explorer[:100], end), (explorer[:100], 0))
+
+
 class BuildTest(unittest.TestCase):
     def test_the_offline_build_writes_the_status_files_and_explorer_rows(self):
         workspace = support.BuildCopy()
@@ -413,6 +456,7 @@ class BuildTest(unittest.TestCase):
             self.assertTrue(incident)
             self.assertTrue(any(["vendor:check-point", "source-identity", "high"] in row["tagging"].get("vendor", []) for row in incident))
             self.assertEqual(result["status"]["status"], "ok")
+            self.assertEqual(result["status"]["explorer_rows_held"], 0)
             self.assertIn("data/v7/status/current.json: ", output)
             # The v6 feed is unchanged by service health: its rows stay publisher, KEV and curated.
             self.assertFalse(any(row["origin"] == "service-status" for row in workspace.feed()["articles"]))
@@ -572,6 +616,29 @@ class PreviousPublicationTest(unittest.TestCase):
         self.assert_may_kept(result["files"])
         self.assertIn("status-check-point-may00001", {row["id"] for row in result["rows"]})
         self.assertEqual(result["summary"]["months"], sum(1 for path in raw if status.MONTH_PATH.fullmatch(path)))
+
+    def test_a_failed_outage_read_after_a_good_publication_keeps_its_rows(self):
+        raw, index = self.publication()
+        before = json.loads(raw["status/outages.json"].decode("utf-8"))["ioda"]
+        self.assertEqual((before["status"], before["last_success"]), ("ok", CLOCK))
+        self.assertTrue(before["rows"])
+        # current.json lists only the tracked status pages; the outage blocks come from outages.json.
+        self.assertNotIn("ioda", {item["id"] for item in json.loads(raw["status/current.json"].decode("utf-8"))["sources"]})
+        root = self.site(raw)
+
+        def fail(url, maximum=None, fresh=False):
+            raise OSError("simulated IODA outage")
+        with mock.patch.dict(status.os.environ, {status.RADAR_TOKEN_ENV: ""}):
+            result = status.collect_status(root, refresh=True, previous_index=index, deployed=False, end=self.END, fetch=fail,
+                                           clock="2026-11-01T18:00:00+00:00")
+        self.assertEqual(result["summary"]["status"], "ok")
+        after = result["files"]["status/outages.json"]["ioda"]
+        self.assertEqual(after["status"], "failed")
+        self.assertIn("simulated IODA outage", after["error"])
+        self.assertEqual(after["fetched_at"], "2026-11-01T18:00:00+00:00")
+        self.assertEqual((after["rows"], after["copyright"], after["last_success"]), (before["rows"], before["copyright"], CLOCK),
+                         "a failed IODA read never blanks the last good outage snapshot")
+        self.assertEqual(result["files"]["status/outages.json"]["radar"]["status"], "not_configured")
 
     def test_a_failed_step_with_no_previous_files_publishes_none(self):
         result = self.collect(self.site({}, registry="{}"), None)
