@@ -112,8 +112,13 @@ their own registry, [config/status.json](../config/status.json), described sourc
 bounded fetch as publisher feeds: canonical HTTPS only, no redirects, identity encoding, a
 12-second connection timeout, a 30-second read deadline and the 3 MiB default byte bound. A
 failed read keeps that source's last good snapshot with its own fetch time and records the
-failure; a broken registry leaves the status files out and never blocks the feed. These sources
-are not counted among the publisher feeds below.
+failure. Statuspage incident lists return only the 50 most recent incidents, so the published
+month files are the only copy of older incidents. Every status file the previous publication
+lists is read and checked first (each one gets a second read); if one still cannot be read, the
+run stops before writing anything and the deployed publication stays, so a read failure never
+removes or shrinks a month. A failure later in the step, such as a broken registry, publishes
+the previous status files again byte for byte and never blocks the feed. These sources are not
+counted among the publisher feeds below.
 
 ## What is configured
 

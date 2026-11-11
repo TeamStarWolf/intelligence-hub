@@ -2,10 +2,15 @@
 responses, observation and fallback, the month files and their caps, Explorer rows, the
 publication decision, and the page's connect-src list."""
 from datetime import date, datetime, timezone
+import io
 import json
 from pathlib import Path
 import re
+import shutil
+import tempfile
 import unittest
+from unittest import mock
+import urllib.error
 import urllib.parse
 
 import support
@@ -390,6 +395,160 @@ class BuildTest(unittest.TestCase):
         source = (support.ROOT / "intelligence_hub" / "collect.py").read_text(encoding="utf-8")
         self.assertIn('quiet = {"sources.json", *status_quiet}', source)
         self.assertIn('service_health["summary"].get("board_changed") is True', source)
+
+
+class PreviousPublicationTest(unittest.TestCase):
+    """A read failure never costs incident history: Statuspage lists only the 50 most recent
+    incidents, so a month the vendors no longer list exists only in the published month file."""
+    END = date(2026, 11, 1)
+
+    def publication(self):
+        """(raw bytes by path, previous v7 index) with a May month the observations no longer hold."""
+        row = cache()["check-point"]["incidents"][0]
+        may = {**row, "id": "may00001", "started": "2026-05-04T10:00:00+00:00", "updated": "2026-05-04T12:00:00+00:00",
+               "resolved": "2026-05-04T12:00:00+00:00", "url": "https://status.checkpoint.com/incidents/may00001"}
+        self.assertTrue(status.valid_incident(may))
+        files, _summary = status.build_files(REGISTRY, cache(), {"2026-05": [may]}, self.END, CLOCK)
+        raw, entries = shards.serialize(files)
+        self.assertIn("status/2026-05.json", raw)
+        return raw, {"shards": entries}
+
+    @staticmethod
+    def reader(raw, failing=(), failures=10 ** 6):
+        """read(entry) over raw bytes; each path in failing raises OSError on its first failures reads."""
+        seen = {}
+
+        def read(entry):
+            seen[entry["path"]] = seen.get(entry["path"], 0) + 1
+            if entry["path"] in failing and seen[entry["path"]] <= failures:
+                raise OSError("simulated transient read failure")
+            data = raw[entry["path"]]
+            collect.require(len(data) == entry["bytes"] and shards.sha256(data) == entry["sha256"], "A status file differs from the index.")
+            return data
+        return read
+
+    def site(self, raw, registry=None):
+        """A throwaway root whose site/data/v7 holds the previous status files (local mode)."""
+        directory = tempfile.TemporaryDirectory(prefix="hub-status-")
+        self.addCleanup(directory.cleanup)
+        root = Path(directory.name)
+        (root / "config").mkdir()
+        shutil.copyfile(support.ROOT / "config" / "status.json", root / "config" / "status.json")
+        if registry is not None:
+            (root / "config" / "status.json").write_text(registry, encoding="utf-8")
+        for path, data in raw.items():
+            target = root / "site" / "data" / "v7" / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(data)
+        (root / ".state").mkdir()
+        shutil.copyfile(support.FIXTURES / "status-cache.json", root / ".state" / "status-cache.json")
+        return root
+
+    def collect(self, root, index):
+        return status.collect_status(root, refresh=False, previous_index=index, deployed=False, end=self.END)
+
+    def assert_may_kept(self, files):
+        self.assertIn("status/2026-05.json", files)
+        self.assertEqual([row["id"] for row in files["status/2026-05.json"]["rows"]], ["may00001"])
+
+    def test_a_month_read_once_more_after_a_transient_failure_keeps_its_rows(self):
+        raw, index = self.publication()
+        months, current = status.read_previous(index, self.reader(raw, failing={"status/2026-05.json"}, failures=1))
+        self.assertEqual([row["id"] for row in months["2026-05"]], ["may00001"])
+        self.assertIsNotNone(current)
+
+    def test_one_unreadable_month_holds_the_run_and_never_publishes_a_removal(self):
+        raw, index = self.publication()
+        with self.assertRaises(status.StatusHold) as caught:
+            status.read_previous(index, self.reader(raw, failing={"status/2026-05.json"}))
+        self.assertIn("status/2026-05.json", str(caught.exception))
+        # On disk: the local reader refuses the changed bytes, and the step holds with no files.
+        changed = dict(raw)
+        changed["status/2026-05.json"] = raw["status/2026-05.json"].replace(b"may00001", b"may00002")
+        result = self.collect(self.site(changed), index)
+        self.assertEqual(result["summary"]["status"], "held")
+        self.assertEqual(result["files"], {})
+        self.assertIn("status/2026-05.json", result["summary"]["reason"])
+        # A file that parses but does not serialize back to its own bytes holds too.
+        loose = dict(raw)
+        loose["status/2026-05.json"] = raw["status/2026-05.json"].replace(b",", b", ", 1)
+        entries = [{**entry, "bytes": len(loose[entry["path"]]), "sha256": shards.sha256(loose[entry["path"]])} for entry in index["shards"]]
+        with self.assertRaises(status.StatusHold):
+            status.read_previous({"shards": entries}, self.reader(loose))
+
+    def test_a_failed_step_publishes_the_previous_status_files_byte_for_byte(self):
+        raw, index = self.publication()
+        # The registry breaks: nothing can be rebuilt, so the previous files are carried as they are.
+        result = self.collect(self.site(raw, registry="{}"), index)
+        self.assertEqual(result["summary"]["status"], "carried")
+        self.assertFalse(result["summary"]["board_changed"])
+        self.assertEqual(set(result["files"]), set(raw))
+        for path, data in raw.items():
+            self.assertEqual(shards.canonical(result["files"][path]), data, path)
+        self.assert_may_kept(result["files"])
+        self.assertEqual(result["rows"], [])
+        # The step raises after the registry loaded: the files are carried and the Explorer rows rebuilt from them.
+        root = self.site(raw)
+        with mock.patch.object(status, "build_files", side_effect=ValueError("simulated failure")):
+            result = self.collect(root, index)
+        self.assertEqual(result["summary"]["status"], "carried")
+        self.assertEqual({path: shards.canonical(value) for path, value in result["files"].items()}, raw)
+        self.assert_may_kept(result["files"])
+        self.assertIn("status-check-point-may00001", {row["id"] for row in result["rows"]})
+        self.assertEqual(result["summary"]["months"], sum(1 for path in raw if status.MONTH_PATH.fullmatch(path)))
+
+    def test_a_failed_step_with_no_previous_files_publishes_none(self):
+        result = self.collect(self.site({}, registry="{}"), None)
+        self.assertEqual(result["summary"]["status"], "unavailable")
+        self.assertEqual(result["files"], {})
+
+    def test_a_feed_json_resume_reads_the_deployed_index_or_holds(self):
+        raw, index = self.publication()
+        listed = json.dumps({**index, "shards": index["shards"] + [{"path": "live/2026-10.json", "bytes": 1, "sha256": "0" * 64}]}).encode("utf-8")
+        found = status.deployed_index(lambda url, maximum, fresh=False: listed)
+        self.assertEqual([entry["path"] for entry in found["shards"]], sorted(raw))
+
+        def missing(url, maximum, fresh=False):
+            raise urllib.error.HTTPError(url, 404, "Not Found", {}, io.BytesIO(b""))
+        self.assertIsNone(status.deployed_index(missing))
+
+        def down(url, maximum, fresh=False):
+            raise OSError("simulated network failure")
+        with self.assertRaises(status.StatusHold):
+            status.deployed_index(down)
+        # The collector's own path: a resume from data/feed.json whose index read fails holds the run.
+        with mock.patch.object(collect, "fetch", side_effect=OSError("simulated network failure")):
+            result = collect.collect_status(False, {"schema_version": 7}, self.END)
+        self.assertEqual(result["summary"]["status"], "held")
+
+    def test_the_offline_build_holds_on_an_unreadable_month_and_carries_on_a_broken_registry(self):
+        workspace = support.BuildCopy()
+        try:
+            code, _result, output = workspace.run()
+            self.assertEqual(code, 0, output[-2000:])
+            base = workspace.root / "site" / "data" / "v7"
+            before = {path.relative_to(base).as_posix(): path.read_bytes() for path in (base / "status").iterdir()}
+            index_before = (base / "index.json").read_bytes()
+            # A changed month file: the run stops before writing anything.
+            (base / "status" / "2026-10.json").write_bytes(before["status/2026-10.json"] + b" ")
+            code, _result, output = workspace.run()
+            self.assertNotEqual(code, 0)
+            self.assertIn("holding this run so no incident history is lost", output)
+            self.assertEqual((base / "index.json").read_bytes(), index_before)
+            self.assertEqual((base / "status" / "2026-10.json").read_bytes(), before["status/2026-10.json"] + b" ")
+            # Restored, then the registry breaks: the run publishes and the status files are unchanged.
+            (base / "status" / "2026-10.json").write_bytes(before["status/2026-10.json"])
+            (workspace.root / "config" / "status.json").write_text("{}", encoding="utf-8")
+            code, result, output = workspace.run()
+            self.assertEqual(code, 0, output[-2000:])
+            self.assertEqual(result["status"]["status"], "carried")
+            self.assertEqual({path.relative_to(base).as_posix(): path.read_bytes() for path in (base / "status").iterdir()}, before)
+            listed = {entry["path"] for entry in json.loads((base / "index.json").read_text(encoding="utf-8"))["shards"]}
+            self.assertTrue(set(before) <= listed)
+            # Explorer rows need the registry, so only the status files themselves must stay listed.
+            self.assertFalse([path for path in result["removed_shards"] if path.startswith("status/")])
+        finally:
+            workspace.close()
 
 
 class PageTest(unittest.TestCase):

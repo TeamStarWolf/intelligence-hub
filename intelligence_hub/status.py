@@ -21,7 +21,11 @@ Incidents of impact minor or above also become Explorer rows (origin "service-st
 "incident"), tagged with the outage event type and the source's vendor.
 
 A failed read never blanks a source: it keeps the last good snapshot with its own fetch time and
-records the failure. A failure of this whole step never blocks the feed.
+records the failure. Vendor incident lists reach back only so far (Statuspage returns the 50 most
+recent), so the published month files are the only copy of older rows and are never given up to a
+read failure: every status file the previous index lists is read and checked first, and a run that
+cannot read one of them holds (the collector stops and the deployed publication stays). A failure
+later in this step publishes the previous status files again byte for byte and never blocks the feed.
 """
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta, timezone
@@ -33,6 +37,7 @@ from pathlib import Path
 import re
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -100,6 +105,11 @@ NOTES = [
 
 class StatusError(ValueError):
     """The registry or a status file does not meet its rules."""
+
+
+class StatusHold(StatusError):
+    """A status file the previous publication lists could not be read or checked, so this run must
+    not replace the publication: building without it would drop incident history."""
 
 
 def _check(condition, message):
@@ -929,28 +939,81 @@ def tag_rows(rows, registry, context, catalog, briefs):
 
 # Previous publication ------------------------------------------------------------------------
 
+KINDS = {"current": "status-current", "outages": "status-outages", "index": "status-index"}
+READ_ATTEMPTS = 2
+
+
+def previous_entries(index):
+    """The status files a previous publication's v7 index lists, in path order."""
+    return sorted((entry for entry in (index or {}).get("shards", []) if isinstance(entry, dict) and isinstance(entry.get("path"), str) and
+                   PATH.fullmatch(entry["path"])), key=lambda entry: entry["path"])
+
+
+def expected_kind(path):
+    return "status-month" if MONTH_PATH.fullmatch(path) else KINDS[path[len(DIRECTORY) + 1:-len(".json")]]
+
+
+def read_previous_files(index, read):
+    """{path: value} for every status file the previous index lists, each one checked.
+
+    read(entry) returns the file's bytes after checking them against the entry. A file must parse,
+    carry its kind and serialize again to exactly the bytes read, so carrying it forward publishes
+    the same bytes. Each file gets READ_ATTEMPTS reads; one that still fails raises StatusHold.
+    """
+    from .shards import canonical
+    found = {}
+    for entry in previous_entries(index):
+        path = entry["path"]
+        for attempt in range(1, READ_ATTEMPTS + 1):
+            try:
+                raw = read(entry)
+                value = json.loads(raw.decode("utf-8"), parse_constant=collect.reject_constant)
+                require(isinstance(value, dict) and value.get("kind") == expected_kind(path), "It is not a " + expected_kind(path) + " file.")
+                require(not MONTH_PATH.fullmatch(path) or isinstance(value.get("rows"), list), "Its rows are not a list.")
+                require(canonical(value) == raw, "It does not serialize again to the bytes read.")
+            except (OSError, ValueError, TypeError, KeyError, UnicodeError, RecursionError) as error:
+                reason = collect.failure_reason(error, "unreadable")
+                if attempt < READ_ATTEMPTS:
+                    print("Status: " + path + " from the previous publication was not read (" + reason + "); reading it once more.", file=sys.stderr)
+                    continue
+                raise StatusHold("data/v7/" + path + " from the previous publication could not be read or checked (" + reason + ")") from error
+            found[path] = value
+            break
+    return found
+
+
+def previous_state(files):
+    """({YYYY-MM: rows}, current.json or None) from the previous publication's checked status files."""
+    months, current = {}, None
+    for path, value in files.items():
+        match = MONTH_PATH.fullmatch(path)
+        if match:
+            months[match.group(1)] = [row for row in value["rows"] if valid_incident(row)]
+            dropped = len(value["rows"]) - len(months[match.group(1)])
+            if dropped:
+                print("Status: {:,} rows of {} from the previous publication do not meet the incident rules and were left out.".format(dropped, path),
+                      file=sys.stderr)
+        elif path == DIRECTORY + "/current.json" and isinstance(value.get("sources"), list):
+            current = value
+    return months, current
+
+
 def read_previous(index, read):
     """({YYYY-MM: rows}, current.json or None) from a previous publication's status files.
 
     index is that publication's v7 index (or None); read(entry) returns the file's bytes after
-    checking them against the entry. Anything unreadable or invalid is left out.
+    checking them against the entry. A listed file that cannot be read or checked raises StatusHold.
     """
-    months, current = {}, None
-    for entry in (index or {}).get("shards", []):
-        path = entry.get("path", "")
-        match = MONTH_PATH.fullmatch(path)
-        if not match and path != DIRECTORY + "/current.json":
-            continue
-        try:
-            value = json.loads(read(entry).decode("utf-8"), parse_constant=collect.reject_constant)
-        except (OSError, ValueError, TypeError, KeyError, UnicodeError) as error:
-            print("Status: " + path + " from the previous publication was not used (" + collect.failure_reason(error, "unreadable") + ").", file=sys.stderr)
-            continue
-        if match and isinstance(value, dict) and value.get("kind") == "status-month" and isinstance(value.get("rows"), list):
-            months[match.group(1)] = [row for row in value["rows"] if valid_incident(row)]
-        elif not match and isinstance(value, dict) and value.get("kind") == "status-current" and isinstance(value.get("sources"), list):
-            current = value
-    return months, current
+    return previous_state(read_previous_files(index, read))
+
+
+def carried_summary(files, reason):
+    """The run summary when the previous status files are published again unchanged."""
+    index = files.get(DIRECTORY + "/index.json") or {}
+    months = [path for path in files if MONTH_PATH.fullmatch(path)]
+    return {"status": "carried", "reason": reason, "sources": index["sources"] if isinstance(index.get("sources"), int) else 0,
+            "incidents": sum(len(files[path]["rows"]) for path in months), "months": len(months), "board_changed": False,
+            "carried": sorted(files)}
 
 
 def previous_observations(current):
@@ -962,6 +1025,32 @@ def previous_observations(current):
                                  "incidents": [row for row in item.get("open") or [] if valid_incident(row, item["id"])],
                                  "last_success": item.get("last_success")}
     return found
+
+
+def deployed_index(fetch):
+    """The deployed v7 index's status entries, for a run that resumed from data/feed.json because the
+    v7 index was not usable for articles: the deployed status files are still the only copy of older
+    incidents. None when no v7 index is deployed (HTTP 404) or the deployed one cannot be parsed, so
+    it names no file to keep. Any other failure to read it raises StatusHold.
+    """
+    from .shards import INDEX_MAX_BYTES
+    try:
+        raw = fetch(collect.PUBLIC_V7 + "index.json", INDEX_MAX_BYTES, fresh=True)
+    except urllib.error.HTTPError as error:
+        error.close()
+        if error.code == 404:
+            return None
+        raise StatusHold("the deployed data/v7/index.json could not be read (HTTP " + str(error.code) + ")") from error
+    except (OSError, ValueError) as error:
+        raise StatusHold("the deployed data/v7/index.json could not be read (" + collect.failure_reason(error, "unreadable") + ")") from error
+    try:
+        value = json.loads(raw.decode("utf-8"), parse_constant=collect.reject_constant)
+    except (ValueError, UnicodeError, RecursionError):
+        print("Status: the deployed data/v7/index.json does not parse; it names no status file to keep.", file=sys.stderr)
+        return None
+    if not isinstance(value, dict) or not isinstance(value.get("shards"), list):
+        return None
+    return {"shards": previous_entries(value)}
 
 
 def deployed_reader(base, fetch):
@@ -988,13 +1077,34 @@ def read_time(observations, end):
     return max(clocks) if clocks else end.isoformat() + "T00:00:00+00:00"
 
 
-def collect_status(root, *, refresh, previous_index, deployed, end, fetch=collect.fetch, state=None, clock=None):
-    """The status files, Explorer rows (untagged) and run summary. Never raises: a failure returns no files."""
+def held(reason):
+    """The step's result when a previous status file cannot be read: the collector stops on it."""
+    print("Status: " + reason + "; holding this run so no incident history is lost.", file=sys.stderr)
+    return {"files": {}, "rows": [], "registry": None, "summary": {"status": "held", "reason": reason[:300], "board_changed": False}}
+
+
+def collect_status(root, *, refresh, previous_index, deployed, end, fetch=None, state=None, clock=None):
+    """The status files, Explorer rows (untagged) and run summary. Never raises.
+
+    The previous publication's status files are read first. If one it lists cannot be read or
+    checked, the summary status is "held" and the collector stops before writing anything. A
+    failure after that publishes the previous status files again, byte for byte (status
+    "carried"); with no previous status files it returns none (status "unavailable").
+    """
     state = Path(state) if state is not None else Path(root) / ".state"
+    # Looked up at call time, so a test that replaces collect.fetch replaces every read here too.
+    fetch = fetch if fetch is not None else collect.fetch
+    try:
+        read = deployed_reader(collect.PUBLIC_V7, fetch) if deployed else local_reader(Path(root) / "site")
+        carried = read_previous_files(previous_index, read)
+    except StatusHold as error:
+        return held(str(error))
+    except (OSError, ValueError, TypeError, KeyError, AttributeError) as error:
+        return held("the previous status files could not be read (" + (str(error) or type(error).__name__)[:200] + ")")
+    registry = None
     try:
         registry = load_registry(root)
-        read = deployed_reader(collect.PUBLIC_V7, fetch) if deployed else local_reader(Path(root) / "site")
-        months, current = read_previous(previous_index, read)
+        months, current = previous_state(carried)
         retained = previous_observations(current)
         cache_path = state / CACHE
         if refresh:
@@ -1012,8 +1122,16 @@ def collect_status(root, *, refresh, previous_index, deployed, end, fetch=collec
         generated = read_time(observations, end)
         files, summary = build_files(registry, observations, months, end, generated, board_digest(current) if current else None)
         return {"files": files, "rows": explorer_rows(files, registry), "registry": registry, "summary": summary}
-    except (OSError, ValueError, TypeError, KeyError, AttributeError) as error:
+    except (OSError, ValueError, TypeError, KeyError, AttributeError, RecursionError) as error:
         reason = (str(error) or type(error).__name__)[:300]
+        if carried:
+            print("Status: service health not rebuilt (" + reason + "); the previous " + format(len(carried), ",") +
+                  " status files are published again unchanged.", file=sys.stderr)
+            try:
+                rows = explorer_rows(carried, registry) if registry is not None else []
+            except (ValueError, TypeError, KeyError, AttributeError):
+                rows = []
+            return {"files": carried, "rows": rows, "registry": registry if rows else None, "summary": carried_summary(carried, reason)}
         print("Status: service health not built (" + reason + ").", file=sys.stderr)
         return {"files": {}, "rows": [], "registry": None, "summary": {"status": "unavailable", "reason": reason, "board_changed": False}}
 

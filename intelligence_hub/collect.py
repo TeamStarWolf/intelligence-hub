@@ -731,8 +731,12 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
         validate_cache(cache, sources)
         require(any(item.get("status") in {"ok", "partial"} for item in [*cache["sources"].values(), cache["kev"]]), "No live source succeeded; the previously deployed snapshot must remain available.")
     # Service health (intelligence_hub/status.py): vendor status pages, cloud health feeds and
-    # internet outage signals. A failure here leaves the status files out and never blocks the feed.
+    # internet outage signals. A later failure in that step publishes the previous status files
+    # again and never blocks the feed; a previous status file that cannot be read holds the run,
+    # because the month files are the only copy of incidents the vendors no longer list.
     service_health = collect_status(refresh, previous, end)
+    require(service_health["summary"].get("status") != "held", "Service health: " + str(service_health["summary"].get("reason")) +
+            ". Nothing was written; the deployed publication is preserved and the next run reads the status files again.")
     failures = [{"id": key, "error": item.get("error")} for key, item in [*sorted(cache["sources"].items()), ("cisa-kev", cache["kev"])]
                 if item.get("status") == "failed"]
     for failure in failures:
@@ -998,11 +1002,21 @@ def collect_status(refresh, previous, end):
 
     Incident history is folded into the month files of the previous publication: the deployed
     one on a --resume-public run, otherwise the files a previous local build left in site/.
+    A run that resumed from data/feed.json reads the deployed v7 index once more for its status
+    entries; when that read fails, the step holds the run (status.deployed_index).
     """
     from . import shards, status
-    deployed = previous is not None and "v7_index" in previous
-    index = previous["v7_index"] if deployed else None if previous is not None else shards.local_index(ROOT / "site")
-    return status.collect_status(ROOT, refresh=refresh, previous_index=index, deployed=deployed, end=end, state=STATE)
+    deployed = previous is not None
+    if previous is None:
+        index = shards.local_index(ROOT / "site")
+    elif "v7_index" in previous:
+        index = previous["v7_index"]
+    else:
+        try:
+            index = status.deployed_index(fetch)
+        except status.StatusHold as error:
+            return status.held(str(error))
+    return status.collect_status(ROOT, refresh=refresh, previous_index=index, deployed=deployed, end=end, fetch=fetch, state=STATE)
 
 
 def status_shards(service_health, tagged, catalog, briefs):

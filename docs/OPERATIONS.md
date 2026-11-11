@@ -455,6 +455,8 @@ an oversized publication stays blocked rather than widening those guards.
 | A story looks old | Check its publication/event/catalog date and origin; legacy feeds and curation intentionally include history. |
 | A service-health card says Snapshot with an old time | The collector's last read is that old; a CORS-open Statuspage card turns Live once this browser reads it. A failed collector read keeps the last good snapshot and names the failure. |
 | A service-health card says the live read failed | The vendor's host refused or timed out for this browser; the card keeps the collector's snapshot. Nothing is retried until the next five-minute read. |
+| The publish run failed after "holding this run so no incident history is lost" | A status file the deployed index lists could not be read twice in a row, so the run stopped before writing anything and the deployed publication stays; the month files are the only copy of incidents the vendors no longer list. The next run reads them again. If it repeats, open the named file under `data/v7/status/` on the live site. |
+| The run summary says status `carried` | The service-health step failed after reading the previous status files (for example a broken `config/status.json`), so those files were published again unchanged and the feed carried on. Read the reason in `.state/collection-result.json`. |
 
 Keep actual collection/deployment dates, counts and scoped scanner input evidence
 privately. Distinguish source review, collection, packaging, deployment and browser
