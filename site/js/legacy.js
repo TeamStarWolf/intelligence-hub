@@ -469,7 +469,9 @@ export function legacyData(snapshot) {
       guidance: record.record_state === "REJECTED" ? "needs-review" : record.analysis.guidance_status,
       required_action: record.required_action_present ?? Boolean(record.required_action),
       score: record.cvss?.score ?? null, version: record.cvss?.version ?? null, kev_added: record.kev?.date_added ?? null,
-      weaknesses: record.weaknesses.map(item => item.id), bucket: null
+      weaknesses: record.weaknesses.map(item => item.id), bucket: null,
+      // The version 3 index columns the register, the chips and the EPSS sort read (null on an inline brief).
+      ssvc_exploitation: record.ssvc_exploitation ?? null, epss: record.epss ?? null
     });
   }
   const rows = snapshot.articles.map(article => {

@@ -11,7 +11,7 @@ import { indexFields } from "../../site/js/limits.js";
 import { safeUrl } from "../../site/js/util.js";
 import { ELSEWHERE, elsewhereRow, severityBlock } from "../../site/js/views/cves.js";
 import { FormatError, normalizeBrief, normalizeCveIndex, normalizeRecent } from "../../site/js/validate.js";
-import { normalize as normalizeFeed } from "../../site/js/legacy.js";
+import { legacyData, normalize as normalizeFeed } from "../../site/js/legacy.js";
 
 async function boot({ hash = "", site = files() } = {}) {
   const shell = page(hash, "");
@@ -163,6 +163,9 @@ test("the feed reader for the fallback path reads the version 3 brief index and 
   assert.equal(snapshot.mitigations.get("CVE-2026-1000").ssvc_exploitation, "active");
   assert.equal(snapshot.mitigations.get("CVE-2026-1000").cvss.score, 9.8);
   assert.equal(snapshot.mitigations.get("CVE-2026-1000").epss.score, 0.5);
+  // The fallback's own CVE index, which the register, the chips and the EPSS sort read, carries both columns.
+  const fallback = legacyData(snapshot).cveIndex.get("CVE-2026-1000");
+  assert.deepEqual([fallback.ssvc_exploitation, fallback.epss], ["active", { score: 0.5, percentile: 0.9, date: "2026-11-02", model: "v2026.06.15" }]);
   const old = feed(1, ["PUBLISHED", "ok", "publisher-guidance", true, 9.8, "3.1", "2026-11-02", ["CWE-787"]]);
   assert.throws(() => normalizeFeed(old, JSON.stringify(old).length), FormatError);
   const beforeEpss = feed(2, ["PUBLISHED", "ok", "publisher-guidance", true, 9.8, "3.1", "2026-11-02", ["CWE-787"], "active"]);
