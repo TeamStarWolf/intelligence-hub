@@ -16,7 +16,7 @@ import time
 
 from .collect import (BRIEFS_MAX_BYTES, FEED_MAX_BYTES, LEGACY_MAX_ARTICLES, MAX_FEED_ROWS, public_bytes, published, rows_over_message,
                       safe_url, validate_article, validate_observation, validate_window)
-from .mitigations import INDEX_FIELDS, brief_index, join_publication, split_publication, valid_projection
+from .mitigations import INDEX_FIELDS, INDEX_FIELDS_V1, INDEX_VERSION, brief_index, join_publication, split_publication, valid_projection
 from .intelligence import validate_intelligence, validate_weaknesses
 from .mitigations import brief_url
 
@@ -169,18 +169,24 @@ def validate_archive_source(source, snapshot_version):
 def validate_index(index, wanted):
     """The compact per-CVE rows in a schema 7 feed."""
     keys(index, {"version", "fields", "rows"})
-    require(type(index["version"]) is int and index["version"] == 1 and index["fields"] == list(INDEX_FIELDS), "Unsupported brief index.")
+    # Version 1 is the layout published before WP-04 added ssvc_exploitation; a deployed feed in
+    # that layout stays a valid resume and archive input.
+    version = index["version"]
+    require(type(version) is int and version in (1, INDEX_VERSION) and
+            index["fields"] == list(INDEX_FIELDS if version == INDEX_VERSION else INDEX_FIELDS_V1), "Unsupported brief index.")
     rows = index["rows"]
     require(isinstance(rows, dict) and set(rows) == wanted, "The brief index must exactly cover article mentions.")
     for cve, row in rows.items():
-        require(CVE.fullmatch(cve) and isinstance(row, list) and len(row) == len(INDEX_FIELDS), "Invalid brief index row.")
-        state, status, guidance, action, score, version, added, weaknesses = row
+        require(CVE.fullmatch(cve) and isinstance(row, list) and len(row) == len(index["fields"]), "Invalid brief index row.")
+        state, status, guidance, action, score, cvss_version, added, weaknesses = row[:8]
+        exploitation = row[8] if version == INDEX_VERSION else None
         require(state in RECORD_STATES and status in SOURCE_STATES and guidance in GUIDANCE_STATES and type(action) is bool, "Invalid brief index state.")
         require(score is None or type(score) in (int, float) and math.isfinite(score) and 0 <= score <= 10, "Invalid brief index score.")
-        require(version is None or isinstance(version, str) and len(version) <= 20, "Invalid brief index score version.")
+        require(cvss_version is None or isinstance(cvss_version, str) and len(cvss_version) <= 20, "Invalid brief index score version.")
         require(added is None or isinstance(added, str) and len(added) == 10 and published(added) == added, "Invalid brief index KEV date.")
         require(isinstance(weaknesses, list) and len(weaknesses) <= 8 and len(set(weaknesses)) == len(weaknesses) and
                 all(isinstance(item, str) and CWE_ID.fullmatch(item) for item in weaknesses), "Invalid brief index weaknesses.")
+        require(exploitation is None or isinstance(exploitation, str) and 0 < len(exploitation) <= 40, "Invalid brief index SSVC exploitation.")
     return rows
 
 
@@ -254,7 +260,12 @@ def validate_snapshot(value):
         require(set(value["mitigations"]) == wanted, "CVE briefs must exactly cover article mentions.")
     index = validate_index(value["brief_index"], wanted) if current else None
     for cve, brief in (value["mitigations"].items() if not current or joined else ()):
-        keys(brief, BRIEF | {"weaknesses", "weaknesses_status"} if modern else BRIEF)
+        expected = BRIEF | {"weaknesses", "weaknesses_status"} if modern else BRIEF
+        # Briefs carry CISA's ADP block since WP-04, as an optional pair like the schema 5 weakness
+        # pair; files published before it have none, and a legacy-labelled snapshot cannot carry it.
+        if modern and {"adp", "adp_status"} & set(brief):
+            expected = expected | {"adp", "adp_status"}
+        keys(brief, expected)
         require(CVE.fullmatch(cve) and valid_projection(brief, cve, safe_url, published), "Invalid structured CVE provenance.")
         if modern:
             validate_weaknesses(brief, cve, brief_url)
@@ -291,7 +302,7 @@ def validate_snapshot(value):
             strings(limitation)
     if joined:
         # Checked after the briefs themselves, so a malformed brief fails as a validation error.
-        require(value["brief_index"] == brief_index(value["mitigations"]), "The brief index differs from its briefs.")
+        require(value["brief_index"] == brief_index(value["mitigations"], value["brief_index"]["version"]), "The brief index differs from its briefs.")
         require(len(public_bytes(split_publication(value)[1])) <= BRIEFS_MAX_BYTES, "The briefs file exceeds its byte bound.")
     for field in ("mitigation_coverage", "deduplication", "coverage", "refresh", "integrations"):
         require(isinstance(value[field], dict), "Invalid snapshot header.")
