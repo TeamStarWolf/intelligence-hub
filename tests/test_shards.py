@@ -506,8 +506,13 @@ class ResumeV7Test(unittest.TestCase):
         cls.workspace.close()
 
     def serve(self, files):
-        def fetch(url, maximum=collect.MAX_BYTES, fresh=False):
+        def fetch(url, maximum=collect.MAX_BYTES, fresh=False, ceiling=collect.FETCH_CEILING):
             self.assertTrue(fresh)
+            self.assertLessEqual(maximum, ceiling)
+            if url == collect.PUBLIC_BRIEFS:
+                self.assertEqual((maximum, ceiling), (collect.BRIEFS_MAX_BYTES, collect.DEPLOYED_BRIEFS_CEILING))
+            else:
+                self.assertEqual(ceiling, collect.FETCH_CEILING)
             if url not in files:
                 raise OSError("HTTP Error 404: Not Found")
             value = files[url]

@@ -654,7 +654,8 @@ class PublishTest(unittest.TestCase):
         files = {collect.PUBLIC_V7 + path.relative_to(self.v7).as_posix(): path.read_bytes() for path in self.v7.rglob("*") if path.is_file()}
         files[collect.PUBLIC_BRIEFS] = self.workspace.raw("briefs.json")
 
-        def fetch(url, maximum=collect.MAX_BYTES, fresh=False):
+        def fetch(url, maximum=collect.MAX_BYTES, fresh=False, ceiling=collect.FETCH_CEILING):
+            assert maximum <= ceiling and (ceiling == collect.FETCH_CEILING or url == collect.PUBLIC_BRIEFS)
             if url not in files:
                 raise OSError("HTTP Error 404: Not Found")
             return files[url]

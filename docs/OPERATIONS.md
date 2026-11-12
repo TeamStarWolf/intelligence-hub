@@ -385,7 +385,7 @@ equals the manifest set, and that each byte count and sha256 agree. Symlinks,
 hard-linked files, other file types and unexpected directories are rejected.
 The package holds at most **4,000 files**; every file under `data/v7/` (shards and
 exports) is at most **4 MiB**, while `data/feed.json` and `data/briefs.json` keep
-the collector's own byte bounds (8 MiB and 12 MiB). Actual file content must total
+the collector's own byte bounds (8 MiB and 24 MiB). Actual file content must total
 at most **192 MiB**. The check builds an in-memory tar and estimates compression
 using both gzip and zlib at level 6. If the larger estimate exceeds **48,000,000
 bytes**, it fails before artifact upload. On every run it prints one line per file

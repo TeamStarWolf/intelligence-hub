@@ -74,7 +74,7 @@ the existing CVE-version payload. No SQL table, schema version, application ID,
 membership, transaction, digest, storage path or export mechanism changes.
 
 The full intelligence section is limited to **128 KiB**. The existing whole-input
-16 MiB, 500,000-node/depth-32 tree and **256 KiB header** limits remain. A valid
+24 MiB, 500,000-node/depth-32 tree and **256 KiB header** limits remain. A valid
 public snapshot can still exceed an archive bound and be refused. Supporting
 schemas 5/6 does not establish that arbitrary stored historical rows reconstruct or
 export successfully, nor prove an actual import, backup or restoration.
@@ -161,7 +161,8 @@ matching receipt/hash before use. Reconcile uncertain writes before retrying.
 
 ## Resource and storage guards
 
-- Each input file at most **16 MiB** and a selected export at most **21 MiB**; strict
+- Each input file at most **24 MiB** (the feed itself stays under 16 MiB) and a selected
+  export at most **33 MiB**; strict
   UTF-8/JSON, duplicate member and nonfinite-number rejection, bounded tree
   depth/node/string counts, checked for each of a schema 7 snapshot's two files.
 - Snapshot: at most 8,000 articles for schemas 3 to 6 (schema 7: at most 27,962,

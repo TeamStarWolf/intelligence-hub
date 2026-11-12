@@ -24,7 +24,7 @@ the feed on `generated_at` and `content_revision`, or its report editions lose
 their CVE brief rows.
 
 There is no longer an 8,000-article abort. Each file has a byte bound instead:
-**8 MiB** for `data/feed.json` and **12 MiB** for `data/briefs.json`. Two count
+**8 MiB** for `data/feed.json` and **24 MiB** for `data/briefs.json`. Two count
 ceilings sit beside them. The feed holds at most **27,962 article rows**, a number
 derived from its byte bound (8,388,608 bytes / 300 bytes per row). The smallest
 live row is 363 bytes and the average is about 480, so at real sizes the byte
@@ -37,15 +37,16 @@ store of live rows, and KEV and curated rows are never trimmed. The site and the
 archive validator check the same bounds and ceilings.
 
 These bounds are the next wall, not a permanent one. A bounded run on
-3 November 2026 wrote 9,019,252 of the 12,582,912 briefs bytes (2,385 briefs,
-about 3,780 bytes each, 3,563,660 bytes free). New CVEs arrived at about 15 to
-21 a day in October and early November, which is about 55 to 80 KB of briefs a
-day, so the 12 MiB briefs bound is crossed between mid-December 2026 and early
-January 2027. The publish input cap was raised to 192 MiB in pull request #7
-(the whole package, with the v7 shards and the exports, was 32,216,955 bytes on
-3 November 2026), so the 12 MiB briefs bound is the wall that binds first. A
-run that crosses it fails and the site keeps its last publication, so the next
-data layout must land before mid-December.
+3 November 2026 wrote 9,019,252 briefs bytes (2,385 briefs, about 3,780 bytes
+each). The deployed file was 10,795,310 bytes on 11 November 2026 after a week
+at about 173 KB a day (the CVE count went from 2,435 to 2,793), which would have
+crossed the former 12 MiB bound around 22 November. The owner approved raising
+the briefs bound to 24 MiB on 11 November 2026 (WP-00 of the revision plan) as
+the interim step; the structural fix is to publish the CVE brief buckets and
+retire schema 6 once the owner's desktop compiler reads them. The publish input
+cap is 192 MiB (the whole package was 90,858,121 bytes on 11 November 2026), so
+the briefs bound still binds first. A run that crosses it fails and the site
+keeps its last publication; every run prints the bound's headroom.
 
 Publisher responses keep the **3 MiB** default bound. A source can set its own
 `max_bytes` in `config/sources.json`, up to a **16 MiB** fetch ceiling. The CISA
@@ -89,7 +90,7 @@ is fixed since 1998; the limit is a technical review horizon, not full coverage.
 Schema 5 keeps 7,306 days and older readers keep their 3,661-day profile. The existing 3 MiB publisher response, strict UTF-8, DTD/entity rejection,
 40,000-node/depth-48 XML, 100-CVE whole-entry rejection, 150 normalization,
 600 retained articles per source, 500 curation entries, 8,000 total articles,
-16 MiB resume, compressed package estimate (now 48,000,000 bytes) and one-day artifact-retention guards applied
+16 MiB resume (24 MiB for the deployed briefs file), compressed package estimate (now 48,000,000 bytes) and one-day artifact-retention guards applied
 to schema 6. Schema 7 replaces the 8,000-article limit with the per-file byte bounds above and the 27,962-row ceiling derived from the feed bound.
 Neither the broader window nor a source's accepted input proves complete history
 or timely reporting. Known modern schema 5/6 fields on legacy labels are refused;
@@ -277,7 +278,7 @@ coordinated release and rollback. Older collectors can ignore the new catalog
 option and retain document order; older site readers can reject schema 4. Do not
 silently strip selection fields, relabel new data as legacy or mix incompatible
 versions. Existing safeguards remain: 150 normalizations, 100 CVEs per entry,
-600 retained articles per source, the schema 7 per-file byte bounds, 16 MiB public-resume input,
+600 retained articles per source, the schema 7 per-file byte bounds, 16 MiB public-resume input (24 MiB for the deployed briefs file),
 the 48,000,000-byte compressed artifact estimate guard and one-day artifact
 retention, alongside the whole-response/XML bounds above.
 

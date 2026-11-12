@@ -26,7 +26,8 @@ INBOX = HOME / "inbox" / "feed.json"
 BRIEFS_INBOX = HOME / "inbox" / "briefs.json"
 DATABASE = HOME / "archive.sqlite3"
 EXPORTS = HOME / "exports"
-MAX_INPUT = 16 * 1024 * 1024
+# Each input file: the feed stays under 16 MiB; a schema 7 briefs file may reach its own bound.
+MAX_INPUT = max(16 * 1024 * 1024, BRIEFS_MAX_BYTES)
 # A schema 7 snapshot is a feed file plus a briefs file, each under its own bound.
 MAX_EXPORT = FEED_MAX_BYTES + BRIEFS_MAX_BYTES + 1024 * 1024
 MAX_KEV_ROWS = 15000

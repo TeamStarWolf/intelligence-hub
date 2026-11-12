@@ -3,7 +3,8 @@
 
 // FEED_MAX_BYTES and BRIEFS_MAX_BYTES in intelligence_hub/collect.py.
 export const maximumFeedBytes = 8 * 1024 * 1024;
-export const maximumBriefsBytes = 12 * 1024 * 1024;
+// The briefs bound was raised from 12 MiB to 24 MiB on 2026-11-11 with the owner's approval (WP-00).
+export const maximumBriefsBytes = 24 * 1024 * 1024;
 // Schema 6 and earlier carried every brief inline, so those files could reach 16 MiB.
 export const maximumLegacyFeedBytes = 16 * 1024 * 1024;
 // MAX_FEED_ROWS in the collector: the 8 MiB feed bound / 300 bytes per row.
