@@ -91,14 +91,29 @@ async function go(shell, hash) { shell.app.navigate(parseRoute(hash, "")); await
 const cards = doc => Object.fromEntries([...doc.querySelectorAll(".status-card")].map(item => [item.getAttribute("data-source"), item]));
 const liveTimer = timers => timers.find(timer => timer.ms === LIVE_INTERVAL);
 
-test("Today's brief head reads the service-health board when the index lists it and sums its open incidents", async () => {
+test("Today's brief head reads the service-health board when the index lists it, sums its open incidents and names retained and unread sources", async () => {
   const shell = await boot({ hash: "#/today" });
   const text = shell.doc.querySelector("#view").textContent;
-  assert.ok(text.includes("Service health: 1 open incident and 1 status page reporting a problem across 3 sources, read 3 Nov 2026, 12:00 UTC."), text.slice(0, 900));
+  assert.ok(text.includes("Service health: 1 open incident and 1 status page reporting a problem across 3 sources, from the collector's read at 3 Nov 2026, 12:00 UTC."), text.slice(0, 900));
+  assert.ok(!text.includes("earlier reading") && !text.includes("not read yet"), "every source on this board was read");
   const link = [...shell.doc.querySelectorAll("#view .brief-list a")].find(anchor => anchor.textContent === "Open the board");
   assert.equal(link.getAttribute("href"), "#/status");
   assert.ok(shell.net.http.requests.some(request => request.path === "./data/v7/status/current.json"));
   assert.ok(!shell.net.http.requests.some(request => request.path.includes("status/2026-11.json")), "no month file is read for the brief head");
+  // A source whose latest read failed keeps its earlier reading and its open incident; one never
+  // read has nothing. Both count in the totals and both are named, so the board clock dates only
+  // the sources it read (the retrieval dates stay apart).
+  const base = statusSite();
+  const current = JSON.parse(base.bodies["./data/v7/status/current.json"]);
+  const retained = incident("zscaler", "32496", { status: "investigating", status_raw: "investigating", impact: "major", impact_raw: "major", resolved: null, url: "https://trust.zscaler.com/incidents/32496", vendor: "vendor:zscaler" });
+  current.sources.push(source("zscaler", { name: "Zscaler", group: "security-platforms", vendor: "vendor:zscaler", home: "https://trust.zscaler.com/", status: "failed", fetched_at: "2026-11-03T12:00:00+00:00",
+    last_success: "2026-11-01T12:00:00+00:00", error: "HTTP 503", indicator: "major", description: "Partial outage", open: [retained] }));
+  current.sources.push(source("newone", { name: "New One", status: "not_fetched", fetched_at: null, last_success: null, indicator: "unknown", description: null, open: [] }));
+  const extra = Object.fromEntries(["status/2026-11.json", "status/outages.json", "status/index.json", "live/2026-11.json"].map(path => [path, JSON.parse(base.bodies["./data/v7/" + path])]));
+  const mixed = await boot({ hash: "#/today", site: files({ extra: { ...extra, "status/current.json": current } }) });
+  const line = mixed.doc.querySelector("#view").textContent;
+  assert.ok(line.includes("Service health: 2 open incidents and 2 status pages reporting a problem across 5 sources, from the collector's read at 3 Nov 2026, 12:00 UTC; " +
+    "1 source shows an earlier reading because the latest read failed; 1 source not read yet."), line.slice(0, 1200));
 });
 
 test("the Service health tab is the infrastructure desk's view, the Explorer stays first, and the default route reads no status file and no vendor host", async () => {

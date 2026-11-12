@@ -90,9 +90,18 @@ export function briefHead(data, board, patch, since) {
   if (board) {
     const open = board.sources.reduce((sum, source) => sum + source.open.length, 0);
     const trouble = board.sources.filter(source => TROUBLE.includes(source.indicator)).length;
+    // A source whose latest read failed keeps its earlier reading (status.js snapshotLabel dates
+    // it by that read), and a source never read has none: both are counted here, so the board
+    // clock dates only the sources it read.
+    const retained = board.sources.filter(source => source.status !== "ok" && source.last_success).length;
+    const unread = board.sources.filter(source => !source.last_success).length;
+    const notes = [];
+    if (retained) notes.push(count(retained, "source") + (retained === 1 ? " shows" : " show") + " an earlier reading because the latest read failed");
+    if (unread) notes.push(count(unread, "source") + " not read yet");
     const item = node("li");
     item.append(node("span", "", "Service health: " + (open ? count(open, "open incident") : "no open incident") + " and " + (trouble ? count(trouble, "status page") + " reporting a problem" : "no status page reporting a problem") +
-      " across " + count(board.sources.length, "source") + ", read " + stamp(board.generated_at) + ". "), routeLink("Open the board", formatRoute({ view: "status", id: null, query: {} })));
+      " across " + count(board.sources.length, "source") + ", from the collector's read at " + stamp(board.generated_at) + (notes.length ? "; " + notes.join("; ") : "") + ". "),
+      routeLink("Open the board", formatRoute({ view: "status", id: null, query: {} })));
     list.append(item);
   }
   if (patch) {
