@@ -17,8 +17,20 @@ Every other view is a tab under one of the desks in the two-row strip under the 
 (Explore, Security, Infrastructure, Reference) and an entry in the **Panels** sidebar, which
 starts closed: Today, Advisories, Known exploited,
 Research, News, CVEs, History, Vendors, Tags, Actors and malware, Reports, Data,
-Sources, Method, About and Service health. Nothing from those views is drawn above
+Subscribe, Sources, Method, About and Service health. Nothing from those views is drawn above
 the Explorer on the default route.
+
+- **Today** opens with a brief head: the KEV and three-day counts in words, the
+  service-health board's open incidents (read from `status/current.json` when the
+  index lists it), the latest Patch Tuesday brief and the next expected release
+  (from `patch-tuesday/index.json` when listed), and what is new since this
+  browser's last visit. That last line uses `localStorage` as a per-browser
+  convenience: the entry ids and KEV CVEs shown are stored under one key, read once
+  per page session and compared on every render. With storage blocked the line
+  says so and nothing else changes.
+- **Subscribe** lists the Hub's three Atom feeds (below) with the address to copy
+  into a feed reader, then podcasts and newsletters as titles and links only. The
+  Hub collects nothing from them.
 
 - **CVEs** lists every CVE an entry mentions. A CVE opens its saved brief in a
   dialog with a link to its CVE.org record. One CVE can have several publisher
@@ -140,7 +152,9 @@ v7 paths whose sha256 differs from the previous index, and the paths it no longe
 lists. Article, guidance, source-outcome, intake-count/reason and layout changes
 can trigger publication, and so can any changed or removed shard except
 `sources.json`, which carries every run's attempt clocks, and `status/current.json`
-and `status/index.json`, which carry the service-health fetch clocks. The board
+and `status/index.json`, which carry the service-health fetch clocks. A changed Atom
+feed file (`feeds_changed`) publishes too; the feeds carry no run clock, so they
+change only with their entries. The board
 republishes when its digest without clocks (`board_sha256` in `status/index.json`)
 changes: an indicator, an open incident, a vendor description, a failure or the
 source list. A changed incident publishes through its month file. Publisher-feed response
@@ -199,6 +213,23 @@ The analytics exports (`data/v7/exports/`: per-year CSV and JSON Lines files, th
 under `exports` with its bytes and sha256. A run whose tagging is unavailable, or
 whose exports cannot be kept under the per-file cap, publishes the feed and shards
 without exports and records `exports.status: unavailable` with the reason.
+
+The Hub's own Atom feeds (`data/v7/feeds/`) are built from the shards of the same
+run and listed in `index.json` under `feeds` with bytes and sha256:
+
+| File | Entries |
+| --- | --- |
+| `feeds/kev.xml` | The newest KEV ledger rows by date added: the CVE and CISA's vendor and product as the title, CISA's vulnerability name, due date and directive in the summary, a link to the Hub's CVE brief |
+| `feeds/incidents.xml` | The incidents in the status month files, newest update first: the source name and the vendor's incident name as the title, status, impact, components and times in the summary, a link to the Hub's Service health view for that source and a related link to the vendor's incident page |
+| `feeds/patch-calendar.xml` | The next expected Patch Tuesday (the second Tuesday on or after the content date), then every built month of the Patch Tuesday index with its headline counts, each linking to its brief |
+
+Each feed holds at most 50 entries and 256 KiB (entries are cut from the end until
+it fits); a feed with no entries is still written, with a fixed clock. The feed's
+own `updated` clock is its newest entry's, never the run clock, so the same entries
+give the same bytes and `feeds_changed` is true only when an entry changed. The
+feeds carry the Hub's own titles, dates and links; KEV names are CISA's text and
+incident names are the vendors' status-page text. The three files are the public
+files decision D-03 of the revision plan approved.
 
 ### Patch Tuesday briefs
 
@@ -379,18 +410,18 @@ The package must match `data/v7/index.json` and `site/files.json` exactly. Fixed
 - `data/feed.json` and `data/briefs.json`, each with the bytes and sha256 the index lists
 - `data/v7/index.json`
 
-Data files: every path the index lists under `shards` and under `exports`, each
-with its listed bytes and sha256, and nothing else. `python -m intelligence_hub.shards package site`
+Data files: every path the index lists under `shards`, under `exports` and under
+`feeds`, each with its listed bytes and sha256, and nothing else. `python -m intelligence_hub.shards package site`
 checks that every file matches an allowlisted pattern, that the set of files
 equals the manifest set, and that each byte count and sha256 agree. Symlinks,
 hard-linked files, other file types and unexpected directories are rejected.
-The package holds at most **4,000 files**; every file under `data/v7/` (shards and
-exports) is at most **4 MiB**, while `data/feed.json` and `data/briefs.json` keep
+The package holds at most **4,000 files**; every file under `data/v7/` (shards,
+exports and feeds) is at most **4 MiB**, while `data/feed.json` and `data/briefs.json` keep
 the collector's own byte bounds (8 MiB and 24 MiB). Actual file content must total
 at most **192 MiB**. The check builds an in-memory tar and estimates compression
 using both gzip and zlib at level 6. If the larger estimate exceeds **48,000,000
 bytes**, it fails before artifact upload. On every run it prints one line per file
-under `data/v7/` (shards, exports and `index.json`) with its bytes and headroom
+under `data/v7/` (shards, exports, feeds and `index.json`) with its bytes and headroom
 under the 4 MiB cap, and the history split headroom for history files, then every
 cap with its headroom. The previous live site remains in place. The package caps (192 MiB
 input, 4,000 files, 4 MiB per v7 file, 48,000,000-byte estimate) were raised in pull

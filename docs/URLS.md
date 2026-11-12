@@ -19,7 +19,7 @@ server rewrite is needed. Values are percent-encoded; a space in `q` may be writ
 | Route | What it shows | Default date range |
 | --- | --- | --- |
 | `#/` or `#/explore` | The Intelligence Explorer: search, filters, sort and results over the live window (the last 24 months) | whole live window |
-| `#/today` | KEV additions by calendar day, KEV entries whose CISA federal due date falls in the next 14 days, then the last three calendar days of advisories, research and press | fixed: the content date and the 2 days before it |
+| `#/today` | The brief head (the KEV and three-day counts in words, the service-health board's open incidents, the latest Patch Tuesday brief and the next expected release, and what is new since this browser's last visit), KEV additions by calendar day, KEV entries whose CISA federal due date falls in the next 14 days, then the last three calendar days of advisories, research and press | fixed: the content date and the 2 days before it |
 | `#/advisories` | The Explorer limited to vendor-primary and government or CERT sources (KEV catalog entries excluded) | last 30 days |
 | `#/kev` | CISA's KEV ledger by date added, with the directive each entry's required action cites | added in the last 30 days |
 | `#/research` | The Explorer limited to research sources | last 30 days |
@@ -37,6 +37,7 @@ server rewrite is needed. Values are percent-encoded; a space in `q` may be writ
 | `#/sources` | The run record, the history coverage matrix by source and year, and the source ledger | none |
 | `#/method` | Evidence rules, confidence levels, coverage statuses, dates and scores, and the licence and notice table | none |
 | `#/data` | Per-year analytics exports, the manifest, the data dictionary and the licence table | none |
+| `#/subscribe` | The Hub's three Atom feeds (`data/v7/feeds/kev.xml`, `incidents.xml` and `patch-calendar.xml`) with the address to copy into a feed reader, then podcasts and newsletters as titles and links only | none |
 | `#/about` | What the Hub is, what it covers, how fresh it is, and the notices | none |
 | `#/patch-tuesday` | The latest Patch Tuesday brief: Microsoft's monthly release with its headline numbers, priority list, exploited and disclosed CVEs, Critical CVEs, product families, KEV join, Adobe and SAP rows, the month history and the rules | none |
 | `#/patch-tuesday/<YYYY-MM>` | The brief for one release month, such as `2026-10` | none |
@@ -140,6 +141,7 @@ address to the hash route and drops the query string.
 | KEV additions in the last 90 days | `https://teamstarwolf.github.io/intelligence-hub/#/kev?range=90` |
 | The latest Patch Tuesday brief | `https://teamstarwolf.github.io/intelligence-hub/#/patch-tuesday` |
 | The infrastructure desk's entries in the Explorer | `https://teamstarwolf.github.io/intelligence-hub/#/explore?desk=infrastructure` |
+| The Hub's feeds to subscribe to | `https://teamstarwolf.github.io/intelligence-hub/#/subscribe` |
 | Service health in wall mode, for a monitor | `https://teamstarwolf.github.io/intelligence-hub/#/status?wall=1` |
 | One month's Patch Tuesday brief | `https://teamstarwolf.github.io/intelligence-hub/#/patch-tuesday/2026-10` |
 

@@ -187,6 +187,8 @@ test("every view sits under exactly one desk, and the desk row's targets are vie
   assert.equal(VIEW_DESK.today, "security");
   assert.equal(VIEW_DESK.status, "infrastructure");
   assert.equal(VIEW_DESK.history, "reference");
+  assert.equal(VIEW_DESK.subscribe, "reference");
+  assert.equal(roundTrip("#/subscribe?q=x&wall=1"), "#/subscribe", "Subscribe reads no key");
   // A page with an id sits where its index sits.
   assert.equal(VIEW_DESK.cve, VIEW_DESK.cves);
   assert.equal(VIEW_DESK.vendor, VIEW_DESK.vendors);

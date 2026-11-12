@@ -4,7 +4,7 @@
 // so nothing from the address bar is ever reflected into the page. docs/URLS.md publishes
 // this contract for links from the library.
 
-export const VIEWS = ["explore", "today", "advisories", "kev", "research", "news", "cves", "cve", "history", "vendors", "vendor", "tags", "actors", "actor", "malware", "reports", "sources", "method", "data", "about", "patch-tuesday", "status"];
+export const VIEWS = ["explore", "today", "advisories", "kev", "research", "news", "cves", "cve", "history", "vendors", "vendor", "tags", "actors", "actor", "malware", "reports", "sources", "method", "data", "about", "patch-tuesday", "status", "subscribe"];
 // Views that are the Explorer with a fixed source-class constraint.
 export const LIST_VIEWS = { explore: null, advisories: ["vendor-primary", "government-cert"], research: ["researcher"], news: ["press"] };
 
@@ -14,7 +14,8 @@ const CLASSES = ["vendor-primary", "government-cert", "researcher", "press"];
 export const DESKS = ["security", "infrastructure", "it"];
 export const VIEW_DESK = { explore: "explore", today: "security", advisories: "security", kev: "security", research: "security", news: "security", cves: "security", cve: "security",
   actors: "security", actor: "security", malware: "security", "patch-tuesday": "security", status: "infrastructure",
-  history: "reference", vendors: "reference", vendor: "reference", tags: "reference", reports: "reference", sources: "reference", method: "reference", data: "reference", about: "reference" };
+  history: "reference", vendors: "reference", vendor: "reference", tags: "reference", reports: "reference", sources: "reference", method: "reference", data: "reference", about: "reference",
+  subscribe: "reference" };
 const EVENTS = ["disclosure", "exploitation", "patch", "breach", "outage", "takedown", "policy", "analysis", "unclassified", "maintenance", "end-of-support"];
 const EXPLOITATION = ["known", "reported", "unknown"];
 export const RANGES = ["3", "7", "30", "90", "365", "all"];
@@ -72,7 +73,7 @@ const VIEW_KEYS = {
   // history is the year index; a history/<year> page reads the "history-year" keys.
   history: [], "history-year": ["source", "month", "page"],
   vendors: [], vendor: ["page"], tags: ["year"], actors: ["year"], actor: ["page"], malware: ["page"],
-  reports: [], sources: [], method: [], data: [], about: [], "patch-tuesday": [],
+  reports: [], sources: [], method: [], data: [], about: [], subscribe: [], "patch-tuesday": [],
   // #/status?source=<id> shows one service-health source; wall=1 is the monitor layout.
   status: ["source", "wall"]
 };

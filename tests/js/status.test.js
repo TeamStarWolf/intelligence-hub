@@ -91,6 +91,16 @@ async function go(shell, hash) { shell.app.navigate(parseRoute(hash, "")); await
 const cards = doc => Object.fromEntries([...doc.querySelectorAll(".status-card")].map(item => [item.getAttribute("data-source"), item]));
 const liveTimer = timers => timers.find(timer => timer.ms === LIVE_INTERVAL);
 
+test("Today's brief head reads the service-health board when the index lists it and sums its open incidents", async () => {
+  const shell = await boot({ hash: "#/today" });
+  const text = shell.doc.querySelector("#view").textContent;
+  assert.ok(text.includes("Service health: 1 open incident and 1 status page reporting a problem across 3 sources, read 3 Nov 2026, 12:00 UTC."), text.slice(0, 900));
+  const link = [...shell.doc.querySelectorAll("#view .brief-list a")].find(anchor => anchor.textContent === "Open the board");
+  assert.equal(link.getAttribute("href"), "#/status");
+  assert.ok(shell.net.http.requests.some(request => request.path === "./data/v7/status/current.json"));
+  assert.ok(!shell.net.http.requests.some(request => request.path.includes("status/2026-11.json")), "no month file is read for the brief head");
+});
+
 test("the Service health tab is the infrastructure desk's view, the Explorer stays first, and the default route reads no status file and no vendor host", async () => {
   const shell = await boot();
   const tabs = [...shell.doc.querySelectorAll(".tabs .views a")].map(tab => tab.getAttribute("data-view"));

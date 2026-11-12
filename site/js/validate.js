@@ -50,6 +50,8 @@ const CVE = /^CVE-\d{4}-\d{4,19}$/;
 const SHARD_PATTERN = String.raw`(?:sources|coverage|reports|cve-index|recent)\.json|live/(?:[0-9]{4}-(?:0[1-9]|1[0-2])|undated)\.json|history/(?:[0-9]{4}(?:-(?:h[12]|q[1-4]|0[1-9]|1[0-2]))?|undated)\.json|kev/[0-9]{4}\.json|cve/[0-9]{4}/[0-9]{1,5}k\.json|patch-tuesday/(?:index|[0-9]{4}-(?:0[1-9]|1[0-2]))\.json|status/(?:current|outages|index|[0-9]{4}-(?:0[1-9]|1[0-2]))\.json`;
 const SHARD_PATH = new RegExp("^(?:" + SHARD_PATTERN + ")$");
 const EXPORT_PATH = /^exports\/(?:articles-(?:[0-9]{4}(?:-(?:0[1-9]|1[0-2]))?|undated)\.(?:csv|jsonl)|tags-(?:[0-9]{4}(?:-(?:0[1-9]|1[0-2]))?|undated)\.csv|manifest\.json|data-dictionary\.md)$/;
+// The Hub's own Atom feeds (intelligence_hub/shards.py build_feeds), listed under feeds.
+const FEED_PATH = /^feeds\/(?:kev|incidents|patch-calendar)\.xml$/;
 
 // data/v7/index.json. Known fields are checked; fields a later collector adds are ignored.
 export function normalizeIndex(raw) {
@@ -95,6 +97,19 @@ export function normalizeIndex(raw) {
       status: raw.exports.status, reason: optionalText(raw.exports.reason, 300),
       files: list(raw.exports.files, 1000).map(item => {
         requireValue(isObject(item) && typeof item.path === "string" && EXPORT_PATH.test(item.path));
+        return { path: item.path, bytes: nonnegative(item.bytes), sha256: hash(item.sha256) };
+      })
+    };
+  }
+  value.feeds = { status: "unavailable", reason: null, files: [] };
+  if (raw.feeds !== undefined) {
+    requireValue(isObject(raw.feeds) && ["ok", "unavailable"].includes(raw.feeds.status));
+    const seenFeeds = new Set();
+    value.feeds = {
+      status: raw.feeds.status, reason: optionalText(raw.feeds.reason, 300),
+      files: list(raw.feeds.files, 3).map(item => {
+        requireValue(isObject(item) && typeof item.path === "string" && FEED_PATH.test(item.path) && !seenFeeds.has(item.path));
+        seenFeeds.add(item.path);
         return { path: item.path, bytes: nonnegative(item.bytes), sha256: hash(item.sha256) };
       })
     };

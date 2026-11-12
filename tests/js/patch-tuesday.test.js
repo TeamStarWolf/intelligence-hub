@@ -31,6 +31,16 @@ async function boot(hash = "", extra = BRIEFS) {
 
 async function go(shell, hash) { shell.app.navigate(parseRoute(hash, "")); await settle(80); return shell.doc.querySelector("#view"); }
 
+test("Today's brief head names the latest Patch Tuesday brief and the next expected release", async () => {
+  const shell = await boot("#/today");
+  const text = shell.doc.querySelector("#view").textContent;
+  assert.ok(text.includes("Patch Tuesday: the latest brief is Oct 2026 with 14 CVEs, 1 exploited at release and 2 in KEV; the next release is expected 10 Nov 2026."), text.slice(0, 900));
+  const link = [...shell.doc.querySelectorAll("#view .brief-list a")].find(anchor => anchor.textContent === "Open the brief");
+  assert.equal(link.getAttribute("href"), "#/patch-tuesday/2026-10");
+  assert.ok(shell.http.requests.some(request => request.path === "./data/v7/patch-tuesday/index.json"));
+  assert.ok(!shell.http.requests.some(request => request.path.includes("patch-tuesday/2026-10.json")), "no brief is read for the head");
+});
+
 test("the route contract: #/patch-tuesday, #/patch-tuesday/<YYYY-MM>, and a bad month falls back to the latest brief", () => {
   assert.deepEqual(parseRoute("#/patch-tuesday", ""), { view: "patch-tuesday", id: null, query: {}, rewrite: false });
   assert.deepEqual(parseRoute("#/patch-tuesday/2026-10", ""), { view: "patch-tuesday", id: "2026-10", query: {}, rewrite: false });

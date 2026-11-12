@@ -478,7 +478,7 @@ class BuildTest(unittest.TestCase):
     def test_clock_only_changes_never_republish(self):
         self.assertEqual(status.QUIET, ("status/current.json", "status/index.json", "status/outages.json"))
         source = (support.ROOT / "intelligence_hub" / "collect.py").read_text(encoding="utf-8")
-        self.assertIn('changed = publication_changed(changed, v7["changed_shards"], v7["removed_shards"], v7["exports_changed"], service_health["summary"])', source)
+        self.assertIn('changed = publication_changed(changed, v7["changed_shards"], v7["removed_shards"], v7["exports_changed"], service_health["summary"], v7["feeds_changed"])', source)
         quiet = {"board_changed": False, "outages_changed": False}
         clocks = ["sources.json", "status/current.json", "status/index.json", "status/outages.json"]
         self.assertFalse(collect.publication_changed(False, clocks, [], False, quiet))
@@ -488,6 +488,8 @@ class BuildTest(unittest.TestCase):
         self.assertTrue(collect.publication_changed(False, [], ["status/2025-10.json"], False, quiet))
         self.assertTrue(collect.publication_changed(True, [], [], False, quiet))
         self.assertTrue(collect.publication_changed(False, [], [], True, quiet))
+        self.assertFalse(collect.publication_changed(False, [], [], False, quiet, False))
+        self.assertTrue(collect.publication_changed(False, [], [], False, quiet, True), "a changed Atom feed republishes")
 
     def test_two_builds_whose_status_clocks_differ_and_nothing_else_publish_nothing(self):
         workspace = support.BuildCopy()
@@ -509,10 +511,11 @@ class BuildTest(unittest.TestCase):
             self.assertFalse(result["status"]["outages_changed"])
             self.assertEqual(result["removed_shards"], [])
             self.assertFalse(result["exports_changed"])
+            self.assertFalse(result["feeds_changed"], "the Atom feeds carry no fetch clock, so moved clocks leave their bytes alone")
             # An offline --cached build has no deployed snapshot, so its v6 content always counts as
             # new; with the v6 content unchanged, as it is when only status clocks move, nothing deploys.
-            self.assertFalse(collect.publication_changed(False, result["changed_shards"], result["removed_shards"], result["exports_changed"], result["status"]),
-                             "clock-only changes must not deploy")
+            self.assertFalse(collect.publication_changed(False, result["changed_shards"], result["removed_shards"], result["exports_changed"], result["status"],
+                                                         result["feeds_changed"]), "clock-only changes must not deploy")
         finally:
             workspace.close()
 

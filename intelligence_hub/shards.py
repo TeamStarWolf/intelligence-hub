@@ -6,7 +6,8 @@ the same bytes, and a shard's sha256 changes only when that shard's content does
 data/v7/index.json lists every shard with its path, rows, bytes and sha256, keeps
 the last published runs, and is the manifest that publish.yml checks the Pages
 package against (package_site below). When the analytics exports are published, index.json also lists
-every file under data/v7/exports/ (intelligence_hub/exports.py) under "exports".
+every file under data/v7/exports/ (intelligence_hub/exports.py) under "exports", and the
+Hub's own Atom feeds under data/v7/feeds/ (build_feeds below) under "feeds".
 
 Article rows are the v6 feed record plus a "tagging" block: the controlled-vocabulary
 tags of intelligence_hub/tagging in the compact form that index.json's tagging.layout
@@ -25,7 +26,7 @@ import statistics
 import sys
 import tarfile
 import zlib
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 from .collect import (FEED_MAX_BYTES, article_date, published, reject_constant, require,
                       safe_url as collector_safe_url)
@@ -87,6 +88,24 @@ EXPORT_NAME = re.compile(r"(?:articles-(?:[0-9]{4}(?:-(?:0[1-9]|1[0-2]))?|undate
                          r"|tags-(?:[0-9]{4}(?:-(?:0[1-9]|1[0-2]))?|undated)\.csv|manifest\.json|data-dictionary\.md)")
 MAX_EXPORT_FILES = 1000
 EXPORT_STATUS = {"ok", "unavailable"}
+# The Hub's own Atom feeds (data/v7/feeds/): the latest KEV additions, the latest
+# service-health incidents and the Patch Tuesday calendar, each with the Hub's own titles,
+# dates and links to the Hub's routes. index.json lists them under "feeds" as it lists the
+# exports, and the package check reads them from that entry. Each file keeps at most
+# ATOM_ENTRIES entries and ATOM_MAX_BYTES bytes (entries are cut, newest kept, until it fits).
+ATOM_DIRECTORY = "feeds"
+ATOM_NAME = re.compile(r"(?:kev|incidents|patch-calendar)\.xml")
+ATOM_FILES = ("kev.xml", "incidents.xml", "patch-calendar.xml")
+ATOM_ENTRIES = 50
+ATOM_MAX_BYTES = 256 * 1024
+HUB_URL = "https://teamstarwolf.github.io/intelligence-hub/"
+ATOM_TAG = "tag:teamstarwolf.github.io,2026:intelligence-hub"
+# The clock of a feed with no entries, so an empty feed's bytes never change between runs.
+ATOM_EPOCH = "2026-11-12T00:00:00Z"
+XML_CONTROL = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f\ud800-\udfff\ufffe\uffff]")
+MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+MONTH_NAMES = ("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+STATUS_MONTH = re.compile(r"status/[0-9]{4}-(?:0[1-9]|1[0-2])\.json")
 TRIGGERS = {"schedule", "push", "workflow_dispatch", "local", "unrecorded"}
 # CISA writes "BOD 22-01", "ED 24-01", "Emergency Directive 26-03" and
 # "Emergency Directive (ED) 25-03"; every form is normalized to BOD or ED.
@@ -104,7 +123,7 @@ SHARD_PATH = re.compile(r"(?:sources|coverage|reports|cve-index|recent)\.json"
                         r"|cve/[0-9]{4}/[0-9]{1,5}k\.json"
                         r"|patch-tuesday/(?:index|[0-9]{4}-(?:0[1-9]|1[0-2]))\.json"
                         r"|status/(?:current|outages|index|[0-9]{4}-(?:0[1-9]|1[0-2]))\.json")
-SHARD_DIRECTORY = re.compile(r"live|history|kev|cve|cve/[0-9]{4}|exports|patch-tuesday|status")
+SHARD_DIRECTORY = re.compile(r"live|history|kev|cve|cve/[0-9]{4}|exports|patch-tuesday|status|feeds")
 # The Patch Tuesday briefs (intelligence_hub/patch_tuesday.py): one per Microsoft monthly release.
 PATCH_TUESDAY_MONTH = re.compile(r"patch-tuesday/[0-9]{4}-(?:0[1-9]|1[0-2])\.json")
 # The page files are the ones site/files.json lists (intelligence_hub/site.py), plus that list.
@@ -504,8 +523,215 @@ def exports_changed(previous, entry):
     return listing(previous) != listing({"exports": entry} if entry is not None else None)
 
 
+def atom_path(path):
+    """True for a path, relative to data/v7, that names one of the Hub's Atom feeds."""
+    return (isinstance(path, str) and path.startswith(ATOM_DIRECTORY + "/") and
+            ATOM_NAME.fullmatch(path[len(ATOM_DIRECTORY) + 1:]) is not None)
+
+
+def feeds_entry(files=None, reason=None):
+    """index.json's feeds entry: every Atom file (keyed by its path under data/v7) with bytes and sha256, or why there are none."""
+    if files:
+        return {"status": "ok", "reason": None, "files": [file_entry(path, files[path]) for path in sorted(files)]}
+    return {"status": "unavailable", "reason": (reason or "feeds not built in this run")[:300], "files": []}
+
+
+def feeds_changed(previous, entry):
+    """True when this run's Atom files differ from the ones the previous index listed."""
+    def listing(value):
+        block = value.get("feeds") if isinstance(value, dict) else None
+        files = block.get("files", []) if isinstance(block, dict) else []
+        return {item["path"]: item["sha256"] for item in files}
+    return listing(previous) != listing({"feeds": entry} if entry is not None else None)
+
+
+def _atom_text(value, maximum=400):
+    """Plain text for an Atom element: control characters removed, whitespace folded, bounded."""
+    value = XML_CONTROL.sub("", value if isinstance(value, str) else "")
+    return " ".join(value.split())[:maximum]
+
+
+def _atom_clock(value):
+    """An RFC 3339 UTC clock from an ISO day or timestamp, or None."""
+    if not isinstance(value, str) or not value:
+        return None
+    if DAY.fullmatch(value):
+        return value + "T00:00:00Z"
+    try:
+        moment = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=timezone.utc)
+    return moment.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _day_label(value):
+    """2 Nov 2026, from a day or a clock."""
+    day = date.fromisoformat(value[:10])
+    return "{} {} {}".format(day.day, MONTHS[day.month - 1], day.year)
+
+
+def _stamp_label(value):
+    """2 Nov 2026 10:00 UTC, from a clock; the day alone when the value has no time."""
+    clock = _atom_clock(value)
+    if clock is None:
+        return "an unrecorded time"
+    return _day_label(clock) + ("" if DAY.fullmatch(value) else " " + clock[11:16] + " UTC")
+
+
+def atom_document(name, title, subtitle, alternate, entries, rights):
+    """One Atom feed's bytes, deterministic for its entries.
+
+    entries are [{"id", "title", "link", "related", "updated", "published", "summary"}], newest
+    first. The feed's own updated clock is its newest entry's (ATOM_EPOCH with no entries), so
+    unchanged entries give unchanged bytes and a run with no new item republishes nothing. The
+    list is cut from the end until the file fits ATOM_MAX_BYTES.
+    """
+    from xml.sax.saxutils import escape, quoteattr
+
+    def render(items):
+        updated = max((item["updated"] for item in items), default=ATOM_EPOCH)
+        lines = ['<?xml version="1.0" encoding="utf-8"?>', '<feed xmlns="http://www.w3.org/2005/Atom">',
+                 "  <id>" + escape(ATOM_TAG + ":feeds/" + name) + "</id>",
+                 "  <title>" + escape(title) + "</title>",
+                 "  <subtitle>" + escape(subtitle) + "</subtitle>",
+                 '  <link rel="self" type="application/atom+xml" href=' + quoteattr(HUB_URL + DIRECTORY + "/" + ATOM_DIRECTORY + "/" + name + ".xml") + "/>",
+                 '  <link rel="alternate" type="text/html" href=' + quoteattr(HUB_URL + alternate) + "/>",
+                 "  <updated>" + updated + "</updated>",
+                 "  <author><name>TeamStarWolf Intelligence Hub</name><uri>" + HUB_URL + "</uri></author>",
+                 "  <rights>" + escape(rights) + "</rights>",
+                 '  <generator uri="https://github.com/TeamStarWolf/intelligence-hub">TeamStarWolf Intelligence Hub collector</generator>']
+        for item in items:
+            lines.append("  <entry>")
+            lines.append("    <id>" + escape(item["id"]) + "</id>")
+            lines.append("    <title>" + escape(item["title"]) + "</title>")
+            lines.append('    <link rel="alternate" type="text/html" href=' + quoteattr(item["link"]) + "/>")
+            if item.get("related"):
+                lines.append('    <link rel="related" href=' + quoteattr(item["related"]) + "/>")
+            lines.append("    <updated>" + item["updated"] + "</updated>")
+            lines.append("    <published>" + item["published"] + "</published>")
+            lines.append("    <summary>" + escape(item["summary"]) + "</summary>")
+            lines.append("  </entry>")
+        lines.append("</feed>")
+        return ("\n".join(lines) + "\n").encode("utf-8")
+
+    items = []
+    for item in list(entries)[:ATOM_ENTRIES]:
+        require(item["updated"] is not None and item["published"] is not None, "An Atom entry has no clock: " + item["id"])
+        items.append(item)
+    raw = render(items)
+    while len(raw) > ATOM_MAX_BYTES and items:
+        items = items[:-5] if len(items) > 5 else []
+        raw = render(items)
+    require(len(raw) <= ATOM_MAX_BYTES, "data/v7/feeds/" + name + ".xml would pass its " + format(ATOM_MAX_BYTES, ",") + "-byte bound.")
+    return raw
+
+
+def kev_feed_entries(files):
+    """The newest KEV ledger rows, by date added then CVE, as Atom entries."""
+    rows = [row for path in sorted(files) if path.startswith("kev/") for row in files[path]["rows"]]
+    rows.sort(key=lambda row: (row["date_added"], row["cve"]), reverse=True)
+    entries = []
+    for row in rows[:ATOM_ENTRIES]:
+        product = " ".join(part for part in (row.get("vendor_raw"), row.get("product_raw")) if part)
+        summary = "Added to CISA's Known Exploited Vulnerabilities catalog on " + _day_label(row["date_added"]) + "."
+        if row.get("name"):
+            summary += " CISA names it: " + _atom_text(row["name"], 300) + "."
+        if row.get("due_date"):
+            summary += " CISA's federal due date is " + _day_label(row["due_date"]) + (" under " + row["directive"] if row.get("directive") else "") + "."
+        if row.get("ransomware") == "Known":
+            summary += " CISA records known ransomware campaign use."
+        entries.append({"id": ATOM_TAG + ":kev:" + row["cve"], "title": _atom_text(row["cve"] + (": " + product if product else ""), 240),
+                        "link": HUB_URL + "#/cve/" + row["cve"], "related": None, "updated": _atom_clock(row["date_added"]),
+                        "published": _atom_clock(row["date_added"]), "summary": _atom_text(summary, 600)})
+    return entries
+
+
+def incident_feed_entries(files):
+    """The latest service-health incidents in the status month files, newest update first, as Atom entries."""
+    current = files.get("status/current.json") or {}
+    names = {source["id"]: source["name"] for source in current.get("sources", []) if isinstance(source, dict)}
+    rows = [row for path in sorted(files) if STATUS_MONTH.fullmatch(path) for row in files[path].get("rows", [])]
+    rows.sort(key=lambda row: (_atom_clock(row.get("updated")) or _atom_clock(row["started"]) or "", _atom_clock(row["started"]) or "", row["source"], row["id"]),
+              reverse=True)
+    entries = []
+    for row in rows[:ATOM_ENTRIES]:
+        words = ["Status " + row["status"] + "." if row.get("status") and row["status"] != "other" else ""]
+        if row.get("impact"):
+            words.append("Impact " + row["impact"] + ".")
+        if row.get("components"):
+            words.append("Components: " + ", ".join(row["components"][:6]) + ".")
+        words.append("Started " + _stamp_label(row["started"]) + ("; resolved " + _stamp_label(row["resolved"]) if row.get("resolved") else
+                                                                 "; not resolved at the collector's read") + ".")
+        digest = hashlib.sha256((row["source"] + "\n" + row["id"]).encode("utf-8")).hexdigest()[:16]
+        related = row.get("url") if isinstance(row.get("url"), str) and row["url"].startswith("https://") else None
+        entries.append({"id": ATOM_TAG + ":incident:" + row["source"] + ":" + digest, "title": _atom_text(names.get(row["source"], row["source"]) + ": " + row["name"], 240),
+                        "link": HUB_URL + "#/status?source=" + row["source"], "related": related,
+                        "updated": _atom_clock(row.get("updated")) or _atom_clock(row["started"]), "published": _atom_clock(row["started"]),
+                        "summary": _atom_text(" ".join(word for word in words if word), 600)})
+    return entries
+
+
+def second_tuesday(year, month):
+    first = date(year, month, 1)
+    return first + timedelta(days=(1 - first.weekday()) % 7 + 7)
+
+
+def next_patch_tuesday(day):
+    """The second Tuesday of day's month when day is on or before it, else the next month's."""
+    candidate = second_tuesday(day.year, day.month)
+    if candidate < day:
+        year, month = (day.year + 1, 1) if day.month == 12 else (day.year, day.month + 1)
+        candidate = second_tuesday(year, month)
+    return candidate
+
+
+def patch_feed_entries(files, end):
+    """The next expected Patch Tuesday, then every built month of the Patch Tuesday index, as Atom entries."""
+    index = files.get("patch-tuesday/index.json")
+    if not isinstance(index, dict):
+        return []
+    coming = next_patch_tuesday(end)
+    entries = [{"id": ATOM_TAG + ":patch-tuesday:next:" + coming.isoformat(), "title": "Next Patch Tuesday: " + _day_label(coming.isoformat()),
+                "link": HUB_URL + "#/patch-tuesday", "related": None, "updated": coming.isoformat() + "T00:00:00Z", "published": coming.isoformat() + "T00:00:00Z",
+                "summary": "Microsoft's next monthly security release is expected on " + _day_label(coming.isoformat()) +
+                           ", the second Tuesday of the month. The Hub's brief for it appears after the collector reads the release document."}]
+    for month in index.get("months", [])[:ATOM_ENTRIES - 1]:
+        year, number = int(month["month"][:4]), int(month["month"][5:7])
+        released, revised = _atom_clock(month["initial_release"]), _atom_clock(month["current_release"])
+        summary = ("Microsoft's " + _atom_text(month["title"], 120) + ", released " + _day_label(released) +
+                   (", revised " + _day_label(revised) if revised and revised[:10] != released[:10] else "") +
+                   ": {total:,} CVEs, {critical:,} rated Critical, {important:,} Important, {exploited:,} exploited at release, "
+                   "{disclosed:,} publicly disclosed, {in_kev:,} in CISA's KEV catalog.".format(**month) +
+                   " Adobe headline rows: {adobe:,}. SAP headline rows: {sap:,}.".format(**month))
+        entries.append({"id": ATOM_TAG + ":patch-tuesday:" + month["month"],
+                        "title": "Patch Tuesday " + MONTH_NAMES[number - 1] + " " + str(year) + ": {total:,} CVEs, {critical:,} Critical, {exploited:,} exploited".format(**month),
+                        "link": HUB_URL + "#/patch-tuesday/" + month["month"], "related": None, "updated": revised or released, "published": released,
+                        "summary": _atom_text(summary, 600)})
+    return entries
+
+
+def build_feeds(files, end):
+    """{feeds/<name>.xml: bytes}: the Hub's three Atom feeds from this run's shards (KEV ledger,
+    status month files and board, Patch Tuesday index). Pure: no clock beyond the content end date."""
+    kev = atom_document("kev", "TeamStarWolf Intelligence Hub: KEV additions",
+                        "The latest additions to CISA's Known Exploited Vulnerabilities catalog, as the Hub's KEV ledger records them.",
+                        "#/kev", kev_feed_entries(files),
+                        "Entry names are CISA's catalog text, published by CISA under CC0 1.0. Titles, summaries and links are the Hub's own.")
+    incidents = atom_document("incidents", "TeamStarWolf Intelligence Hub: service-health incidents",
+                              "The latest incidents on the vendor status pages and cloud health feeds the Hub reads, newest update first.",
+                              "#/status", incident_feed_entries(files),
+                              "Incident and component names are the vendors' own status-page text, linked to their pages. Titles, summaries and links are the Hub's own.")
+    calendar = atom_document("patch-calendar", "TeamStarWolf Intelligence Hub: Patch Tuesday calendar",
+                             "Microsoft's monthly security releases as the Hub's Patch Tuesday briefs record them, and the next expected release date.",
+                             "#/patch-tuesday", patch_feed_entries(files, end),
+                             "Counts come from Microsoft's release documents and CISA's KEV catalog. Titles, summaries and links are the Hub's own.")
+    return {ATOM_DIRECTORY + "/kev.xml": kev, ATOM_DIRECTORY + "/incidents.xml": incidents, ATOM_DIRECTORY + "/patch-calendar.xml": calendar}
+
+
 def build_index(entries, *, generated_at, end, feed_content_revision, layout_revision, runs, counts, v6_files, tagging=None,
-                exports=None):
+                exports=None, feeds=None):
     content_date = content_day(((entry["path"], entry["to"]) for entry in entries), end)
     return {"schema_version": SCHEMA_VERSION, "generated_at": generated_at, "content_date": content_date,
             "content_revision": content_revision(entries), "feed_content_revision": feed_content_revision,
@@ -515,7 +741,7 @@ def build_index(entries, *, generated_at, end, feed_content_revision, layout_rev
             "counts": counts, "shards": entries, "v6_files": v6_files,
             "cve_buckets": {"published": CVE_BUCKETS_PUBLISHED, "note": None if CVE_BUCKETS_PUBLISHED else CVE_BUCKETS_PENDING},
             "notices": NOTICES, **({"tagging": tagging} if tagging is not None else {}),
-            **({"exports": exports} if exports is not None else {})}
+            **({"exports": exports} if exports is not None else {}), **({"feeds": feeds} if feeds is not None else {})}
 
 
 def file_entry(path, raw):
@@ -524,8 +750,8 @@ def file_entry(path, raw):
 
 def validate_index(index):
     """Check an index read back from disk or from the deployed site before anything trusts it."""
-    # tagging and exports are optional, so an index written before either existed still resumes.
-    require(type(index) is dict and INDEX_KEYS <= set(index) <= INDEX_KEYS | {"tagging", "exports"} and
+    # tagging, exports and feeds are optional, so an index written before any of them existed still resumes.
+    require(type(index) is dict and INDEX_KEYS <= set(index) <= INDEX_KEYS | {"tagging", "exports", "feeds"} and
             type(index["schema_version"]) is int and index["schema_version"] == SCHEMA_VERSION, "Unsupported v7 index.")
     require(isinstance(index["generated_at"], str) and published(index["generated_at"]) and "T" in index["generated_at"], "Invalid v7 index clock.")
     for field in ("content_revision", "feed_content_revision", "layout_revision"):
@@ -567,6 +793,18 @@ def validate_index(index):
             names.add(item["path"])
         require(not names or {EXPORT_DIRECTORY + "/manifest.json", EXPORT_DIRECTORY + "/data-dictionary.md"} <= names,
                 "The v7 exports entry is missing its manifest or dictionary.")
+    if "feeds" in index:
+        block = index["feeds"]
+        require(type(block) is dict and set(block) == {"status", "reason", "files"} and block["status"] in EXPORT_STATUS and
+                (block["reason"] is None or isinstance(block["reason"], str) and len(block["reason"]) <= 300) and
+                type(block["files"]) is list and len(block["files"]) <= len(ATOM_FILES) and
+                (block["status"] == "ok") == bool(block["files"]), "Invalid v7 feeds entry.")
+        names = set()
+        for item in block["files"]:
+            require(type(item) is dict and set(item) == {"path", "bytes", "sha256"} and atom_path(item["path"]) and
+                    item["path"] not in names and type(item["bytes"]) is int and 0 < item["bytes"] <= ATOM_MAX_BYTES and
+                    isinstance(item["sha256"], str) and HEX.fullmatch(item["sha256"]), "Invalid v7 feed file entry.")
+            names.add(item["path"])
     require(type(index["v6_files"]) is list and [item.get("path") for item in index["v6_files"] if type(item) is dict] == list(V6_FILES), "Invalid v6 file list.")
     for item in index["v6_files"]:
         require(set(item) == {"path", "bytes", "sha256"} and type(item["bytes"]) is int and item["bytes"] > 0 and
@@ -627,9 +865,9 @@ def package_site(site, max_input=PACKAGE_MAX_INPUT, max_compressed=PACKAGE_MAX_C
 
     Fixed files: site/files.json and every page file it lists, the two v6 data files and
     data/v7/index.json.
-    Data files: exactly the shards and export files the index lists, each with the
-    listed bytes and sha256. No links, no hard links, no other directories. Caps: the
-    file count, the per-file cap for every file under data/v7/ (the v6 files keep their
+    Data files: exactly the shards, export files and Atom feed files the index lists, each
+    with the listed bytes and sha256. No links, no hard links, no other directories. Caps:
+    the file count, the per-file cap for every file under data/v7/ (the v6 files keep their
     own collector bounds), the total input and the compressed estimate. Returns a report
     dict and prints every cap with its headroom.
     """
@@ -668,11 +906,12 @@ def package_site(site, max_input=PACKAGE_MAX_INPUT, max_compressed=PACKAGE_MAX_C
     listed = {DIRECTORY + "/" + entry["path"]: entry for entry in index["shards"]}
     listed.update({item["path"]: item for item in index["v6_files"]})
     listed.update({DIRECTORY + "/" + item["path"]: item for item in index.get("exports", {}).get("files", [])})
+    listed.update({DIRECTORY + "/" + item["path"]: item for item in index.get("feeds", {}).get("files", [])})
     expected = page | {index_path} | set(listed)
     for name in sorted(files):
         _refuse(name in page or name in V6_FILES or name == index_path or
                 (name.startswith(DIRECTORY + "/") and (SHARD_PATH.fullmatch(name[len(DIRECTORY) + 1:]) or
-                                                       export_path(name[len(DIRECTORY) + 1:]))),
+                                                       export_path(name[len(DIRECTORY) + 1:]) or atom_path(name[len(DIRECTORY) + 1:]))),
                 "A file outside the allowlisted patterns would be published: " + name)
     _refuse(not files - expected, "Files not listed in the manifest would be published: " + ", ".join(sorted(files - expected)))
     _refuse(not expected - files, "Files listed in the manifest are missing: " + ", ".join(sorted(expected - files)))
@@ -711,15 +950,15 @@ def package_site(site, max_input=PACKAGE_MAX_INPUT, max_compressed=PACKAGE_MAX_C
     tar_bytes = archive.getvalue()
     estimate = max(len(gzip.compress(tar_bytes, compresslevel=6, mtime=0)), len(zlib.compress(tar_bytes, level=6)))
     report = {"files": len(expected), "files_cap": max_files, "files_headroom": max_files - len(expected),
-              "exports": len(index.get("exports", {}).get("files", [])),
+              "exports": len(index.get("exports", {}).get("files", [])), "feeds": len(index.get("feeds", {}).get("files", [])),
               "largest_v7_file": largest_v7, "v7_file_cap": max_v7_file, "v7_file_headroom": max_v7_file - largest_v7,
               "input_bytes": total, "input_cap": max_input, "input_headroom": max_input - total,
               "compressed_estimate": estimate, "compressed_cap": max_compressed, "compressed_headroom": max_compressed - estimate}
-    # Every file under data/v7/ (shards, exports and index.json) by path, then the four caps.
+    # Every file under data/v7/ (shards, exports, feeds and index.json) by path, then the four caps.
     for line in v7_lines:
         print(line, file=out)
     print("Public files: {files:,} of {files_cap:,} ({files_headroom:,} of headroom; all match data/v7/index.json; "
-          "{exports:,} export files)".format(**report), file=out)
+          "{exports:,} export files; {feeds:,} feed files)".format(**report), file=out)
     print("Largest v7 file: {largest_v7_file:,} of {v7_file_cap:,} bytes ({v7_file_headroom:,} of headroom)".format(**report), file=out)
     print("Public input bytes: {input_bytes:,} of {input_cap:,} ({input_headroom:,} of headroom)".format(**report), file=out)
     print("Estimated compressed artifact bytes: {compressed_estimate:,} of {compressed_cap:,} ({compressed_headroom:,} of headroom)".format(**report), file=out)

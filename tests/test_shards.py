@@ -14,16 +14,36 @@ import tempfile
 import unittest
 from unittest import mock
 
+import xml.etree.ElementTree as ET
+
 import support
 from intelligence_hub import collect, shards
 from test_publication import END, Workspace, synthetic_cache
 
+ATOM = "{http://www.w3.org/2005/Atom}"
+
 
 def v7_files(workspace):
-    """Every v7 shard and index.json on disk; the analytics exports under exports/ are left out."""
+    """Every v7 shard and index.json on disk; the analytics exports under exports/ and the Atom feeds under feeds/ are left out."""
     base = workspace.root / "site" / "data" / "v7"
     return {path.relative_to(base).as_posix(): path.read_bytes() for path in sorted(base.rglob("*"))
-            if path.is_file() and not path.relative_to(base).as_posix().startswith("exports/")}
+            if path.is_file() and not path.relative_to(base).as_posix().startswith(("exports/", "feeds/"))}
+
+
+def feed_files(workspace):
+    base = workspace.root / "site" / "data" / "v7" / "feeds"
+    return {"feeds/" + path.name: path.read_bytes() for path in sorted(base.iterdir())} if base.is_dir() else {}
+
+
+def atom_entries(raw):
+    """The parsed feed element and its entries, as {child tag: text} with the links by rel."""
+    feed = ET.fromstring(raw)
+    entries = []
+    for entry in feed.findall(ATOM + "entry"):
+        item = {child.tag[len(ATOM):]: child.text for child in entry if child.tag != ATOM + "link"}
+        item["links"] = {link.get("rel"): link.get("href") for link in entry.findall(ATOM + "link")}
+        entries.append(item)
+    return feed, entries
 
 
 def index_of(workspace):
@@ -492,6 +512,177 @@ class RecentTest(unittest.TestCase):
         self.assertTrue(shards.SHARD_PATH.fullmatch("recent.json"))
 
 
+class AtomFeedTest(unittest.TestCase):
+    """The Hub's own Atom feeds under data/v7/feeds/, listed in index.json under feeds."""
+
+    def entry(self, number, **extra):
+        return {"id": shards.ATOM_TAG + ":test:" + str(number), "title": "Entry " + str(number), "link": shards.HUB_URL + "#/kev", "related": None,
+                "updated": "2026-11-{:02d}T00:00:00Z".format(number), "published": "2026-11-{:02d}T00:00:00Z".format(number), "summary": "Summary " + str(number), **extra}
+
+    def test_a_feed_is_well_formed_atom_with_the_newest_entry_as_its_clock(self):
+        raw = shards.atom_document("kev", "A title", "A subtitle", "#/kev", [self.entry(3), self.entry(2, related="https://example.org/x")], "Rights.")
+        feed, entries = atom_entries(raw)
+        self.assertEqual(feed.tag, ATOM + "feed")
+        self.assertEqual(feed.find(ATOM + "id").text, shards.ATOM_TAG + ":feeds/kev")
+        self.assertEqual(feed.find(ATOM + "updated").text, "2026-11-03T00:00:00Z")
+        self.assertEqual({link.get("rel"): link.get("href") for link in feed.findall(ATOM + "link")},
+                         {"self": shards.HUB_URL + "data/v7/feeds/kev.xml", "alternate": shards.HUB_URL + "#/kev"})
+        self.assertEqual(feed.find(ATOM + "author").find(ATOM + "name").text, "TeamStarWolf Intelligence Hub")
+        self.assertEqual([item["title"] for item in entries], ["Entry 3", "Entry 2"])
+        self.assertEqual(entries[1]["links"], {"alternate": shards.HUB_URL + "#/kev", "related": "https://example.org/x"})
+        self.assertNotIn("related", entries[0]["links"])
+        self.assertTrue(raw.startswith(b'<?xml version="1.0" encoding="utf-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom">'))
+
+    def test_the_same_entries_give_the_same_bytes_and_no_entry_gives_the_fixed_epoch(self):
+        entries = [self.entry(5), self.entry(4)]
+        self.assertEqual(shards.atom_document("kev", "T", "S", "#/kev", entries, "R"), shards.atom_document("kev", "T", "S", "#/kev", list(entries), "R"))
+        self.assertNotEqual(shards.atom_document("kev", "T", "S", "#/kev", entries, "R"), shards.atom_document("kev", "T", "S", "#/kev", entries[:1], "R"))
+        feed, entries = atom_entries(shards.atom_document("incidents", "T", "S", "#/status", [], "R"))
+        self.assertEqual((feed.find(ATOM + "updated").text, entries), (shards.ATOM_EPOCH, []))
+
+    def test_text_is_escaped_and_control_characters_are_dropped(self):
+        entry = self.entry(1, title="A <b>bold</b> & \x01tricky\x1f  title", summary="Quote \" and ' here")
+        feed, entries = atom_entries(shards.atom_document("kev", "T", "S", "#/kev", [{**entry, "title": shards._atom_text(entry["title"])}], "R"))
+        self.assertEqual(entries[0]["title"], "A <b>bold</b> & tricky title")
+        self.assertEqual(entries[0]["summary"], "Quote \" and ' here")
+        self.assertEqual(shards._atom_text("  many\n\twords  here "), "many words here")
+        self.assertEqual(shards._atom_text("x" * 500, 10), "x" * 10)
+
+    def test_an_oversized_feed_is_cut_from_the_end_until_it_fits(self):
+        entries = [self.entry(number % 28 + 1, summary="s" * 20000) for number in range(shards.ATOM_ENTRIES)]
+        raw = shards.atom_document("kev", "T", "S", "#/kev", entries, "R")
+        self.assertLessEqual(len(raw), shards.ATOM_MAX_BYTES)
+        _feed, kept = atom_entries(raw)
+        self.assertTrue(0 < len(kept) < shards.ATOM_ENTRIES)
+        self.assertEqual([item["summary"] for item in kept], [item["summary"] for item in entries[:len(kept)]])
+        with self.assertRaisesRegex(ValueError, "no clock"):
+            shards.atom_document("kev", "T", "S", "#/kev", [self.entry(1, updated=None)], "R")
+
+    def test_clocks_and_labels(self):
+        self.assertEqual(shards._atom_clock("2026-11-02"), "2026-11-02T00:00:00Z")
+        self.assertEqual(shards._atom_clock("2026-11-02T10:30:00+00:00"), "2026-11-02T10:30:00Z")
+        self.assertEqual(shards._atom_clock("2026-11-02T10:30:00Z"), "2026-11-02T10:30:00Z")
+        self.assertEqual(shards._atom_clock("2026-11-02T12:30:00+02:00"), "2026-11-02T10:30:00Z")
+        self.assertIsNone(shards._atom_clock("not a clock"))
+        self.assertIsNone(shards._atom_clock(None))
+        self.assertEqual(shards._day_label("2026-11-02T10:30:00Z"), "2 Nov 2026")
+        self.assertEqual(shards._stamp_label("2026-11-02T10:30:00+00:00"), "2 Nov 2026 10:30 UTC")
+        self.assertEqual(shards._stamp_label("2026-11-02"), "2 Nov 2026")
+
+    def test_the_next_patch_tuesday_is_the_second_tuesday_on_or_after_the_day(self):
+        self.assertEqual(shards.second_tuesday(2026, 11), date(2026, 11, 10))
+        self.assertEqual(shards.second_tuesday(2026, 12), date(2026, 12, 8))
+        self.assertEqual(shards.next_patch_tuesday(date(2026, 11, 1)), date(2026, 11, 10))
+        self.assertEqual(shards.next_patch_tuesday(date(2026, 11, 10)), date(2026, 11, 10))
+        self.assertEqual(shards.next_patch_tuesday(date(2026, 11, 11)), date(2026, 12, 8))
+        self.assertEqual(shards.next_patch_tuesday(date(2026, 12, 9)), date(2027, 1, 12))
+
+    def test_the_kev_feed_holds_the_newest_catalog_entries_with_hub_links(self):
+        entries = [kev_entry("CVE-2026-10002", "2026-10-30", "Follow BOD 26-04 guidance.", knownRansomwareCampaignUse="Known"),
+                   kev_entry("CVE-2026-10001", "2026-10-30", "Apply updates per vendor instructions."),
+                   kev_entry("CVE-2021-44228", "2021-12-10", "Follow applicable BOD 22-01 guidance.")]
+        files = shards.kev_ledger({"vulnerabilities": entries})
+        items = shards.kev_feed_entries(files)
+        self.assertEqual([item["id"] for item in items], [shards.ATOM_TAG + ":kev:CVE-2026-10002", shards.ATOM_TAG + ":kev:CVE-2026-10001", shards.ATOM_TAG + ":kev:CVE-2021-44228"])
+        self.assertEqual(items[0]["title"], "CVE-2026-10002: Example Vendor Example Product")
+        self.assertEqual(items[0]["link"], shards.HUB_URL + "#/cve/CVE-2026-10002")
+        self.assertEqual(items[0]["updated"], "2026-10-30T00:00:00Z")
+        self.assertIn("CISA names it: Example record CVE-2026-10002.", items[0]["summary"])
+        self.assertIn("federal due date is 20 Nov 2026 under BOD 26-04.", items[0]["summary"])
+        self.assertIn("known ransomware campaign use", items[0]["summary"])
+        self.assertNotIn("ransomware", items[1]["summary"])
+        many = {"vulnerabilities": [kev_entry("CVE-2026-" + str(20000 + number), "2026-10-01", "Apply updates.") for number in range(80)]}
+        self.assertEqual(len(shards.kev_feed_entries(shards.kev_ledger(many))), shards.ATOM_ENTRIES)
+
+    def test_the_incident_feed_orders_by_update_and_links_the_hub_and_the_vendor_page(self):
+        def incident(source, ident, started, updated=None, resolved=None, url=None):
+            return {"source": source, "vendor": None, "id": ident, "name": "Incident " + ident + " <" + source + ">", "status": "resolved" if resolved else "investigating",
+                    "status_raw": None, "impact": "minor", "impact_raw": None, "components": ["API", "Git"], "started": started, "updated": updated or started,
+                    "resolved": resolved, "url": url or "https://www." + source + "status.com/incidents/" + ident, "summary": None}
+        files = {"status/current.json": {"sources": [{"id": "github", "name": "GitHub"}, {"id": "tenable", "name": "Tenable"}]},
+                 "status/2026-11.json": {"rows": [incident("github", "a1", "2026-11-01T10:00:00+00:00", "2026-11-01T12:00:00+00:00", "2026-11-01T12:00:00+00:00"),
+                                                  incident("tenable", "b2", "2026-11-02T09:00:00+00:00")]},
+                 "status/2026-10.json": {"rows": [incident("github", "c3", "2026-10-05T10:00:00+00:00", resolved="2026-10-05T11:00:00+00:00")]}}
+        items = shards.incident_feed_entries(files)
+        self.assertEqual([item["title"] for item in items], ["Tenable: Incident b2 <tenable>", "GitHub: Incident a1 <github>", "GitHub: Incident c3 <github>"])
+        self.assertEqual(items[0]["link"], shards.HUB_URL + "#/status?source=tenable")
+        self.assertEqual(items[0]["related"], "https://www.tenablestatus.com/incidents/b2")
+        self.assertEqual((items[0]["updated"], items[0]["published"]), ("2026-11-02T09:00:00Z", "2026-11-02T09:00:00Z"))
+        self.assertEqual(items[0]["summary"], "Status investigating. Impact minor. Components: API, Git. Started 2 Nov 2026 09:00 UTC; not resolved at the collector's read.")
+        self.assertEqual(items[1]["summary"], "Status resolved. Impact minor. Components: API, Git. Started 1 Nov 2026 10:00 UTC; resolved 1 Nov 2026 12:00 UTC.")
+        self.assertEqual(items[1]["updated"], "2026-11-01T12:00:00Z")
+        self.assertEqual(len({item["id"] for item in items}), 3)
+        self.assertEqual(shards.incident_feed_entries({}), [])
+        raw = shards.atom_document("incidents", "T", "S", "#/status", items, "R")
+        self.assertEqual(atom_entries(raw)[1][0]["title"], "Tenable: Incident b2 <tenable>")
+
+    def test_the_patch_calendar_leads_with_the_next_release_then_every_built_month(self):
+        month = {"month": "2026-10", "id": "2026-Oct", "title": "2026 October Security Updates", "initial_release": "2026-10-14T07:00:00Z",
+                 "current_release": "2026-10-20T07:00:00Z", "path": "patch-tuesday/2026-10.json", "total": 120, "critical": 8, "important": 100,
+                 "exploited": 3, "disclosed": 2, "in_kev": 4, "kev_added_in_month": 5, "adobe": 6, "sap": 7}
+        items = shards.patch_feed_entries({"patch-tuesday/index.json": {"months": [month]}}, date(2026, 11, 1))
+        self.assertEqual([item["title"] for item in items], ["Next Patch Tuesday: 10 Nov 2026", "Patch Tuesday October 2026: 120 CVEs, 8 Critical, 3 exploited"])
+        self.assertEqual(items[0]["link"], shards.HUB_URL + "#/patch-tuesday")
+        self.assertEqual(items[0]["updated"], "2026-11-10T00:00:00Z")
+        self.assertEqual(items[1]["link"], shards.HUB_URL + "#/patch-tuesday/2026-10")
+        self.assertEqual((items[1]["updated"], items[1]["published"]), ("2026-10-20T07:00:00Z", "2026-10-14T07:00:00Z"))
+        self.assertEqual(items[1]["summary"], "Microsoft's 2026 October Security Updates, released 14 Oct 2026, revised 20 Oct 2026: 120 CVEs, 8 rated Critical, "
+                                              "100 Important, 3 exploited at release, 2 publicly disclosed, 4 in CISA's KEV catalog. Adobe headline rows: 6. SAP headline rows: 7.")
+        self.assertEqual(shards.patch_feed_entries({}, date(2026, 11, 1)), [])
+
+    def test_a_build_writes_the_three_feeds_lists_them_and_gives_the_same_bytes_again(self):
+        workspace = Workspace(synthetic_cache(publisher_rows=300, kev_rows=60))
+        try:
+            workspace.build()
+            feeds = feed_files(workspace)
+            self.assertEqual(sorted(feeds), ["feeds/incidents.xml", "feeds/kev.xml", "feeds/patch-calendar.xml"])
+            index = index_of(workspace)
+            self.assertEqual(index["feeds"]["status"], "ok")
+            self.assertEqual([item["path"] for item in index["feeds"]["files"]], sorted(feeds))
+            for item in index["feeds"]["files"]:
+                self.assertEqual((item["bytes"], item["sha256"]), (len(feeds[item["path"]]), shards.sha256(feeds[item["path"]])))
+                self.assertLessEqual(item["bytes"], shards.ATOM_MAX_BYTES)
+            self.assertFalse(any(entry["path"].startswith("feeds/") for entry in index["shards"]), "feeds are not shards")
+            _feed, kev = atom_entries(feeds["feeds/kev.xml"])
+            self.assertEqual(len(kev), shards.ATOM_ENTRIES)
+            self.assertEqual([item["updated"] for item in kev], sorted((item["updated"] for item in kev), reverse=True))
+            self.assertTrue(all(item["links"]["alternate"].startswith(shards.HUB_URL + "#/cve/CVE-") for item in kev))
+            # No service-health rows in this workspace: an empty incidents feed, still well formed. No Patch
+            # Tuesday document is read offline, so the calendar carries the next expected release alone.
+            feed, entries = atom_entries(feeds["feeds/incidents.xml"])
+            self.assertEqual((entries, feed.find(ATOM + "updated").text), ([], shards.ATOM_EPOCH))
+            feed, entries = atom_entries(feeds["feeds/patch-calendar.xml"])
+            self.assertEqual([item["title"] for item in entries], ["Next Patch Tuesday: 10 Nov 2026"])
+            self.assertEqual(feed.find(ATOM + "updated").text, "2026-11-10T00:00:00Z")
+            workspace.build()
+            self.assertEqual(feed_files(workspace), feeds, "the same inputs give the same feed bytes")
+            self.assertFalse(shards.feeds_changed(index, index_of(workspace)["feeds"]))
+            self.assertTrue(shards.feeds_changed(None, index["feeds"]))
+            self.assertTrue(shards.feeds_changed({"shards": []}, index["feeds"]))
+            self.assertFalse(shards.feeds_changed({"shards": []}, None))
+            self.assertTrue(shards.feeds_changed(index, shards.feeds_entry(None, "left out")))
+            self.assertEqual(shards.feeds_entry(None, "left out"), {"status": "unavailable", "reason": "left out", "files": []})
+        finally:
+            workspace.close()
+
+    def test_an_index_without_feeds_still_validates_and_a_bad_feeds_entry_is_refused(self):
+        workspace = Workspace(synthetic_cache(publisher_rows=300, kev_rows=60))
+        try:
+            workspace.build()
+            index = index_of(workspace)
+            without = {key: value for key, value in index.items() if key != "feeds"}
+            shards.validate_index(copy.deepcopy(without))
+            for bad in ({**index["feeds"], "files": [{**index["feeds"]["files"][0], "path": "feeds/other.xml"}]},
+                        {**index["feeds"], "files": [{**index["feeds"]["files"][0], "path": "exports/kev.xml"}]},
+                        {**index["feeds"], "status": "unavailable"},
+                        {**index["feeds"], "files": index["feeds"]["files"] + index["feeds"]["files"][:1]},
+                        {**index["feeds"], "files": [{**index["feeds"]["files"][0], "bytes": shards.ATOM_MAX_BYTES + 1}]}):
+                with self.assertRaisesRegex(ValueError, "feed"):
+                    shards.validate_index({**copy.deepcopy(without), "feeds": bad})
+        finally:
+            workspace.close()
+
+
 class ResumeV7Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -601,9 +792,10 @@ class PackageTest(unittest.TestCase):
         report = self.package()
         index = index_of(self.workspace)
         self.assertTrue(index["exports"]["files"])
+        self.assertEqual(len(index["feeds"]["files"]), 3)
         # The page files site/files.json lists (and files.json), index.json and the two v6 files.
-        self.assertEqual(report["files"], len(index["shards"]) + len(index["exports"]["files"]) + len(support.site_files()) + 3)
-        self.assertEqual(report["exports"], len(index["exports"]["files"]))
+        self.assertEqual(report["files"], len(index["shards"]) + len(index["exports"]["files"]) + len(index["feeds"]["files"]) + len(support.site_files()) + 3)
+        self.assertEqual((report["exports"], report["feeds"]), (len(index["exports"]["files"]), 3))
         self.assertLess(report["compressed_estimate"], report["input_bytes"])
 
     def test_the_report_prints_every_cap_with_its_headroom(self):
@@ -621,7 +813,8 @@ class PackageTest(unittest.TestCase):
         lines = out.getvalue().splitlines()
         index = index_of(self.workspace)
         base = self.site / "data" / "v7"
-        paths = sorted([entry["path"] for entry in index["shards"]] + [item["path"] for item in index["exports"]["files"]] + ["index.json"])
+        paths = sorted([entry["path"] for entry in index["shards"]] + [item["path"] for item in index["exports"]["files"]] +
+                       [item["path"] for item in index["feeds"]["files"]] + ["index.json"])
         prefix = [line.split(": ", 1)[0] for line in lines[:len(paths)]]
         self.assertEqual(prefix, ["data/v7/" + path for path in paths])
         for path, line in zip(paths, lines):
@@ -653,6 +846,31 @@ class PackageTest(unittest.TestCase):
     def test_a_missing_export_is_refused(self):
         (self.site / "data" / "v7" / "exports" / "manifest.json").unlink()
         with self.assertRaisesRegex(shards.PackageError, "missing"):
+            self.package()
+
+    def test_a_feed_outside_the_patterns_an_unlisted_a_changed_and_a_missing_feed_are_refused(self):
+        feeds = self.site / "data" / "v7" / "feeds"
+        (feeds / "notes.xml").write_bytes(b"<feed/>\n")
+        with self.assertRaisesRegex(shards.PackageError, "outside the allowlisted patterns"):
+            self.package()
+        (feeds / "notes.xml").unlink()
+        path = self.site / "data" / "v7" / "index.json"
+        index = json.loads(path.read_text(encoding="utf-8"))
+        kept = index["feeds"]["files"]
+        index["feeds"]["files"] = [item for item in kept if item["path"] != "feeds/kev.xml"]
+        path.write_bytes(shards.canonical(index))
+        with self.assertRaisesRegex(shards.PackageError, "not listed in the manifest.*feeds/kev.xml"):
+            self.package()
+        index["feeds"]["files"] = kept
+        path.write_bytes(shards.canonical(index))
+        self.package()
+        kev = feeds / "kev.xml"
+        original = kev.read_bytes()
+        kev.write_bytes(original + b"\n")
+        with self.assertRaisesRegex(shards.PackageError, "Byte count differs.*feeds/kev.xml"):
+            self.package()
+        kev.unlink()
+        with self.assertRaisesRegex(shards.PackageError, "missing.*feeds/kev.xml"):
             self.package()
 
     def test_the_per_file_cap_binds_v7_files_but_not_the_v6_files(self):
