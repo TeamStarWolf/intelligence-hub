@@ -63,6 +63,10 @@ ARTICLE_COLUMNS = (
     ("cvss_version", "CVSS version of the highest CNA base score among the row's CVEs. Versions are never merged."),
     ("cvss_base", "That CNA base score."),
     ("cvss_scorer", "Who scored it: cna (the CVE record's CNA container)."),
+    ("epss", "The highest EPSS score among the row's CVEs: FIRST's estimated probability, 0 to 1, that the CVE is exploited in the next 30 days, as scored on epss_date. Empty when no CVE on the row has a score on that date; a missing score is never written as 0."),
+    ("epss_percentile", "That score's percentile among every CVE FIRST scored that day, 0 to 1."),
+    ("epss_date", "The score date FIRST published that score for, YYYY-MM-DD."),
+    ("epss_model", "The EPSS model version that produced it, for example v2026.06.15. Scores from different model versions are not compared, and no change across versions is recorded."),
     ("kev_added", "Earliest CISA KEV dateAdded among the row's CVEs."),
     ("kev_due", "That entry's KEV dueDate (the federal catalog requirement, not a deadline for the reader)."),
     ("kev_ransomware", "That entry's knownRansomwareCampaignUse, as CISA publishes it."),
@@ -97,6 +101,7 @@ JSONL_FIELDS = (
     ("region", "List of {value, role, method, confidence}."),
     ("attack", "List of {value, method, confidence, tactics, path}."),
     ("cvss", "{base, version, vector, scorer, cve} or null."),
+    ("epss", "{score, percentile, date, model, cve} or null: the highest EPSS score among the row's CVEs, by FIRST, with the CVE it belongs to."),
     ("kev", "{cves, added, due, ransomware, at_publication} or null."),
     ("tagger_version", "Version of the tagging rules."),
 )
@@ -113,6 +118,8 @@ NOTICES = [
     "CAPEC: © The MITRE Corporation. Includes material from the Common Attack Pattern Enumeration and Classification (CAPEC™), used under the CAPEC Terms of Use. https://capec.mitre.org/",
     "CVE ids and CNA fields come from the CVE Program's records (cvelistV5).",
     "Vendor, product, actor, malware and sector ids come from the TeamStarWolf library's shared vocabulary (data/vocab/vocabulary.json) at the pinned commit.",
+    "EPSS scores come from FIRST's Exploit Prediction Scoring System (https://www.first.org/epss/), read from api.first.org. "
+    "FIRST asks for attribution when EPSS data is used in publications or products.",
 ]
 
 
@@ -144,7 +151,32 @@ def json_line(value):
     return json.dumps(value, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":"))
 
 
-def record(article, block, source_class):
+def best_epss(article, scores):
+    """The highest EPSS block among the row's CVEs with the CVE it belongs to, or None. Ties go to the lowest CVE id."""
+    scores = scores or {}
+    best = None
+    for cve in sorted(set(article.get("cves") or [])):
+        block = scores.get(cve)
+        if isinstance(block, dict) and (best is None or block["score"] > best["score"]):
+            best = {**block, "cve": cve}
+    return best
+
+
+def epss_fields(article, scores):
+    """The four CSV columns of the row's best EPSS score, empty when there is none."""
+    best = best_epss(article, scores)
+    if best is None:
+        return {"epss": "", "epss_percentile": "", "epss_date": "", "epss_model": ""}
+    return {"epss": _decimal(best["score"]), "epss_percentile": _decimal(best["percentile"]), "epss_date": best["date"], "epss_model": best["model"]}
+
+
+def _decimal(value):
+    """A probability as a plain decimal with up to five places (0.00004, never 4e-05)."""
+    text = format(value, ".5f").rstrip("0").rstrip(".")
+    return text or "0"
+
+
+def record(article, block, source_class, scores=None):
     block = block or {}
     out = {key: article.get(key) for key in ("id", "title", "url", "source_id", "source_name", "kind", "origin", "date_basis",
                                               "event_date", "summary", "references")}
@@ -154,6 +186,7 @@ def record(article, block, source_class):
     for key in ("source_class", "desk", "exploitation", "event_type", "vendor", "product", "actor", "malware", "sector", "region", "cwe",
                 "attack", "cvss", "kev"):
         out[key] = block.get(key, [] if key not in {"source_class", "desk", "exploitation", "cvss", "kev"} else None)
+    out["epss"] = best_epss(article, scores)
     out["tagger_version"] = block.get("tagger_version") or TAGGER_VERSION
     return out
 
@@ -163,7 +196,7 @@ def month_of(article):
     return value[:7] if re.fullmatch(r"[0-9]{4}-(?:0[1-9]|1[0-2])", value[:7]) else None
 
 
-def year_files(year, articles, blocks, label=None):
+def year_files(year, articles, blocks, label=None, scores=None):
     """The three files for one year (label = the year) or one month of a split year (label = YYYY-MM)."""
     label = label or year
     rows = sorted(articles, key=lambda article: (published(article), article["id"]))
@@ -177,12 +210,13 @@ def year_files(year, articles, blocks, label=None):
                 "source_id": article["source_id"], "kind": article["kind"], "origin": article["origin"], "title": article["title"],
                 "url": article["url"], "cve": ";".join(sorted(set(article.get("cves") or [])))}
         base.update(view)
+        base.update(epss_fields(article, scores))
         if not base["tagger_version"]:
             base["tagger_version"] = ""
         wide.append([base[name] for name in header])
         for field, value, confidence, method, path in long_tags(block):
             long_rows.append([article["id"], date, field, value, confidence, method, path])
-        lines.append(json_line(record(article, block, view["source_class"])))
+        lines.append(json_line(record(article, block, view["source_class"], scores)))
     return {
         "articles-" + label + ".csv": csv_bytes(header, wide),
         "articles-" + label + ".jsonl": ("".join(line + "\n" for line in lines)).encode("utf-8"),
@@ -190,10 +224,10 @@ def year_files(year, articles, blocks, label=None):
     }, len(rows), len(long_rows)
 
 
-def period_files(year, articles, blocks, limit=None):
+def period_files(year, articles, blocks, limit=None, scores=None):
     """[(month or None, files, rows, tag rows)]: the year as one set, or one set per month when a file passes the cap."""
     limit = V7_FILE_MAX_BYTES if limit is None else limit
-    built, rows, tag_rows = year_files(year, articles, blocks)
+    built, rows, tag_rows = year_files(year, articles, blocks, scores=scores)
     if all(len(data) <= limit for data in built.values()):
         return [(None, built, rows, tag_rows)]
     months = {}
@@ -204,7 +238,7 @@ def period_files(year, articles, blocks, limit=None):
         months.setdefault(month, []).append(article)
     periods = []
     for month in sorted(months):
-        built, rows, tag_rows = year_files(year, months[month], blocks, label=month)
+        built, rows, tag_rows = year_files(year, months[month], blocks, label=month, scores=scores)
         for name, data in built.items():
             if len(data) > limit:
                 raise ValueError("The export " + name + " passes the " + format(limit, ",") + "-byte per-file cap.")
@@ -267,11 +301,12 @@ def source_notes(articles, registry, blocks=None):
     return [seen[key] for key in sorted(seen)]
 
 
-def build_exports(articles, blocks, registry, vocabulary_info, source_classes=None, limit=None):
+def build_exports(articles, blocks, registry, vocabulary_info, source_classes=None, limit=None, scores=None):
     """{file name: bytes} for every export, the manifest and the dictionary.
 
     Raises ValueError when a file cannot be kept under the per-file cap (limit, by default
-    V7_FILE_MAX_BYTES); the collector then publishes the feed without exports.
+    V7_FILE_MAX_BYTES); the collector then publishes the feed without exports. scores maps a
+    CVE to its EPSS block for the epss columns.
     """
     limit = V7_FILE_MAX_BYTES if limit is None else limit
     years = {}
@@ -279,7 +314,7 @@ def build_exports(articles, blocks, registry, vocabulary_info, source_classes=No
         years.setdefault(year_of(article), []).append(article)
     files, entries = {}, []
     for year in sorted(years):
-        for month, built, rows, tag_rows in period_files(year, years[year], blocks, limit):
+        for month, built, rows, tag_rows in period_files(year, years[year], blocks, limit, scores):
             for name in sorted(built):
                 data = built[name]
                 files[name] = data

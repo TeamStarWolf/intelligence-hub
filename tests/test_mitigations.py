@@ -9,7 +9,7 @@ import support
 from intelligence_hub import collect
 from intelligence_hub.archive import validate_snapshot
 from intelligence_hub.collect import published, safe_url, text
-from intelligence_hub.mitigations import (ADP_CONTAINERS, ADP_TEXT, INDEX_FIELDS, INDEX_FIELDS_V1, INDEX_VERSION, METRIC_ENTRIES,
+from intelligence_hub.mitigations import (ADP_CONTAINERS, ADP_TEXT, INDEX_FIELDS, INDEX_FIELDS_V1, INDEX_FIELDS_V2, INDEX_VERSION, METRIC_ENTRIES,
                                           blank, brief_index, build_briefs, index_row, join_publication, merge_retained,
                                           project_record, record_url, valid_projection, validate_adp)
 import test_publication
@@ -210,23 +210,26 @@ class ReprojectionTest(unittest.TestCase):
 
 
 class IndexTest(unittest.TestCase):
-    def test_ssvc_exploitation_is_the_last_index_field(self):
-        self.assertEqual(INDEX_FIELDS[-1], "ssvc_exploitation")
-        self.assertEqual(INDEX_FIELDS_V1, INDEX_FIELDS[:-1])
-        self.assertEqual(INDEX_VERSION, 2)
+    def test_ssvc_exploitation_then_epss_end_the_index_fields(self):
+        self.assertEqual(INDEX_FIELDS[-2:], ("ssvc_exploitation", "epss"))
+        self.assertEqual(INDEX_FIELDS_V2, INDEX_FIELDS[:-1])
+        self.assertEqual(INDEX_FIELDS_V1, INDEX_FIELDS[:-2])
+        self.assertEqual(INDEX_VERSION, 3)
         briefs, _, _ = build_briefs([{"cves": [CVE]}], {}, {CVE: project(record([adp_container()]))}, False, 0, None, text, safe_url, published, STAMP)
         row = index_row(briefs[CVE])
         self.assertEqual(len(row), len(INDEX_FIELDS))
-        self.assertEqual(row[-1], "active")
+        self.assertEqual(row[-2:], ["active", None])
         self.assertEqual(row[4:6], [9.8, "3.1"], "the score columns stay the CNA's metric")
-        self.assertEqual(index_row(briefs[CVE], 1), row[:-1])
-        self.assertEqual(brief_index(briefs), {"version": 2, "fields": list(INDEX_FIELDS), "rows": {CVE: row}})
-        self.assertEqual(brief_index(briefs, 1), {"version": 1, "fields": list(INDEX_FIELDS_V1), "rows": {CVE: row[:-1]}})
+        self.assertEqual(index_row(briefs[CVE], 2), row[:-1])
+        self.assertEqual(index_row(briefs[CVE], 1), row[:-2])
+        self.assertEqual(brief_index(briefs), {"version": 3, "fields": list(INDEX_FIELDS), "rows": {CVE: row}})
+        self.assertEqual(brief_index(briefs, 2), {"version": 2, "fields": list(INDEX_FIELDS_V2), "rows": {CVE: row[:-1]}})
+        self.assertEqual(brief_index(briefs, 1), {"version": 1, "fields": list(INDEX_FIELDS_V1), "rows": {CVE: row[:-2]}})
         with self.assertRaisesRegex(ValueError, "Unsupported brief index version"):
-            brief_index(briefs, 3)
+            brief_index(briefs, 4)
         pending = blank(CVE)
         pending.update(required_action=None, analysis={"guidance_status": "needs-review"})
-        self.assertIsNone(index_row(pending)[-1])
+        self.assertEqual(index_row(pending)[-2:], [None, None])
 
     def test_the_page_mirrors_the_index_fields_and_the_fixture_follows_them(self):
         limits = (support.ROOT / "site" / "js" / "limits.js").read_text(encoding="utf-8")
@@ -249,9 +252,9 @@ class PublicationTest(unittest.TestCase):
         brief = briefs["briefs"]["CVE-2026-99991"]
         # The offline build makes no record request, so the fixture's briefs are pending and unprojected.
         self.assertEqual((brief["adp"], brief["adp_status"]), (None, "not_projected"))
-        self.assertEqual(feed["brief_index"]["version"], 2)
+        self.assertEqual(feed["brief_index"]["version"], 3)
         self.assertEqual(feed["brief_index"]["fields"], list(INDEX_FIELDS))
-        self.assertTrue(all(row[-1] is None for row in feed["brief_index"]["rows"].values()))
+        self.assertTrue(all(row[-2] is None and row[-1] is None for row in feed["brief_index"]["rows"].values()))
         validate_snapshot(feed)
         validate_snapshot(self.joined())
 
@@ -261,25 +264,27 @@ class PublicationTest(unittest.TestCase):
         joined["mitigations"][cve].update(adp=copy.deepcopy(SUPPLIED), adp_status="supplied")
         joined["brief_index"] = brief_index(joined["mitigations"])
         validate_snapshot(joined)
-        self.assertEqual(joined["brief_index"]["rows"][cve][-1], "active")
+        self.assertEqual(joined["brief_index"]["rows"][cve][-2], "active")
         joined["mitigations"][cve]["adp_status"] = "not_supplied"
         with self.assertRaisesRegex(ValueError, "Invalid structured CVE provenance"):
             validate_snapshot(joined)
         joined["mitigations"][cve]["adp_status"] = "supplied"
-        joined["brief_index"]["rows"][cve][-1] = "poc"
+        joined["brief_index"]["rows"][cve][-2] = "poc"
         with self.assertRaisesRegex(ValueError, "brief index differs"):
             validate_snapshot(joined)
-        joined["brief_index"]["rows"][cve][-1] = "x" * 41
+        joined["brief_index"]["rows"][cve][-2] = "x" * 41
         with self.assertRaisesRegex(ValueError, "Invalid brief index SSVC exploitation"):
             validate_snapshot(joined)
 
     def test_files_published_before_this_change_still_validate(self):
-        # The deployed feed and briefs file carry no pair and a version 1 index; both stay valid
-        # resume and archive inputs. A version 2 index with the old columns is refused.
+        # The feed published before WP-04 carries no pair and a version 1 index; the one before
+        # WP-03 carries the pair, no epss and a version 2 index. Both stay valid resume and archive
+        # inputs. A later version number on the old columns is refused.
         joined = self.joined()
         for brief in joined["mitigations"].values():
             del brief["adp"]
             del brief["adp_status"]
+            del brief["epss"]
         joined["brief_index"] = brief_index(joined["mitigations"], 1)
         validate_snapshot(joined)
         feed = {key: item for key, item in joined.items() if key != "mitigations"}
@@ -287,6 +292,14 @@ class PublicationTest(unittest.TestCase):
         feed["brief_index"]["version"] = 2
         with self.assertRaisesRegex(ValueError, "Unsupported brief index"):
             validate_snapshot(feed)
+        before_epss = self.joined()
+        for brief in before_epss["mitigations"].values():
+            del brief["epss"]
+        before_epss["brief_index"] = brief_index(before_epss["mitigations"], 2)
+        validate_snapshot(before_epss)
+        before_epss["brief_index"]["version"] = 3
+        with self.assertRaisesRegex(ValueError, "Unsupported brief index"):
+            validate_snapshot(before_epss)
         # The pair is optional on every modern snapshot, like the schema 5 weakness pair, so the
         # schema 6 relabel the resume test makes from a build still validates with it.
         relabelled = self.joined()

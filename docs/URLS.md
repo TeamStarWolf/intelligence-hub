@@ -84,9 +84,9 @@ are dropped.
 | `year` | list, `kev`, `tags`, `actors` | `1998` to `2099` | that calendar year; on a list view, `tags` and `actors` it also reads that year's history rows |
 | `month` | list, `history/<year>` | `01` to `12`, with `year` on a list view | that month |
 | `range` | list, `kev` | `3`, `7`, `30`, `90`, `365`, `all` | the last N days ending on the content date; `year` replaces it |
-| `sort` | list | `date-desc`, `date-asc`, `title-asc`, `title-desc`, `source-asc`, `source-desc`, `cve-asc`, `cve-desc`, `cvss-desc`, `cvss-asc` | result order |
+| `sort` | list | `date-desc`, `date-asc`, `title-asc`, `title-desc`, `source-asc`, `source-desc`, `cve-asc`, `cve-desc`, `cvss-desc`, `cvss-asc`, `epss-desc`, `epss-asc` | result order; the EPSS sorts use the highest EPSS score among the entry's CVEs |
 | `sort` | `kev` | `added-desc`, `added-asc`, `due-asc`, `due-desc`, `cve-desc`, `cve-asc` | ledger order |
-| `sort` | `cves` | `cve-desc`, `cve-asc`, `cvss-desc`, `cvss-asc`, `kev-desc` | register order |
+| `sort` | `cves` | `cve-desc`, `cve-asc`, `cvss-desc`, `cvss-asc`, `epss-desc`, `epss-asc`, `kev-desc` | register order |
 | `page` | list, `kev`, `cves`, `history/<year>`, `vendor`, `actor`, `malware` | `1` to `9999` | result page, 25 rows each |
 | `open` | list | an entry id, such as `feed-3f41d3f2c16c88f054f7` | opens that entry's detail dialog |
 | `wall` | `today`, `status` | `1` | wall mode for a monitor: the tab rows, the page controls and the footer are hidden and the type is larger; nothing more is read |

@@ -20,7 +20,7 @@ every tab is also listed in the **Panels** sidebar, which starts closed:
 | Today | The brief head (the day's counts in words, the service-health board, the latest Patch Tuesday brief and what is new since this browser's last visit), KEV additions by calendar day, KEV entries due in the next 14 days, then the last three days of advisories, research and press. |
 | Advisories, Research, News | The Explorer limited to vendor and government sources, research teams, or the press. |
 | Known exploited | CISA's KEV ledger by date added, with the directive each required action cites. |
-| CVEs | Every CVE an entry mentions, with its guidance label, KEV state and CVSS; a CVE opens its source-led brief and its CVE.org record. |
+| CVEs | Every CVE an entry mentions, with its guidance label, KEV state, CNA CVSS and FIRST's EPSS score (with the model and the score date); a CVE opens its source-led brief, its severity sources, its EPSS block and its CVE.org record. |
 | History | One page per year from 1998. Each year opens with its per-source coverage statements, so a quiet year is never read as a year when nothing happened. |
 | Vendors | Every vendor with entries or KEV entries, its KEV entries by year added, its products, and its TeamStarWolf library pages. |
 | Tags | Every tag value on at least one entry, with its count and a page or Explorer filter. Values with no entry are not listed. |
@@ -51,7 +51,8 @@ written for this project. Full article bodies are not copied.
 ## How it works
 
 A Python collector (standard library only, in `intelligence_hub/`) runs in GitHub Actions. It
-reads 62 configured RSS and Atom feeds, the CISA KEV catalog and 46 official status sources plus
+reads 62 configured RSS and Atom feeds, the CISA KEV catalog, FIRST's EPSS API for the CVEs it
+shows, and 46 official status sources plus
 IODA's internet outage signals under strict size, time and format bounds, enriches mentioned CVEs
 from the CVE Program's records, tags every row from controlled vocabularies, merges the committed
 history files, and writes static files that the page in `site/` reads. Your browser reads those
@@ -160,6 +161,7 @@ themes, the 12 px type floor and an em-dash lint. New code needs tests.
 
 The Hub's code is MIT-licensed. Publisher headlines and links belong to their publishers; KEV
 entries are CISA's text, which CISA distributes under CC0 1.0; CVE record fields are used under the
-CVE Program Terms of Use; curated summaries are original paraphrases. MITRE ATT&CK, CWE and CAPEC
+CVE Program Terms of Use; EPSS scores are FIRST's, shown with attribution as FIRST asks; curated
+summaries are original paraphrases. MITRE ATT&CK, CWE and CAPEC
 content carries the designations in [METHOD.md](docs/METHOD.md#licences-and-notices). This project
 is not affiliated with MITRE, with Nintendo or with any news publisher.

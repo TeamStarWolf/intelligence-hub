@@ -116,6 +116,7 @@ vocabulary has no CVE, CAPEC or CWE entries yet, so those library links are not 
 | ATT&CK groups, software, techniques and tactics | MITRE ATT&CK, through the library's pinned files | The ATT&CK notice below. |
 | CWE weaknesses | MITRE CWE, through the library's pinned CWE list | The CWE notice below. |
 | CAPEC attack patterns | MITRE CAPEC, through the library's pinned CAPEC list | The CAPEC notice below. |
+| EPSS scores | FIRST, the Exploit Prediction Scoring System, read from api.first.org | Free. FIRST asks for attribution when EPSS data is used in publications or products ([FAQ](https://www.first.org/epss/faq)); every value the Hub shows names FIRST, the model version and the score date. |
 | Curated summaries | Written for the Hub | Original paraphrases, each backed by a dated primary source that the row links. |
 | Service-health entries | The vendors' official status pages and feeds, IODA from Georgia Tech, and Cloudflare Radar once it is configured | Incident names, states, impact levels, affected components, times, a short excerpt of the vendor's latest update and the link. The status pages belong to their vendors, and IODA rows repeat IODA's own copyright line. |
 | The Hub's code | This repository | [MIT License](../LICENSE). |

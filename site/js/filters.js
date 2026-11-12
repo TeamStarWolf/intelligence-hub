@@ -76,14 +76,28 @@ function compareNullable(a, b, direction, numeric = false) {
   return (numeric ? a - b : a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })) * direction;
 }
 
-// Sorts in place and returns rows. Unknown values sort last in both directions.
-export function sortRows(rows, sort = "date-desc") {
+// The highest EPSS score among a row's CVEs, from the CVE index; null without one.
+export function epssOf(row, cveIndex) {
+  if (!cveIndex) return null;
+  let best = null;
+  for (const cve of row.cves) {
+    const score = cveIndex.get(cve)?.epss?.score;
+    if (typeof score === "number" && (best === null || score > best)) best = score;
+  }
+  return best;
+}
+
+// Sorts in place and returns rows. Unknown values sort last in both directions. The EPSS sort
+// reads each row's CVEs in the CVE index, so it needs the index; without one every row is unknown.
+export function sortRows(rows, sort = "date-desc", cveIndex = null) {
   const [key, order] = sort.split("-");
   const direction = order === "desc" ? -1 : 1;
+  const epss = key === "epss" ? new Map(rows.map(row => [row.id, epssOf(row, cveIndex)])) : null;
   return rows.sort((a, b) => {
     let result = 0;
     if (key === "date") result = compareNullable(a.time, b.time, direction, true);
     else if (key === "cvss") result = compareNullable(a.score, b.score, direction, true);
+    else if (key === "epss") result = compareNullable(epss.get(a.id), epss.get(b.id), direction, true);
     else if (key === "cve") result = compareNullable(a.cve_key, b.cve_key, direction);
     else if (key === "title") result = a.title.localeCompare(b.title) * direction;
     else if (key === "source") result = a.source_name.localeCompare(b.source_name) * direction;
@@ -93,7 +107,7 @@ export function sortRows(rows, sort = "date-desc") {
 
 export function filterRows(rows, route, { cveIndex = null, contentDate = null } = {}) {
   const window = dateWindow(route.view, route.query, contentDate);
-  return sortRows(rows.filter(row => rowMatches(row, route.query, { view: route.view, cveIndex, window })), route.query.sort || defaultSort(route.view));
+  return sortRows(rows.filter(row => rowMatches(row, route.query, { view: route.view, cveIndex, window })), route.query.sort || defaultSort(route.view), cveIndex);
 }
 
 // Value counts for every filter over rows (the loaded scope under the view's fixed constraint).
@@ -124,7 +138,8 @@ export function cveRegister(cveIndex, query) {
     words.every(word => normalized(row.cve + " " + row.weaknesses.join(" ") + " " + row.guidance).includes(word)));
   const [key, order] = (query.sort || "cve-desc").split("-");
   const direction = order === "desc" ? -1 : 1;
-  return rows.sort((a, b) => (key === "cvss" ? compareNullable(a.score, b.score, direction, true) : key === "kev" ? compareNullable(a.kev_added, b.kev_added, direction) : 0) ||
+  return rows.sort((a, b) => (key === "cvss" ? compareNullable(a.score, b.score, direction, true) : key === "kev" ? compareNullable(a.kev_added, b.kev_added, direction) :
+    key === "epss" ? compareNullable(a.epss ? a.epss.score : null, b.epss ? b.epss.score : null, direction, true) : 0) ||
     a.cve.localeCompare(b.cve, undefined, { numeric: true }) * (key === "cve" ? direction : -1));
 }
 

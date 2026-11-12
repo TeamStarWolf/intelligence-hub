@@ -94,6 +94,34 @@ pages, so a listed site says nothing about what it holds for that CVE. GreyNoise
 `/cve/` page pattern and Vulners did not answer a plain request for a real KEV CVE on
 2026-11-12 and are not listed; AttackerKB was retired on 2026-08-18.
 
+## EPSS by FIRST
+
+Every brief carries an `epss` block, FIRST's Exploit Prediction Scoring System value for
+the CVE: `score` (the estimated probability, 0 to 1, that the CVE is exploited in the next
+30 days), `percentile` (its rank among every CVE FIRST scored that day), `date` (the score
+date FIRST published it for) and `model` (the model version, for example `v2026.06.15`),
+or null when FIRST had no score for the CVE on that date. The collector reads the API at
+`api.first.org` once a run for the CVEs of the brief set, in sorted batches of 100
+(`intelligence_hub/epss.py`), with a 256 KiB bound on each answer and at most 150 batches
+a run. The daily CSV is not read: it is reached through a redirect and is gzip-encoded,
+both of which the collector refuses.
+
+| Rule | What it means |
+| --- | --- |
+| A missing score is no score | A CVE the API did not return reads as null, in the brief, the index and the exports; the page says "no EPSS score on that date" and never writes 0 |
+| A failed read keeps the last good value | A batch that fails (a 429, a timeout, a malformed answer) leaves every CVE in it as it was, and the first failed batch ends the run's reads; the retained value travels in the retained projections and in the deployed briefs file, so a `--resume-public` run keeps it too |
+| The model is named and pinned | The API carries no model version. `MODEL` in `epss.py` is the version the daily CSV header named on `MODEL_CONFIRMED`; a new model is a reviewed change of that constant, and a value keeps the model it was scored under |
+| No change across a model boundary | The Hub shows each score as published for its date and model; it records no delta between runs and compares no two model versions |
+| Attribution on every value | FIRST asks for attribution when EPSS data is used in publications or products; the register caption, the brief and the export dictionary name FIRST, the model and the score date |
+
+`cve-index.json` (brief index version 3) carries the block per CVE as `epss`, after
+`ssvc_exploitation`, and `index.json` records `epss_scored`, `epss_model` and `epss_date`
+in its counts. The feeds published before this field, with their version 1 or version 2
+index and briefs without the block, stay valid resume and archive inputs. The register's
+EPSS column and sort, the brief's EPSS block and the Explorer's EPSS sort and chip read
+these values; the exports carry `epss`, `epss_percentile`, `epss_date` and `epss_model`
+per row (the highest score among the row's CVEs).
+
 ## CWE, CAPEC and source-attributed context
 
 Schema 5 introduced exact `weaknesses` and `weaknesses_status` fields to each brief.

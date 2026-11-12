@@ -6,6 +6,7 @@ import json
 import math
 import re
 
+from .epss import valid_score
 from .intelligence import CWE, plain, validate_weaknesses
 
 CVE_ID = re.compile(r"CVE-[0-9]{4}-[0-9]{4,8}")
@@ -74,7 +75,7 @@ def normalize_retained(value, cve):
     """A validated retained projection with the pairs later changes added, read as not_projected when absent."""
     items, status = validate_weaknesses(value, cve, brief_url, legacy=True)
     return {**value, "weaknesses": items, "weaknesses_status": status,
-            "adp": value.get("adp"), "adp_status": value.get("adp_status", "not_projected")}
+            "adp": value.get("adp"), "adp_status": value.get("adp_status", "not_projected"), "epss": value.get("epss")}
 
 # CISA's ADP container on the same record carries its SSVC decision-point values and, when CISA
 # supplied one, its own CVSS metric. It is read beside the CNA's metric and never blended with it.
@@ -272,6 +273,9 @@ def valid_projection(value, cve, safe_url, normalize_date):
         return False
     if value.get("source_status") not in {"ok", "failed", "pending"} or value.get("record_state") not in {"PUBLISHED", "REJECTED", "UNKNOWN"}:
         return False
+    # FIRST's EPSS block (WP-03) rides on the record: absent or null before a read, else a valid block.
+    if value.get("epss") is not None and not valid_score(value["epss"]):
+        return False
     for field in ("source_updated_at", "retrieved_at", "source_attempted_at"):
         item = value.get(field)
         if item is not None and (not isinstance(item, str) or len(item) > 40 or normalize_date(item) is None):
@@ -316,7 +320,7 @@ def blank(cve):
     return {"cve": cve, "title": cve, "description": "", "source_status": "pending", "record_state": "UNKNOWN",
         "source_updated_at": None, "retrieved_at": None, "source_attempted_at": None, "source_sha256": None,
         "products": [], "solutions": [], "workarounds": [], "cvss": None, "weaknesses": [], "weaknesses_status": "not_projected",
-        "adp": None, "adp_status": "not_projected",
+        "adp": None, "adp_status": "not_projected", "epss": None,
         "references": [{"label": "Official CVE record", "url": brief_url(cve), "kind": "record"}], "projection_notes": []}
 
 
@@ -333,10 +337,20 @@ def merge_retained(local, remote, cve, safe_url, normalize_date):
     result["projection_notes"] = []
     latest = max(values, key=lambda item: clock(item, "source_attempted_at"))
     result.update(source_status=latest["source_status"], source_attempted_at=latest.get("source_attempted_at"))
+    # FIRST's EPSS block is read apart from the CNA record, so it is merged apart: the block with the
+    # newest score date among the valid records, whichever record carried it and whether or not that
+    # record's CNA read succeeded, so a retained score survives a resume and a failed batch.
+    blocks = [item["epss"] for item in values if valid_score(item.get("epss"))]
+    result["epss"] = max(blocks, key=lambda block: block["date"]) if blocks else None
     return result
 
 
-def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, safe_url, normalize_date, stamp):
+def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, safe_url, normalize_date, stamp, scores=None):
+    """The briefs, the retained projections to keep and the coverage counts.
+
+    scores is epss.collect_scores' map for this run: a CVE in it takes that value (a block, or
+    None for no score on the day); a CVE absent from it keeps the retained value.
+    """
     wanted = sorted({cve for article in articles for cve in article["cves"]}, reverse=True)
     if not isinstance(retained, dict):
         raise ValueError("Invalid retained CVE projections.")
@@ -369,17 +383,24 @@ def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, saf
             raw = fetch(record_url(cve))
             completed = datetime.now(timezone.utc).isoformat(timespec="seconds")
             projection = project_record(raw, cve, clean, safe_url, normalize_date, completed)
-            return cve, {**projection, "source_attempted_at": attempted}
+            # The EPSS block is read separately (epss.py); a fresh CNA projection keeps the retained one.
+            return cve, {**projection, "source_attempted_at": attempted, "epss": records[cve].get("epss")}
         except (OSError, ValueError, TypeError, RecursionError):
             return cve, {**records[cve], "source_status": "failed", "source_attempted_at": attempted}
 
     if refresh and pending:
         with ThreadPoolExecutor(max_workers=4) as pool:
             records.update(pool.map(update, pending))
+    for cve, value in (scores or {}).items():
+        if cve in records:
+            require_score = value is None or valid_score(value)
+            if not require_score:
+                raise ValueError("Invalid EPSS score for " + cve + ".")
+            records[cve] = {**records[cve], "epss": value}
     kev_by_id = {item["cveID"]: item for item in catalog.get("vulnerabilities", [])}
     result = {}
     for cve, projection in records.items():
-        record = {key: projection[key] for key in ("cve", "title", "description", "source_status", "record_state", "source_updated_at", "retrieved_at", "source_attempted_at", "source_sha256", "products", "solutions", "workarounds", "cvss", "references", "weaknesses", "weaknesses_status", "adp", "adp_status")}
+        record = {key: projection[key] for key in ("cve", "title", "description", "source_status", "record_state", "source_updated_at", "retrieved_at", "source_attempted_at", "source_sha256", "products", "solutions", "workarounds", "cvss", "references", "weaknesses", "weaknesses_status", "adp", "adp_status", "epss")}
         item = kev_by_id.get(cve)
         cisa_url = "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=" + cve
         action = clean(item.get("requiredAction", ""), 1200) if item else ""
@@ -425,14 +446,24 @@ def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, saf
 # The public site splits one snapshot into two files. data/feed.json keeps a
 # compact row per CVE for list views; data/briefs.json holds the full briefs and
 # is read only when a reader opens one.
-# Index version 2 adds ssvc_exploitation, CISA's SSVC Exploitation value (WP-04). cvss_score and
+# Index version 2 added ssvc_exploitation, CISA's SSVC Exploitation value (WP-04); version 3 adds
+# epss, FIRST's EPSS block {score, percentile, date, model} or null (WP-03). cvss_score and
 # cvss_version are the CNA's metric; CISA's ADP CVSS is only in the brief.
-INDEX_VERSION = 2
+INDEX_VERSION = 3
 INDEX_FIELDS = ("record_state", "source_status", "guidance_status", "required_action",
-                "cvss_score", "cvss_version", "kev_date_added", "weaknesses", "ssvc_exploitation")
-# The version 1 layout, as the feed published before WP-04 carries it; the archive validator still reads it.
-INDEX_FIELDS_V1 = INDEX_FIELDS[:-1]
+                "cvss_score", "cvss_version", "kev_date_added", "weaknesses", "ssvc_exploitation", "epss")
+# The earlier layouts, as the feeds published before WP-04 and before WP-03 carry them; the
+# archive validator still reads both.
+INDEX_FIELDS_V2 = INDEX_FIELDS[:-1]
+INDEX_FIELDS_V1 = INDEX_FIELDS[:-2]
+INDEX_VERSIONS = (1, 2, INDEX_VERSION)
 BRIEFS_KEYS = {"schema_version", "feed_schema_version", "generated_at", "content_revision", "briefs"}
+
+
+def index_fields(version):
+    if version not in INDEX_VERSIONS:
+        raise ValueError("Unsupported brief index version.")
+    return {1: INDEX_FIELDS_V1, 2: INDEX_FIELDS_V2, INDEX_VERSION: INDEX_FIELDS}[version]
 
 
 def index_row(brief, version=INDEX_VERSION):
@@ -441,16 +472,16 @@ def index_row(brief, version=INDEX_VERSION):
     row = [brief["record_state"], brief["source_status"], brief["analysis"]["guidance_status"],
            bool(brief["required_action"]), cvss.get("score"), cvss.get("version"), kev.get("date_added"),
            [item["id"] for item in brief.get("weaknesses", [])]]
-    if version == INDEX_VERSION:
+    if version >= 2:
         row.append(((brief.get("adp") or {}).get("ssvc") or {}).get("exploitation"))
+    if version >= INDEX_VERSION:
+        row.append(brief.get("epss"))
     return row
 
 
 def brief_index(briefs, version=INDEX_VERSION):
     """The per-CVE fields that list views, filters and counts need, in CVE order."""
-    if version not in (1, INDEX_VERSION):
-        raise ValueError("Unsupported brief index version.")
-    fields = INDEX_FIELDS if version == INDEX_VERSION else INDEX_FIELDS_V1
+    fields = index_fields(version)
     return {"version": version, "fields": list(fields), "rows": {cve: index_row(briefs[cve], version) for cve in sorted(briefs)}}
 
 
