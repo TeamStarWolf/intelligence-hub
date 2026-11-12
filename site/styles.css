@@ -128,7 +128,8 @@ button, input, select { font: inherit; color: inherit; }
 /* Wall mode (?wall=1 on Today and Service health): no tab rows, bar buttons, controls, pager or
    footer, larger type and the full width, for a monitor across a room. Nothing more is read. */
 html[data-wall="1"] .tabs, html[data-wall="1"] .bar-actions, html[data-wall="1"] .status-controls, html[data-wall="1"] .pager, html[data-wall="1"] .site-footer { display: none; }
-html[data-wall="1"] body { font-size: var(--text-lg); }
+/* The type tokens are rem, so the root scales: 1rem becomes 20px and every token follows. */
+html[data-wall="1"] { font-size: 125%; }
 html[data-wall="1"] .layout { max-width: none; }
 
 .layout { flex: 1; display: block; width: 100%; max-width: 1440px; margin: 0 auto; }
