@@ -576,6 +576,8 @@ class AtomFeedTest(unittest.TestCase):
         self.assertEqual(shards.next_patch_tuesday(date(2026, 11, 10)), date(2026, 11, 10))
         self.assertEqual(shards.next_patch_tuesday(date(2026, 11, 11)), date(2026, 12, 8))
         self.assertEqual(shards.next_patch_tuesday(date(2026, 12, 9)), date(2027, 1, 12))
+        self.assertEqual(shards.previous_patch_tuesday(date(2026, 11, 10)), date(2026, 10, 13))
+        self.assertEqual(shards.previous_patch_tuesday(date(2027, 1, 12)), date(2026, 12, 8))
 
     def test_the_kev_feed_holds_the_newest_catalog_entries_with_hub_links(self):
         entries = [kev_entry("CVE-2026-10002", "2026-10-30", "Follow BOD 26-04 guidance.", knownRansomwareCampaignUse="Known"),
@@ -611,6 +613,12 @@ class AtomFeedTest(unittest.TestCase):
         self.assertEqual(items[0]["summary"], "Status investigating. Impact minor. Components: API, Git. Started 2 Nov 2026 09:00 UTC; not resolved at the collector's read.")
         self.assertEqual(items[1]["summary"], "Status resolved. Impact minor. Components: API, Git. Started 1 Nov 2026 10:00 UTC; resolved 1 Nov 2026 12:00 UTC.")
         self.assertEqual(items[1]["updated"], "2026-11-01T12:00:00Z")
+        # A cancelled or completed incident is resolved by its normalized status even when the status
+        # page recorded no resolution time (status.is_open reads both fields the same way).
+        cancelled = {**incident("zscaler", "32496", "2026-11-02T05:41:00+00:00"), "status": "resolved", "status_raw": "Cancelled", "resolved": None}
+        [item] = shards.incident_feed_entries({"status/2026-11.json": {"rows": [cancelled]}})
+        self.assertEqual(item["summary"], "Status resolved. Impact minor. Components: API, Git. Started 2 Nov 2026 05:41 UTC; resolved, time not recorded.")
+        self.assertNotIn("not resolved", item["summary"])
         self.assertEqual(len({item["id"] for item in items}), 3)
         self.assertEqual(shards.incident_feed_entries({}), [])
         raw = shards.atom_document("incidents", "T", "S", "#/status", items, "R")
@@ -623,7 +631,9 @@ class AtomFeedTest(unittest.TestCase):
         items = shards.patch_feed_entries({"patch-tuesday/index.json": {"months": [month]}}, date(2026, 11, 1))
         self.assertEqual([item["title"] for item in items], ["Next Patch Tuesday: 10 Nov 2026", "Patch Tuesday October 2026: 120 CVEs, 8 Critical, 3 exploited"])
         self.assertEqual(items[0]["link"], shards.HUB_URL + "#/patch-tuesday")
-        self.assertEqual(items[0]["updated"], "2026-11-10T00:00:00Z")
+        # The lead entry's clock is the day after the previous release (13 Oct 2026), never the future.
+        self.assertEqual((items[0]["updated"], items[0]["published"]), ("2026-10-14T00:00:00Z", "2026-10-14T00:00:00Z"))
+        self.assertLessEqual(items[0]["updated"][:10], "2026-11-01")
         self.assertEqual(items[1]["link"], shards.HUB_URL + "#/patch-tuesday/2026-10")
         self.assertEqual((items[1]["updated"], items[1]["published"]), ("2026-10-20T07:00:00Z", "2026-10-14T07:00:00Z"))
         self.assertEqual(items[1]["summary"], "Microsoft's 2026 October Security Updates, released 14 Oct 2026, revised 20 Oct 2026: 120 CVEs, 8 rated Critical, "
@@ -653,7 +663,7 @@ class AtomFeedTest(unittest.TestCase):
             self.assertEqual((entries, feed.find(ATOM + "updated").text), ([], shards.ATOM_EPOCH))
             feed, entries = atom_entries(feeds["feeds/patch-calendar.xml"])
             self.assertEqual([item["title"] for item in entries], ["Next Patch Tuesday: 10 Nov 2026"])
-            self.assertEqual(feed.find(ATOM + "updated").text, "2026-11-10T00:00:00Z")
+            self.assertEqual(feed.find(ATOM + "updated").text, "2026-10-14T00:00:00Z")
             workspace.build()
             self.assertEqual(feed_files(workspace), feeds, "the same inputs give the same feed bytes")
             self.assertFalse(shards.feeds_changed(index, index_of(workspace)["feeds"]))

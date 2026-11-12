@@ -662,8 +662,15 @@ def incident_feed_entries(files):
             words.append("Impact " + row["impact"] + ".")
         if row.get("components"):
             words.append("Components: " + ", ".join(row["components"][:6]) + ".")
-        words.append("Started " + _stamp_label(row["started"]) + ("; resolved " + _stamp_label(row["resolved"]) if row.get("resolved") else
-                                                                 "; not resolved at the collector's read") + ".")
+        # The clause follows the normalized status, as status.is_open does: a cancelled or completed
+        # incident is resolved even when the status page recorded no resolution time.
+        if row.get("resolved"):
+            closing = "; resolved " + _stamp_label(row["resolved"])
+        elif row.get("status") == "resolved":
+            closing = "; resolved, time not recorded"
+        else:
+            closing = "; not resolved at the collector's read"
+        words.append("Started " + _stamp_label(row["started"]) + closing + ".")
         digest = hashlib.sha256((row["source"] + "\n" + row["id"]).encode("utf-8")).hexdigest()[:16]
         related = row.get("url") if isinstance(row.get("url"), str) and row["url"].startswith("https://") else None
         entries.append({"id": ATOM_TAG + ":incident:" + row["source"] + ":" + digest, "title": _atom_text(names.get(row["source"], row["source"]) + ": " + row["name"], 240),
@@ -687,14 +694,23 @@ def next_patch_tuesday(day):
     return candidate
 
 
+def previous_patch_tuesday(coming):
+    """The second Tuesday of the month before coming's month."""
+    year, month = (coming.year - 1, 12) if coming.month == 1 else (coming.year, coming.month - 1)
+    return second_tuesday(year, month)
+
+
 def patch_feed_entries(files, end):
     """The next expected Patch Tuesday, then every built month of the Patch Tuesday index, as Atom entries."""
     index = files.get("patch-tuesday/index.json")
     if not isinstance(index, dict):
         return []
     coming = next_patch_tuesday(end)
+    # The entry's clock is the day after the previous release, when this one became the next: a
+    # past instant that moves once a cycle, so the feed's own clock never sits in the future.
+    since = (previous_patch_tuesday(coming) + timedelta(days=1)).isoformat() + "T00:00:00Z"
     entries = [{"id": ATOM_TAG + ":patch-tuesday:next:" + coming.isoformat(), "title": "Next Patch Tuesday: " + _day_label(coming.isoformat()),
-                "link": HUB_URL + "#/patch-tuesday", "related": None, "updated": coming.isoformat() + "T00:00:00Z", "published": coming.isoformat() + "T00:00:00Z",
+                "link": HUB_URL + "#/patch-tuesday", "related": None, "updated": since, "published": since,
                 "summary": "Microsoft's next monthly security release is expected on " + _day_label(coming.isoformat()) +
                            ", the second Tuesday of the month. The Hub's brief for it appears after the collector reads the release document."}]
     for month in index.get("months", [])[:ATOM_ENTRIES - 1]:
