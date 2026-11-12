@@ -7,7 +7,7 @@ import assert from "node:assert/strict";
 import { webcrypto } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { inOrder } from "./dom.js";
-import { CONTENT_DATE, ROOT, files, page, server, settle, storage } from "./fixtures.js";
+import { CONTENT_DATE, ROOT, files, page, server, settle, statusRow, storage } from "./fixtures.js";
 import { createApp } from "../../site/js/main.js";
 import { RELOAD_KEY } from "../../site/js/guard.js";
 import { cveRegister } from "../../site/js/filters.js";
@@ -47,6 +47,79 @@ test("the Explorer is first: only the brand bar and tab strip precede the search
   assert.equal(doc.querySelector("#view").hidden, true);
   assert.ok(doc.querySelectorAll("#results li").length >= 4);
   assert.equal(doc.querySelector(".tabs a[aria-current=page]").getAttribute("data-view"), "explore");
+});
+
+test("the tab strip is two rows: the desks, then only the active desk's views, and the Panels list groups by desk", async () => {
+  const { doc, app } = await boot();
+  const desks = [...doc.querySelectorAll(".tabs .desks a")];
+  assert.deepEqual(desks.map(tab => tab.getAttribute("data-desk")), ["explore", "security", "infrastructure", "reference"]);
+  assert.deepEqual(desks.map(tab => tab.getAttribute("href")), ["#/explore", "#/today", "#/status", "#/history"]);
+  const views = [...doc.querySelectorAll(".tabs .views a")];
+  assert.equal(views.length, 18, "every view link stays in the DOM");
+  const shown = () => views.filter(tab => !tab.hidden).map(tab => tab.getAttribute("data-view"));
+  // The Explorer is a desk of one view, so the second row is hidden.
+  assert.equal(desks.find(tab => tab.getAttribute("aria-current") === "location").getAttribute("data-desk"), "explore");
+  assert.equal(doc.querySelector(".tabs .views").hidden, true);
+  assert.deepEqual(shown(), ["explore"]);
+  app.navigate({ view: "kev", id: null, query: {} });
+  await settle(40);
+  assert.equal(desks.find(tab => tab.getAttribute("aria-current") === "location").getAttribute("data-desk"), "security");
+  assert.equal(doc.querySelector(".tabs .views").hidden, false);
+  assert.deepEqual(shown(), ["today", "advisories", "kev", "research", "news", "cves", "actors", "patch-tuesday"]);
+  assert.equal(doc.querySelector(".tabs a[aria-current=page]").getAttribute("data-view"), "kev");
+  app.navigate({ view: "vendor", id: "fortinet", query: {} });
+  await settle(40);
+  assert.equal(desks.find(tab => tab.getAttribute("aria-current") === "location").getAttribute("data-desk"), "reference");
+  assert.deepEqual(shown(), ["history", "vendors", "tags", "reports", "data", "sources", "method", "about"]);
+  assert.equal(doc.querySelector(".tabs a[aria-current=page]").getAttribute("data-view"), "vendors", "a vendor page lights the Vendors tab");
+  app.navigate({ view: "status", id: null, query: {} });
+  await settle(40);
+  assert.equal(desks.find(tab => tab.getAttribute("aria-current") === "location").getAttribute("data-desk"), "infrastructure");
+  assert.deepEqual(shown(), ["status"]);
+  assert.equal(doc.querySelector(".tabs .views").hidden, true, "a desk with one view shows no second row");
+  doc.querySelector("#sidebar-toggle").dispatchEvent({ type: "click" });
+  await settle(80);
+  assert.deepEqual([...doc.querySelectorAll("#sidebar-body .side-desk")].map(item => item.textContent), ["Security desk", "Infrastructure desk", "Reference"]);
+  const lists = [...doc.querySelectorAll("#sidebar-body .side-views")].map(list => [...list.querySelectorAll("a")].map(anchor => anchor.getAttribute("href")));
+  assert.deepEqual(lists[1], ["#/status"]);
+  assert.ok(lists[0].includes("#/today") && lists[2].includes("#/history"));
+});
+
+test("the Desk filter keeps rows of one desk, lists desks with counts, and status rows fall on the infrastructure desk", async () => {
+  const site = files({ extra: { "live/2026-09.json": { schema_version: 7, kind: "articles", period: "2026-09", rows: [statusRow("status-vendor-1")] } } });
+  const { doc, app } = await boot({ hash: "#/explore?desk=infrastructure", site });
+  const rows = () => [...doc.querySelectorAll("#results li")].map(item => item.getAttribute("data-id"));
+  assert.deepEqual(rows(), ["status-vendor-1"]);
+  const options = [...doc.querySelectorAll("#f-desk option")].map(option => [option.value, option.textContent]);
+  assert.deepEqual(options, [["", "All desks"], ["security", "Security (5)"], ["infrastructure", "Infrastructure (1)"]]);
+  assert.equal(doc.querySelector("#f-desk").value, "infrastructure");
+  app.navigate({ view: "explore", id: null, query: { desk: "security" } });
+  await settle(40);
+  assert.ok(!rows().includes("status-vendor-1") && rows().length === 5);
+  // A row tagged before the desk existed sits on the security desk unless it is a status incident.
+  const legacy = files({ extra: { "live/2026-09.json": { schema_version: 7, kind: "articles", period: "2026-09", rows: [
+    statusRow("status-untagged", { tagging: { source_class: "vendor-primary", exploitation: ["unknown", "none", "high"] } }),
+    statusRow("press-untagged", { origin: "publisher-feed", kind: "reporting", source_id: "news", source_name: "News Desk", tagging: { source_class: "press", exploitation: ["unknown", "none", "high"] } })
+  ] } } });
+  const second = await boot({ hash: "#/explore?desk=infrastructure", site: legacy });
+  assert.deepEqual([...second.doc.querySelectorAll("#results li")].map(item => item.getAttribute("data-id")), ["status-untagged"]);
+});
+
+test("wall mode marks the document on Today and Service health only, and reads nothing more", async () => {
+  const { doc, app, http } = await boot({ hash: "#/today?wall=1" });
+  assert.equal(doc.documentElement.getAttribute("data-wall"), "1");
+  const read = http.requests.length;
+  app.navigate({ view: "today", id: null, query: {} });
+  await settle(40);
+  assert.equal(doc.documentElement.hasAttribute("data-wall"), false);
+  assert.equal(http.requests.length, read, "leaving wall mode reads nothing");
+  app.navigate({ view: "explore", id: null, query: { wall: "1" } });
+  await settle(40);
+  assert.equal(doc.documentElement.hasAttribute("data-wall"), false, "the Explorer drops the key");
+  assert.equal(app.route().query.wall, undefined);
+  app.navigate({ view: "status", id: null, query: { wall: "1" } });
+  await settle(40);
+  assert.equal(doc.documentElement.getAttribute("data-wall"), "1");
 });
 
 test("no hero, snapshot, report or ledger text sits in the Explorer", async () => {

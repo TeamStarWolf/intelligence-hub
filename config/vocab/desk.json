@@ -1,0 +1,23 @@
+{
+  "vocab": "desk",
+  "version": "2026.11.2",
+  "multi": false,
+  "description": "The desk a row sits on, set per source in config/sources.json and config/status.json and never inferred from a headline. The page groups its views by desk and the Explorer filters on it.",
+  "values": [
+    {
+      "value": "security",
+      "label": "Security",
+      "definition": "The security desk: advisories, research, press, KEV, CVEs, history rows and Patch Tuesday. Every source the Hub read before November 2026 sits here."
+    },
+    {
+      "value": "infrastructure",
+      "label": "Infrastructure",
+      "definition": "The infrastructure desk: vendor service health and cloud health incidents, and the internet, cloud-change, certificate and maintenance sources the revision plan adds."
+    },
+    {
+      "value": "it",
+      "label": "IT lifecycle",
+      "definition": "The IT lifecycle desk: end-of-life and release schedules, standards and benchmark updates, and IT press. Reserved for the sources the revision plan adds; no source carries it yet."
+    }
+  ]
+}

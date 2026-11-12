@@ -41,6 +41,12 @@ def tag_source_class(row, context):
     return [tag(info["source_class"], "source-registry", "high")] if info else []
 
 
+def tag_desk(row, context):
+    """The desk the row's source sits on (security, infrastructure or it), from the registry entry; never from a headline."""
+    info = source_info(row, context)
+    return [tag(info["desk"], "source-registry", "high")] if info and info.get("desk") in context.vocab.values["desk"] else []
+
+
 def _row_cves(row):
     return sorted(set(row.get("cves") or []))
 

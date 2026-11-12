@@ -339,6 +339,42 @@ class V6TagTest(unittest.TestCase):
         self.assertEqual(tagging.v6_tags(item, tag_row(item, CONTEXT), CONTEXT, tagging.Fold([item], CONTEXT)), [])
 
 
+class DeskTest(unittest.TestCase):
+    """The desk comes from the source's registry entry, never from a headline (WP-01)."""
+
+    def test_every_registry_source_names_a_desk_the_vocabulary_holds(self):
+        self.assertEqual(set(VOCAB.values["desk"]), {"security", "infrastructure", "it"})
+        for source in REGISTRY:
+            self.assertIn(source["desk"], VOCAB.values["desk"], source["id"])
+
+    def test_feed_kev_and_curated_rows_sit_on_the_security_desk(self):
+        for item in (row("Vendor fixes an exploited flaw"),
+                     row("CVE-2026-90001", source_id="cisa-kev", cves=["CVE-2026-90001"], origin="cisa-kev", ident="kev-CVE-2026-90001", kind="kev"),
+                     row("A curated incident", source_id="microsoft-msrc", origin="library-curation", ident="hist-1", kind="incident")):
+            block = tag_row(item, CONTEXT)
+            self.assertEqual(block["desk"], {"value": "security", "method": "source-registry", "confidence": "high"}, item["id"])
+            self.assertEqual(compact(block)["desk"], "security")
+            self.assertEqual(export_fields(item, block)["desk"], "security")
+            self.assertIn(("desk", "security", "high", "source-registry", ""), long_tags(block))
+
+    def test_a_headline_never_sets_the_desk(self):
+        block = tag_row(row("Infrastructure outage hits IT lifecycle planning"), CONTEXT)
+        self.assertEqual(block["desk"]["value"], "security")
+
+    def test_status_rows_sit_on_the_infrastructure_desk(self):
+        from intelligence_hub import status
+        registry = status.load_registry(support.ROOT)
+        ctx = tagging.build_context(VOCAB, status.tag_registry(registry), KEV, BRIEFS)
+        item = row("GitHub: Incident with Actions", source_id="status-github", origin="service-status", ident="status-github-1", kind="incident")
+        block = tag_row(item, ctx)
+        self.assertEqual(block["desk"], {"value": "infrastructure", "method": "source-registry", "confidence": "high"})
+
+    def test_a_source_entry_without_a_desk_falls_back_to_security(self):
+        ctx = tagging.build_context(VOCAB, [{"id": "old-source", "source_class": "press"}], KEV, BRIEFS)
+        block = tag_row(row("Headline", source_id="old-source"), ctx)
+        self.assertEqual(block["desk"]["value"], "security")
+
+
 class CompactTest(unittest.TestCase):
     def test_compact_form_matches_the_layout(self):
         block = tag_row(row("Iranian hackers exploit Cisco flaw", source_id="unit42", cves=["CVE-2026-90005"]), CONTEXT)
@@ -346,6 +382,7 @@ class CompactTest(unittest.TestCase):
         self.assertNotIn("kind", small)
         self.assertNotIn("tagger_version", small)
         self.assertEqual(small["source_class"], "researcher")
+        self.assertEqual(small["desk"], "security")
         self.assertEqual(len(small["exploitation"]), 3)
         self.assertTrue(all(len(item) == 4 for item in small["region"]))
         self.assertTrue(all(isinstance(item, str) and re.fullmatch(r"T[0-9]{4}(?:\.[0-9]{3})?", item) for item in small.get("attack", [])))

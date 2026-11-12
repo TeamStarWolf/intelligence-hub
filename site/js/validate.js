@@ -41,7 +41,7 @@ export function timestamp(value, nullable = true) {
   return value;
 }
 
-const KINDS = ["advisory", "research", "reporting", "incident", "kev", "filing", "bulletin", "note"];
+const KINDS = ["advisory", "research", "reporting", "incident", "kev", "filing", "bulletin", "note", "change", "lifecycle"];
 const EXPLOITATION = ["known", "reported", "unknown"];
 const ORIGIN = /^(?:publisher-feed|cisa-kev|library-curation|service-status|history:[a-z0-9][a-z0-9-]{0,39})$/;
 const CVE = /^CVE-\d{4}-\d{4,19}$/;
@@ -118,10 +118,11 @@ function triples(value, width, limit = 500) {
 
 // The row's tagging block (index.json tagging.layout). Fields the page does not read are dropped.
 function normalizeTagging(raw) {
-  const tags = { source_class: null, event_type: [], vendor: [], product: [], actor: [], malware: [], sector: [], region: [], cwe: [], attack: [], exploitation: null, kev: null, cvss: null };
+  const tags = { source_class: null, desk: null, event_type: [], vendor: [], product: [], actor: [], malware: [], sector: [], region: [], cwe: [], attack: [], exploitation: null, kev: null, cvss: null };
   if (raw === undefined || raw === null) return tags;
   requireValue(isObject(raw));
   if (raw.source_class !== undefined) tags.source_class = boundedText(raw.source_class, 40);
+  if (raw.desk !== undefined) tags.desk = boundedText(raw.desk, 40);
   for (const field of ["event_type", "vendor", "product", "actor", "malware", "sector", "cwe"]) if (raw[field] !== undefined) tags[field] = triples(raw[field], 3);
   if (raw.region !== undefined) tags.region = triples(raw.region, 4);
   if (raw.attack !== undefined) tags.attack = list(raw.attack, 5000).map(item => { requireValue(typeof item === "string" && /^T\d{4}(?:\.\d{3})?$/.test(item)); return item; });

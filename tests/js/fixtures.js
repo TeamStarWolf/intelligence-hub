@@ -13,9 +13,17 @@ export function row(id, fields = {}) {
   return {
     id, title: "Headline " + id, url: "https://publisher.example.org/" + id, source_id: "vendor-psirt", source_name: "Vendor PSIRT", kind: "advisory",
     origin: "publisher-feed", published_at: CONTENT_DATE, event_date: null, date_basis: "publication", summary: "", cves: [], tags: [], exploitation: "unknown",
-    references: [], tagging: { source_class: "vendor-primary", event_type: [["disclosure", "kind-default", "high"]], exploitation: ["unknown", "none", "high"], region: [["US", "publisher", "source-identity", "high"]] },
+    references: [], tagging: { source_class: "vendor-primary", desk: "security", event_type: [["disclosure", "kind-default", "high"]], exploitation: ["unknown", "none", "high"], region: [["US", "publisher", "source-identity", "high"]] },
     ...fields
   };
+}
+
+// A service-health incident row as intelligence_hub/status.py writes it into a live month: the
+// infrastructure desk, origin service-status, no CVEs.
+export function statusRow(id, fields = {}) {
+  return row(id, { title: "Vendor: Incident with the API", url: "https://status.vendor.example.org/incidents/" + id, source_id: "status-vendor", source_name: "Vendor status page", kind: "incident",
+    origin: "service-status", date_basis: "incident start", published_at: "2026-09-20T10:00:00+00:00",
+    tagging: { source_class: "vendor-primary", desk: "infrastructure", event_type: [["outage", "status-incident", "high"]], exploitation: ["unknown", "none", "high"] }, ...fields });
 }
 
 export function brief(cve, fields = {}) {

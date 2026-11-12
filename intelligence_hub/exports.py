@@ -53,7 +53,8 @@ ARTICLE_COLUMNS = (
     ("month", "Month of published as YYYY-MM, or empty."),
     ("source_id", "Source id from config/sources.json, or a curated or KEV source id."),
     ("source_class", "Who publishes the row: vendor-primary, government-cert, researcher or press (config/vocab/source_class.json)."),
-    ("kind", "What the row is: advisory, research, reporting, incident, kev, filing, bulletin or note (config/vocab/kind.json)."),
+    ("desk", "The desk the row sits on: security, infrastructure or it (config/vocab/desk.json), set per source and never inferred from a headline. Publisher feeds, KEV, curated and history rows are security; service-health incident rows are infrastructure; it is reserved for the lifecycle, standards and IT press sources the revision plan adds."),
+    ("kind", "What the row is: advisory, research, reporting, incident, kev, filing, bulletin, note, change or lifecycle (config/vocab/kind.json)."),
     ("origin", "publisher-feed (headline and link only), cisa-kev (CISA's catalog text) or library-curation (original paraphrase)."),
     ("title", "Publisher headline, CISA's vulnerability name or the curated title. A cell that would start with =, +, -, @, tab or CR is prefixed with ' so that spreadsheets do not read it as a formula."),
     ("url", "Link to the publisher, CISA or the curated row's primary source."),
@@ -67,7 +68,7 @@ ARTICLE_COLUMNS = (
     ("kev_ransomware", "That entry's knownRansomwareCampaignUse, as CISA publishes it."),
     ("exploitation", "known, reported or unknown. unknown never means unexploited (config/vocab/exploitation.json)."),
     ("exploitation_basis", "The evidence: kev, vendor-structured, curated-primary, title-term or none."),
-    ("event_type", "disclosure, exploitation, patch, breach, outage, takedown, policy, analysis or unclassified (config/vocab/event_type.json)."),
+    ("event_type", "disclosure, exploitation, patch, breach, outage, takedown, policy, analysis, unclassified, maintenance or end-of-support (config/vocab/event_type.json)."),
     ("vendor", "Library vendor ids (vendor:<slug>)."),
     ("product", "Library product ids (product:<slug>)."),
     ("attack_technique", "MITRE ATT&CK technique ids reached from the row's CWEs through CAPEC, every one with no cap. Taxonomic and sparse, never observed behaviour."),
@@ -82,7 +83,7 @@ ARTICLE_COLUMNS = (
 TAG_COLUMNS = (
     ("id", "Row id, as in articles-YYYY.csv."),
     ("published", "Primary date of the row, as in articles-YYYY.csv."),
-    ("field", "kind, source_class, exploitation, event_type, vendor, product, actor, malware, sector, region, cwe, attack_technique or attack_tactic."),
+    ("field", "kind, source_class, desk, exploitation, event_type, vendor, product, actor, malware, sector, region, cwe, attack_technique or attack_tactic."),
     ("value", "The tag value. Region values carry their role as value/role."),
     ("confidence", "high (structured field or source identity), medium (exact headline name or term) or low (taxonomy chain, context-confirmed name, press wording)."),
     ("method", "How the tag was found, for example source-registry, kev, cna-affected, title-match, title-term or cwe-capec."),
@@ -91,7 +92,7 @@ TAG_COLUMNS = (
 JSONL_FIELDS = (
     ("id, title, url, source_id, source_name, kind, origin, date_basis, event_date, summary, references", "As in the v6 feed row. summary is empty for publisher rows (headlines and links only)."),
     ("published, year, cve", "As in articles-YYYY.csv; cve is a list."),
-    ("source_class, exploitation", "One tag each: {value, method, confidence}."),
+    ("source_class, desk, exploitation", "One tag each: {value, method, confidence}."),
     ("event_type, vendor, product, actor, malware, sector, cwe", "Lists of {value, method, confidence}."),
     ("region", "List of {value, role, method, confidence}."),
     ("attack", "List of {value, method, confidence, tactics, path}."),
@@ -150,9 +151,9 @@ def record(article, block, source_class):
     out.update({"published": published(article) or None, "year": year_of(article), "cve": sorted(set(article.get("cves") or []))})
     if article.get("origin") == "publisher-feed":
         out["summary"] = ""
-    for key in ("source_class", "exploitation", "event_type", "vendor", "product", "actor", "malware", "sector", "region", "cwe",
+    for key in ("source_class", "desk", "exploitation", "event_type", "vendor", "product", "actor", "malware", "sector", "region", "cwe",
                 "attack", "cvss", "kev"):
-        out[key] = block.get(key, [] if key not in {"source_class", "exploitation", "cvss", "kev"} else None)
+        out[key] = block.get(key, [] if key not in {"source_class", "desk", "exploitation", "cvss", "kev"} else None)
     out["tagger_version"] = block.get("tagger_version") or TAGGER_VERSION
     return out
 
@@ -242,20 +243,27 @@ def dictionary():
     lines += ["", "## manifest.json", "",
               "`files` lists every export with its year, its month (`YYYY-MM` for a year split by month, otherwise null), row count, "
               "bytes and sha256. `sources` gives each source id its name, "
-              "source_class and licence note. `vocabulary` records the tagger version, the Hub vocabulary versions and the pinned "
+              "source_class, desk and licence note. `vocabulary` records the tagger version, the Hub vocabulary versions and the pinned "
               "library commit. `notices` carries the designations for MITRE ATT&CK, CWE and CAPEC content.", "",
               "## Notices", ""]
     lines += ["- " + notice for notice in NOTICES]
     return ("\n".join(lines) + "\n").encode("utf-8")
 
 
-def source_notes(articles, registry):
+def source_notes(articles, registry, blocks=None):
+    """One note per source id: name, source_class, desk and licence. A source outside the registry
+    (KEV, curated, history, status) takes its desk from its rows' tagging blocks."""
     names = {source["id"]: source for source in registry}
+    blocks = blocks or {}
     seen = {}
     for article in articles:
         info = names.get(article["source_id"], {})
-        seen.setdefault(article["source_id"], {"id": article["source_id"], "name": article["source_name"],
-                                                "source_class": info.get("source_class"), "licence": LICENCE[article["origin"]]})
+        desk = info.get("desk") or ((blocks.get(article["id"]) or {}).get("desk") or {}).get("value")
+        note = seen.setdefault(article["source_id"], {"id": article["source_id"], "name": article["source_name"],
+                                                       "source_class": info.get("source_class"), "desk": desk,
+                                                       "licence": LICENCE[article["origin"]]})
+        if note["desk"] is None and desk:
+            note["desk"] = desk
     return [seen[key] for key in sorted(seen)]
 
 
@@ -278,7 +286,7 @@ def build_exports(articles, blocks, registry, vocabulary_info, source_classes=No
                 entries.append({"name": name, "year": year, "month": month, "rows": tag_rows if name.startswith("tags-") else rows,
                                 "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()})
     files["data-dictionary.md"] = dictionary()
-    sources = source_notes(articles, registry)
+    sources = source_notes(articles, registry, blocks)
     for item in sources:
         if item["source_class"] is None and source_classes:
             item["source_class"] = source_classes.get(item["id"])

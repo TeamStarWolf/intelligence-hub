@@ -263,5 +263,15 @@ class FontFloorTest(unittest.TestCase):
             self.assertEqual(check_font_size.problems(target), [])
 
 
+class WallModeTest(unittest.TestCase):
+    def test_wall_mode_scales_the_root_so_the_rem_tokens_follow(self):
+        """Every type token is rem (root-relative), so wall mode must raise the root font size, not body's."""
+        css = (support.ROOT / "site" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn('html[data-wall="1"] { font-size: 125%; }', css)
+        self.assertNotRegex(css, r'html\[data-wall="1"\] body \{[^}]*font-size')
+        for token in ("--text-xs", "--text-sm", "--text-md", "--text-lg", "--text-xl"):
+            self.assertRegex(css, token + r": [0-9.]+rem;", token + " is a rem token")
+
+
 if __name__ == "__main__":
     unittest.main()

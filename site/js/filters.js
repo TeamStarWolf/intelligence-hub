@@ -10,6 +10,12 @@ export function classOf(row) {
   return { advisory: "vendor-primary", bulletin: "vendor-primary", note: "government-cert", kev: "government-cert", research: "researcher", reporting: "press" }[row.kind] || null;
 }
 
+// The desk a row sits on. Rows tagged before the desk existed, and schema 6 rows, fall back by
+// origin: service-health incidents are infrastructure, everything else is security.
+export function deskOf(row) {
+  return row.t.desk || (row.origin === "service-status" ? "infrastructure" : "security");
+}
+
 // KEV-linked: the row is a KEV entry, its tagging names a KEV CVE, or one of its CVEs has a
 // KEV dateAdded in the CVE index. This is the catalog match, separate from the guidance label.
 export function kevLinked(row, cveIndex) {
@@ -44,6 +50,7 @@ export function rowMatches(row, query, { view = "explore", cveIndex = null, wind
   if (constraint && (row.kind === "kev" || !constraint.includes(classOf(row)))) return false;
   if (window && (row.day === null || row.day < window.from || row.day > window.to)) return false;
   if (query.q && !terms(query.q).every(term => row.search.includes(term))) return false;
+  if (query.desk && deskOf(row) !== query.desk) return false;
   if (query.kind && row.kind !== query.kind) return false;
   if (query.class && classOf(row) !== query.class) return false;
   if (query.event && !has(row.t.event_type, query.event)) return false;
@@ -91,12 +98,12 @@ export function filterRows(rows, route, { cveIndex = null, contentDate = null } 
 
 // Value counts for every filter over rows (the loaded scope under the view's fixed constraint).
 export function facets(rows, view = "explore") {
-  const result = { kind: new Map(), class: new Map(), event: new Map(), exp: new Map(), vendor: new Map(), product: new Map(), actor: new Map(), malware: new Map(), cwe: new Map(), tech: new Map(), sector: new Map(), region: new Map(), source: new Map() };
+  const result = { desk: new Map(), kind: new Map(), class: new Map(), event: new Map(), exp: new Map(), vendor: new Map(), product: new Map(), actor: new Map(), malware: new Map(), cwe: new Map(), tech: new Map(), sector: new Map(), region: new Map(), source: new Map() };
   const add = (map, key, label) => { const entry = map.get(key); if (entry) entry.count++; else map.set(key, { count: 1, label }); };
   const constraint = LIST_VIEWS[view];
   for (const row of rows) {
     if (constraint && (row.kind === "kev" || !constraint.includes(classOf(row)))) continue;
-    add(result.kind, row.kind); add(result.exp, row.exploited); add(result.source, row.source_id, row.source_name);
+    add(result.desk, deskOf(row)); add(result.kind, row.kind); add(result.exp, row.exploited); add(result.source, row.source_id, row.source_name);
     const rowClass = classOf(row); if (rowClass) add(result.class, rowClass);
     for (const field of ["event_type", "vendor", "product", "actor", "malware", "sector"]) {
       const target = result[field === "event_type" ? "event" : field];

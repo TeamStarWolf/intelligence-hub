@@ -134,7 +134,7 @@ def validate_registry(registry):
     sources = registry["sources"]
     _check(isinstance(sources, list) and 1 <= len(sources) <= MAX_SOURCES, "Invalid status source list.")
     seen = set()
-    keys = {"id", "name", "vendor", "group", "class", "format", "endpoints", "home", "cors", "library"}
+    keys = {"id", "name", "vendor", "group", "desk", "class", "format", "endpoints", "home", "cors", "library"}
     for source in sources:
         _check(isinstance(source, dict) and set(source) == keys, "A status source has unexpected fields.")
         _check(isinstance(source["id"], str) and SOURCE_ID.fullmatch(source["id"]) and source["id"] not in seen, "Invalid status source id.")
@@ -144,6 +144,7 @@ def validate_registry(registry):
             _check(source[field] is None or isinstance(source[field], str) and VOCAB_ID.fullmatch(source[field]), "Invalid " + field + ": " + source["id"])
         _check(source["vendor"] is None or source["vendor"].startswith("vendor:"), "A status vendor must be a vendor id: " + source["id"])
         _check(source["group"] in GROUPS, "Invalid status group: " + source["id"])
+        _check(source["desk"] == "infrastructure", "A status source's rows sit on the infrastructure desk: " + source["id"])
         _check(source["class"] in CLASSES and source["format"] in CLASSES[source["class"]], "Invalid status class or format: " + source["id"])
         _check((source["group"] == "internet") == (source["format"] in OUTAGE_FORMATS), "Only outage signals sit in the internet group: " + source["id"])
         endpoints = source["endpoints"]
@@ -952,7 +953,8 @@ def explorer_rows(files, registry):
 
 def tag_registry(registry):
     """The tagging engine's source entries for status rows: the vendor's own statement, with its vendor id."""
-    return [{"id": SOURCE_PREFIX + source["id"], "source_class": "vendor-primary", "publisher_vendor": source["vendor"], "country": None}
+    return [{"id": SOURCE_PREFIX + source["id"], "source_class": "vendor-primary", "publisher_vendor": source["vendor"], "country": None,
+             "desk": source["desk"]}
             for source in tracked(registry)]
 
 

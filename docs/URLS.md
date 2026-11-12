@@ -53,7 +53,7 @@ their index view, and `#/history/<year>` with an invalid year opens the year ind
 `#/tag/<field>/<value>` is an alias: the page rewrites it to the Explorer filter for that value,
 so `#/tag/vendor/fortinet` becomes `#/explore?vendor=fortinet`. `<field>` is a query key from the
 table below or the field's name in a row's tagging block (`source_class`, `event_type`,
-`exploitation`, `attack`).
+`exploitation`, `attack`, `desk`).
 
 ## Query keys
 
@@ -63,9 +63,10 @@ are dropped.
 | Key | Views | Values | Effect |
 | --- | --- | --- | --- |
 | `q` | list, `kev`, `cves` | free text, 1 to 200 characters, no `<`, `>` or control characters | every word must appear in the entry |
-| `kind` | list | `advisory`, `research`, `reporting`, `incident`, `kev`, `filing`, `bulletin`, `note` | entry kind |
+| `desk` | list | `security`, `infrastructure`, `it` | the desk the entry's source sits on |
+| `kind` | list | `advisory`, `research`, `reporting`, `incident`, `kev`, `filing`, `bulletin`, `note`, `change`, `lifecycle` | entry kind |
 | `class` | list | `vendor-primary`, `government-cert`, `researcher`, `press` | source class |
-| `event` | list | `disclosure`, `exploitation`, `patch`, `breach`, `outage`, `takedown`, `policy`, `analysis`, `unclassified` | event type tag |
+| `event` | list | `disclosure`, `exploitation`, `patch`, `breach`, `outage`, `takedown`, `policy`, `analysis`, `unclassified`, `maintenance`, `end-of-support` | event type tag |
 | `exp` | list | `known`, `reported`, `unknown` | exploitation state |
 | `kev` | list, `cves` | `1` | KEV-linked: the entry is a KEV entry or one of its CVEs is in CISA's KEV catalog |
 | `action` | list, `cves` | `1` | one of the entry's CVEs carries CISA's required action |
@@ -87,6 +88,7 @@ are dropped.
 | `sort` | `cves` | `cve-desc`, `cve-asc`, `cvss-desc`, `cvss-asc`, `kev-desc` | register order |
 | `page` | list, `kev`, `cves`, `history/<year>`, `vendor`, `actor`, `malware` | `1` to `9999` | result page, 25 rows each |
 | `open` | list | an entry id, such as `feed-3f41d3f2c16c88f054f7` | opens that entry's detail dialog |
+| `wall` | `today`, `status` | `1` | wall mode for a monitor: the tab rows, the page controls and the footer are hidden and the type is larger; nothing more is read |
 
 The page writes keys in the order of this table and leaves out default values (`sort` at its
 view default, `page=1`, `range` at its view default). Vocabulary ids come from the library's
@@ -137,6 +139,8 @@ address to the hash route and drops the query string.
 | Every tag value in one year | `https://teamstarwolf.github.io/intelligence-hub/#/tags?year=2024` |
 | KEV additions in the last 90 days | `https://teamstarwolf.github.io/intelligence-hub/#/kev?range=90` |
 | The latest Patch Tuesday brief | `https://teamstarwolf.github.io/intelligence-hub/#/patch-tuesday` |
+| The infrastructure desk's entries in the Explorer | `https://teamstarwolf.github.io/intelligence-hub/#/explore?desk=infrastructure` |
+| Service health in wall mode, for a monitor | `https://teamstarwolf.github.io/intelligence-hub/#/status?wall=1` |
 | One month's Patch Tuesday brief | `https://teamstarwolf.github.io/intelligence-hub/#/patch-tuesday/2026-10` |
 
 A change to this contract changes `site/js/router.js`, its tests and this page in the same pull

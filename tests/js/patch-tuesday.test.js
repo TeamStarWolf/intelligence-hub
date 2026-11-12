@@ -43,12 +43,13 @@ test("the route contract: #/patch-tuesday, #/patch-tuesday/<YYYY-MM>, and a bad 
   assert.equal(formatRoute({ view: "patch-tuesday", id: "2024-01", query: { q: "x" } }), "#/patch-tuesday/2024-01");
 });
 
-test("the tab sits after the existing tabs, and the default route renders the Explorer first and reads no brief", async () => {
+test("the tab sits on the security desk after CVEs, and the default route renders the Explorer first and reads no brief", async () => {
   const shell = await boot();
   const { doc } = shell;
-  const tabs = [...doc.querySelectorAll(".tabs a")].map(tab => tab.getAttribute("data-view"));
+  const tabs = [...doc.querySelectorAll(".tabs .views a")].map(tab => tab.getAttribute("data-view"));
   assert.equal(tabs[0], "explore");
-  assert.ok(tabs.indexOf("patch-tuesday") > tabs.indexOf("about"), "the Patch Tuesday tab sits after the existing tabs");
+  assert.ok(tabs.indexOf("patch-tuesday") > tabs.indexOf("cves"), "the Patch Tuesday tab sits after the CVE register on its desk");
+  assert.equal(doc.querySelector(".tabs .views a[data-view=patch-tuesday]").getAttribute("data-desk"), "security");
   assert.equal(doc.querySelector("#explore").hidden, false);
   assert.equal(doc.querySelector("#view").hidden, true);
   assert.ok(!shell.http.requests.some(request => request.path.includes("patch-tuesday")), "the Explorer reads no Patch Tuesday file");

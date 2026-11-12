@@ -4,7 +4,10 @@ import re
 from . import fields
 from .match import PhraseIndex, term_pattern, tokens, words
 
-TAGGER_VERSION = "2026.11.1"
+TAGGER_VERSION = "2026.11.2"
+# The desk of a source entry that names none: the Hub's original security desk. Registry sources
+# name theirs explicitly (collect.validate_registry requires it); status sources are infrastructure.
+DEFAULT_DESK = "security"
 ENTITY_FIELDS = ("vendor", "product", "actor", "malware")
 MULTI_FIELDS = ("event_type", "vendor", "product", "actor", "malware", "sector", "region", "cwe", "attack")
 V6_TAG_LIMIT = 30
@@ -18,10 +21,10 @@ class Context:
         self._sources = {}
         for ident, item in vocab.hub["source_class"].get("sources", {}).items():
             self._sources[ident] = {"source_class": item["source_class"], "publisher_vendor": item.get("publisher_vendor"),
-                                    "country": item.get("country")}
+                                    "country": item.get("country"), "desk": item.get("desk") or DEFAULT_DESK}
         for source in registry:
             self._sources[source["id"]] = {"source_class": source.get("source_class"), "publisher_vendor": source.get("publisher_vendor"),
-                                           "country": source.get("country")}
+                                           "country": source.get("country"), "desk": source.get("desk") or DEFAULT_DESK}
         self.kev = {}
         for entry in (kev_catalog or {}).get("vulnerabilities", []) if isinstance(kev_catalog, dict) else []:
             if isinstance(entry, dict) and isinstance(entry.get("cveID"), str):
@@ -175,6 +178,7 @@ def tag_row(row, context):
         "tagger_version": TAGGER_VERSION,
         "kind": (fields.tag_kind(row, context) or [None])[0],
         "source_class": (fields.tag_source_class(row, context) or [None])[0],
+        "desk": (fields.tag_desk(row, context) or [None])[0],
         "exploitation": exploitation[0],
         "event_type": fields.tag_event_type(row, context, exploitation),
         **entities,
@@ -190,6 +194,7 @@ def tag_row(row, context):
 
 SHARD_LAYOUT = {
     "source_class": "value (method source-registry, confidence high)",
+    "desk": "value (method source-registry, confidence high): security, infrastructure or it, from the source's registry entry",
     "exploitation": "[value, method, confidence]",
     "event_type, vendor, product, actor, malware, sector, cwe": "[[value, method, confidence], ...]",
     "region": "[[value, role, method, confidence], ...]",
@@ -206,7 +211,7 @@ def compact(block):
     for key, value in block.items():
         if key in {"tagger_version", "kind"}:
             continue
-        if key == "source_class":
+        if key in {"source_class", "desk"}:
             out[key] = value["value"]
         elif key == "exploitation":
             out[key] = [value["value"], value["method"], value["confidence"]]
@@ -316,10 +321,11 @@ def export_fields(row, block):
     cvss = block.get("cvss") or {}
     kev = block.get("kev") or {}
     tags = [item for field in MULTI_FIELDS for item in block.get(field, [])]
-    tags += [block[field] for field in ("kind", "source_class", "exploitation") if field in block]
+    tags += [block[field] for field in ("kind", "source_class", "desk", "exploitation") if field in block]
     confidence = max((fields.CONFIDENCE_ORDER[item["confidence"]] for item in tags), default=None)
     return {
         "source_class": (block.get("source_class") or {}).get("value", ""),
+        "desk": (block.get("desk") or {}).get("value", ""),
         "cwe": _joined(item["value"] for item in block.get("cwe", [])),
         "cvss_version": cvss.get("version") or "", "cvss_base": "" if cvss.get("base") is None else format(cvss["base"], "g"),
         "cvss_scorer": cvss.get("scorer") or "",
@@ -344,7 +350,7 @@ def long_tags(block):
     """(field, value, confidence, method, basis_path) for every tag, for the long tags export."""
     block = block or {}
     rows = []
-    for field in ("kind", "source_class", "exploitation"):
+    for field in ("kind", "source_class", "desk", "exploitation"):
         if field in block:
             rows.append((field, block[field]["value"], block[field]["confidence"], block[field]["method"], ""))
     for field in MULTI_FIELDS:

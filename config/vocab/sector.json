@@ -1,6 +1,6 @@
 {
   "vocab": "sector",
-  "version": "2026.11.1",
+  "version": "2026.11.2",
   "multi": true,
   "description": "The sector a headline concerns. Values are the library's sector ids (data/vocab/entities.jsonl, type sector) without the 'sector:' prefix; labels come from the library. Terms match whole words, ignoring case, at medium confidence.",
   "values": [

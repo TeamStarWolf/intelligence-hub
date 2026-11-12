@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { ID_VIEWS, VIEWS, formatRoute, parseRoute, withQuery } from "../../site/js/router.js";
+import { DESKS, ID_VIEWS, VIEWS, VIEW_DESK, formatRoute, parseRoute, withQuery } from "../../site/js/router.js";
 
 const roundTrip = hash => formatRoute(parseRoute(hash, ""));
 
@@ -156,6 +156,42 @@ test("A4 query keys and old anchors are accepted as legacy aliases and rewritten
     assert.equal(route.rewrite, true, hash + search);
     assert.equal(formatRoute(route), expected, hash + search);
   }
+});
+
+test("the desk key, the reserved kinds and event types and the wall key round-trip, and bad values are dropped", () => {
+  assert.deepEqual(DESKS, ["security", "infrastructure", "it"]);
+  for (const desk of DESKS) assert.equal(roundTrip("#/explore?desk=" + desk), "#/explore?desk=" + desk);
+  assert.equal(roundTrip("#/news?desk=it&range=30"), "#/news?desk=it&range=30");
+  assert.equal(roundTrip("#/explore?kind=advisory&desk=security"), "#/explore?desk=security&kind=advisory", "desk is written right after q");
+  for (const hash of ["#/explore?desk=Security", "#/explore?desk=%3Cx%3E", "#/explore?desk=cloud", "#/kev?desk=security", "#/status?desk=infrastructure"]) {
+    assert.equal(roundTrip(hash), hash.slice(0, hash.indexOf("?")), hash);
+    assert.equal(parseRoute(hash, "").rewrite, true, hash);
+  }
+  assert.equal(roundTrip("#/explore?kind=change&event=end-of-support"), "#/explore?kind=change&event=end-of-support");
+  assert.equal(roundTrip("#/explore?kind=lifecycle&event=maintenance"), "#/explore?kind=lifecycle&event=maintenance");
+  const route = parseRoute("#/tag/desk/infrastructure", "");
+  assert.equal(route.rewrite, true);
+  assert.equal(formatRoute(route), "#/explore?desk=infrastructure");
+  // Wall mode is a key of Today and Service health only.
+  assert.equal(roundTrip("#/today?wall=1"), "#/today?wall=1");
+  assert.equal(roundTrip("#/status?source=github&wall=1"), "#/status?source=github&wall=1");
+  for (const hash of ["#/today?wall=2", "#/today?wall=", "#/today?wall=%3Cx%3E"]) assert.equal(roundTrip(hash), "#/today", hash);
+  assert.equal(roundTrip("#/explore?wall=1"), "#/explore", "the Explorer has no wall mode");
+  assert.equal(roundTrip("#/kev?wall=1"), "#/kev");
+});
+
+test("every view sits under exactly one desk, and the desk row's targets are views on their desk", () => {
+  for (const view of VIEWS) assert.ok(["explore", "security", "infrastructure", "reference"].includes(VIEW_DESK[view]), view);
+  assert.deepEqual(Object.keys(VIEW_DESK).sort(), [...VIEWS].sort());
+  assert.equal(VIEW_DESK.explore, "explore");
+  assert.equal(VIEW_DESK.today, "security");
+  assert.equal(VIEW_DESK.status, "infrastructure");
+  assert.equal(VIEW_DESK.history, "reference");
+  // A page with an id sits where its index sits.
+  assert.equal(VIEW_DESK.cve, VIEW_DESK.cves);
+  assert.equal(VIEW_DESK.vendor, VIEW_DESK.vendors);
+  assert.equal(VIEW_DESK.actor, VIEW_DESK.actors);
+  assert.equal(VIEW_DESK.malware, VIEW_DESK.actors);
 });
 
 test("withQuery changes keys, resets the page on a filter change and keeps it otherwise", () => {

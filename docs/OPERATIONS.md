@@ -13,8 +13,9 @@ the device's clock. Every filter, sort, page and open entry is kept in the
 address, so Back and Forward work and a copied link reopens the same view
 ([URLS.md](URLS.md)).
 
-Every other view is a tab in the strip under the brand bar and an entry in the
-**Panels** sidebar, which starts closed: Today, Advisories, Known exploited,
+Every other view is a tab under one of the desks in the two-row strip under the brand bar
+(Explore, Security, Infrastructure, Reference) and an entry in the **Panels** sidebar, which
+starts closed: Today, Advisories, Known exploited,
 Research, News, CVEs, History, Vendors, Tags, Actors and malware, Reports, Data,
 Sources, Method, About and Service health. Nothing from those views is drawn above
 the Explorer on the default route.

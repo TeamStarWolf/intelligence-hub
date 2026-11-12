@@ -10,12 +10,13 @@ how it was found and how far to trust it.
 
 The page opens on the **Intelligence Explorer**: one search box, a filter rail, ten sort orders
 and the results, over the live window (the last 24 months). Choose a year to add that year's
-history rows, back to 1998. Everything else is a tab, and every tab is also listed in the
-**Panels** sidebar, which starts closed:
+history rows, back to 1998. Everything else is a tab under one of four desks (Explore,
+Security, Infrastructure, Reference; an IT lifecycle desk opens with its first view), and
+every tab is also listed in the **Panels** sidebar, which starts closed:
 
 | Tab | What it holds |
 | --- | --- |
-| Explore | Search, filters (kind, source class, event type, exploitation, KEV-linked, CISA required action, sector, region, vendor, product, actor, malware, CWE, ATT&CK technique, source, year, month, date range), sort and results. |
+| Explore | Search, filters (desk, kind, source class, event type, exploitation, KEV-linked, CISA required action, sector, region, vendor, product, actor, malware, CWE, ATT&CK technique, source, year, month, date range), sort and results. |
 | Today | KEV additions by calendar day, KEV entries due in the next 14 days, then the last three days of advisories, research and press. |
 | Advisories, Research, News | The Explorer limited to vendor and government sources, research teams, or the press. |
 | Known exploited | CISA's KEV ledger by date added, with the directive each required action cites. |
@@ -31,6 +32,9 @@ history rows, back to 1998. Everything else is a tab, and every tab is also list
 | About | What the Hub is and what it covers. |
 | Patch Tuesday | Microsoft's monthly security release from the MSRC CVRF data: the headline numbers, what to prioritize by fixed rules, the exploited and publicly disclosed CVEs, the Critical CVEs, the product families, the KEV join, Adobe's and SAP's same-day bulletins as headline rows, and a brief for every monthly release back to January 2016. |
 | Service health | The vendors' own status pages and cloud health feeds by group, open incidents, internet outage signals from IODA, and the last 30 days of incidents. |
+
+Today and Service health take `?wall=1` for a monitor: the tab rows, controls and footer are
+hidden and the type is larger, and nothing more is read.
 
 Every view, filter, page and open entry has its own address; [docs/URLS.md](docs/URLS.md) is the
 route contract that the TeamStarWolf library's links follow.

@@ -1,6 +1,6 @@
 // The page shell: routing, view dispatch, dialogs, the sidebar and the index poll.
 // createApp takes every browser object it uses, so tests/js can run it with stand-ins.
-import { LIST_VIEWS, formatRoute, parseRoute, withQuery } from "./router.js";
+import { LIST_VIEWS, VIEW_DESK, formatRoute, parseRoute, withQuery } from "./router.js";
 import { createFetcher } from "./fetcher.js";
 import { createStore } from "./store.js";
 import { layoutSkew, reloadOnce, runningRevision } from "./guard.js";
@@ -81,13 +81,27 @@ export function createApp(env) {
     } catch (_) { /* a strip without layout stays where it is */ }
   }
 
+  // The two tab rows: the desks, then the active desk's views. Every view link stays in the
+  // DOM; the ones on other desks are hidden, and a desk with one view hides the second row.
   function updateTabs() {
     const active = TAB_OF[route.view] || route.view;
+    const desk = VIEW_DESK[route.view] || "explore";
     let activeTab = null;
-    for (const tab of doc.querySelectorAll(".tabs a")) {
+    for (const tab of doc.querySelectorAll(".tabs .desks a")) {
+      if (tab.dataset.desk === desk) tab.setAttribute("aria-current", "location"); else tab.removeAttribute("aria-current");
+    }
+    let shown = 0;
+    for (const tab of doc.querySelectorAll(".tabs .views a")) {
+      tab.hidden = tab.dataset.desk !== desk;
+      if (!tab.hidden) shown++;
       if (tab.dataset.view === active) { tab.setAttribute("aria-current", "page"); activeTab = tab; } else tab.removeAttribute("aria-current");
     }
+    const row = el(".tabs .views");
+    if (row) row.hidden = shown < 2;
     if (activeTab && activeTab !== revealedTab) { revealedTab = activeTab; revealTab(activeTab); }
+    // Wall mode (?wall=1 on Today and Service health): a data attribute the stylesheet reads.
+    const html = doc.documentElement;
+    if (html) { if (route.query.wall === "1") html.setAttribute("data-wall", "1"); else html.removeAttribute("data-wall"); }
     doc.title = (TITLES[route.view] || "Explorer") + " · Intelligence Hub · TeamStarWolf";
   }
 

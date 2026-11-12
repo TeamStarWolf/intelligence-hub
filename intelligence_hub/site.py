@@ -180,7 +180,7 @@ def build_labels(root=ROOT):
     vocabulary = json.loads((root / "config" / "vocabulary.json").read_text(encoding="utf-8"))
     for entity in vocabulary["entities"]:
         labels[entity["id"]] = entity["label"]
-    prefixes = {"kind": "kind", "source_class": "class", "event_type": "event", "exploitation": "exp", "region": "region"}
+    prefixes = {"kind": "kind", "source_class": "class", "desk": "desk", "event_type": "event", "exploitation": "exp", "region": "region"}
     for name, prefix in prefixes.items():
         vocab = json.loads((root / "config" / "vocab" / (name + ".json")).read_text(encoding="utf-8"))
         for value in vocab["values"]:

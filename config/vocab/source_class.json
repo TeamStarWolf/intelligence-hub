@@ -1,6 +1,6 @@
 {
   "vocab": "source_class",
-  "version": "2026.11.1",
+  "version": "2026.11.2",
   "multi": false,
   "description": "Who publishes the row. Set per source in config/sources.json, or below for KEV and curated source ids. Never inferred from a headline.",
   "values": [

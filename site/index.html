@@ -23,24 +23,32 @@
     </div>
   </header>
   <nav class="tabs" aria-label="Hub views">
-    <a href="#/explore" data-view="explore">Explore</a>
-    <a href="#/today" data-view="today">Today</a>
-    <a href="#/advisories" data-view="advisories">Advisories</a>
-    <a href="#/kev" data-view="kev">Known exploited</a>
-    <a href="#/research" data-view="research">Research</a>
-    <a href="#/news" data-view="news">News</a>
-    <a href="#/cves" data-view="cves">CVEs</a>
-    <a href="#/history" data-view="history">History</a>
-    <a href="#/vendors" data-view="vendors">Vendors</a>
-    <a href="#/tags" data-view="tags">Tags</a>
-    <a href="#/actors" data-view="actors">Actors and malware</a>
-    <a href="#/reports" data-view="reports">Reports</a>
-    <a href="#/data" data-view="data">Data</a>
-    <a href="#/sources" data-view="sources">Sources</a>
-    <a href="#/method" data-view="method">Method</a>
-    <a href="#/about" data-view="about">About</a>
-    <a href="#/patch-tuesday" data-view="patch-tuesday">Patch Tuesday</a>
-    <a href="#/status" data-view="status">Service health</a>
+    <div class="tab-row desks" role="group" aria-label="Desks">
+      <a href="#/explore" data-desk="explore">Explore</a>
+      <a href="#/today" data-desk="security">Security</a>
+      <a href="#/status" data-desk="infrastructure">Infrastructure</a>
+      <a href="#/history" data-desk="reference">Reference</a>
+    </div>
+    <div class="tab-row views" role="group" aria-label="Views on this desk">
+      <a href="#/explore" data-view="explore" data-desk="explore">Explore</a>
+      <a href="#/today" data-view="today" data-desk="security">Today</a>
+      <a href="#/advisories" data-view="advisories" data-desk="security">Advisories</a>
+      <a href="#/kev" data-view="kev" data-desk="security">Known exploited</a>
+      <a href="#/research" data-view="research" data-desk="security">Research</a>
+      <a href="#/news" data-view="news" data-desk="security">News</a>
+      <a href="#/cves" data-view="cves" data-desk="security">CVEs</a>
+      <a href="#/actors" data-view="actors" data-desk="security">Actors and malware</a>
+      <a href="#/patch-tuesday" data-view="patch-tuesday" data-desk="security">Patch Tuesday</a>
+      <a href="#/status" data-view="status" data-desk="infrastructure">Service health</a>
+      <a href="#/history" data-view="history" data-desk="reference">History</a>
+      <a href="#/vendors" data-view="vendors" data-desk="reference">Vendors</a>
+      <a href="#/tags" data-view="tags" data-desk="reference">Tags</a>
+      <a href="#/reports" data-view="reports" data-desk="reference">Reports</a>
+      <a href="#/data" data-view="data" data-desk="reference">Data</a>
+      <a href="#/sources" data-view="sources" data-desk="reference">Sources</a>
+      <a href="#/method" data-view="method" data-desk="reference">Method</a>
+      <a href="#/about" data-view="about" data-desk="reference">About</a>
+    </div>
   </nav>
   <div id="layout" class="layout">
     <main id="main" class="main" tabindex="-1">
@@ -54,6 +62,7 @@
         </form>
         <div class="explore-body">
           <div id="filter-rail" class="filter-rail" aria-label="Filters" role="group">
+            <label class="field"><span>Desk</span><select id="f-desk" data-key="desk"><option value="">All desks</option></select></label>
             <label class="field"><span>Kind</span><select id="f-kind" data-key="kind"><option value="">All kinds</option></select></label>
             <label class="field"><span>Source class</span><select id="f-class" data-key="class"><option value="">All source classes</option></select></label>
             <label class="field"><span>Event type</span><select id="f-event" data-key="event"><option value="">All event types</option></select></label>

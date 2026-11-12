@@ -20,7 +20,8 @@ The exports keep one set of files per year even when the year's history shard on
 | `month` | Month of published as YYYY-MM, or empty. |
 | `source_id` | Source id from config/sources.json, or a curated or KEV source id. |
 | `source_class` | Who publishes the row: vendor-primary, government-cert, researcher or press (config/vocab/source_class.json). |
-| `kind` | What the row is: advisory, research, reporting, incident, kev, filing, bulletin or note (config/vocab/kind.json). |
+| `desk` | The desk the row sits on: security, infrastructure or it (config/vocab/desk.json), set per source and never inferred from a headline. Publisher feeds, KEV, curated and history rows are security; service-health incident rows are infrastructure; it is reserved for the lifecycle, standards and IT press sources the revision plan adds. |
+| `kind` | What the row is: advisory, research, reporting, incident, kev, filing, bulletin, note, change or lifecycle (config/vocab/kind.json). |
 | `origin` | publisher-feed (headline and link only), cisa-kev (CISA's catalog text) or library-curation (original paraphrase). |
 | `title` | Publisher headline, CISA's vulnerability name or the curated title. A cell that would start with =, +, -, @, tab or CR is prefixed with ' so that spreadsheets do not read it as a formula. |
 | `url` | Link to the publisher, CISA or the curated row's primary source. |
@@ -34,7 +35,7 @@ The exports keep one set of files per year even when the year's history shard on
 | `kev_ransomware` | That entry's knownRansomwareCampaignUse, as CISA publishes it. |
 | `exploitation` | known, reported or unknown. unknown never means unexploited (config/vocab/exploitation.json). |
 | `exploitation_basis` | The evidence: kev, vendor-structured, curated-primary, title-term or none. |
-| `event_type` | disclosure, exploitation, patch, breach, outage, takedown, policy, analysis or unclassified (config/vocab/event_type.json). |
+| `event_type` | disclosure, exploitation, patch, breach, outage, takedown, policy, analysis, unclassified, maintenance or end-of-support (config/vocab/event_type.json). |
 | `vendor` | Library vendor ids (vendor:<slug>). |
 | `product` | Library product ids (product:<slug>). |
 | `attack_technique` | MITRE ATT&CK technique ids reached from the row's CWEs through CAPEC, every one with no cap. Taxonomic and sparse, never observed behaviour. |
@@ -52,7 +53,7 @@ The exports keep one set of files per year even when the year's history shard on
 | --- | --- |
 | `id` | Row id, as in articles-YYYY.csv. |
 | `published` | Primary date of the row, as in articles-YYYY.csv. |
-| `field` | kind, source_class, exploitation, event_type, vendor, product, actor, malware, sector, region, cwe, attack_technique or attack_tactic. |
+| `field` | kind, source_class, desk, exploitation, event_type, vendor, product, actor, malware, sector, region, cwe, attack_technique or attack_tactic. |
 | `value` | The tag value. Region values carry their role as value/role. |
 | `confidence` | high (structured field or source identity), medium (exact headline name or term) or low (taxonomy chain, context-confirmed name, press wording). |
 | `method` | How the tag was found, for example source-registry, kev, cna-affected, title-match, title-term or cwe-capec. |
@@ -66,7 +67,7 @@ One JSON object per line, keys sorted.
 | --- | --- |
 | `id`, `title`, `url`, `source_id`, `source_name`, `kind`, `origin`, `date_basis`, `event_date`, `summary`, `references` | As in the v6 feed row. summary is empty for publisher rows (headlines and links only). |
 | `published`, `year`, `cve` | As in articles-YYYY.csv; cve is a list. |
-| `source_class`, `exploitation` | One tag each: {value, method, confidence}. |
+| `source_class`, `desk`, `exploitation` | One tag each: {value, method, confidence}. |
 | `event_type`, `vendor`, `product`, `actor`, `malware`, `sector`, `cwe` | Lists of {value, method, confidence}. |
 | `region` | List of {value, role, method, confidence}. |
 | `attack` | List of {value, method, confidence, tactics, path}. |
@@ -76,7 +77,7 @@ One JSON object per line, keys sorted.
 
 ## manifest.json
 
-`files` lists every export with its year, its month (`YYYY-MM` for a year split by month, otherwise null), row count, bytes and sha256. `sources` gives each source id its name, source_class and licence note. `vocabulary` records the tagger version, the Hub vocabulary versions and the pinned library commit. `notices` carries the designations for MITRE ATT&CK, CWE and CAPEC content.
+`files` lists every export with its year, its month (`YYYY-MM` for a year split by month, otherwise null), row count, bytes and sha256. `sources` gives each source id its name, source_class, desk and licence note. `vocabulary` records the tagger version, the Hub vocabulary versions and the pinned library commit. `notices` carries the designations for MITRE ATT&CK, CWE and CAPEC content.
 
 ## Notices
 

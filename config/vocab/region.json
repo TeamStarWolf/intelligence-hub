@@ -1,6 +1,6 @@
 {
   "vocab": "region",
-  "version": "2026.11.1",
+  "version": "2026.11.2",
   "multi": true,
   "description": "Places a row is tied to, each with a role. Values are ISO 3166-1 alpha-2 country codes, EU for the European Union, and M49-<code> for UN M49 regions. Names match case-sensitively as whole words.",
   "roles": [

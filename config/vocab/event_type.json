@@ -1,6 +1,6 @@
 {
   "vocab": "event_type",
-  "version": "2026.11.1",
+  "version": "2026.11.2",
   "multi": true,
   "description": "What happened, from the row's kind, source and headline. A row can carry several. analysis and unclassified exist so that no label is forced.",
   "values": [
@@ -151,6 +151,16 @@
       "value": "unclassified",
       "label": "Unclassified",
       "definition": "No rule applied. The row is not forced into a label."
+    },
+    {
+      "value": "maintenance",
+      "label": "Maintenance",
+      "definition": "A vendor-scheduled maintenance window. Reserved for the maintenance calendar the revision plan adds; it carries no headline terms, so no headline sets it."
+    },
+    {
+      "value": "end-of-support",
+      "label": "End of support",
+      "definition": "A product, version or service reaches end of support, end of life or retirement. Reserved for the lifecycle and cloud-change sources the revision plan adds; it carries no headline terms, so no headline sets it."
     }
   ]
 }
