@@ -41,6 +41,10 @@ BRIEFS_MAX_BYTES = 24 * 1024 * 1024
 # and the largest file the collector writes; every publisher read keeps the 16 MiB ceiling.
 DEPLOYED_BRIEFS_CEILING = BRIEFS_MAX_BYTES
 OUTPUT_CEILING = max(FETCH_CEILING, FEED_MAX_BYTES, BRIEFS_MAX_BYTES)
+# The two retained state files (.state/public-cache.json and .state/cve-projections.json) are
+# written through write_raw, so they are read back under the same ceiling: a cache the previous
+# run could save is never refused by the next run's read.
+STATE_INPUT_BYTES = OUTPUT_CEILING
 # The feed's article-row ceiling is derived from its byte bound, so it is not a
 # second, hidden wall: the smallest live row is 363 bytes (publisher rows average
 # about 480, KEV rows about 794), so at real sizes the byte bound is crossed first.
@@ -755,13 +759,13 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     registry = read_json(ROOT / "config/sources.json", 128 * 1024)
     sources = validate_registry(registry)
     cache_path = STATE / "public-cache.json"
-    cache = read_json(cache_path) if cache_path.exists() else {"sources": {}, "kev": {}}
+    cache = read_json(cache_path, STATE_INPUT_BYTES) if cache_path.exists() else {"sources": {}, "kev": {}}
     validate_cache(cache, sources)
     previous, resume_reason = resume_deployed(sources, cache) if resume_public else (None, None)
     require(not resume_public or previous is not None,
             "The deployed snapshot could not be resumed safely (" + str(resume_reason) + "); preserving the current publication.")
     cve_path = STATE / "cve-projections.json"
-    retained = read_json(cve_path) if cve_path.exists() else {}
+    retained = read_json(cve_path, STATE_INPUT_BYTES) if cve_path.exists() else {}
     require(isinstance(retained, dict) and len(retained) <= 15000, "Invalid retained CVE projections.")
     if previous and isinstance(previous.get("mitigations"), dict):
         require(len(previous["mitigations"]) <= 15000, "Invalid deployed CVE projection count.")

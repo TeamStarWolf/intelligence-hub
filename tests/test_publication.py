@@ -252,6 +252,20 @@ class BoundTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Invalid bounded read size"):
             collect.fetch(collect.PUBLIC_BRIEFS, collect.BRIEFS_MAX_BYTES)
 
+    def test_a_retained_state_file_over_16_mib_reads_back_on_the_next_run(self):
+        # The projection cache and the public cache are written through write_raw and read with
+        # read_json; the read bound must follow the write ceiling, or a cache the previous run saved
+        # would fail every later run until the Actions cache key changed.
+        self.assertEqual(collect.STATE_INPUT_BYTES, collect.OUTPUT_CEILING)
+        value = {"CVE-2026-" + str(100000 + index): "x" * 1000 for index in range(17500)}
+        with tempfile.TemporaryDirectory() as folder:
+            path = pathlib.Path(folder) / "cve-projections.json"
+            collect.write_json(path, value, compact=True)
+            self.assertGreater(path.stat().st_size, 16 * 1024 * 1024)
+            self.assertEqual(collect.read_json(path, collect.STATE_INPUT_BYTES), value)
+            with self.assertRaisesRegex(ValueError, "Local JSON input exceeds its limit"):
+                collect.read_json(path)
+
 
 class BriefsFileTest(unittest.TestCase):
     @classmethod
