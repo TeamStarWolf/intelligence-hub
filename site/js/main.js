@@ -149,7 +149,7 @@ export function createApp(env) {
       const loadedRows = store.state.mode === "legacy" ? store.rows([]) : store.rows(store.listed("live/").filter(path => store.cached(path)));
       const seen = new Set(loadedRows.map(row => row.id));
       for (const row of store.state.mode === "v7" ? store.cached("recent.json")?.rows || [] : []) if (!seen.has(row.id)) { seen.add(row.id); loadedRows.push(row); }
-      el("#cve-body").replaceChildren(...(record ? briefBody(record, index.get(cve), loadedRows, lib) : [node("p", "", "This CVE has no saved brief in this snapshot. No external lookup was made.")]));
+      el("#cve-body").replaceChildren(...(record ? briefBody(record, index.get(cve), loadedRows, lib, store.state.mode === "v7" ? store.state.index.counts : null) : [node("p", "", "This CVE has no saved brief in this snapshot. No external lookup was made.")]));
       dialog.dataset.revision = shown;
     } catch (error) {
       if (!current()) return;

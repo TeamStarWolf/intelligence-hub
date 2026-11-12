@@ -20,9 +20,9 @@ const EVENTS = ["disclosure", "exploitation", "patch", "breach", "outage", "take
 const EXPLOITATION = ["known", "reported", "unknown"];
 export const RANGES = ["3", "7", "30", "90", "365", "all"];
 export const SORTS = {
-  list: ["date-desc", "date-asc", "title-asc", "title-desc", "source-asc", "source-desc", "cve-asc", "cve-desc", "cvss-desc", "cvss-asc"],
+  list: ["date-desc", "date-asc", "title-asc", "title-desc", "source-asc", "source-desc", "cve-asc", "cve-desc", "cvss-desc", "cvss-asc", "epss-desc", "epss-asc"],
   kev: ["added-desc", "added-asc", "due-asc", "due-desc", "cve-desc", "cve-asc"],
-  cves: ["cve-desc", "cve-asc", "cvss-desc", "cvss-asc", "kev-desc"]
+  cves: ["cve-desc", "cve-asc", "cvss-desc", "cvss-asc", "epss-desc", "epss-asc", "kev-desc"]
 };
 export const CVE_ID = /^CVE-\d{4}-\d{4,19}$/;
 

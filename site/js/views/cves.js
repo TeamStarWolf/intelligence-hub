@@ -3,7 +3,7 @@
 // from its bucket when buckets are published, otherwise from data/briefs.json.
 import { formatRoute, withQuery } from "../router.js";
 import { cveRegister, kevLinked } from "../filters.js";
-import { count, dateLabel, link, node, routeLink, stamp } from "../util.js";
+import { count, dateLabel, epssPercent, link, node, routeLink, stamp } from "../util.js";
 import { libraryDoor, pager } from "./common.js";
 import { pageSize } from "../limits.js";
 
@@ -27,18 +27,31 @@ function controls(ctx) {
     form.append(wrap);
   }
   const sort = node("select"); sort.setAttribute("aria-label", "Sort");
-  for (const [value, text] of [["cve-desc", "CVE descending"], ["cve-asc", "CVE ascending"], ["cvss-desc", "CNA CVSS highest"], ["cvss-asc", "CNA CVSS lowest"], ["kev-desc", "Newest KEV additions"]]) { const option = node("option", "", text); option.value = value; sort.append(option); }
+  for (const [value, text] of [["cve-desc", "CVE descending"], ["cve-asc", "CVE ascending"], ["cvss-desc", "CNA CVSS highest"], ["cvss-asc", "CNA CVSS lowest"], ["epss-desc", "EPSS highest"], ["epss-asc", "EPSS lowest"], ["kev-desc", "Newest KEV additions"]]) { const option = node("option", "", text); option.value = value; sort.append(option); }
   sort.value = route.query.sort || "cve-desc";
   sort.addEventListener("change", () => navigate(withQuery(base, { sort: sort.value }), { replace: true }));
   form.append(sort);
   return form;
 }
 
-export function registerTable(rows) {
+// An EPSS cell: the percentage and the percentile, or the words for no score (never 0).
+export function epssCell(epss) {
+  return epss ? epssPercent(epss.score) + " (p" + (epss.percentile * 100).toFixed(1) + ")" : "No score";
+}
+
+// The EPSS attribution for a register or a brief: the scorer, the model and the score date the index records.
+export function epssNote(counts) {
+  const model = counts && typeof counts.epss_model === "string" ? counts.epss_model : null;
+  const day = counts && typeof counts.epss_date === "string" ? counts.epss_date : null;
+  return "EPSS by FIRST" + (model ? ", model " + model : "") + (day ? ", score date " + dateLabel(day) : "");
+}
+
+export function registerTable(rows, counts = null) {
   const table = node("table", "data-table");
-  table.append(node("caption", "", "CVEs that saved entries mention. Guidance is the brief's own label; KEV and the CISA required action are separate catalog facts. The CVSS column is the CNA's metric, versions not normalized; CISA's ADP CVSS and SSVC values are in the brief."));
+  table.append(node("caption", "", "CVEs that saved entries mention. Guidance is the brief's own label; KEV and the CISA required action are separate catalog facts. The CVSS column is the CNA's metric, versions not normalized; CISA's ADP CVSS and SSVC values are in the brief. " +
+    epssNote(counts) + ": the probability that the CVE is exploited in the next 30 days with its percentile; a CVE without a score on that date reads No score, never 0."));
   const head = node("tr");
-  for (const label of ["CVE", "Guidance", "KEV added", "CNA CVSS", "CWE"]) { const cell = node("th", "", label); cell.scope = "col"; head.append(cell); }
+  for (const label of ["CVE", "Guidance", "KEV added", "CNA CVSS", "EPSS", "CWE"]) { const cell = node("th", "", label); cell.scope = "col"; head.append(cell); }
   const thead = node("thead"); thead.append(head);
   const body = node("tbody");
   for (const row of rows) {
@@ -48,7 +61,8 @@ export function registerTable(rows) {
     const guidance = node("td", "", GUIDANCE[row.guidance]);
     if (row.required_action) guidance.append(node("span", "cell-note", "CISA required action"));
     if (row.source_status !== "ok") guidance.append(node("span", "cell-note", "CNA lookup " + row.source_status));
-    tr.append(id, guidance, node("td", "", row.kev_added ? dateLabel(row.kev_added) : "Not in KEV"), node("td", "", row.score === null ? "Unknown" : row.score.toFixed(1) + " (v" + (row.version || "?") + ")"), node("td", "", row.weaknesses.join(", ") || "None supplied"));
+    tr.append(id, guidance, node("td", "", row.kev_added ? dateLabel(row.kev_added) : "Not in KEV"), node("td", "", row.score === null ? "Unknown" : row.score.toFixed(1) + " (v" + (row.version || "?") + ")"),
+      node("td", "", epssCell(row.epss)), node("td", "", row.weaknesses.join(", ") || "None supplied"));
     body.append(tr);
   }
   table.append(thead, body);
@@ -61,13 +75,13 @@ export async function renderCves(ctx) {
   status.setAttribute("role", "status");
   const table = node("div", "table-wrap");
   const pages = node("nav", "pager"); pages.setAttribute("aria-label", "CVE pages");
-  target.replaceChildren(node("h1", "view-title", "CVE register"), node("p", "view-intro", "Every CVE a saved entry mentions, with its brief's guidance label, KEV state and CVSS. Open a CVE for the source-led brief."), controls(ctx), status, table, pages);
+  target.replaceChildren(node("h1", "view-title", "CVE register"), node("p", "view-intro", "Every CVE a saved entry mentions, with its brief's guidance label, KEV state, CNA CVSS and EPSS. Open a CVE for the source-led brief."), controls(ctx), status, table, pages);
   const index = await store.cveIndex();
   if (!ctx.current()) return;
   const rows = cveRegister(index, route.query);
   const listRoute = route.view === "cve" ? { view: "cves", id: null, query: route.query } : route;
   const page = pager(pages, listRoute, rows.length);
-  table.replaceChildren(registerTable(rows.slice(page.start, page.start + pageSize)));
+  table.replaceChildren(registerTable(rows.slice(page.start, page.start + pageSize), store.state.mode === "v7" ? store.state.index.counts : null));
   status.textContent = count(rows.length, "CVE") + " of " + index.size.toLocaleString("en-US") + " match.";
   return rows;
 }
@@ -136,7 +150,18 @@ export function severityBlock(record) {
 
 // The brief for one CVE, built from the saved record only. No lookup leaves this site.
 // lib is the library-door module: a CVE the shared vocabulary covers links its library notes.
-export function briefBody(record, indexRow, rows, lib = null) {
+// FIRST's EPSS block on the brief: the score as published for its date and model, or the words
+// for no score on that date. Never a severity, never a change across model versions.
+export function epssBlock(record, counts = null) {
+  const item = block("Exploitation probability (EPSS)");
+  if (record.epss) {
+    item.append(node("p", "", "EPSS by FIRST, model " + record.epss.model + ", score date " + dateLabel(record.epss.date) + ": " + record.epss.score.toFixed(5) + " (" + epssPercent(record.epss.score) + "), percentile " + record.epss.percentile.toFixed(5) + "."));
+  } else item.append(node("p", "muted", epssNote(counts) + ": no EPSS score on that date."));
+  item.append(node("p", "muted", "The score is FIRST's estimated probability that the CVE is exploited in the next 30 days, as the model scores it on that date. It is not a severity, it is not blended with any CVSS value, and the Hub records no change across model versions."));
+  return item;
+}
+
+export function briefBody(record, indexRow, rows, lib = null, counts = null) {
   const parts = [];
   const overview = block(record.title || "Source record title not supplied");
   overview.append(node("p", "chips", ""));
@@ -147,8 +172,9 @@ export function briefBody(record, indexRow, rows, lib = null) {
   if (record.record_state === "REJECTED") overview.append(node("p", "notice-inline", "This CVE record is rejected. Read its original disposition before treating it as a vulnerability."));
   overview.append(node("p", "", record.description || "Description not supplied in this saved record."));
   overview.append(node("p", "muted", "CNA source updated " + stamp(record.source_updated_at) + " · retrieved " + stamp(record.retrieved_at) + ". Review affected products and your installed version before acting; this is not a device assessment."));
+  if (record.epss) badges.append(node("span", "chip", "EPSS " + epssPercent(record.epss.score)));
   overview.append(elsewhereRow(record.cve, lib));
-  parts.push(overview, severityBlock(record));
+  parts.push(overview, severityBlock(record), epssBlock(record, counts));
   const action = block("CISA catalog action");
   action.append(node("p", "", record.required_action || "No CISA required action is supplied for this record."));
   if (record.required_action_source_url) { const row = node("p"); row.append(link("CISA action source", record.required_action_source_url)); action.append(row); }

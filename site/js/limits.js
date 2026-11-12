@@ -10,7 +10,7 @@ export const maximumLegacyFeedBytes = 16 * 1024 * 1024;
 // MAX_FEED_ROWS in the collector: the 8 MiB feed bound / 300 bytes per row.
 export const maximumArticles = 27962;
 // INDEX_FIELDS in intelligence_hub/mitigations.py.
-export const indexFields = ["record_state", "source_status", "guidance_status", "required_action", "cvss_score", "cvss_version", "kev_date_added", "weaknesses", "ssvc_exploitation"];
+export const indexFields = ["record_state", "source_status", "guidance_status", "required_action", "cvss_score", "cvss_version", "kev_date_added", "weaknesses", "ssvc_exploitation", "epss"];
 // INDEX_MAX_BYTES and V7_FILE_MAX_BYTES in intelligence_hub/shards.py.
 export const maximumIndexBytes = 1 * 1024 * 1024;
 export const maximumShardBytes = 4 * 1024 * 1024;

@@ -32,10 +32,14 @@ export function brief(cve, fields = {}) {
     retrieved_at: "2026-11-01T00:00:00Z", source_attempted_at: "2026-11-01T00:00:00Z", source_sha256: "a".repeat(64), products: [], solutions: [], workarounds: [],
     cvss: { score: 9.8, version: "3.1", vector: "CVSS:3.1/AV:N", source_url: null }, references: [], required_action: null, required_action_source_url: null, kev: null,
     analysis: { priority: "review", guidance_status: "needs-review", assessment: "Review it.", steps: [], limitations: [] }, weaknesses: [], weaknesses_status: "not_supplied",
-    adp: null, adp_status: "not_supplied",
+    adp: null, adp_status: "not_supplied", epss: null,
     ...fields
   };
 }
+
+// FIRST's EPSS blocks as the collector keeps them: a high and a low score on one score date.
+export const EPSS_HIGH = { score: 0.94333, percentile: 0.99901, date: "2026-11-02", model: "v2026.06.15" };
+export const EPSS_LOW = { score: 0.00043, percentile: 0.12345, date: "2026-11-02", model: "v2026.06.15" };
 
 // CISA's ADP block as the collector projects it for CVE-2026-1000: its own CVSS (a different
 // score from the CNA's 9.8, so a test can tell a blended number from either issuer's) and its
@@ -48,9 +52,9 @@ export const ADP = { provider: "CISA-ADP", date: "2026-10-31T10:00:00+00:00",
 // "CISA action" guidance filter dropped) with CISA's SSVC Exploitation value, a KEV CVE labelled
 // CISA action, and a CVE not in KEV.
 export const CVE_ROWS = [
-  ["CVE-2026-1000", "PUBLISHED", "ok", "publisher-guidance", true, 9.8, "3.1", "2026-11-02", ["CWE-787"], "active", null],
-  ["CVE-2026-1001", "PUBLISHED", "ok", "cisa-action", true, 7.5, "3.1", "2026-10-20", [], null, null],
-  ["CVE-2026-1002", "PUBLISHED", "ok", "needs-review", false, null, null, null, [], null, null]
+  ["CVE-2026-1000", "PUBLISHED", "ok", "publisher-guidance", true, 9.8, "3.1", "2026-11-02", ["CWE-787"], "active", EPSS_HIGH, null],
+  ["CVE-2026-1001", "PUBLISHED", "ok", "cisa-action", true, 7.5, "3.1", "2026-10-20", [], null, EPSS_LOW, null],
+  ["CVE-2026-1002", "PUBLISHED", "ok", "needs-review", false, null, null, null, [], null, null, null]
 ];
 
 export function files({ schema = 7, layout = "b".repeat(64), extra = {}, omit = [] } = {}) {
@@ -69,7 +73,7 @@ export function files({ schema = 7, layout = "b".repeat(64), extra = {}, omit = 
       { cve: "CVE-2026-1001", cwe: [], date_added: "2026-10-20", directive: "BOD 22-01", due_date: "2026-11-30", forensic_triage: "No", name: "Example Two Vulnerability", notes_urls: [], product_raw: "Two", ransomware: "Unknown", required_action: "Apply mitigations per vendor instructions.", short_description: "CISA text two.", vendor_raw: "Example" },
       { cve: "CVE-2026-1000", cwe: ["CWE-787"], date_added: "2026-11-02", directive: "BOD 26-04", due_date: "2026-11-10", forensic_triage: "No", name: "Example One Vulnerability", notes_urls: ["https://www.cisa.gov/example"], product_raw: "FortiOS", ransomware: "Known", required_action: "Apply mitigations per vendor instructions.", short_description: "CISA text one.", vendor_raw: "Fortinet" }
     ] },
-    "cve-index.json": { schema_version: 7, kind: "cve-index", fields: ["cve", "record_state", "source_status", "guidance_status", "required_action", "cvss_score", "cvss_version", "kev_date_added", "weaknesses", "ssvc_exploitation", "bucket"], briefs_file: "data/briefs.json", rows: CVE_ROWS },
+    "cve-index.json": { schema_version: 7, kind: "cve-index", fields: ["cve", "record_state", "source_status", "guidance_status", "required_action", "cvss_score", "cvss_version", "kev_date_added", "weaknesses", "ssvc_exploitation", "epss", "bucket"], briefs_file: "data/briefs.json", rows: CVE_ROWS },
     "sources.json": { schema_version: 7, kind: "sources", rows: [
       { id: "vendor-psirt", name: "Vendor PSIRT", kind: "advisory", url: "https://psirt.example.org/", status: "ok", last_attempt: "2026-11-03T10:00:00+00:00", last_success: "2026-11-03T10:00:00+00:00", error: null, sha256: null, articles: 4, intake: null, configured_selection: "document-order-v1" },
       { id: "cisa-kev", name: "CISA Known Exploited Vulnerabilities", kind: "kev", url: "https://www.cisa.gov/known-exploited-vulnerabilities-catalog", status: "ok", last_attempt: "2026-11-03T10:00:00+00:00", last_success: "2026-11-03T10:00:00+00:00", error: null, sha256: null, articles: 1, intake: null, configured_selection: null }
@@ -97,14 +101,15 @@ export function files({ schema = 7, layout = "b".repeat(64), extra = {}, omit = 
   }
   const feedRevision = "d".repeat(64);
   const briefs = { schema_version: 1, feed_schema_version: 7, generated_at: "2026-11-03T12:00:00+00:00", content_revision: feedRevision,
-    briefs: { "CVE-2026-1000": brief("CVE-2026-1000", { required_action: "Apply mitigations per vendor instructions.", kev: { date_added: "2026-11-02", due_date: "2026-11-10", ransomware: "Known" }, analysis: { priority: "known-exploited", guidance_status: "publisher-guidance", assessment: "Exploited.", steps: [], limitations: [] }, adp: ADP, adp_status: "supplied" }),
-      "CVE-2026-1001": brief("CVE-2026-1001"), "CVE-2026-1002": brief("CVE-2026-1002", { adp_status: "not_projected" }) } };
+    briefs: { "CVE-2026-1000": brief("CVE-2026-1000", { required_action: "Apply mitigations per vendor instructions.", kev: { date_added: "2026-11-02", due_date: "2026-11-10", ransomware: "Known" }, analysis: { priority: "known-exploited", guidance_status: "publisher-guidance", assessment: "Exploited.", steps: [], limitations: [] }, adp: ADP, adp_status: "supplied", epss: EPSS_HIGH }),
+      "CVE-2026-1001": brief("CVE-2026-1001", { epss: EPSS_LOW }), "CVE-2026-1002": brief("CVE-2026-1002", { adp_status: "not_projected" }) } };
   bodies["./data/briefs.json"] = json(briefs);
   const index = {
     schema_version: schema, generated_at: "2026-11-03T12:00:00+00:00", content_date: CONTENT_DATE, content_revision: sha(entries.map(item => item.path + item.sha256).join("")),
     feed_content_revision: feedRevision, layout_revision: layout, window: { history_start: "1998-01-01", live_start: "2024-12-01", end: CONTENT_DATE },
     runs: [{ generated_at: "2026-11-03T12:00:00+00:00", trigger: "schedule", changed: true }, { generated_at: "2026-11-03T07:42:00+00:00", trigger: "schedule", changed: true }],
-    observed_interval_hours: { median: 4.3, max: 10.2, runs_counted: 10 }, requested_cron: "7 */2 * * *", counts: { articles: 6, kev: 2, cves: 3, live_rows: 5, history_rows: 1 },
+    observed_interval_hours: { median: 4.3, max: 10.2, runs_counted: 10 }, requested_cron: "7 */2 * * *",
+    counts: { articles: 6, kev: 2, cves: 3, live_rows: 5, history_rows: 1, epss_scored: 2, epss_model: "v2026.06.15", epss_date: "2026-11-02" },
     shards: entries, v6_files: [{ path: "data/feed.json", bytes: 10, sha256: "e".repeat(64) }, { path: "data/briefs.json", bytes: 10, sha256: "f".repeat(64) }],
     cve_buckets: { published: false, note: "Not yet." }, notices: ["Publisher rows carry headlines and links only."],
     exports: { status: "ok", reason: null, files: [{ path: "exports/articles-2026.csv", bytes: 100, sha256: "1".repeat(64) }, { path: "exports/manifest.json", bytes: 50, sha256: "2".repeat(64) }, { path: "exports/data-dictionary.md", bytes: 50, sha256: "3".repeat(64) }] },

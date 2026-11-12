@@ -71,6 +71,9 @@ export function count(value, singular, plural = singular + "s") {
 
 export function hoursLabel(value) { return value.toLocaleString("en-US", { maximumFractionDigits: 1 }) + " h"; }
 
+// An EPSS score (FIRST's probability, 0 to 1) as a percentage with one decimal; under 0.1% reads so.
+export function epssPercent(score) { return score < 0.001 ? "<0.1%" : (score * 100).toFixed(1) + "%"; }
+
 // "vendor:palo-alto-networks" reads "Palo Alto Networks" until the vocabulary labels load.
 export function humanize(id) {
   const value = String(id).replace(/^[a-z]+:/, "");

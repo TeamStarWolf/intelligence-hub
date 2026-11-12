@@ -856,7 +856,18 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     require(len({article["id"] for article in ordered}) == len(ordered), "Article identities must be unique.")
     counts = {origin: sum(article["origin"] == origin for article in ordered) for origin in ("cisa-kev", "library-curation", "publisher-feed")}
     prepared_at = now()
-    briefs, projections, mitigation_stats = build_briefs(ordered, kev.get("catalog", {}), retained, refresh, enrich_limit, fetch, text, safe_url, published, prepared_at)
+    # FIRST's EPSS scores for the CVEs the briefs cover (intelligence_hub/epss.py): read in batches
+    # of 100 when the run reads the network, else every brief keeps its retained value.
+    from . import epss
+    wanted_cves = sorted({cve for article in ordered for cve in article["cves"]})
+    if refresh:
+        epss_scores, epss_report = epss.collect_scores(wanted_cves, fetch)
+    else:
+        epss_scores, epss_report = {}, epss.skipped(wanted_cves, "no network read in this run")
+    print("EPSS: {status}, {completed:,} of {batches:,} batches read, {scored:,} of {cves:,} CVEs scored, model {model}, score date {date}{failed}".format(
+        **{**epss_report, "failed": (" (" + epss_report["failed"] + ")") if epss_report["failed"] else ""}), file=sys.stderr)
+    briefs, projections, mitigation_stats = build_briefs(ordered, kev.get("catalog", {}), retained, refresh, enrich_limit, fetch, text, safe_url, published, prepared_at,
+                                                         scores=epss_scores)
     briefs = apply_mitigation_context(briefs, context)
     tagged = tag_snapshot(ordered, sources, kev.get("catalog"), briefs)
     ordered = tagged["articles"]
@@ -892,7 +903,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     feed_raw, briefs_raw = public_bytes(feed), public_bytes(briefs_file)
     bounds = check_bounds(feed_raw, briefs_raw)
     # Exports are built (never written) before the index, so the index can list every export file.
-    export_files, exported = build_analytics_exports(snapshot["articles"], tagged, sources)
+    export_files, exported = build_analytics_exports(snapshot["articles"], tagged, sources, briefs)
     v7 = build_v7(snapshot, previous, kev.get("catalog"), reports, intelligence_inputs, end, feed_raw, briefs_raw, tagged,
                   exports_index(export_files, exported), patch, service_health=service_health)
     changed = publication_changed(changed, v7["changed_shards"], v7["removed_shards"], v7["exports_changed"], service_health["summary"], v7["feeds_changed"])
@@ -914,7 +925,8 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
         "schema_version": SNAPSHOT_VERSION, "publication": bounds, "rows": rows, "source_failures": failures[:100],
         "changed_shards": v7["changed_shards"], "removed_shards": v7["removed_shards"], "exports_changed": v7["exports_changed"],
         "feeds_changed": v7["feeds_changed"], "v7": v7["summary"],
-        "tagging": tagged["summary"], "exports": exported, "patch_tuesday": v7["patch_tuesday"], "status": service_health["summary"]}
+        "tagging": tagged["summary"], "exports": exported, "patch_tuesday": v7["patch_tuesday"], "status": service_health["summary"],
+        "epss": epss_report}
     result_raw = (json.dumps(result, ensure_ascii=False, allow_nan=False, indent=2) + "\n").encode("utf-8")
     require(len(result_raw) <= RESULT_MAX_BYTES, "The collection result would exceed its " + format(RESULT_MAX_BYTES, ",") + "-byte bound.")
     write_raw(STATE / "collection-result.json", result_raw)
@@ -963,18 +975,20 @@ def tag_snapshot(articles, sources, catalog, briefs, root=None):
             "summary": {"status": "ok", **info, "rows_with": tagged_rows, "tags": dict(sorted(counts.items()))}}
 
 
-def build_analytics_exports(articles, tagged, sources):
+def build_analytics_exports(articles, tagged, sources, briefs=None):
     """(files, report): the per-year CSV and JSONL exports, built in memory and not written.
 
     files is None when tagging was unavailable or the build failed (for example a file that
-    cannot be kept under the per-file cap); the feed is then published without exports.
+    cannot be kept under the per-file cap); the feed is then published without exports. briefs
+    supplies the EPSS block of each CVE for the epss columns.
     """
     from . import exports
     if not tagged.get("blocks"):
         return None, {"status": "skipped", "reason": "tagging unavailable in this run"}
     try:
         classes = {key: value["source_class"] for key, value in tagged["context"].vocab.hub["source_class"].get("sources", {}).items()}
-        files = exports.build_exports(articles, tagged["blocks"], sources, tagged["vocabulary"], classes)
+        scores = {cve: brief["epss"] for cve, brief in (briefs or {}).items() if isinstance(brief, dict) and brief.get("epss")}
+        files = exports.build_exports(articles, tagged["blocks"], sources, tagged["vocabulary"], classes, scores=scores)
     except (ValueError, TypeError, KeyError, AttributeError) as error:
         reason = (str(error) or type(error).__name__)[:300]
         print("Exports: not built (" + reason + ").", file=sys.stderr)
@@ -1250,7 +1264,8 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
               "cves": len(snapshot["mitigations"]), "sources": len(snapshot["sources"]), "shards": len(entries),
               "patch_tuesday_months": sum(1 for entry in entries if shards.PATCH_TUESDAY_MONTH.fullmatch(entry["path"])),
               "status_sources": (service_health or {}).get("summary", {}).get("sources", 0),
-              "status_incidents": (service_health or {}).get("summary", {}).get("incidents", 0), "status_rows": len(health_rows)}
+              "status_incidents": (service_health or {}).get("summary", {}).get("incidents", 0), "status_rows": len(health_rows),
+              **epss_counts(snapshot["mitigations"])}
     index = shards.build_index(entries, generated_at=snapshot["generated_at"], end=end, feed_content_revision=snapshot["content_revision"],
                                layout_revision=snapshot["layout_revision"], runs=runs, counts=counts,
                                v6_files=[shards.file_entry("data/feed.json", feed_raw), shards.file_entry("data/briefs.json", briefs_raw)],
@@ -1267,6 +1282,13 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
     return {"raw": raw, "index_raw": index_raw, "index": index, "changed_shards": changed_shards,
             "removed_shards": removed_shards, "summary": summary, "export_paths": export_paths, "patch_tuesday": patch_summary,
             "exports_changed": shards.exports_changed(previous_index, exports_entry), "feeds_changed": shards.feeds_changed(previous_index, feeds)}
+
+
+def epss_counts(briefs):
+    """index.json counts for FIRST's EPSS scores: how many briefs carry one, the model and the newest score date."""
+    from .epss import MODEL
+    scored = [brief["epss"] for brief in briefs.values() if isinstance(brief, dict) and brief.get("epss")]
+    return {"epss_scored": len(scored), "epss_model": MODEL, "epss_date": max((item["date"] for item in scored), default=None)}
 
 
 def content_revision(snapshot):

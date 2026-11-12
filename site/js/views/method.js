@@ -24,6 +24,7 @@ export const LICENCES = [
   ["ATT&CK groups, software, techniques and tactics", "MITRE ATT&CK, through the TeamStarWolf library's pinned files", MITRE_NOTICES[0], "https://attack.mitre.org/resources/legal-and-branding/terms-of-use/"],
   ["CWE weaknesses", "MITRE CWE, through the library's pinned CWE list", MITRE_NOTICES[1], "https://cwe.mitre.org/"],
   ["CAPEC attack patterns", "MITRE CAPEC, through the library's pinned CAPEC list", MITRE_NOTICES[2], "https://capec.mitre.org/"],
+  ["EPSS scores", "FIRST, the Exploit Prediction Scoring System, read from api.first.org", "Free. FIRST asks for attribution when EPSS data is used in publications or products; every value the Hub shows names FIRST, the model version and the score date.", "https://www.first.org/epss/faq"],
   ["Curated summaries", "Written for the Hub", "Original paraphrases, each backed by a dated primary source that the row links.", null],
   ["Service-health entries", "The vendors' official status pages and feeds, IODA from Georgia Tech, and Cloudflare Radar once it is configured", "Incident names, states, impact levels, affected components, times, a short excerpt of the vendor's latest update and the link. The status pages belong to their vendors, and IODA rows repeat IODA's own copyright line.", null],
   ["The Hub's code", "TeamStarWolf/intelligence-hub", "MIT License.", "https://github.com/TeamStarWolf/intelligence-hub/blob/main/LICENSE"]

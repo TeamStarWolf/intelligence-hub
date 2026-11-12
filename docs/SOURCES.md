@@ -44,6 +44,17 @@ The 2026 boundary year is partial. Coverage within all years remains uneven; 199
 
 Live feeds, curated history and CISA KEV remain separate inputs. RSS usually contains only recent posts. A wider date window cannot reconstruct a publisher’s archive or establish complete source coverage.
 
+## EPSS scores
+
+FIRST's Exploit Prediction Scoring System (https://www.first.org/epss/) gives every
+scored CVE a daily probability of exploitation in the next 30 days and a percentile. The
+collector reads the API at `api.first.org` once a run for the CVEs the briefs cover, in
+batches of 100, and keeps each score with its date and the model version
+(`intelligence_hub/epss.py`, [MITIGATIONS.md](MITIGATIONS.md#epss-by-first)). The scores
+are FIRST's; FIRST asks for attribution when EPSS data is used in publications or
+products, and every value the Hub shows names FIRST, the model and the score date. A CVE
+without a score on that date reads as no score, never as 0.
+
 ## Patch Tuesday briefs
 
 The Patch Tuesday tab is a separate input from the curated history above. Its rows come from

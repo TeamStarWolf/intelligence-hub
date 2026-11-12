@@ -30,6 +30,10 @@ The exports keep one set of files per year even when the year's history shard on
 | `cvss_version` | CVSS version of the highest CNA base score among the row's CVEs. Versions are never merged. |
 | `cvss_base` | That CNA base score. |
 | `cvss_scorer` | Who scored it: cna (the CVE record's CNA container). |
+| `epss` | The highest EPSS score among the row's CVEs: FIRST's estimated probability, 0 to 1, that the CVE is exploited in the next 30 days, as scored on epss_date. Empty when no CVE on the row has a score on that date; a missing score is never written as 0. |
+| `epss_percentile` | That score's percentile among every CVE FIRST scored that day, 0 to 1. |
+| `epss_date` | The score date FIRST published that score for, YYYY-MM-DD. |
+| `epss_model` | The EPSS model version that produced it, for example v2026.06.15. Scores from different model versions are not compared, and no change across versions is recorded. |
 | `kev_added` | Earliest CISA KEV dateAdded among the row's CVEs. |
 | `kev_due` | That entry's KEV dueDate (the federal catalog requirement, not a deadline for the reader). |
 | `kev_ransomware` | That entry's knownRansomwareCampaignUse, as CISA publishes it. |
@@ -72,6 +76,7 @@ One JSON object per line, keys sorted.
 | `region` | List of {value, role, method, confidence}. |
 | `attack` | List of {value, method, confidence, tactics, path}. |
 | `cvss` | {base, version, vector, scorer, cve} or null. |
+| `epss` | {score, percentile, date, model, cve} or null: the highest EPSS score among the row's CVEs, by FIRST, with the CVE it belongs to. |
 | `kev` | {cves, added, due, ransomware, at_publication} or null. |
 | `tagger_version` | Version of the tagging rules. |
 
@@ -86,3 +91,4 @@ One JSON object per line, keys sorted.
 - CAPEC: © The MITRE Corporation. Includes material from the Common Attack Pattern Enumeration and Classification (CAPEC™), used under the CAPEC Terms of Use. https://capec.mitre.org/
 - CVE ids and CNA fields come from the CVE Program's records (cvelistV5).
 - Vendor, product, actor, malware and sector ids come from the TeamStarWolf library's shared vocabulary (data/vocab/vocabulary.json) at the pinned commit.
+- EPSS scores come from FIRST's Exploit Prediction Scoring System (https://www.first.org/epss/), read from api.first.org. FIRST asks for attribution when EPSS data is used in publications or products.

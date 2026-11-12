@@ -16,7 +16,8 @@ import time
 
 from .collect import (BRIEFS_MAX_BYTES, FEED_MAX_BYTES, LEGACY_MAX_ARTICLES, MAX_FEED_ROWS, public_bytes, published, rows_over_message,
                       safe_url, validate_article, validate_observation, validate_window)
-from .mitigations import INDEX_FIELDS, INDEX_FIELDS_V1, INDEX_VERSION, brief_index, join_publication, split_publication, valid_projection
+from .epss import valid_score
+from .mitigations import INDEX_VERSION, INDEX_VERSIONS, brief_index, index_fields, join_publication, split_publication, valid_projection
 from .intelligence import validate_intelligence, validate_weaknesses
 from .mitigations import brief_url
 
@@ -169,17 +170,17 @@ def validate_archive_source(source, snapshot_version):
 def validate_index(index, wanted):
     """The compact per-CVE rows in a schema 7 feed."""
     keys(index, {"version", "fields", "rows"})
-    # Version 1 is the layout published before WP-04 added ssvc_exploitation; a deployed feed in
-    # that layout stays a valid resume and archive input.
+    # Version 1 is the layout published before WP-04 added ssvc_exploitation and version 2 the one
+    # before WP-03 added epss; a deployed feed in either layout stays a valid resume and archive input.
     version = index["version"]
-    require(type(version) is int and version in (1, INDEX_VERSION) and
-            index["fields"] == list(INDEX_FIELDS if version == INDEX_VERSION else INDEX_FIELDS_V1), "Unsupported brief index.")
+    require(type(version) is int and version in INDEX_VERSIONS and index["fields"] == list(index_fields(version)), "Unsupported brief index.")
     rows = index["rows"]
     require(isinstance(rows, dict) and set(rows) == wanted, "The brief index must exactly cover article mentions.")
     for cve, row in rows.items():
         require(CVE.fullmatch(cve) and isinstance(row, list) and len(row) == len(index["fields"]), "Invalid brief index row.")
         state, status, guidance, action, score, cvss_version, added, weaknesses = row[:8]
-        exploitation = row[8] if version == INDEX_VERSION else None
+        exploitation = row[8] if version >= 2 else None
+        epss = row[9] if version >= INDEX_VERSION else None
         require(state in RECORD_STATES and status in SOURCE_STATES and guidance in GUIDANCE_STATES and type(action) is bool, "Invalid brief index state.")
         require(score is None or type(score) in (int, float) and math.isfinite(score) and 0 <= score <= 10, "Invalid brief index score.")
         require(cvss_version is None or isinstance(cvss_version, str) and len(cvss_version) <= 20, "Invalid brief index score version.")
@@ -187,6 +188,7 @@ def validate_index(index, wanted):
         require(isinstance(weaknesses, list) and len(weaknesses) <= 8 and len(set(weaknesses)) == len(weaknesses) and
                 all(isinstance(item, str) and CWE_ID.fullmatch(item) for item in weaknesses), "Invalid brief index weaknesses.")
         require(exploitation is None or isinstance(exploitation, str) and 0 < len(exploitation) <= 40, "Invalid brief index SSVC exploitation.")
+        require(epss is None or valid_score(epss), "Invalid brief index EPSS.")
     return rows
 
 
@@ -265,6 +267,9 @@ def validate_snapshot(value):
         # pair; files published before it have none, and a legacy-labelled snapshot cannot carry it.
         if modern and {"adp", "adp_status"} & set(brief):
             expected = expected | {"adp", "adp_status"}
+        # FIRST's EPSS block since WP-03, optional the same way; valid_projection checks its content.
+        if modern and "epss" in brief:
+            expected = expected | {"epss"}
         keys(brief, expected)
         require(CVE.fullmatch(cve) and valid_projection(brief, cve, safe_url, published), "Invalid structured CVE provenance.")
         if modern:
