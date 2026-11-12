@@ -206,6 +206,13 @@ a.chip:hover { border-color: var(--tsw-link); color: var(--tsw-chip-fg); }
 .has-kev .day-count { color: var(--tsw-red-text); }
 .act-head { font-weight: 600; margin: 0 0 6px; }
 .act-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: var(--text-sm); }
+/* Today's brief head and the Subscribe view: layout only, on the panel's own colours. */
+.brief-list { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.brief-since { margin: 10px 0 0; }
+.feed-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.feed-item p { margin: 4px 0; }
+.feed-link { font-weight: 600; }
+.feed-address { display: block; font-family: var(--tsw-mono); font-size: var(--text-sm); overflow-wrap: anywhere; }
 .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; margin: 10px 0 0; }
 .facts dt { color: var(--tsw-text-muted); font-size: var(--text-xs); }
 .facts dd { margin: 0; font-weight: 600; }

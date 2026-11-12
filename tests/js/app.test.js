@@ -10,18 +10,19 @@ import { inOrder } from "./dom.js";
 import { CONTENT_DATE, ROOT, files, page, server, settle, statusRow, storage } from "./fixtures.js";
 import { createApp } from "../../site/js/main.js";
 import { RELOAD_KEY } from "../../site/js/guard.js";
+import { SEEN_KEY, nextPatchTuesday } from "../../site/js/views/today.js";
 import { cveRegister } from "../../site/js/filters.js";
 import { normalizeCveIndex } from "../../site/js/validate.js";
 
-async function boot({ hash = "", search = "", site = files(), session = storage(), moduleUrl = null, hidden = false } = {}) {
+async function boot({ hash = "", search = "", site = files(), session = storage(), local = storage(), moduleUrl = null, hidden = false } = {}) {
   const shell = page(hash, search);
   shell.doc.hidden = hidden;
   const http = server(site.bodies);
-  const app = createApp({ doc: shell.doc, win: shell.win, location: shell.location, history: shell.history, storage: storage(), session, fetchImpl: http.fetch,
+  const app = createApp({ doc: shell.doc, win: shell.win, location: shell.location, history: shell.history, storage: local, session, fetchImpl: http.fetch,
     subtle: webcrypto.subtle, moduleUrl, every: () => 0, loadLabels: async () => ({ default: { "vendor:fortinet": "Fortinet", "actor:G0016": "APT29" } }) });
   await app.start();
   await settle(60);
-  return { ...shell, http, app, site, session };
+  return { ...shell, http, app, site, session, local };
 }
 
 const ids = elements => elements.map(element => element.getAttribute("id")).filter(Boolean);
@@ -55,7 +56,7 @@ test("the tab strip is two rows: the desks, then only the active desk's views, a
   assert.deepEqual(desks.map(tab => tab.getAttribute("data-desk")), ["explore", "security", "infrastructure", "reference"]);
   assert.deepEqual(desks.map(tab => tab.getAttribute("href")), ["#/explore", "#/today", "#/status", "#/history"]);
   const views = [...doc.querySelectorAll(".tabs .views a")];
-  assert.equal(views.length, 18, "every view link stays in the DOM");
+  assert.equal(views.length, 19, "every view link stays in the DOM");
   const shown = () => views.filter(tab => !tab.hidden).map(tab => tab.getAttribute("data-view"));
   // The Explorer is a desk of one view, so the second row is hidden.
   assert.equal(desks.find(tab => tab.getAttribute("aria-current") === "location").getAttribute("data-desk"), "explore");
@@ -70,7 +71,7 @@ test("the tab strip is two rows: the desks, then only the active desk's views, a
   app.navigate({ view: "vendor", id: "fortinet", query: {} });
   await settle(40);
   assert.equal(desks.find(tab => tab.getAttribute("aria-current") === "location").getAttribute("data-desk"), "reference");
-  assert.deepEqual(shown(), ["history", "vendors", "tags", "reports", "data", "sources", "method", "about"]);
+  assert.deepEqual(shown(), ["history", "vendors", "tags", "reports", "data", "subscribe", "sources", "method", "about"]);
   assert.equal(doc.querySelector(".tabs a[aria-current=page]").getAttribute("data-view"), "vendors", "a vendor page lights the Vendors tab");
   app.navigate({ view: "status", id: null, query: {} });
   await settle(40);
@@ -205,6 +206,61 @@ test("an open record in the URL opens its detail dialog", async () => {
   assert.equal(doc.querySelector("#record-dialog").open, true);
   const text = doc.querySelector("#record-body").textContent;
   assert.ok(text.includes("Vendor fixes exploited flaw") && text.includes("Fortinet") && text.includes("KEV-linked"));
+});
+
+test("Today opens with the brief head: the windows in words, zero said in words, and what is new since this browser's last visit", async () => {
+  const local = storage();
+  const first = await boot({ hash: "#/today", local });
+  let text = first.doc.querySelector("#view").textContent;
+  assert.ok(text.includes("The brief"), text.slice(0, 300));
+  assert.ok(text.includes("1 KEV addition in the last 7 days; 1 KEV entry reaches a federal due date within 14 days."), text.slice(0, 600));
+  assert.ok(text.includes("1 advisory, 1 research entry and 1 press entry in the last 3 days."), text.slice(0, 600));
+  assert.ok(!text.includes("Service health:") && !text.includes("Patch Tuesday:"), "a file the index does not list leaves its line out");
+  assert.ok(text.includes("This browser has no record of an earlier visit."), text.slice(0, 900));
+  // The brief head comes right after the intro, before the act-today strip and the KEV days.
+  const view = first.doc.querySelector("#view");
+  assert.equal(view.children[2].className, "panel brief-head");
+  const seen = JSON.parse(local.getItem(SEEN_KEY));
+  assert.equal(seen.at, CONTENT_DATE);
+  assert.deepEqual([...seen.ids].sort(), ["a-kev-guidance", "a-press", "a-research", "kev:CVE-2026-1000"]);
+  // The same browser again, with nothing new.
+  const second = await boot({ hash: "#/today", local });
+  text = second.doc.querySelector("#view").textContent;
+  assert.ok(text.includes("Nothing new since you last opened Today (content date 3 Nov 2026)."), text.slice(0, 900));
+  // A later run with one more entry and one more KEV addition.
+  const site = files();
+  const recent = JSON.parse(site.bodies["./data/v7/recent.json"]);
+  recent.rows.push({ ...recent.rows[0], id: "a-fresh", title: "A fresh advisory" });
+  recent.kev.push({ ...recent.kev[0], cve: "CVE-2026-1003", date_added: CONTENT_DATE });
+  const third = await boot({ hash: "#/today", local, site: files({ extra: { "recent.json": recent } }) });
+  text = third.doc.querySelector("#view").textContent;
+  assert.ok(text.includes("1 new entry and 1 new KEV addition since you last opened Today (content date 3 Nov 2026)."), text.slice(0, 900));
+  assert.ok(text.includes("2 KEV additions in the last 7 days"));
+  // A re-render in the same page session keeps the baseline: still 1 new entry.
+  third.app.navigate({ view: "explore", id: null, query: {} });
+  await settle(40);
+  third.app.navigate({ view: "today", id: null, query: {} });
+  await settle(60);
+  assert.ok(third.doc.querySelector("#view").textContent.includes("1 new entry and 1 new KEV addition since"));
+  // Storage blocked: the line says so, and the view still renders.
+  const blocked = { getItem() { throw new Error("blocked"); }, setItem() { throw new Error("blocked"); }, removeItem() {} };
+  const fourth = await boot({ hash: "#/today", local: blocked });
+  text = fourth.doc.querySelector("#view").textContent;
+  assert.ok(text.includes("This browser keeps no record between visits, so nothing is marked new."), text.slice(0, 900));
+  assert.ok(text.includes("1 KEV addition in the last 7 days"));
+  // Zero rows: words, not numbers.
+  const empty = await boot({ hash: "#/today", site: files({ extra: { "recent.json": { ...recent, rows: [], kev: [], cves: [] } } }) });
+  text = empty.doc.querySelector("#view").textContent;
+  assert.ok(text.includes("No KEV addition in the last 7 days; no KEV entry reaches a federal due date within 14 days."), text.slice(0, 900));
+  assert.ok(text.includes("No advisory, research or press entry in the last 3 days."), text.slice(0, 900));
+  assert.ok(text.includes("Nothing in these three days."));
+});
+
+test("the next Patch Tuesday is the second Tuesday on or after the day", () => {
+  assert.equal(nextPatchTuesday("2026-11-01"), "2026-11-10");
+  assert.equal(nextPatchTuesday("2026-11-10"), "2026-11-10");
+  assert.equal(nextPatchTuesday("2026-11-11"), "2026-12-08");
+  assert.equal(nextPatchTuesday("2026-12-09"), "2027-01-12");
 });
 
 test("Today shows KEV additions by calendar day and the act-today strip", async () => {

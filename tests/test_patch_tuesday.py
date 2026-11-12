@@ -528,7 +528,8 @@ class BuildTest(unittest.TestCase):
         self.assertEqual(result["patch_tuesday"]["months"], 2)
         self.assertIn("Patch Tuesday: data/v7/patch-tuesday/2026-10.json", self.workspace.log)
         report = shards.package_site(self.workspace.root / "site", out=io.StringIO())
-        self.assertEqual(report["files"], len(index["shards"]) + len(index.get("exports", {}).get("files", [])) + len(support.site_files()) + 3)
+        self.assertEqual(report["files"], len(index["shards"]) + len(index.get("exports", {}).get("files", [])) +
+                         len(index.get("feeds", {}).get("files", [])) + len(support.site_files()) + 3)
 
     def test_an_unlisted_patch_tuesday_file_is_refused_by_the_package(self):
         self.workspace.build()

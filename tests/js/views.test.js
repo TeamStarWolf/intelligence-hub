@@ -72,7 +72,40 @@ async function boot({ hash = "", app: base = site(), matches = false } = {}) {
 
 async function go(shell, hash) { shell.app.navigate(parseRoute(hash, "")); await settle(80); return shell.doc.querySelector("#view"); }
 
-const NEW_VIEWS = [["history", "History"], ["vendors", "Vendors"], ["tags", "Tags"], ["actors", "Actors and malware"], ["reports", "Reports"], ["data", "Data downloads"], ["sources", "Sources and coverage"], ["method", "Method"]];
+const NEW_VIEWS = [["history", "History"], ["vendors", "Vendors"], ["tags", "Tags"], ["actors", "Actors and malware"], ["reports", "Reports"], ["data", "Data downloads"], ["sources", "Sources and coverage"], ["method", "Method"], ["subscribe", "Subscribe"]];
+
+test("the Subscribe view lists the Hub's three Atom feeds from the index, then podcasts and newsletters as titles and links only", async () => {
+  const shell = await boot();
+  const target = await go(shell, "#/subscribe");
+  const own = [...target.querySelectorAll(".feed-list a")];
+  assert.deepEqual(own.map(anchor => anchor.getAttribute("href")), ["./data/v7/feeds/kev.xml", "./data/v7/feeds/incidents.xml", "./data/v7/feeds/patch-calendar.xml"]);
+  assert.deepEqual(own.map(anchor => anchor.textContent), ["KEV additions", "Service-health incidents", "Patch Tuesday calendar"]);
+  assert.ok(target.textContent.includes("https://teamstarwolf.github.io/intelligence-hub/data/v7/feeds/kev.xml"), "the public address to copy");
+  const external = [...target.querySelectorAll("a")].filter(anchor => anchor.getAttribute("target") === "_blank");
+  assert.ok(external.length >= 10, "podcast and newsletter links");
+  for (const anchor of external) {
+    assert.equal(safeUrl(anchor.getAttribute("href")), anchor.getAttribute("href"), anchor.textContent);
+    assert.equal(anchor.getAttribute("rel"), "noopener noreferrer nofollow");
+  }
+  assert.ok(target.textContent.includes("Podcasts") && target.textContent.includes("Newsletters"));
+  assert.ok(!shell.http.requests.some(request => request.path.includes("/feeds/")), "the view reads no feed file");
+  assert.ok(!target.querySelector("audio") && !target.querySelector("iframe"), "titles and links only");
+  // The Panels sidebar names the feeds and links the view.
+  shell.doc.querySelector("#sidebar-toggle").dispatchEvent({ type: "click" });
+  await settle(80);
+  const side = shell.doc.querySelector("#sidebar-body").textContent;
+  assert.ok(side.includes("3 Atom feeds: KEV additions, service-health incidents and the Patch Tuesday calendar."), side.slice(0, 1200));
+  // An index without a feeds entry: the view says so and still lists the lanes.
+  const bare = site();
+  const index = JSON.parse(bare.bodies["./data/v7/index.json"]);
+  delete index.feeds;
+  bare.bodies["./data/v7/index.json"] = JSON.stringify(index) + "\n";
+  const other = await boot({ app: bare });
+  const view = await go(other, "#/subscribe");
+  assert.ok(view.textContent.includes("No feeds are listed in this index."));
+  assert.equal(view.querySelectorAll(".feed-list a").length, 0);
+  assert.ok(view.textContent.includes("Podcasts"));
+});
 
 test("the default route still renders the Explorer first and none of the new views", async () => {
   const shell = await boot();

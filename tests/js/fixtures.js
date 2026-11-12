@@ -107,7 +107,8 @@ export function files({ schema = 7, layout = "b".repeat(64), extra = {}, omit = 
     observed_interval_hours: { median: 4.3, max: 10.2, runs_counted: 10 }, requested_cron: "7 */2 * * *", counts: { articles: 6, kev: 2, cves: 3, live_rows: 5, history_rows: 1 },
     shards: entries, v6_files: [{ path: "data/feed.json", bytes: 10, sha256: "e".repeat(64) }, { path: "data/briefs.json", bytes: 10, sha256: "f".repeat(64) }],
     cve_buckets: { published: false, note: "Not yet." }, notices: ["Publisher rows carry headlines and links only."],
-    exports: { status: "ok", reason: null, files: [{ path: "exports/articles-2026.csv", bytes: 100, sha256: "1".repeat(64) }, { path: "exports/manifest.json", bytes: 50, sha256: "2".repeat(64) }, { path: "exports/data-dictionary.md", bytes: 50, sha256: "3".repeat(64) }] }
+    exports: { status: "ok", reason: null, files: [{ path: "exports/articles-2026.csv", bytes: 100, sha256: "1".repeat(64) }, { path: "exports/manifest.json", bytes: 50, sha256: "2".repeat(64) }, { path: "exports/data-dictionary.md", bytes: 50, sha256: "3".repeat(64) }] },
+    feeds: { status: "ok", reason: null, files: [{ path: "feeds/incidents.xml", bytes: 900, sha256: "4".repeat(64) }, { path: "feeds/kev.xml", bytes: 800, sha256: "5".repeat(64) }, { path: "feeds/patch-calendar.xml", bytes: 700, sha256: "6".repeat(64) }] }
   };
   bodies["./data/v7/index.json"] = json(index);
   return { bodies, index };

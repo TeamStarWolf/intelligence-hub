@@ -729,19 +729,21 @@ def check_bounds(feed_raw, briefs_raw):
     return reports
 
 
-def publication_changed(content_changed, changed_shards, removed_shards, exports_changed, status_summary):
+def publication_changed(content_changed, changed_shards, removed_shards, exports_changed, status_summary, feeds_changed=False):
     """Whether this run deploys: the typed 'changed' decision.
 
     sources.json carries every run's attempt clocks, so on its own it never republishes; the v6
     content revision ignores those clocks in the same way. A change in the published export files
     (for example a new dictionary) republishes too. The service-health board, its index and the
     outage signals carry fetch clocks too; the board and the outage signals republish when their
-    digests without clocks change, and incident history republishes through its month files.
+    digests without clocks change, and incident history republishes through its month files. The
+    Hub's Atom feeds carry no run clock, so they change only with their entries (a new KEV
+    addition, a new or updated incident, a new Patch Tuesday month or the next expected date).
     """
     from .status import QUIET as status_quiet
     quiet = {"sources.json", *status_quiet}
     return bool(content_changed or removed_shards != [] or any(path not in quiet for path in changed_shards) or exports_changed or
-                status_summary.get("board_changed") is True or status_summary.get("outages_changed") is True)
+                status_summary.get("board_changed") is True or status_summary.get("outages_changed") is True or feeds_changed)
 
 
 def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=40, patch_limit=None):
@@ -893,7 +895,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     export_files, exported = build_analytics_exports(snapshot["articles"], tagged, sources)
     v7 = build_v7(snapshot, previous, kev.get("catalog"), reports, intelligence_inputs, end, feed_raw, briefs_raw, tagged,
                   exports_index(export_files, exported), patch, service_health=service_health)
-    changed = publication_changed(changed, v7["changed_shards"], v7["removed_shards"], v7["exports_changed"], service_health["summary"])
+    changed = publication_changed(changed, v7["changed_shards"], v7["removed_shards"], v7["exports_changed"], service_health["summary"], v7["feeds_changed"])
     if refresh:
         write_json(cache_path, cache)
         write_json(cve_path, projections, compact=True)
@@ -910,7 +912,8 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
         "source_partial": sum(item["status"] == "partial" for item in health), "source_total": len(health),
         "coverage": snapshot["coverage"], "mitigations": mitigation_stats, "reports": reports, "changed": changed, "generated_at": snapshot["generated_at"],
         "schema_version": SNAPSHOT_VERSION, "publication": bounds, "rows": rows, "source_failures": failures[:100],
-        "changed_shards": v7["changed_shards"], "removed_shards": v7["removed_shards"], "exports_changed": v7["exports_changed"], "v7": v7["summary"],
+        "changed_shards": v7["changed_shards"], "removed_shards": v7["removed_shards"], "exports_changed": v7["exports_changed"],
+        "feeds_changed": v7["feeds_changed"], "v7": v7["summary"],
         "tagging": tagged["summary"], "exports": exported, "patch_tuesday": v7["patch_tuesday"], "status": service_health["summary"]}
     result_raw = (json.dumps(result, ensure_ascii=False, allow_nan=False, indent=2) + "\n").encode("utf-8")
     require(len(result_raw) <= RESULT_MAX_BYTES, "The collection result would exceed its " + format(RESULT_MAX_BYTES, ",") + "-byte bound.")
@@ -1222,7 +1225,11 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
     for path, value in health_files.items():
         require(shards.SHARD_PATH.fullmatch(path) and path not in files, "Unexpected service-health shard " + path + ".")
         files[path] = value
+    # The Hub's own Atom feeds, from the shards above; written with them, listed under "feeds".
+    feed_files = shards.build_feeds(files, end)
+    feeds = shards.feeds_entry(feed_files)
     raw, entries = shards.serialize(files)
+    raw.update(feed_files)
     # Every shard's size against the per-file cap, and each history file's against its split threshold.
     for path in sorted(raw):
         print(shards.headroom_line(path, len(raw[path])), file=sys.stderr)
@@ -1247,18 +1254,19 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
     index = shards.build_index(entries, generated_at=snapshot["generated_at"], end=end, feed_content_revision=snapshot["content_revision"],
                                layout_revision=snapshot["layout_revision"], runs=runs, counts=counts,
                                v6_files=[shards.file_entry("data/feed.json", feed_raw), shards.file_entry("data/briefs.json", briefs_raw)],
-                               tagging=(tagged or {}).get("index"), exports=exports_entry)
+                               tagging=(tagged or {}).get("index"), exports=exports_entry, feeds=feeds)
     index_raw = shards.canonical(index)
     shards.read_index(index_raw)
     total = sum(len(item) for item in raw.values()) + len(index_raw)
     print("data/v7: {:,} shards, {:,} bytes; {:,} changed and {:,} removed since the previous index".format(
         len(entries), total, len(changed_shards), len(removed_shards)), file=sys.stderr)
     summary = {"shards": len(entries), "bytes": total, "content_revision": index["content_revision"],
-               "observed_interval_hours": index["observed_interval_hours"], "runs_recorded": len(runs), "history": history_summary}
+               "observed_interval_hours": index["observed_interval_hours"], "runs_recorded": len(runs), "history": history_summary,
+               "feeds": len(feed_files)}
     export_paths = [item["path"] for item in (exports_entry or {}).get("files", [])]
     return {"raw": raw, "index_raw": index_raw, "index": index, "changed_shards": changed_shards,
             "removed_shards": removed_shards, "summary": summary, "export_paths": export_paths, "patch_tuesday": patch_summary,
-            "exports_changed": shards.exports_changed(previous_index, exports_entry)}
+            "exports_changed": shards.exports_changed(previous_index, exports_entry), "feeds_changed": shards.feeds_changed(previous_index, feeds)}
 
 
 def content_revision(snapshot):

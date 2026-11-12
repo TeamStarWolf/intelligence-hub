@@ -42,6 +42,15 @@ test("every shard of the offline build validates and matches its manifest sha256
   // Every brief the Patch Tuesday index lists is a shard the manifest lists too.
   if (patchIndex) assert.deepEqual(patchIndex.months.map(item => item.month).sort(), patchMonths.sort());
   assert.ok(status.current && status.current.sources.length > 0, "the build writes status/current.json");
+  // The Hub's Atom feeds: listed under feeds with matching bytes and sha256, an Atom document each.
+  assert.equal(index.feeds.status, "ok");
+  assert.deepEqual(index.feeds.files.map(file => file.path), ["feeds/incidents.xml", "feeds/kev.xml", "feeds/patch-calendar.xml"]);
+  for (const file of index.feeds.files) {
+    const raw = readFileSync(base + "v7/" + file.path);
+    assert.equal(raw.length, file.bytes, file.path);
+    assert.equal(createHash("sha256").update(raw).digest("hex"), file.sha256, file.path);
+    assert.ok(raw.toString("utf8").startsWith('<?xml version="1.0" encoding="utf-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom">'), file.path);
+  }
   assert.ok(status.incidents > 0, "the build writes a status month file");
   // recent.json covers the content date and holds only live rows the live shards also hold.
   assert.ok(recent, "the build writes recent.json");

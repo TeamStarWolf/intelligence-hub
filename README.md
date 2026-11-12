@@ -17,7 +17,7 @@ every tab is also listed in the **Panels** sidebar, which starts closed:
 | Tab | What it holds |
 | --- | --- |
 | Explore | Search, filters (desk, kind, source class, event type, exploitation, KEV-linked, CISA required action, sector, region, vendor, product, actor, malware, CWE, ATT&CK technique, source, year, month, date range), sort and results. |
-| Today | KEV additions by calendar day, KEV entries due in the next 14 days, then the last three days of advisories, research and press. |
+| Today | The brief head (the day's counts in words, the service-health board, the latest Patch Tuesday brief and what is new since this browser's last visit), KEV additions by calendar day, KEV entries due in the next 14 days, then the last three days of advisories, research and press. |
 | Advisories, Research, News | The Explorer limited to vendor and government sources, research teams, or the press. |
 | Known exploited | CISA's KEV ledger by date added, with the directive each required action cites. |
 | CVEs | Every CVE an entry mentions, with its guidance label, KEV state and CVSS; a CVE opens its source-led brief and its CVE.org record. |
@@ -27,6 +27,7 @@ every tab is also listed in the **Panels** sidebar, which starts closed:
 | Actors and malware | Threat groups, malware and tools that entries name, each linking back to its library page. |
 | Reports | Every report edition, the collector's run record and cadence, and the catalog's review notes. |
 | Data | Per-year CSV and JSON Lines exports, the manifest, the data dictionary and the licence table. |
+| Subscribe | The Hub's three Atom feeds (KEV additions, service-health incidents, the Patch Tuesday calendar) with the address to copy into a feed reader, then podcasts and newsletters as titles and links only. |
 | Sources | The run record, the history coverage matrix by source and year, and the source ledger. |
 | Method | The evidence rules, confidence levels, coverage statuses and licence notices. |
 | About | What the Hub is and what it covers. |
@@ -35,6 +36,11 @@ every tab is also listed in the **Panels** sidebar, which starts closed:
 
 Today and Service health take `?wall=1` for a monitor: the tab rows, controls and footer are
 hidden and the type is larger, and nothing more is read.
+
+The collector also writes three Atom feeds under `data/v7/feeds/`: `kev.xml` (the latest KEV
+additions), `incidents.xml` (the latest service-health incidents) and `patch-calendar.xml` (the
+next expected Patch Tuesday and every built monthly brief). Each carries the Hub's own titles,
+dates and links to the Hub's routes, at most 50 entries, and changes only when its entries do.
 
 Every view, filter, page and open entry has its own address; [docs/URLS.md](docs/URLS.md) is the
 route contract that the TeamStarWolf library's links follow.

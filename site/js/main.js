@@ -12,7 +12,7 @@ import { bindExplore, recordDetail, renderExplore } from "./views/explore.js";
 import { renderToday } from "./views/today.js";
 import { renderKev } from "./views/kev.js";
 import { briefBody, renderCves } from "./views/cves.js";
-import { renderAbout, renderData, renderReports, renderSidebar, renderSources } from "./views/panels.js";
+import { renderAbout, renderData, renderReports, renderSidebar, renderSources, renderSubscribe } from "./views/panels.js";
 import { renderHistory } from "./views/history.js";
 import { renderVendor, renderVendors } from "./views/vendors.js";
 import { renderTags } from "./views/tags.js";
@@ -22,10 +22,11 @@ import { renderPatchTuesday } from "./views/patch-tuesday.js";
 import { createLiveBoard, renderStatus } from "./views/status.js";
 
 const TITLES = { explore: "Explorer", today: "Today", advisories: "Advisories", kev: "Known exploited", research: "Research", news: "News", cves: "CVE register", cve: "CVE",
-  history: "History", vendors: "Vendors", vendor: "Vendor", tags: "Tags", actors: "Actors and malware", actor: "Actor", malware: "Malware", reports: "Reports", sources: "Sources", method: "Method", data: "Data", about: "About", "patch-tuesday": "Patch Tuesday", status: "Service health" };
+  history: "History", vendors: "Vendors", vendor: "Vendor", tags: "Tags", actors: "Actors and malware", actor: "Actor", malware: "Malware", reports: "Reports", sources: "Sources", method: "Method", data: "Data", about: "About", "patch-tuesday": "Patch Tuesday", status: "Service health",
+  subscribe: "Subscribe" };
 const OTHER_VIEWS = { today: renderToday, kev: renderKev, cves: renderCves, cve: renderCves, history: renderHistory, vendors: renderVendors, vendor: renderVendor, tags: renderTags,
   actors: renderActors, actor: renderEntity, malware: renderEntity, reports: renderReports, sources: renderSources, method: renderMethod, data: renderData, about: renderAbout,
-  "patch-tuesday": renderPatchTuesday, status: renderStatus };
+  "patch-tuesday": renderPatchTuesday, status: renderStatus, subscribe: renderSubscribe };
 // The tab a view sits under: a page with an id lights its index tab.
 const TAB_OF = { cve: "cves", vendor: "vendors", actor: "actors", malware: "actors" };
 
@@ -46,6 +47,9 @@ export function createApp(env) {
   let lastPoll = 0;
   let pollTimer = null;
   let fatal = false;
+  // Today's since-last-visit baseline (views/today.js): what this browser had seen before this
+  // page session, read from storage once and compared on every render of Today.
+  const visit = { today: null };
 
   // The notice is a toast fixed to the bottom of the viewport (styles.css .toast), so a reader
   // sees it wherever the results are scrolled; Dismiss hides it until the next notice.
@@ -164,7 +168,7 @@ export function createApp(env) {
     el("#view").hidden = list;
     if (route.view !== "status") live.stop();
     if (!store.state.mode || fatal) return;
-    const ctx = { route, store, el, doc, navigate, current, target: el("#view"), live };
+    const ctx = { route, store, el, doc, navigate, current, target: el("#view"), live, storage, visit };
     try {
       if (list) {
         const { rows, cveIndex } = await renderExplore(ctx);

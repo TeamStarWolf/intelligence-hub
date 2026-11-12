@@ -1,5 +1,5 @@
-// Everything that is not the Explorer: the sidebar panels and the Reports, Sources, Data and
-// About tabs. The sidebar starts collapsed and reads its data only when it is opened.
+// Everything that is not the Explorer: the sidebar panels and the Reports, Sources, Data,
+// Subscribe and About tabs. The sidebar starts collapsed and reads its data only when it is opened.
 import { VIEW_DESK, formatRoute } from "../router.js";
 import { count, dateLabel, hoursLabel, link, node, routeLink, stamp } from "../util.js";
 import { definitionList, section } from "./common.js";
@@ -11,7 +11,33 @@ import { MITRE_NOTICES, licenceTable } from "./method.js";
 export const OTHER_VIEW_LINKS = [["today", "Today"], ["advisories", "Advisories"], ["kev", "Known exploited"], ["research", "Research"], ["news", "News"], ["cves", "CVE register"],
   ["actors", "Actors and malware"], ["patch-tuesday", "Patch Tuesday"], ["status", "Service health"],
   ["history", "History, 1998 to today"], ["vendors", "Vendors"], ["tags", "Tags"], ["reports", "Reports and run record"],
-  ["data", "Data downloads"], ["sources", "Sources and coverage"], ["method", "Method"], ["about", "About"]];
+  ["data", "Data downloads"], ["subscribe", "Subscribe: feeds, podcasts and newsletters"], ["sources", "Sources and coverage"], ["method", "Method"], ["about", "About"]];
+// The public site, for the feed addresses a reader copies into a feed reader.
+export const HUB_URL = "https://teamstarwolf.github.io/intelligence-hub/";
+// The Hub's own Atom feeds, in the order the Subscribe view lists them (index.json feeds.files).
+export const HUB_FEEDS = [
+  ["feeds/kev.xml", "KEV additions", "The latest additions to CISA's Known Exploited Vulnerabilities catalog, up to 50 entries, each linking to the Hub's CVE brief. The entry names are CISA's own text."],
+  ["feeds/incidents.xml", "Service-health incidents", "The latest incidents on the vendor status pages and cloud health feeds the Hub reads, newest update first, each linking to the Hub's Service health view and to the vendor's own incident page."],
+  ["feeds/patch-calendar.xml", "Patch Tuesday calendar", "The next expected Patch Tuesday, then every monthly release the Hub has a brief for, with its headline counts."]
+];
+// Podcasts and newsletters the desk reads, as titles and links only. The Hub collects nothing
+// from them, and a link that fails safeUrl renders as plain text.
+export const PODCASTS = [
+  ["SANS Internet Storm Center Stormcast", "https://isc.sans.edu/podcast.html", "The Internet Storm Center's short daily security news podcast."],
+  ["Risky Business", "https://risky.biz/", "A weekly security news and interview podcast."],
+  ["CyberWire Daily", "https://thecyberwire.com/podcasts/daily-podcast", "N2K CyberWire's daily security news podcast."],
+  ["Click Here", "https://therecord.media/podcast", "The Record's podcast on cybercrime and security reporting."],
+  ["Threat Vector", "https://www.paloaltonetworks.com/podcasts/threat-vector", "Palo Alto Networks Unit 42's podcast on threats and security operations."],
+  ["Security Now", "https://twit.tv/shows/security-now", "TWiT's weekly security podcast."],
+  ["Darknet Diaries", "https://darknetdiaries.com/", "A narrative podcast about hacking, breaches and cybercrime."]
+];
+export const NEWSLETTERS = [
+  ["CISA email updates", "https://public.govdelivery.com/accounts/USDHSCISA/subscriber/new", "CISA's own mailing lists for alerts, advisories and KEV catalog updates."],
+  ["Risky Business News", "https://news.risky.biz/", "The Risky Business team's security news newsletter."],
+  ["SANS NewsBites", "https://www.sans.org/newsletters/newsbites/", "SANS's security news digest with editor comments."],
+  ["tl;dr sec", "https://tldrsec.com/", "A weekly newsletter of security tools, talks and research."],
+  ["CyberWire Daily Briefing", "https://thecyberwire.com/newsletters/daily-briefing", "N2K CyberWire's daily security news briefing."]
+];
 const DESK_NAMES = { security: "Security desk", infrastructure: "Infrastructure desk", reference: "Reference" };
 
 export function cadenceText(index) {
@@ -73,7 +99,49 @@ export async function renderSidebar(ctx) {
   reports.append(more("All report editions", "reports"));
   sources.append(node("p", "", ledger ? sourceSummary(ledger) : "The source ledger could not be read."), more("Source ledger", "sources"));
   const exports = store.state.mode === "v7" ? store.state.index.exports : null;
-  data.append(node("p", "", exports && exports.status === "ok" ? count(exports.files.length, "export file") + ": per-year CSV and JSONL with every tag, a manifest and a data dictionary." : "No exports are listed in this index."), more("Data downloads", "data"));
+  const feeds = store.state.mode === "v7" ? store.state.index.feeds : null;
+  data.append(node("p", "", exports && exports.status === "ok" ? count(exports.files.length, "export file") + ": per-year CSV and JSONL with every tag, a manifest and a data dictionary." : "No exports are listed in this index."),
+    node("p", "", feeds && feeds.status === "ok" ? count(feeds.files.length, "Atom feed") + ": KEV additions, service-health incidents and the Patch Tuesday calendar." : "No feeds are listed in this index."),
+    more("Data downloads", "data"), more("Subscribe", "subscribe"));
+}
+
+function lane(title, intro, items) {
+  const block = section(title);
+  block.append(node("p", "muted", intro));
+  const list = node("ul", "detail-list");
+  for (const [name, url, text] of items) { const item = node("li"); item.append(link(name, url), node("span", "muted", " " + text)); list.append(item); }
+  block.append(list);
+  return block;
+}
+
+// Subscribe: the Hub's own Atom feeds from the index (links to the files on this site, with the
+// public address to copy), then podcasts and newsletters as titles and links only.
+export function renderSubscribe(ctx) {
+  const { target, store } = ctx;
+  const parts = [node("h1", "view-title", "Subscribe"),
+    node("p", "view-intro", "The Hub's own feeds for a feed reader, then the podcasts and newsletters the desk reads. The Hub collects nothing from the podcasts and newsletters; they are titles and links only.")];
+  const own = section("The Hub's feeds (Atom)");
+  const feeds = store.state.mode === "v7" ? store.state.index.feeds : null;
+  if (feeds && feeds.status === "ok") {
+    own.append(node("p", "", "Three Atom feeds, rebuilt by the collector when their entries change and served from this site. Copy an address into your feed reader."));
+    const list = node("ul", "feed-list");
+    for (const [path, title, text] of HUB_FEEDS) {
+      if (!feeds.files.some(item => item.path === path)) continue;
+      const item = node("li", "feed-item");
+      const anchor = node("a", "feed-link", title);
+      anchor.href = "./data/v7/" + path; anchor.type = "application/atom+xml";
+      item.append(anchor, node("p", "muted", text), node("code", "feed-address", HUB_URL + "data/v7/" + path));
+      list.append(item);
+    }
+    own.append(list);
+  } else own.append(node("p", "notice-inline", "No feeds are listed in this index" + (feeds && feeds.reason ? ": " + feeds.reason : ".")));
+  own.append(node("p", "muted", "The feeds carry the Hub's own titles, dates and links. KEV entry names are CISA's text; incident names are the vendors' status-page text."));
+  const data = node("p"); data.append(routeLink("The CSV and JSON Lines exports are on the Data tab", formatRoute({ view: "data", id: null, query: {} }), "more-link"));
+  own.append(data);
+  parts.push(own,
+    lane("Podcasts", "Security news and analysis to listen to.", PODCASTS),
+    lane("Newsletters", "Security news by email.", NEWSLETTERS));
+  target.replaceChildren(...parts);
 }
 
 // The collector's own run record: the cadence statement and the published runs, newest first.
