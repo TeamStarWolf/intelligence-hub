@@ -4,7 +4,7 @@
 import { formatRoute, withQuery } from "../router.js";
 import { cveRegister, kevLinked } from "../filters.js";
 import { count, dateLabel, link, node, routeLink, stamp } from "../util.js";
-import { cveOrgLink, libraryDoor, pager } from "./common.js";
+import { libraryDoor, pager } from "./common.js";
 import { pageSize } from "../limits.js";
 
 export const GUIDANCE = { "publisher-guidance": "Publisher guidance", "cisa-action": "CISA action", "needs-review": "Needs review" };
@@ -27,7 +27,7 @@ function controls(ctx) {
     form.append(wrap);
   }
   const sort = node("select"); sort.setAttribute("aria-label", "Sort");
-  for (const [value, text] of [["cve-desc", "CVE descending"], ["cve-asc", "CVE ascending"], ["cvss-desc", "CVSS highest"], ["cvss-asc", "CVSS lowest"], ["kev-desc", "Newest KEV additions"]]) { const option = node("option", "", text); option.value = value; sort.append(option); }
+  for (const [value, text] of [["cve-desc", "CVE descending"], ["cve-asc", "CVE ascending"], ["cvss-desc", "CNA CVSS highest"], ["cvss-asc", "CNA CVSS lowest"], ["kev-desc", "Newest KEV additions"]]) { const option = node("option", "", text); option.value = value; sort.append(option); }
   sort.value = route.query.sort || "cve-desc";
   sort.addEventListener("change", () => navigate(withQuery(base, { sort: sort.value }), { replace: true }));
   form.append(sort);
@@ -36,9 +36,9 @@ function controls(ctx) {
 
 export function registerTable(rows) {
   const table = node("table", "data-table");
-  table.append(node("caption", "", "CVEs that saved entries mention. Guidance is the brief's own label; KEV and the CISA required action are separate catalog facts. CVSS versions are not normalized."));
+  table.append(node("caption", "", "CVEs that saved entries mention. Guidance is the brief's own label; KEV and the CISA required action are separate catalog facts. The CVSS column is the CNA's metric, versions not normalized; CISA's ADP CVSS and SSVC values are in the brief."));
   const head = node("tr");
-  for (const label of ["CVE", "Guidance", "KEV added", "CVSS", "CWE"]) { const cell = node("th", "", label); cell.scope = "col"; head.append(cell); }
+  for (const label of ["CVE", "Guidance", "KEV added", "CNA CVSS", "CWE"]) { const cell = node("th", "", label); cell.scope = "col"; head.append(cell); }
   const thead = node("thead"); thead.append(head);
   const body = node("tbody");
   for (const row of rows) {
@@ -81,6 +81,59 @@ function guidanceItems(title, values) {
   return item;
 }
 
+// Outbound links built from the CVE id alone, so a reader reaches the surveyed products without
+// this site fetching any of them. Each pattern answered for a real KEV CVE on 2026-11-12 (the
+// pull request that added the row records the status codes). GreyNoise's /cve/ page pattern and
+// Vulners did not answer, so they are not listed; AttackerKB was retired on 2026-08-18.
+export const ELSEWHERE = [
+  ["CVE.org record", cve => "https://www.cve.org/CVERecord?id=" + cve],
+  ["NVD", cve => "https://nvd.nist.gov/vuln/detail/" + cve],
+  ["FIRST EPSS (API JSON)", cve => "https://api.first.org/data/v1/epss?cve=" + cve],
+  ["Rapid7 vulnerability database", cve => "https://www.rapid7.com/db/?q=" + cve]
+];
+
+// The Elsewhere row: every link goes through link(), so it passes safeUrl or renders as text.
+export function elsewhereRow(cve, lib = null) {
+  const row = node("p", "elsewhere");
+  row.append(node("strong", "", "Elsewhere: "));
+  ELSEWHERE.forEach(([label, pattern], position) => { if (position) row.append(node("span", "", " · ")); row.append(link(label, pattern(cve))); });
+  const door = libraryDoor(lib, "cve:" + cve, "TeamStarWolf library notes on " + cve);
+  if (door) row.append(node("span", "", " · "), door);
+  row.append(node("span", "muted", " Links built from the CVE id; this site fetched none of these pages."));
+  return row;
+}
+
+function cvssLine(issuer, cvss) {
+  const row = node("p");
+  row.append(node("strong", "", issuer + " CVSS v" + (cvss.version || "?") + ": "), node("span", "", typeof cvss.score === "number" ? cvss.score.toFixed(1) : "score not supplied"));
+  if (cvss.vector) row.append(node("span", "mono", " " + cvss.vector));
+  return row;
+}
+
+// Every severity value with its issuer: the CNA's CVSS, CISA's ADP CVSS when CISA supplied one,
+// and CISA's SSVC decision-point values with their date. Nothing is blended, averaged or ranked.
+export function severityBlock(record) {
+  const item = block("Severity sources");
+  if (record.cvss) item.append(cvssLine("CNA", record.cvss));
+  else item.append(node("p", "muted", "CNA CVSS: none supplied in this saved record."));
+  const adp = record.adp;
+  if (record.adp_status === "not_projected") item.append(node("p", "muted", "CISA ADP: not read for this saved record yet; a later collector run projects it from the same CVE record."));
+  else if (!adp) item.append(node("p", "muted", "CISA ADP: no CISA ADP container in the saved CVE record."));
+  else {
+    if (adp.cvss) item.append(cvssLine("CISA ADP", adp.cvss));
+    else item.append(node("p", "muted", "CISA ADP CVSS: none supplied."));
+    if (adp.ssvc) {
+      const row = node("p");
+      row.append(node("strong", "", "CISA SSVC decision points" + (adp.ssvc.timestamp ? ", " + stamp(adp.ssvc.timestamp) : "") + ": "),
+        node("span", "", ["Exploitation " + (adp.ssvc.exploitation || "not stated"), "Automatable " + (adp.ssvc.automatable || "not stated"), "Technical Impact " + (adp.ssvc.technical_impact || "not stated")].join(" · ")));
+      item.append(row);
+    } else item.append(node("p", "muted", "CISA SSVC: none supplied."));
+    if (adp.date) item.append(node("p", "muted", "CISA ADP container updated " + stamp(adp.date) + "."));
+  }
+  item.append(node("p", "muted", "Each value is shown as its issuer published it, with the CVSS version. Nothing here is combined or averaged; the register's CVSS sort uses the CNA CVSS only."));
+  return item;
+}
+
 // The brief for one CVE, built from the saved record only. No lookup leaves this site.
 // lib is the library-door module: a CVE the shared vocabulary covers links its library notes.
 export function briefBody(record, indexRow, rows, lib = null) {
@@ -89,18 +142,13 @@ export function briefBody(record, indexRow, rows, lib = null) {
   overview.append(node("p", "chips", ""));
   const badges = overview.lastChild;
   const guidance = record.record_state === "REJECTED" ? "needs-review" : record.analysis.guidance_status;
-  badges.append(node("span", "chip", GUIDANCE[guidance]), node("span", "chip", record.record_state + " record, CNA " + record.source_status), node("span", "chip", typeof record.cvss?.score === "number" ? "CVSS " + record.cvss.score.toFixed(1) + " (v" + (record.cvss.version || "?") + ")" : "CVSS unknown"));
+  badges.append(node("span", "chip", GUIDANCE[guidance]), node("span", "chip", record.record_state + " record, CNA " + record.source_status), node("span", "chip", typeof record.cvss?.score === "number" ? "CNA CVSS " + record.cvss.score.toFixed(1) + " (v" + (record.cvss.version || "?") + ")" : "CNA CVSS not supplied"));
   if (record.kev) badges.append(node("span", "chip chip-kev", "KEV added " + dateLabel(record.kev.date_added)));
   if (record.record_state === "REJECTED") overview.append(node("p", "notice-inline", "This CVE record is rejected. Read its original disposition before treating it as a vulnerability."));
   overview.append(node("p", "", record.description || "Description not supplied in this saved record."));
-  if (record.cvss?.vector) overview.append(node("p", "mono", "Vector: " + record.cvss.vector));
   overview.append(node("p", "muted", "CNA source updated " + stamp(record.source_updated_at) + " · retrieved " + stamp(record.retrieved_at) + ". Review affected products and your installed version before acting; this is not a device assessment."));
-  const elsewhere = node("p");
-  elsewhere.append(cveOrgLink(record.cve, "The CVE Program's record for " + record.cve));
-  const door = libraryDoor(lib, "cve:" + record.cve, "TeamStarWolf library notes on " + record.cve);
-  if (door) elsewhere.append(node("span", "", " · "), door);
-  overview.append(elsewhere);
-  parts.push(overview);
+  overview.append(elsewhereRow(record.cve, lib));
+  parts.push(overview, severityBlock(record));
   const action = block("CISA catalog action");
   action.append(node("p", "", record.required_action || "No CISA required action is supplied for this record."));
   if (record.required_action_source_url) { const row = node("p"); row.append(link("CISA action source", record.required_action_source_url)); action.append(row); }

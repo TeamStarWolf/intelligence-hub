@@ -356,20 +356,21 @@ export function normalizeMitigation(value, key, schemaVersion) {
 // A schema 7 feed lists each CVE as one compact row; the full brief is read from data/briefs.json when needed.
 function indexRecord(key, row) {
   requireValue(/^CVE-[0-9]{4}-[0-9]{4,8}$/.test(key) && Array.isArray(row) && row.length === indexFields.length);
-  const [state, status, guidance, action, score, version, added, weaknesses] = row;
+  const [state, status, guidance, action, score, version, added, weaknesses, exploitation] = row;
   requireValue(["PUBLISHED", "REJECTED", "UNKNOWN"].includes(state) && ["ok", "failed", "pending"].includes(status) && ["publisher-guidance", "cisa-action", "needs-review"].includes(guidance) && typeof action === "boolean");
   requireValue(score === null || (typeof score === "number" && Number.isFinite(score) && score >= 0 && score <= 10));
   const ids = list(weaknesses, 8).map(id => intelligenceId(id, /^CWE-[1-9][0-9]{0,5}$/)); intelligenceUnique(ids);
   return {
     cve: key, title: "", record_state: state, source_status: status, analysis: { guidance_status: guidance }, required_action_present: action,
     cvss: score === null && version === null ? null : { score, version: optionalText(version, 100) },
-    kev: added === null ? null : { date_added: timestamp(added, false) }, weaknesses: ids.map(id => ({ id })), products: []
+    kev: added === null ? null : { date_added: timestamp(added, false) }, weaknesses: ids.map(id => ({ id })), products: [],
+    ssvc_exploitation: optionalText(exploitation, 100)
   };
 }
 
 function normalizeIndex(value) {
   exactKeys(value, ["version", "fields", "rows"]);
-  requireValue(value.version === 1 && Array.isArray(value.fields) && value.fields.length === indexFields.length && value.fields.every((field, position) => field === indexFields[position]));
+  requireValue(value.version === 2 && Array.isArray(value.fields) && value.fields.length === indexFields.length && value.fields.every((field, position) => field === indexFields[position]));
   requireValue(value.rows && typeof value.rows === "object" && !Array.isArray(value.rows));
   const entries = Object.entries(value.rows); requireValue(entries.length <= 15000);
   return new Map(entries.map(([key, row]) => [key, indexRecord(key, row)]));

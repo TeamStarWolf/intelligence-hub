@@ -219,7 +219,7 @@ function cveRows(rawFields, rawRows) {
   const rows = new Map();
   for (const row of list(rawRows, 30000)) {
     requireValue(Array.isArray(row) && row.length === fields.length);
-    const [cve, state, status, guidance, action, score, version, added, weaknesses, bucket] = row;
+    const [cve, state, status, guidance, action, score, version, added, weaknesses, exploitation, bucket] = row;
     requireValue(typeof cve === "string" && CVE.test(cve) && !rows.has(cve));
     requireValue(["PUBLISHED", "REJECTED", "UNKNOWN"].includes(state) && ["ok", "failed", "pending"].includes(status) && ["publisher-guidance", "cisa-action", "needs-review"].includes(guidance) && typeof action === "boolean");
     requireValue(score === null || (typeof score === "number" && Number.isFinite(score) && score >= 0 && score <= 10));
@@ -227,7 +227,9 @@ function cveRows(rawFields, rawRows) {
     rows.set(cve, {
       cve, record_state: state, source_status: status, guidance: state === "REJECTED" ? "needs-review" : guidance, required_action: action,
       score, version: optionalText(version, 100), kev_added: added === null ? null : calendarDay(added),
-      weaknesses: list(weaknesses, 8).map(id => { requireValue(typeof id === "string" && /^CWE-[1-9][0-9]{0,5}$/.test(id)); return id; }), bucket
+      weaknesses: list(weaknesses, 8).map(id => { requireValue(typeof id === "string" && /^CWE-[1-9][0-9]{0,5}$/.test(id)); return id; }),
+      // CISA's SSVC Exploitation value from its ADP container, as published, or null.
+      ssvc_exploitation: optionalText(exploitation, 100), bucket
     });
   }
   return rows;
@@ -354,6 +356,24 @@ export function normalizeCoverage(raw) {
   return { status: "ok", note: null, first_year: raw.first_year, end_year: raw.end_year, sources, rows, held_back };
 }
 
+// The adp block on a brief: CISA's ADP container, with its SSVC decision-point values and the
+// CVSS metric CISA supplied, when it did. adp_status has the semantics of weaknesses_status.
+export const ADP_STATUSES = ["not_projected", "not_supplied", "supplied"];
+function normalizeAdp(value) {
+  requireValue(isObject(value));
+  const adp = { provider: boundedText(value.provider, 100), date: timestamp(value.date), ssvc: null, cvss: null };
+  if (value.ssvc !== null) {
+    requireValue(isObject(value.ssvc));
+    adp.ssvc = { exploitation: optionalText(value.ssvc.exploitation, 100), automatable: optionalText(value.ssvc.automatable, 100),
+      technical_impact: optionalText(value.ssvc.technical_impact, 100), timestamp: timestamp(value.ssvc.timestamp) };
+  }
+  if (value.cvss !== null) {
+    requireValue(isObject(value.cvss) && typeof value.cvss.score === "number" && Number.isFinite(value.cvss.score) && value.cvss.score >= 0 && value.cvss.score <= 10);
+    adp.cvss = { version: boundedText(value.cvss.version, 100), score: value.cvss.score, vector: optionalText(value.cvss.vector, 2000) };
+  }
+  return adp;
+}
+
 // One full CVE brief, schema 7 shape.
 export function normalizeBrief(value, key) {
   requireValue(isObject(value) && CVE.test(key) && value.cve === key && ["ok", "failed", "pending"].includes(value.source_status) && ["PUBLISHED", "REJECTED", "UNKNOWN"].includes(value.record_state));
@@ -381,7 +401,7 @@ export function normalizeBrief(value, key) {
       steps: list(value.analysis.steps, 100).map(item => ({ title: boundedText(item.title, 2000, true), detail: boundedText(item.detail, 20000, true), evidence_url: optionalText(item.evidence_url, 4000) })),
       limitations: textList(value.analysis.limitations, 100, 20000)
     },
-    weaknesses: [], weaknesses_status: "not_projected"
+    weaknesses: [], weaknesses_status: "not_projected", adp: null, adp_status: "not_projected"
   };
   if (value.cvss !== null) {
     requireValue(isObject(value.cvss) && (value.cvss.score === null || (typeof value.cvss.score === "number" && Number.isFinite(value.cvss.score) && value.cvss.score >= 0 && value.cvss.score <= 10)));
@@ -394,6 +414,11 @@ export function normalizeBrief(value, key) {
       return { id: item.id, description: optionalText(item.description, 200), source_url: optionalText(item.source_url, 4000) };
     });
     record.weaknesses_status = value.weaknesses_status;
+  }
+  if (Object.hasOwn(value, "adp") || Object.hasOwn(value, "adp_status")) {
+    requireValue(ADP_STATUSES.includes(value.adp_status) && (value.adp_status === "supplied" ? value.adp !== null : value.adp === null));
+    record.adp_status = value.adp_status;
+    if (value.adp !== null) record.adp = normalizeAdp(value.adp);
   }
   return record;
 }

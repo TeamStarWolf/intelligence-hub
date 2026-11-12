@@ -47,6 +47,53 @@ The displayed score, version, vector and source stay together. The choice is not
 the highest score across every product, a normalized cross-version comparison,
 or an organization-specific risk ranking. Missing metrics stay unknown.
 
+## Bounded CISA ADP projection
+
+The same CVE record carries ADP containers beside the CNA's. The collector reads one
+of them: CISA's, whose `providerMetadata.shortName` is `CISA-ADP`. No other ADP
+container is read, and no new source is fetched; the data is in the record the
+collector already retrieves. Each brief carries an `adp` block (`provider`, `date`,
+`ssvc`, `cvss`) and an `adp_status`:
+
+| Field | Current selection limit |
+| --- | --- |
+| Containers | The first ten ADP containers are inspected for CISA's |
+| Metrics | The first forty metric entries of CISA's container are inspected and at most two are read: the first `other.type == "ssvc"` metric and the first valid CVSS metric at the highest supported version (4.0, then 3.1, 3.0 and 2.0) |
+| SSVC decision points | The first ten `content.options` entries; Exploitation, Automatable and Technical Impact are kept, each up to 40 characters, with the SSVC timestamp |
+| ADP CVSS | Version, score and vector (up to 250 characters), as CISA supplied them |
+| Container date | `providerMetadata.dateUpdated`, normalized to UTC |
+
+The `kev` metric in CISA's container is not read: KEV facts come from the catalog,
+separately attributed. Option entries that are not one name with one text value are
+skipped, never guessed. A malformed container list refuses that projection under the
+existing last-good/failure policy.
+
+`adp_status` has the semantics of `weaknesses_status`: `not_projected` means the
+retained projection was made before this field existed; `not_supplied` means the fully
+inspected record has no CISA ADP container; `supplied` means CISA's container was
+projected, even when it carries neither an SSVC metric nor a CVSS metric. A successful
+projection whose `adp_status` is `not_projected` becomes due for a real re-projection
+within the existing 2,000-record push / 40-record scheduled budget, exactly as a missing
+weakness pair does, so existing records gain their ADP data over the following runs
+without a bigger budget.
+
+The brief names the issuer of every value: the CNA's CVSS with its version, score and
+vector; CISA's ADP CVSS where present; and CISA's SSVC values with their date. Nothing
+is blended, averaged or ranked, the register's CVSS sort uses the CNA CVSS only, and
+SSVC values appear as CISA's decision-point values, never as a priority label.
+`cve-index.json` (brief index version 2) carries CISA's SSVC Exploitation value per
+CVE as `ssvc_exploitation`, null when none; the feed published before this field, with
+its version 1 index and briefs without the pair, stays a valid resume and archive input.
+
+### Elsewhere links
+
+The brief's Elsewhere row links the CVE on the CVE Program's site, NVD, the FIRST EPSS
+API (its JSON answer) and Rapid7's vulnerability database. Every link is built from the
+CVE id by a fixed pattern and passes the page's `safeUrl`; the Hub fetches none of those
+pages, so a listed site says nothing about what it holds for that CVE. GreyNoise's
+`/cve/` page pattern and Vulners did not answer a plain request for a real KEV CVE on
+2026-11-12 and are not listed; AttackerKB was retired on 2026-08-18.
+
 ## CWE, CAPEC and source-attributed context
 
 Schema 5 introduced exact `weaknesses` and `weaknesses_status` fields to each brief.
