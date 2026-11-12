@@ -50,4 +50,4 @@ STATIC_SOURCES = [
 def registry():
     """Source entries for the tagging context, one per adapter."""
     return [{"id": module.SOURCE_ID, "source_class": module.SOURCE_CLASS, "publisher_vendor": module.PUBLISHER_VENDOR,
-             "country": module.COUNTRY} for module in ADAPTERS.values()]
+             "country": module.COUNTRY, "desk": "security"} for module in ADAPTERS.values()]

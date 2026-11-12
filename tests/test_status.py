@@ -695,11 +695,15 @@ class PreviousPublicationTest(unittest.TestCase):
 
 
 class PageTest(unittest.TestCase):
-    def test_the_tab_is_last_and_the_explorer_stays_first(self):
+    def test_the_tab_is_the_infrastructure_desk_view_and_the_explorer_stays_first(self):
         page = (support.ROOT / "site" / "index.html").read_text(encoding="utf-8")
-        tabs = re.findall(r'<a href="#/([a-z-]+)" data-view="[a-z-]+">', page[page.index('<nav class="tabs"'):page.index("</nav>", page.index('<nav class="tabs"'))])
-        self.assertEqual(tabs[0], "explore")
-        self.assertEqual(tabs[-1], "status")
+        strip = page[page.index('<nav class="tabs"'):page.index("</nav>", page.index('<nav class="tabs"'))]
+        tabs = re.findall(r'<a href="#/([a-z-]+)" data-view="[a-z-]+" data-desk="([a-z]+)">', strip)
+        self.assertEqual(tabs[0], ("explore", "explore"))
+        self.assertIn(("status", "infrastructure"), tabs)
+        self.assertEqual([view for view, desk in tabs if desk == "infrastructure"], ["status"])
+        desks = re.findall(r'<a href="#/([a-z-]+)" data-desk="([a-z]+)">', strip)
+        self.assertEqual(desks, [("explore", "explore"), ("today", "security"), ("status", "infrastructure"), ("history", "reference")])
         self.assertIn("js/views/status.js", json.loads((support.ROOT / "site" / "files.json").read_text(encoding="utf-8"))["files"])
 
     def test_the_method_view_and_docs_carry_the_privacy_sentence(self):

@@ -91,11 +91,12 @@ async function go(shell, hash) { shell.app.navigate(parseRoute(hash, "")); await
 const cards = doc => Object.fromEntries([...doc.querySelectorAll(".status-card")].map(item => [item.getAttribute("data-source"), item]));
 const liveTimer = timers => timers.find(timer => timer.ms === LIVE_INTERVAL);
 
-test("the Service health tab is last, the Explorer stays first, and the default route reads no status file and no vendor host", async () => {
+test("the Service health tab is the infrastructure desk's view, the Explorer stays first, and the default route reads no status file and no vendor host", async () => {
   const shell = await boot();
-  const tabs = [...shell.doc.querySelectorAll(".tabs a")].map(tab => tab.getAttribute("data-view"));
+  const tabs = [...shell.doc.querySelectorAll(".tabs .views a")].map(tab => tab.getAttribute("data-view"));
   assert.equal(tabs[0], "explore");
-  assert.equal(tabs.at(-1), "status");
+  assert.ok(tabs.includes("status"));
+  assert.equal(shell.doc.querySelector(".tabs .views a[data-view=status]").getAttribute("data-desk"), "infrastructure");
   assert.equal(shell.doc.querySelector("#view").hidden, true);
   assert.equal(shell.app.route().view, "explore");
   assert.ok(!shell.net.http.requests.some(request => request.path.includes("/status/")), "no status file on the default route");

@@ -116,10 +116,20 @@ button, input, select { font: inherit; color: inherit; }
 .bar-button { min-height: 44px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--tsw-border-strong); background: var(--tsw-surface-2); color: var(--tsw-text); cursor: pointer; font-size: var(--text-sm); }
 .bar-button:hover { border-color: var(--tsw-link); }
 .bar-button[aria-expanded="true"] { border-color: var(--tsw-focus); }
-.tabs { display: flex; gap: 4px; padding: 0 16px; overflow-x: auto; background: var(--tsw-surface); border-bottom: 1px solid var(--tsw-border); scrollbar-width: thin; }
+/* Two rows: the desks, then the active desk's views (main.js updateTabs hides the others). */
+.tabs { background: var(--tsw-surface); border-bottom: 1px solid var(--tsw-border); }
+.tab-row { display: flex; gap: 4px; padding: 0 16px; overflow-x: auto; scrollbar-width: thin; }
+.tab-row.desks { border-bottom: 1px solid var(--tsw-border); }
 .tabs a { flex: none; display: flex; align-items: center; min-height: 44px; padding: 0 10px; color: var(--tsw-text-muted); text-decoration: none; border-bottom: 3px solid transparent; font-size: var(--text-sm); white-space: nowrap; }
 .tabs a:hover { color: var(--tsw-text); }
 .tabs a[aria-current="page"] { color: var(--tsw-heading); border-bottom-color: var(--tsw-red); font-weight: 600; }
+.desks a { color: var(--tsw-text); font-weight: 600; }
+.desks a[aria-current="location"] { color: var(--tsw-heading); border-bottom-color: var(--tsw-link); }
+/* Wall mode (?wall=1 on Today and Service health): no tab rows, bar buttons, controls, pager or
+   footer, larger type and the full width, for a monitor across a room. Nothing more is read. */
+html[data-wall="1"] .tabs, html[data-wall="1"] .bar-actions, html[data-wall="1"] .status-controls, html[data-wall="1"] .pager, html[data-wall="1"] .site-footer { display: none; }
+html[data-wall="1"] body { font-size: var(--text-lg); }
+html[data-wall="1"] .layout { max-width: none; }
 
 .layout { flex: 1; display: block; width: 100%; max-width: 1440px; margin: 0 auto; }
 .main { padding: 12px 16px 32px; min-width: 0; outline: none; }
@@ -219,6 +229,7 @@ a.chip:hover { border-color: var(--tsw-link); color: var(--tsw-chip-fg); }
 .tag-group .chips { margin-top: 4px; }
 .library-link { font-weight: 600; }
 .side-views { padding-left: 18px; }
+.side-desk { margin: 8px 0 2px; font-weight: 600; color: var(--tsw-text); }
 
 /* Service health. Cards sit on surface-2 inside a panel; badges keep the measured chip pairs. */
 .status-grid { list-style: none; margin: 6px 0 14px; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }

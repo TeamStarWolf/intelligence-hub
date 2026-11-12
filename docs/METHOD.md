@@ -18,6 +18,10 @@ Every row has one exploitation value, the method that set it and a confidence.
 
 The term lists are in `config/vocab/exploitation.json`.
 
+## Desk
+
+Every row sits on one desk, taken from its source's registry entry (method `source-registry`, high): `security` for every feed, KEV, curated and history source, `infrastructure` for the vendor status pages and cloud health feeds, and `it` for the lifecycle, standards and IT press sources the revision plan adds. The desk is never read from a headline. The page groups its tabs by desk and the Explorer's Desk filter (`desk=` in the address) selects one. The values are in `config/vocab/desk.json`.
+
 ## Confidence
 
 | Level | Meaning | Examples |
@@ -36,7 +40,7 @@ its method and confidence. The exports carry the same fields.
   reach no technique, and a technique reached this way is taxonomy, not observed behaviour.
 - A region tag carries a role: `publisher` (the source's country) or `mentioned` (a country named
   in the headline). A mention does not say whether a place is a target, an origin or neither.
-- `analysis` and `unclassified` event types exist so that no row is forced into a label.
+- `analysis` and `unclassified` event types exist so that no row is forced into a label. `maintenance` and `end-of-support`, and the kinds `change` and `lifecycle`, are reserved for sources the revision plan adds; they carry no headline terms, so no row carries them today.
 - A service-health incident row carries the `outage` event type by method `status-incident`
   (high), because the vendor filed it as an incident on its own status page, and its vendor by
   `source-identity`. Its impact is the vendor's level; [SOURCES.md](SOURCES.md#service-health-sources)

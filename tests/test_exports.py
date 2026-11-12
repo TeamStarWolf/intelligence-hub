@@ -128,6 +128,15 @@ class ExportTest(unittest.TestCase):
                 self.assertEqual(line["summary"], "")
         kev = next(line for line in lines if line["origin"] == "cisa-kev")
         self.assertEqual(kev["exploitation"]["value"], "known")
+        # The desk column and key (WP-01): every row names a desk the vocabulary holds.
+        self.assertIn("desk", parse(files["articles-2025.csv"])[0])
+        for line in lines:
+            self.assertEqual(line["desk"]["value"], "security", line["id"])
+        self.assertTrue(all(cells["desk"] == "security" for cells in rows.values()))
+        manifest = json.loads(files["manifest.json"].decode("utf-8"))
+        self.assertTrue(manifest["sources"], "the manifest lists sources")
+        for source in manifest["sources"]:
+            self.assertIn(source["desk"], {"security", "infrastructure", "it"}, source["id"])
         long_rows = parse(files["tags-2026.csv"])[1:]
         self.assertIn(["kev-CVE-2026-90001", "2026-10-01", "exploitation", "known", "high", "kev", ""], long_rows)
         for line in long_rows:

@@ -55,8 +55,10 @@ MAX_CVE_BRIEFS = 15000  # mirrors mitigations.MAX_RECORDS
 SNAPSHOT_VERSION = 7
 LEGACY_MAX_ARTICLES = 8000
 HISTORY_START = date(1998, 1, 1)
-KINDS = {"advisory", "research", "reporting", "incident", "kev", "filing"}
+KINDS = {"advisory", "research", "reporting", "incident", "kev", "filing", "change", "lifecycle"}
 SOURCE_CLASSES = {"vendor-primary", "government-cert", "researcher", "press"}
+# The desk a source's rows sit on (config/vocab/desk.json): the page groups its views by desk.
+DESKS = {"security", "infrastructure", "it"}
 CVE = re.compile(r"\bCVE-[0-9]{4}-[0-9]{4,8}\b", re.I)
 PUBLIC_FEED = "https://teamstarwolf.github.io/intelligence-hub/data/feed.json"
 PUBLIC_BRIEFS = "https://teamstarwolf.github.io/intelligence-hub/data/briefs.json"
@@ -671,6 +673,7 @@ def validate_registry(registry):
         # Tagging metadata. Its values are checked against config/vocab by vocab --check;
         # here only the shape is checked, so a vocabulary problem never stops collection.
         require(source.get("source_class") in SOURCE_CLASSES, "Invalid or missing source_class.")
+        require(source.get("desk") in DESKS, "Invalid or missing desk.")
         require(source.get("publisher_vendor") is None or isinstance(source["publisher_vendor"], str) and
                 re.fullmatch(r"vendor:[a-z0-9][a-z0-9-]{0,80}", source["publisher_vendor"]), "Invalid publisher_vendor.")
         require(source.get("country") is None or isinstance(source["country"], str) and re.fullmatch(r"[A-Z]{2}", source["country"]),

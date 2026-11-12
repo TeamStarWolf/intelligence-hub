@@ -5,7 +5,7 @@ import { safeUrl } from "./util.js";
 import { maximumArticles, maximumFeedBytes, indexFields } from "./limits.js";
 import { FormatError, derive } from "./validate.js";
 
-const kinds = { advisory: "ADVISORY", research: "RESEARCH", reporting: "REPORTING", incident: "INCIDENT", kev: "CISA KEV", filing: "SEC FILING" };
+const kinds = { advisory: "ADVISORY", research: "RESEARCH", reporting: "REPORTING", incident: "INCIDENT", kev: "CISA KEV", filing: "SEC FILING", change: "CHANGE", lifecycle: "LIFECYCLE" };
 const origins = { "publisher-feed": "PUBLISHER FEED", "cisa-kev": "CATALOG RECORD", "library-curation": "CURATED ARCHIVE" };
 const day = 86400000;
 const cvePattern = /^CVE-\d{4}-\d{4,19}$/;

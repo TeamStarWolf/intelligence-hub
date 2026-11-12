@@ -1,7 +1,7 @@
 // The Intelligence Explorer: the default route. Advisories, Research and News are the same
 // view with a fixed source-class constraint and a shorter default date range.
 import { defaultRange, defaultSort, formatRoute, withQuery } from "../router.js";
-import { classOf, dateWindow, facets, filterRows, kevLinked, requiredAction } from "../filters.js";
+import { classOf, dateWindow, deskOf, facets, filterRows, kevLinked, requiredAction } from "../filters.js";
 import { count, dateLabel, link, monthLabel, node, routeLink, stamp } from "../util.js";
 import { EXPLOITATION_LABELS, KIND_LABELS, cveOrgLink, dateBasisLabel, facetOptions, fillSelect, label, libraryDoor, pager, pinnedDoor, resultCard } from "./common.js";
 
@@ -11,7 +11,7 @@ const INTROS = {
   research: "Research teams' posts, newest first.",
   news: "Press reporting: publisher headlines and links only."
 };
-const SELECTS = ["kind", "class", "event", "exp", "sector", "region", "vendor", "product", "actor", "malware", "cwe", "tech", "source", "year", "month"];
+const SELECTS = ["desk", "kind", "class", "event", "exp", "sector", "region", "vendor", "product", "actor", "malware", "cwe", "tech", "source", "year", "month"];
 const FILTER_KEYS = [...SELECTS, "kev", "action", "range"];
 
 export function activeFilters(route) {
@@ -45,6 +45,7 @@ function fillFilters(ctx, rows) {
   const { route, el, store } = ctx;
   const found = facets(rows, route.view);
   const plain = (value, entry) => entry && entry.label ? label(entry.label) : value;
+  fillSelect(el("#f-desk"), "All desks", facetOptions(found.desk, value => label("desk:" + value)), route.query.desk);
   fillSelect(el("#f-kind"), "All kinds", facetOptions(found.kind, value => KIND_LABELS[value] || value), route.query.kind);
   fillSelect(el("#f-class"), "All source classes", facetOptions(found.class, value => label("class:" + value)), route.query.class);
   fillSelect(el("#f-event"), "All event types", facetOptions(found.event, value => label("event:" + value)), route.query.event);
@@ -142,7 +143,7 @@ const confidence = item => " (" + item[item.length - 1] + " confidence, " + item
 export function recordDetail(row, route, cveIndex, lib = null) {
   const body = [];
   const head = node("section", "detail-block");
-  head.append(node("p", "card-meta", (KIND_LABELS[row.kind] || row.kind) + " · " + row.source_name + " · " + label("class:" + (classOf(row) || "unknown"))));
+  head.append(node("p", "card-meta", (KIND_LABELS[row.kind] || row.kind) + " · " + row.source_name + " · " + label("class:" + (classOf(row) || "unknown")) + " · " + label("desk:" + deskOf(row)) + " desk"));
   const title = node("p", "detail-title"); title.append(link(row.title + " (opens the publisher)", row.url)); head.append(title);
   if (row.summary) head.append(node("p", "", row.summary + (row.kind === "kev" ? " (CISA's catalog text)" : "")));
   body.push(head);

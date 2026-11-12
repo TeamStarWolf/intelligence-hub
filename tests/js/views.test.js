@@ -477,7 +477,8 @@ test("an entry opened from a year keeps that year on every dialog entity link, a
 test("on a narrow window the active tab is scrolled into the tab strip's view, sideways only", async () => {
   const shell = await boot({ matches: true });
   const { doc } = shell;
-  const strip = doc.querySelector("nav.tabs");
+  // The view row is the strip that scrolls; the desk row above it stays put.
+  const strip = doc.querySelector("nav.tabs .views");
   const tabs = [...strip.querySelectorAll("a")];
   // A 375 px strip holding about 1,236 px of tabs, laid out from its scroll position.
   strip.scrollLeft = 0;

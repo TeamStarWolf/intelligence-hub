@@ -8,9 +8,14 @@ export const VIEWS = ["explore", "today", "advisories", "kev", "research", "news
 // Views that are the Explorer with a fixed source-class constraint.
 export const LIST_VIEWS = { explore: null, advisories: ["vendor-primary", "government-cert"], research: ["researcher"], news: ["press"] };
 
-const KINDS = ["advisory", "research", "reporting", "incident", "kev", "filing", "bulletin", "note"];
+const KINDS = ["advisory", "research", "reporting", "incident", "kev", "filing", "bulletin", "note", "change", "lifecycle"];
 const CLASSES = ["vendor-primary", "government-cert", "researcher", "press"];
-const EVENTS = ["disclosure", "exploitation", "patch", "breach", "outage", "takedown", "policy", "analysis", "unclassified"];
+// The desks (config/vocab/desk.json). Every view sits under one desk tab; "it" has no view yet.
+export const DESKS = ["security", "infrastructure", "it"];
+export const VIEW_DESK = { explore: "explore", today: "security", advisories: "security", kev: "security", research: "security", news: "security", cves: "security", cve: "security",
+  actors: "security", actor: "security", malware: "security", "patch-tuesday": "security", status: "infrastructure",
+  history: "reference", vendors: "reference", vendor: "reference", tags: "reference", reports: "reference", sources: "reference", method: "reference", data: "reference", about: "reference" };
+const EVENTS = ["disclosure", "exploitation", "patch", "breach", "outage", "takedown", "policy", "analysis", "unclassified", "maintenance", "end-of-support"];
 const EXPLOITATION = ["known", "reported", "unknown"];
 export const RANGES = ["3", "7", "30", "90", "365", "all"];
 export const SORTS = {
@@ -29,6 +34,7 @@ const oneOf = values => value => values.includes(value);
 const KEYS = [
   // Free text, rendered only with textContent; angle brackets and control characters are refused.
   ["q", value => value.length > 0 && value.length <= 200 && !/[\u0000-\u001f\u007f<>]/.test(value)],
+  ["desk", oneOf(DESKS)],
   ["kind", oneOf(KINDS)],
   ["class", oneOf(CLASSES)],
   ["event", oneOf(EVENTS)],
@@ -49,15 +55,17 @@ const KEYS = [
   ["range", oneOf(RANGES)],
   ["sort", value => Object.values(SORTS).some(list => list.includes(value))],
   ["page", value => /^[1-9][0-9]{0,3}$/.test(value)],
-  ["open", value => /^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$/.test(value)]
+  ["open", value => /^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$/.test(value)],
+  // Wall mode on Today and Service health: controls hidden, larger type, nothing more read.
+  ["wall", value => value === "1"]
 ];
 const KEY_NAMES = KEYS.map(([name]) => name);
 const CHECKS = Object.fromEntries(KEYS);
 
 // The keys each view reads. Anything else in the hash is dropped for that view.
 const VIEW_KEYS = {
-  list: ["q", "kind", "class", "event", "exp", "kev", "action", "vendor", "product", "actor", "malware", "cwe", "tech", "sector", "region", "source", "year", "month", "range", "sort", "page", "open"],
-  today: [],
+  list: ["q", "desk", "kind", "class", "event", "exp", "kev", "action", "vendor", "product", "actor", "malware", "cwe", "tech", "sector", "region", "source", "year", "month", "range", "sort", "page", "open"],
+  today: ["wall"],
   kev: ["q", "year", "range", "sort", "page"],
   cves: ["q", "kev", "action", "sort", "page"],
   cve: ["q", "kev", "action", "sort", "page"],
@@ -65,8 +73,8 @@ const VIEW_KEYS = {
   history: [], "history-year": ["source", "month", "page"],
   vendors: [], vendor: ["page"], tags: ["year"], actors: ["year"], actor: ["page"], malware: ["page"],
   reports: [], sources: [], method: [], data: [], about: [], "patch-tuesday": [],
-  // #/status?source=<id> shows one service-health source.
-  status: ["source"]
+  // #/status?source=<id> shows one service-health source; wall=1 is the monitor layout.
+  status: ["source", "wall"]
 };
 
 // Views with an id in the path: #/cve/<CVE-id>, #/history/<year>, #/vendor/<id>, #/actor/<id>,
@@ -129,7 +137,7 @@ const LEGACY_ANCHORS = { briefing: "explore", timeline: "explore", top: "explore
 const TAG_FIELDS = { vendor: slug, product: slug, actor: entity, malware: entity, sector: slug };
 // #/tag/<field>/<value> is an alias for the Explorer filter a tag value stands for. A field is
 // named by its query key or by its name in the row's tagging block.
-export const TAG_ROUTE_FIELDS = { kind: "kind", class: "class", source_class: "class", event: "event", event_type: "event", exp: "exp", exploitation: "exp",
+export const TAG_ROUTE_FIELDS = { kind: "kind", desk: "desk", class: "class", source_class: "class", event: "event", event_type: "event", exp: "exp", exploitation: "exp",
   vendor: "vendor", product: "product", actor: "actor", malware: "malware", cwe: "cwe", tech: "tech", attack: "tech", sector: "sector", region: "region", source: "source" };
 
 function legacyQuery(values) {

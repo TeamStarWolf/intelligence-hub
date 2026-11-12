@@ -107,6 +107,7 @@ class SourceClassTest(unittest.TestCase):
         self.assertGreaterEqual(len(registry), 61)
         for source in registry:
             self.assertIn(source["source_class"], classes, source["id"])
+            self.assertIn(source["desk"], loaded.values["desk"], source["id"])
             if "publisher_vendor" in source:
                 self.assertIn(source["publisher_vendor"], loaded.entities, source["id"])
             if "country" in source:
@@ -132,6 +133,17 @@ class SourceClassTest(unittest.TestCase):
         finally:
             directory.cleanup()
 
+    def test_a_source_without_a_desk_fails_the_check(self):
+        directory, root = copy_repository()
+        try:
+            path = root / "config/sources.json"
+            path.write_text(path.read_text(encoding="utf-8").replace('"desk":"security",', "", 1), encoding="utf-8")
+            completed = run_check(root)
+            self.assertNotEqual(completed.returncode, 0)
+            self.assertIn("desk", completed.stdout + completed.stderr)
+        finally:
+            directory.cleanup()
+
     def test_split_publisher_ids_are_merged(self):
         history = json.loads((support.ROOT / "config/history.json").read_text(encoding="utf-8"))
         ids = {entry["source_id"] for entry in history["entries"]}
@@ -153,11 +165,15 @@ class HubVocabularyTest(unittest.TestCase):
         self.assertEqual(set(loaded.values["exploitation"]), {"known", "reported", "unknown"})
         self.assertNotIn("not-exploited", loaded.values["exploitation"])
         self.assertEqual(set(loaded.values["event_type"]), {"disclosure", "exploitation", "patch", "breach", "outage", "takedown",
-                                                             "policy", "analysis", "unclassified"})
+                                                             "policy", "analysis", "unclassified", "maintenance", "end-of-support"})
+        # The reserved values carry no headline terms, so no headline sets them (WP-01).
+        for value in ("maintenance", "end-of-support"):
+            self.assertFalse(loaded.values["event_type"][value].get("terms"), value)
+        self.assertEqual(set(loaded.values["desk"]), {"security", "infrastructure", "it"})
         self.assertEqual(len(loaded.values["sector"]), 18)
         for value in loaded.values["sector"]:
             self.assertIn("sector:" + value, loaded.entities)
-        self.assertTrue({"advisory", "research", "reporting", "incident", "kev", "filing", "bulletin", "note"} <= set(loaded.values["kind"]))
+        self.assertTrue({"advisory", "research", "reporting", "incident", "kev", "filing", "bulletin", "note", "change", "lifecycle"} <= set(loaded.values["kind"]))
 
     def test_a_malformed_hub_file_is_refused(self):
         directory, root = copy_repository()

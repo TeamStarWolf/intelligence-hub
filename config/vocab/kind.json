@@ -1,6 +1,6 @@
 {
   "vocab": "kind",
-  "version": "2026.11.1",
+  "version": "2026.11.2",
   "multi": false,
   "description": "What the row is, set by its source. One value per row.",
   "values": [
@@ -43,6 +43,16 @@
       "value": "note",
       "label": "Vulnerability note",
       "definition": "A CERT/CC vulnerability note from a history adapter."
+    },
+    {
+      "value": "change",
+      "label": "Change",
+      "definition": "A vendor's product or service change announcement: a release note, a feature launch, a retirement or a deprecation notice. Reserved for the cloud-change sources the revision plan adds; no source carries it yet."
+    },
+    {
+      "value": "lifecycle",
+      "label": "Lifecycle",
+      "definition": "An end-of-support or release-schedule row from a lifecycle source. Reserved for the end-of-life desk the revision plan adds; no row carries it yet."
     }
   ]
 }

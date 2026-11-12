@@ -2,7 +2,7 @@
 
 Two kinds of file feed the taggers:
 
-- config/vocab/*.json are owned here: kind, source_class, event_type, exploitation,
+- config/vocab/*.json are owned here: kind, source_class, desk, event_type, exploitation,
   sector, region and the matching rules (stop names, context words). They are edited
   by hand and checked by this module.
 - config/vocabulary.json and config/library/* are copies of TeamStarWolf library
@@ -33,7 +33,7 @@ LOCK = "config/library/lock.json"
 COMMIT = re.compile(r"[0-9a-f]{40}")
 HEX = re.compile(r"[0-9a-f]{64}")
 FETCH_LIMIT = 8 * 1024 * 1024
-HUB_FILES = ("kind", "source_class", "event_type", "exploitation", "sector", "region", "matching")
+HUB_FILES = ("kind", "source_class", "desk", "event_type", "exploitation", "sector", "region", "matching")
 ENTITY_TYPES = ("vendor", "product", "actor", "malware", "sector")
 CONFIDENCE = ("high", "medium", "low")
 VALUE = re.compile(r"[a-z0-9][a-z0-9-]{0,63}")
@@ -247,13 +247,16 @@ def load_hub(root=ROOT):
 
 
 def check_sources(hub, root=ROOT):
-    """Every registry source and every curated or KEV source id has a source_class."""
+    """Every registry source has a source_class and a desk; every curated or KEV source id has a source_class."""
     classes = {item["value"] for item in hub["source_class"]["values"]}
+    desks = {item["value"] for item in hub["desk"]["values"]}
     registry = read_json(Path(root) / "config/sources.json")["sources"]
     problems = []
     for source in registry:
         if source.get("source_class") not in classes:
             problems.append(source["id"])
+        if source.get("desk") not in desks:
+            problems.append(source["id"] + " (desk)")
     overlay = hub["source_class"].get("sources", {})
     for ident, item in overlay.items():
         if item.get("source_class") not in classes:
@@ -263,7 +266,7 @@ def check_sources(hub, root=ROOT):
     for entry in history.get("entries", []):
         if entry.get("source_id") not in known:
             problems.append(entry.get("source_id"))
-    need(not problems, "Sources without a valid source_class: " + ", ".join(sorted(set(map(str, problems)))))
+    need(not problems, "Sources without a valid source_class or desk: " + ", ".join(sorted(set(map(str, problems)))))
     return len(registry), len(overlay)
 
 

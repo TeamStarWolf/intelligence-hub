@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "comment": "The service-health registry that intelligence_hub/status.py reads. Every endpoint is an official, free, machine-readable status source that answered on probed_at. cors records whether the endpoint sent Access-Control-Allow-Origin to a browser origin on that date. Only Statuspage-format status endpoints with cors true are read by the visitor's browser, and the connect-src list in site/index.html names exactly their hosts. page_only lists vendors with no machine-readable status source: they are linked and never polled. docs/SOURCES.md describes every field.",
+  "comment": "The service-health registry that intelligence_hub/status.py reads. Every endpoint is an official, free, machine-readable status source that answered on probed_at. cors records whether the endpoint sent Access-Control-Allow-Origin to a browser origin on that date. Only Statuspage-format status endpoints with cors true are read by the visitor's browser, and the connect-src list in site/index.html names exactly their hosts. desk is the desk the source's incident rows sit on in the Explorer (always infrastructure). page_only lists vendors with no machine-readable status source: they are linked and never polled. docs/SOURCES.md describes every field.",
   "probed_at": "2026-11-04",
   "groups": [
     {
@@ -26,6 +26,7 @@
       "name": "Tenable",
       "vendor": "vendor:tenable",
       "group": "security-platforms",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -42,6 +43,7 @@
       "name": "Snyk",
       "vendor": "vendor:snyk",
       "group": "security-platforms",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -58,6 +60,7 @@
       "name": "Cisco Duo",
       "vendor": "vendor:cisco",
       "group": "security-platforms",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -74,6 +77,7 @@
       "name": "Wiz",
       "vendor": "vendor:wiz",
       "group": "security-platforms",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -90,6 +94,7 @@
       "name": "Check Point",
       "vendor": "vendor:check-point",
       "group": "security-platforms",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -106,6 +111,7 @@
       "name": "Akamai",
       "vendor": "vendor:akamai",
       "group": "security-platforms",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -122,6 +128,7 @@
       "name": "Cloudflare",
       "vendor": "vendor:cloudflare",
       "group": "security-platforms",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -138,6 +145,7 @@
       "name": "Palo Alto Networks",
       "vendor": "vendor:palo-alto-networks",
       "group": "security-platforms",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -154,6 +162,7 @@
       "name": "SentinelOne",
       "vendor": "vendor:sentinelone",
       "group": "security-platforms",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -170,6 +179,7 @@
       "name": "Rapid7",
       "vendor": "vendor:rapid7",
       "group": "security-platforms",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -186,6 +196,7 @@
       "name": "Qualys",
       "vendor": "vendor:qualys",
       "group": "security-platforms",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -202,6 +213,7 @@
       "name": "Fortinet FortiCloud",
       "vendor": "vendor:fortinet",
       "group": "security-platforms",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -218,6 +230,7 @@
       "name": "1Password",
       "vendor": null,
       "group": "security-platforms",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -234,6 +247,7 @@
       "name": "Zscaler",
       "vendor": "vendor:zscaler",
       "group": "security-platforms",
+      "desk": "infrastructure",
       "class": "rss",
       "format": "zscaler",
       "endpoints": {
@@ -248,6 +262,7 @@
       "name": "Chainguard",
       "vendor": "vendor:chainguard",
       "group": "security-platforms",
+      "desk": "infrastructure",
       "class": "json",
       "format": "betterstack",
       "endpoints": {
@@ -262,6 +277,7 @@
       "name": "Zafran",
       "vendor": "vendor:zafran",
       "group": "security-platforms",
+      "desk": "infrastructure",
       "class": "json",
       "format": "betterstack",
       "endpoints": {
@@ -276,6 +292,7 @@
       "name": "Amazon Web Services",
       "vendor": "vendor:aws",
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "json",
       "format": "aws",
       "endpoints": {
@@ -290,6 +307,7 @@
       "name": "Microsoft Azure",
       "vendor": "vendor:microsoft",
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "rss",
       "format": "azure",
       "endpoints": {
@@ -304,6 +322,7 @@
       "name": "Google Cloud",
       "vendor": "vendor:google",
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "json",
       "format": "google",
       "endpoints": {
@@ -318,6 +337,7 @@
       "name": "Google Workspace",
       "vendor": "vendor:google",
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "json",
       "format": "google",
       "endpoints": {
@@ -332,6 +352,7 @@
       "name": "Oracle Cloud Infrastructure",
       "vendor": "vendor:oracle",
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "rss",
       "format": "statuspage-rss",
       "endpoints": {
@@ -347,6 +368,7 @@
       "name": "OpenAI",
       "vendor": null,
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -363,6 +385,7 @@
       "name": "Anthropic (Claude)",
       "vendor": null,
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -379,6 +402,7 @@
       "name": "Atlassian",
       "vendor": "vendor:atlassian",
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -395,6 +419,7 @@
       "name": "Slack",
       "vendor": null,
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "json",
       "format": "slack",
       "endpoints": {
@@ -410,6 +435,7 @@
       "name": "Salesforce",
       "vendor": null,
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "json",
       "format": "salesforce",
       "endpoints": {
@@ -424,6 +450,7 @@
       "name": "Zoom",
       "vendor": null,
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -440,6 +467,7 @@
       "name": "Twilio",
       "vendor": null,
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -456,6 +484,7 @@
       "name": "Snowflake",
       "vendor": null,
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -472,6 +501,7 @@
       "name": "MongoDB Cloud",
       "vendor": null,
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -488,6 +518,7 @@
       "name": "Elastic Cloud",
       "vendor": "vendor:elastic",
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -504,6 +535,7 @@
       "name": "Red Hat",
       "vendor": "vendor:red-hat",
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -520,6 +552,7 @@
       "name": "Dropbox",
       "vendor": null,
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -536,6 +569,7 @@
       "name": "Jamf",
       "vendor": null,
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -552,6 +586,7 @@
       "name": "DigitalOcean",
       "vendor": null,
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -568,6 +603,7 @@
       "name": "Discord",
       "vendor": null,
       "group": "cloud-and-saas",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -584,6 +620,7 @@
       "name": "GitHub",
       "vendor": null,
       "group": "developer-services",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -600,6 +637,7 @@
       "name": "GitLab",
       "vendor": "vendor:gitlab",
       "group": "developer-services",
+      "desk": "infrastructure",
       "class": "json",
       "format": "statusio",
       "endpoints": {
@@ -614,6 +652,7 @@
       "name": "Azure DevOps",
       "vendor": "vendor:microsoft",
       "group": "developer-services",
+      "desk": "infrastructure",
       "class": "json",
       "format": "azure-devops",
       "endpoints": {
@@ -628,6 +667,7 @@
       "name": "npm",
       "vendor": null,
       "group": "developer-services",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -644,6 +684,7 @@
       "name": "Python infrastructure (PyPI)",
       "vendor": null,
       "group": "developer-services",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -660,6 +701,7 @@
       "name": "Docker",
       "vendor": null,
       "group": "developer-services",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -676,6 +718,7 @@
       "name": "HashiCorp",
       "vendor": null,
       "group": "developer-services",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -692,6 +735,7 @@
       "name": "Heroku",
       "vendor": null,
       "group": "developer-services",
+      "desk": "infrastructure",
       "class": "json",
       "format": "heroku",
       "endpoints": {
@@ -706,6 +750,7 @@
       "name": "Netlify",
       "vendor": null,
       "group": "developer-services",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -722,6 +767,7 @@
       "name": "Vercel",
       "vendor": null,
       "group": "developer-services",
+      "desk": "infrastructure",
       "class": "statuspage",
       "format": "statuspage",
       "endpoints": {
@@ -738,6 +784,7 @@
       "name": "IODA (Georgia Tech)",
       "vendor": null,
       "group": "internet",
+      "desk": "infrastructure",
       "class": "ioda",
       "format": "ioda",
       "endpoints": {
@@ -752,6 +799,7 @@
       "name": "Cloudflare Radar outage annotations",
       "vendor": "vendor:cloudflare",
       "group": "internet",
+      "desk": "infrastructure",
       "class": "radar",
       "format": "radar",
       "endpoints": {

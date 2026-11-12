@@ -1,17 +1,18 @@
 // Everything that is not the Explorer: the sidebar panels and the Reports, Sources, Data and
 // About tabs. The sidebar starts collapsed and reads its data only when it is opened.
-import { formatRoute } from "../router.js";
+import { VIEW_DESK, formatRoute } from "../router.js";
 import { count, dateLabel, hoursLabel, link, node, routeLink, stamp } from "../util.js";
 import { definitionList, section } from "./common.js";
 import { actStrip, kevStrip, todayData } from "./today.js";
 import { coverageMatrix } from "./history.js";
 import { MITRE_NOTICES, licenceTable } from "./method.js";
 
-// Every view besides the Explorer, for the sidebar's list. The tab strip carries the same views.
+// Every view besides the Explorer, for the sidebar's list, under its desk. The tab strip carries the same views.
 export const OTHER_VIEW_LINKS = [["today", "Today"], ["advisories", "Advisories"], ["kev", "Known exploited"], ["research", "Research"], ["news", "News"], ["cves", "CVE register"],
-  ["history", "History, 1998 to today"], ["vendors", "Vendors"], ["tags", "Tags"], ["actors", "Actors and malware"], ["reports", "Reports and run record"],
-  ["data", "Data downloads"], ["sources", "Sources and coverage"], ["method", "Method"], ["about", "About"], ["patch-tuesday", "Patch Tuesday"],
-  ["status", "Service health"]];
+  ["actors", "Actors and malware"], ["patch-tuesday", "Patch Tuesday"], ["status", "Service health"],
+  ["history", "History, 1998 to today"], ["vendors", "Vendors"], ["tags", "Tags"], ["reports", "Reports and run record"],
+  ["data", "Data downloads"], ["sources", "Sources and coverage"], ["method", "Method"], ["about", "About"]];
+const DESK_NAMES = { security: "Security desk", infrastructure: "Infrastructure desk", reference: "Reference" };
 
 export function cadenceText(index) {
   if (!index) return "The collector's run record could not be read, so no observed schedule is shown. The workflow asks GitHub for a run every two hours, and GitHub does not guarantee it.";
@@ -46,9 +47,12 @@ export async function renderSidebar(ctx) {
   const method = section("Method and limits", "panel side-panel");
   method.append(node("p", "", "A selected collection, not every incident. Publisher headlines link to their sources; no article body is copied. Unknown exploitation never means safe."), more("How every tag is decided", "method"));
   const views = section("All views", "panel side-panel");
-  const viewList = node("ul", "detail-list side-views");
-  for (const [view, text] of OTHER_VIEW_LINKS) { const item = node("li"); item.append(routeLink(text, formatRoute({ view, id: null, query: {} }))); viewList.append(item); }
-  views.append(viewList);
+  for (const desk of ["security", "infrastructure", "reference"]) {
+    views.append(node("p", "side-desk", DESK_NAMES[desk]));
+    const viewList = node("ul", "detail-list side-views");
+    for (const [view, text] of OTHER_VIEW_LINKS.filter(([name]) => VIEW_DESK[name] === desk)) { const item = node("li"); item.append(routeLink(text, formatRoute({ view, id: null, query: {} }))); viewList.append(item); }
+    views.append(viewList);
+  }
   parts.push(todayPanel, snapshot, reports, sources, data, method, views);
   target.replaceChildren(...parts);
   const [today, reportFile, ledger] = await Promise.all([todayData(store).catch(() => null), store.reports().catch(() => null), store.sources().catch(() => null)]);
