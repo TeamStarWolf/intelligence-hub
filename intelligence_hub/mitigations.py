@@ -70,9 +70,128 @@ def project_weaknesses(cna, cve, clean):
     return result, "bounded" if bounded else "supplied" if result else "not_supplied"
 
 
-def normalize_weaknesses(value, cve):
+def normalize_retained(value, cve):
+    """A validated retained projection with the pairs later changes added, read as not_projected when absent."""
     items, status = validate_weaknesses(value, cve, brief_url, legacy=True)
-    return {**value, "weaknesses": items, "weaknesses_status": status}
+    return {**value, "weaknesses": items, "weaknesses_status": status,
+            "adp": value.get("adp"), "adp_status": value.get("adp_status", "not_projected")}
+
+# CISA's ADP container on the same record carries its SSVC decision-point values and, when CISA
+# supplied one, its own CVSS metric. It is read beside the CNA's metric and never blended with it.
+ADP_PROVIDER = "CISA-ADP"
+ADP_STATUSES = {"not_projected", "not_supplied", "supplied"}
+ADP_CONTAINERS = 10   # ADP containers inspected for CISA's
+METRIC_ENTRIES = 40   # metric entries inspected in a container; the ADP read keeps at most two
+ADP_OPTIONS = 10      # SSVC decision points inspected
+ADP_TEXT = 40         # characters kept per SSVC value and provider name
+SSVC_POINTS = (("Exploitation", "exploitation"), ("Automatable", "automatable"), ("Technical Impact", "technical_impact"))
+CVSS_KEYS = (("cvssV4_0", "4.0"), ("cvssV3_1", "3.1"), ("cvssV3_0", "3.0"), ("cvssV2_0", "2.0"))
+CVSS_VERSIONS = {"2.0", "3.0", "3.1", "4.0"}
+
+
+def first_cvss(metrics, clean):
+    """The first supplied valid metric at the highest supported CVSS version in a bounded metric list, or None."""
+    for key, version in CVSS_KEYS:
+        for metric in metrics[:METRIC_ENTRIES]:
+            candidate = metric.get(key) if isinstance(metric, dict) else None
+            if not isinstance(candidate, dict):
+                continue
+            score = candidate.get("baseScore")
+            if type(score) in (int, float) and math.isfinite(score) and 0 <= score <= 10:
+                return {"score": score, "version": version, "vector": clean(str(candidate.get("vectorString", "")), 250)}
+    return None
+
+
+def project_adp(containers, clean, normalize_date):
+    """CISA's ADP container, bounded like the CNA projection: (block, status).
+
+    Only the container whose providerMetadata.shortName is CISA-ADP is read. Its first ssvc
+    metric gives the decision-point values and their timestamp; its first valid CVSS metric at
+    the highest supported version gives CISA's own score. The kev metric is not read: KEV facts
+    come from the catalog. A record without CISA's container is not_supplied.
+    """
+    adps = containers.get("adp", [])
+    if not isinstance(adps, list):
+        raise ValueError("Invalid ADP container list.")
+    for container in adps[:ADP_CONTAINERS]:
+        if not isinstance(container, dict):
+            raise ValueError("Invalid ADP container.")
+        provider = container.get("providerMetadata", {})
+        if not isinstance(provider, dict):
+            raise ValueError("Invalid ADP provider metadata.")
+        if provider.get("shortName") != ADP_PROVIDER:
+            continue
+        metrics = container.get("metrics", [])
+        if not isinstance(metrics, list):
+            raise ValueError("Invalid ADP metrics.")
+        ssvc = None
+        for metric in metrics[:METRIC_ENTRIES]:
+            other = metric.get("other") if isinstance(metric, dict) else None
+            if not isinstance(other, dict) or other.get("type") != "ssvc" or not isinstance(other.get("content"), dict):
+                continue
+            content = other["content"]
+            options = content.get("options")
+            values = {}
+            for option in (options[:ADP_OPTIONS] if isinstance(options, list) else []):
+                if isinstance(option, dict) and len(option) == 1:
+                    (name, value), = option.items()
+                    if isinstance(name, str) and isinstance(value, str) and name not in values:
+                        values[name] = clean(value, ADP_TEXT) or None
+            ssvc = {field: values.get(name) for name, field in SSVC_POINTS}
+            ssvc["timestamp"] = normalize_date(content["timestamp"]) if isinstance(content.get("timestamp"), str) else None
+            break
+        updated = provider.get("dateUpdated")
+        return {"provider": ADP_PROVIDER, "date": normalize_date(updated) if isinstance(updated, str) else None,
+                "ssvc": ssvc, "cvss": first_cvss(metrics, clean)}, "supplied"
+    return None, "not_supplied"
+
+
+def validate_adp(value, normalize_date, *, legacy=False):
+    """The adp/adp_status pair of a brief or retained projection: (block, status), or ValueError.
+
+    legacy=True reads a projection made before the pair existed as not_projected.
+    """
+    present = {"adp", "adp_status"} & set(value)
+    if not present and legacy:
+        return None, "not_projected"
+    if present != {"adp", "adp_status"}:
+        raise ValueError("Incomplete ADP projection.")
+    adp, status = value["adp"], value["adp_status"]
+    if status not in ADP_STATUSES:
+        raise ValueError("Invalid ADP status.")
+    if status != "supplied":
+        if adp is not None:
+            raise ValueError("ADP status differs from its projection.")
+        return None, status
+
+    def clock(item):
+        if item is not None and (not isinstance(item, str) or len(item) > 40 or normalize_date(item) is None):
+            raise ValueError("Invalid ADP clock.")
+
+    def bounded(item, maximum, *, nullable=True, empty=False):
+        if nullable and item is None:
+            return
+        if not isinstance(item, str) or len(item) > maximum or not (empty or item.strip()):
+            raise ValueError("Invalid ADP text.")
+
+    if not isinstance(adp, dict) or set(adp) != {"provider", "date", "ssvc", "cvss"}:
+        raise ValueError("Invalid ADP projection.")
+    bounded(adp["provider"], ADP_TEXT, nullable=False)
+    clock(adp["date"])
+    ssvc = adp["ssvc"]
+    if ssvc is not None:
+        if not isinstance(ssvc, dict) or set(ssvc) != {"exploitation", "automatable", "technical_impact", "timestamp"}:
+            raise ValueError("Invalid SSVC projection.")
+        for field in ("exploitation", "automatable", "technical_impact"):
+            bounded(ssvc[field], ADP_TEXT)
+        clock(ssvc["timestamp"])
+    cvss = adp["cvss"]
+    if cvss is not None:
+        if (not isinstance(cvss, dict) or set(cvss) != {"version", "score", "vector"} or cvss["version"] not in CVSS_VERSIONS
+                or type(cvss["score"]) not in (int, float) or not math.isfinite(cvss["score"]) or not 0 <= cvss["score"] <= 10):
+            raise ValueError("Invalid ADP CVSS metric.")
+        bounded(cvss["vector"], 250, nullable=False, empty=True)
+    return adp, status
 
 
 def project_record(raw, cve, clean, safe_url, normalize_date, stamp):
@@ -120,21 +239,11 @@ def project_record(raw, cve, clean, safe_url, normalize_date, stamp):
                 "url": safe_url(item["url"]), "kind": "vendor-guidance" if guidance else "record"})
             if len(references) == 16:
                 break
-    cvss = None
     metrics = cna.get("metrics", [])
-    if isinstance(metrics, list):
-        for key, version in (("cvssV4_0", "4.0"), ("cvssV3_1", "3.1"), ("cvssV3_0", "3.0"), ("cvssV2_0", "2.0")):
-            for metric in metrics[:40]:
-                candidate = metric.get(key) if isinstance(metric, dict) else None
-                if not isinstance(candidate, dict):
-                    continue
-                score = candidate.get("baseScore")
-                if type(score) in (int, float) and math.isfinite(score) and 0 <= score <= 10:
-                    cvss = {"score": score, "version": version,
-                        "vector": clean(str(candidate.get("vectorString", "")), 250), "source_url": url}
-                    break
-            if cvss is not None:
-                break
+    cvss = first_cvss(metrics, clean) if isinstance(metrics, list) else None
+    if cvss is not None:
+        cvss["source_url"] = url
+    adp, adp_status = project_adp(containers if isinstance(containers, dict) else {}, clean, normalize_date)
     descriptions = english_values(cna.get("descriptions"), clean, 1)
     rejected = english_values(cna.get("rejectedReasons"), clean, 1)
     weaknesses, weakness_status = project_weaknesses(cna, cve, clean)
@@ -146,6 +255,7 @@ def project_record(raw, cve, clean, safe_url, normalize_date, stamp):
         "solutions": [{"text": text, "source_url": url} for text in english_values(cna.get("solutions"), clean)],
         "workarounds": [{"text": text, "source_url": url} for text in english_values(cna.get("workarounds"), clean)],
         "cvss": cvss, "references": references, "weaknesses": weaknesses, "weaknesses_status": weakness_status,
+        "adp": adp, "adp_status": adp_status,
         "projection_notes": ["CNA fields are bounded excerpts; consult the original record and vendor advisories for complete product/version conditions.",
             "Product statements can include unaffected versions. An affected version range is not a fixed-version claim.",
             "The displayed metric is the first supplied metric of the highest available CVSS version, not a product-specific applicability assessment."]}
@@ -157,6 +267,7 @@ def valid_projection(value, cve, safe_url, normalize_date):
         return False
     try:
         validate_weaknesses(value, cve, brief_url, legacy=True)
+        validate_adp(value, normalize_date, legacy=True)
     except (ValueError, TypeError, KeyError):
         return False
     if value.get("source_status") not in {"ok", "failed", "pending"} or value.get("record_state") not in {"PUBLISHED", "REJECTED", "UNKNOWN"}:
@@ -205,6 +316,7 @@ def blank(cve):
     return {"cve": cve, "title": cve, "description": "", "source_status": "pending", "record_state": "UNKNOWN",
         "source_updated_at": None, "retrieved_at": None, "source_attempted_at": None, "source_sha256": None,
         "products": [], "solutions": [], "workarounds": [], "cvss": None, "weaknesses": [], "weaknesses_status": "not_projected",
+        "adp": None, "adp_status": "not_projected",
         "references": [{"label": "Official CVE record", "url": brief_url(cve), "kind": "record"}], "projection_notes": []}
 
 
@@ -216,7 +328,7 @@ def merge_retained(local, remote, cve, safe_url, normalize_date):
     def clock(item, field):
         return normalize_date(item.get(field) or "") or ""
     successful = [item for item in values if item.get("retrieved_at") and item.get("source_sha256")]
-    facts = normalize_weaknesses(max(successful, key=lambda item: clock(item, "retrieved_at")), cve) if successful else blank(cve)
+    facts = normalize_retained(max(successful, key=lambda item: clock(item, "retrieved_at")), cve) if successful else blank(cve)
     result = {key: facts[key] for key in blank(cve) if key != "projection_notes"}
     result["projection_notes"] = []
     latest = max(values, key=lambda item: clock(item, "source_attempted_at"))
@@ -231,12 +343,14 @@ def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, saf
     if len(wanted) > MAX_RECORDS:
         raise ValueError("The articles link " + format(len(wanted), ",") + " CVEs, over the " + format(MAX_RECORDS, ",") +
                          "-brief ceiling. Nothing was evicted; the deployed publication is preserved.")
-    records = {cve: normalize_weaknesses(retained[cve], cve) if cve in retained and valid_projection(retained[cve], cve, safe_url, normalize_date) else blank(cve) for cve in wanted}
+    records = {cve: normalize_retained(retained[cve], cve) if cve in retained and valid_projection(retained[cve], cve, safe_url, normalize_date) else blank(cve) for cve in wanted}
     current = datetime.fromisoformat(stamp)
 
     def due(cve):
         record = records[cve]
-        if record["source_status"] == "ok" and record["weaknesses_status"] == "not_projected":
+        # A successful projection made before a later field existed is read again within the
+        # budget, ahead of its 24-hour interval: the weakness pair (schema 5) and CISA's ADP block.
+        if record["source_status"] == "ok" and "not_projected" in (record["weaknesses_status"], record["adp_status"]):
             return True
         previous = record.get("source_attempted_at")
         if previous is None:
@@ -265,7 +379,7 @@ def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, saf
     kev_by_id = {item["cveID"]: item for item in catalog.get("vulnerabilities", [])}
     result = {}
     for cve, projection in records.items():
-        record = {key: projection[key] for key in ("cve", "title", "description", "source_status", "record_state", "source_updated_at", "retrieved_at", "source_attempted_at", "source_sha256", "products", "solutions", "workarounds", "cvss", "references", "weaknesses", "weaknesses_status")}
+        record = {key: projection[key] for key in ("cve", "title", "description", "source_status", "record_state", "source_updated_at", "retrieved_at", "source_attempted_at", "source_sha256", "products", "solutions", "workarounds", "cvss", "references", "weaknesses", "weaknesses_status", "adp", "adp_status")}
         item = kev_by_id.get(cve)
         cisa_url = "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=" + cve
         action = clean(item.get("requiredAction", ""), 1200) if item else ""
@@ -311,22 +425,33 @@ def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, saf
 # The public site splits one snapshot into two files. data/feed.json keeps a
 # compact row per CVE for list views; data/briefs.json holds the full briefs and
 # is read only when a reader opens one.
+# Index version 2 adds ssvc_exploitation, CISA's SSVC Exploitation value (WP-04). cvss_score and
+# cvss_version are the CNA's metric; CISA's ADP CVSS is only in the brief.
+INDEX_VERSION = 2
 INDEX_FIELDS = ("record_state", "source_status", "guidance_status", "required_action",
-                "cvss_score", "cvss_version", "kev_date_added", "weaknesses")
+                "cvss_score", "cvss_version", "kev_date_added", "weaknesses", "ssvc_exploitation")
+# The version 1 layout, as the feed published before WP-04 carries it; the archive validator still reads it.
+INDEX_FIELDS_V1 = INDEX_FIELDS[:-1]
 BRIEFS_KEYS = {"schema_version", "feed_schema_version", "generated_at", "content_revision", "briefs"}
 
 
-def index_row(brief):
+def index_row(brief, version=INDEX_VERSION):
     cvss = brief.get("cvss") or {}
     kev = brief.get("kev") or {}
-    return [brief["record_state"], brief["source_status"], brief["analysis"]["guidance_status"],
-            bool(brief["required_action"]), cvss.get("score"), cvss.get("version"), kev.get("date_added"),
-            [item["id"] for item in brief.get("weaknesses", [])]]
+    row = [brief["record_state"], brief["source_status"], brief["analysis"]["guidance_status"],
+           bool(brief["required_action"]), cvss.get("score"), cvss.get("version"), kev.get("date_added"),
+           [item["id"] for item in brief.get("weaknesses", [])]]
+    if version == INDEX_VERSION:
+        row.append(((brief.get("adp") or {}).get("ssvc") or {}).get("exploitation"))
+    return row
 
 
-def brief_index(briefs):
+def brief_index(briefs, version=INDEX_VERSION):
     """The per-CVE fields that list views, filters and counts need, in CVE order."""
-    return {"version": 1, "fields": list(INDEX_FIELDS), "rows": {cve: index_row(briefs[cve]) for cve in sorted(briefs)}}
+    if version not in (1, INDEX_VERSION):
+        raise ValueError("Unsupported brief index version.")
+    fields = INDEX_FIELDS if version == INDEX_VERSION else INDEX_FIELDS_V1
+    return {"version": version, "fields": list(fields), "rows": {cve: index_row(briefs[cve], version) for cve in sorted(briefs)}}
 
 
 def split_publication(snapshot):
