@@ -33,7 +33,14 @@ UNBOUNDED = None
 # Byte bounds for the two public data files. Rows are never evicted to fit:
 # a run that would cross a bound fails and the deployed publication stays.
 FEED_MAX_BYTES = 8 * 1024 * 1024
-BRIEFS_MAX_BYTES = 12 * 1024 * 1024
+# 24 MiB since 2026-11-11, raised from 12 MiB with the owner's approval (WP-00 of the revision
+# plan): the deployed file was 10,795,310 bytes that day and had grown about 173 KB a day over
+# the week before, so the old bound would have closed around 2026-11-22.
+BRIEFS_MAX_BYTES = 24 * 1024 * 1024
+# The deployed briefs file is the one read that may pass FETCH_CEILING, up to its own bound,
+# and the largest file the collector writes; every publisher read keeps the 16 MiB ceiling.
+DEPLOYED_BRIEFS_CEILING = BRIEFS_MAX_BYTES
+OUTPUT_CEILING = max(FETCH_CEILING, FEED_MAX_BYTES, BRIEFS_MAX_BYTES)
 # The feed's article-row ceiling is derived from its byte bound, so it is not a
 # second, hidden wall: the smallest live row is 363 bytes (publisher rows average
 # about 480, KEV rows about 794), so at real sizes the byte bound is crossed first.
@@ -111,9 +118,10 @@ class ResponseByteLimitExceeded(ValueError):
 def fetch(url, maximum=MAX_BYTES, fresh=False, *, accept=None, language=None, ceiling=FETCH_CEILING):
     """One bounded HTTPS read. accept and language replace the default Accept header and add an
     Accept-Language header (Adobe's bulletin index refuses a read without both); ceiling is
-    FETCH_CEILING, or UNBOUNDED (None, with maximum None) for an MSRC release document."""
+    FETCH_CEILING, DEPLOYED_BRIEFS_CEILING for this Hub's own deployed briefs file, or UNBOUNDED
+    (None, with maximum None) for an MSRC release document."""
     require(safe_url(url) == url, "Source URL must be a canonical public HTTPS URL.")
-    require(ceiling == FETCH_CEILING or ceiling is UNBOUNDED, "Invalid fetch ceiling.")
+    require(ceiling in (FETCH_CEILING, DEPLOYED_BRIEFS_CEILING) or ceiling is UNBOUNDED, "Invalid fetch ceiling.")
     if ceiling is UNBOUNDED:
         require(maximum is None, "An unbounded read takes no byte bound.")
     else:
@@ -287,7 +295,7 @@ def write_json(path, value, compact=False):
 
 def write_raw(path, raw):
     path.parent.mkdir(parents=True, exist_ok=True)
-    require(len(raw) <= FETCH_CEILING, "Snapshot output exceeds its limit.")
+    require(len(raw) <= OUTPUT_CEILING, "Snapshot output exceeds its limit.")
     temporary = path.with_name(path.name + ".pending")
     with temporary.open("xb") as stream:
         stream.write(raw)
@@ -1282,7 +1290,7 @@ def deployed_v7():
         files = dict(pool.map(read, wanted))
     briefs_entry = next(item for item in index["v6_files"] if item["path"] == "data/briefs.json")
     require(briefs_entry["bytes"] <= BRIEFS_MAX_BYTES, "The deployed briefs file exceeds its byte bound.")
-    briefs_raw = fetch(PUBLIC_BRIEFS, FETCH_CEILING, fresh=True)
+    briefs_raw = fetch(PUBLIC_BRIEFS, BRIEFS_MAX_BYTES, fresh=True, ceiling=DEPLOYED_BRIEFS_CEILING)
     require(len(briefs_raw) == briefs_entry["bytes"] and shards.sha256(briefs_raw) == briefs_entry["sha256"], V7_MISMATCH)
     briefs = json.loads(briefs_raw, parse_constant=reject_constant)
     require(isinstance(briefs, dict) and set(briefs) == BRIEFS_KEYS and isinstance(briefs["briefs"], dict) and
@@ -1330,7 +1338,7 @@ def deployed_files():
         if previous["schema_version"] != 7:
             return previous
         require(len(raw) <= FEED_MAX_BYTES, "The deployed feed exceeds its byte bound.")
-        briefs_raw = fetch(PUBLIC_BRIEFS, FETCH_CEILING, fresh=True)
+        briefs_raw = fetch(PUBLIC_BRIEFS, BRIEFS_MAX_BYTES, fresh=True, ceiling=DEPLOYED_BRIEFS_CEILING)
         require(len(briefs_raw) <= BRIEFS_MAX_BYTES, "The deployed briefs file exceeds its byte bound.")
         try:
             return join_publication(previous, json.loads(briefs_raw, parse_constant=reject_constant))

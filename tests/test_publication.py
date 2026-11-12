@@ -4,6 +4,8 @@ from datetime import date, timedelta
 import hashlib
 import io
 import json
+import pathlib
+import tempfile
 import unittest
 from unittest import mock
 
@@ -111,7 +113,7 @@ class BoundTest(unittest.TestCase):
             self.assertEqual([item["bytes"] for item in result["publication"]], [len(feed_raw), len(briefs_raw)])
             self.assertTrue(all(item["headroom"] == item["limit"] - item["bytes"] for item in result["publication"]))
             self.assertIn("data/feed.json: " + format(len(feed_raw), ",") + " of 8,388,608 bytes", workspace.log)
-            self.assertIn("data/briefs.json: " + format(len(briefs_raw), ",") + " of 12,582,912 bytes", workspace.log)
+            self.assertIn("data/briefs.json: " + format(len(briefs_raw), ",") + " of " + format(collect.BRIEFS_MAX_BYTES, ",") + " bytes", workspace.log)
             rows = len(feed["articles"])
             self.assertIn("data/feed.json: " + format(rows, ",") + " of 27,962 article rows, " + format(27962 - rows, ",") + " of headroom", workspace.log)
             self.assertIn("data/briefs.json: " + format(len(briefs["briefs"]), ",") + " of 15,000 CVE briefs", workspace.log)
@@ -230,6 +232,26 @@ class BoundTest(unittest.TestCase):
             self.assertIn(text, workflow)
         self.assertLess(collect.FEED_MAX_BYTES + collect.BRIEFS_MAX_BYTES + 512 * 1024, shards.PACKAGE_MAX_INPUT)
 
+    def test_the_briefs_bound_is_24_mib_and_every_mirror_follows_it(self):
+        # Raised from 12 MiB with the owner's approval on 2026-11-11 (WP-00 of the revision plan).
+        self.assertEqual(collect.BRIEFS_MAX_BYTES, 24 * 1024 * 1024)
+        self.assertEqual(collect.DEPLOYED_BRIEFS_CEILING, collect.BRIEFS_MAX_BYTES)
+        self.assertGreaterEqual(collect.OUTPUT_CEILING, collect.BRIEFS_MAX_BYTES)
+        self.assertEqual(collect.FETCH_CEILING, 16 * 1024 * 1024, "publisher reads keep the 16 MiB ceiling")
+        from intelligence_hub import archive
+        self.assertGreaterEqual(archive.MAX_INPUT, collect.BRIEFS_MAX_BYTES)
+        self.assertEqual(archive.MAX_EXPORT, collect.FEED_MAX_BYTES + collect.BRIEFS_MAX_BYTES + 1024 * 1024)
+        # A briefs file between the old 16 MiB output ceiling and the new bound can be written.
+        with tempfile.TemporaryDirectory() as folder:
+            path = pathlib.Path(folder) / "briefs.json"
+            collect.write_raw(path, b"x" * (17 * 1024 * 1024))
+            self.assertEqual(path.stat().st_size, 17 * 1024 * 1024)
+            with self.assertRaisesRegex(ValueError, "Snapshot output exceeds its limit"):
+                collect.write_raw(pathlib.Path(folder) / "too-big.json", b"x" * (collect.OUTPUT_CEILING + 1))
+        # fetch() takes the briefs bound only with the deployed-briefs ceiling; a publisher read cannot.
+        with self.assertRaisesRegex(ValueError, "Invalid bounded read size"):
+            collect.fetch(collect.PUBLIC_BRIEFS, collect.BRIEFS_MAX_BYTES)
+
 
 class BriefsFileTest(unittest.TestCase):
     @classmethod
@@ -292,8 +314,13 @@ class ResumeTest(unittest.TestCase):
         cls.feed_raw, cls.briefs_raw = BriefsFileTest.feed_raw, BriefsFileTest.briefs_raw
 
     def serve(self, files):
-        def fetch(url, maximum=collect.MAX_BYTES, fresh=False):
+        def fetch(url, maximum=collect.MAX_BYTES, fresh=False, ceiling=collect.FETCH_CEILING):
             self.assertTrue(fresh, "resume reads must ask the CDN for a fresh copy")
+            if url == collect.PUBLIC_BRIEFS:
+                self.assertEqual((maximum, ceiling), (collect.BRIEFS_MAX_BYTES, collect.DEPLOYED_BRIEFS_CEILING),
+                                 "the deployed briefs read must allow the whole briefs bound")
+            else:
+                self.assertLessEqual(maximum, collect.FETCH_CEILING)
             value = files[url]
             if isinstance(value, list):
                 value = value.pop(0) if len(value) > 1 else value[0]

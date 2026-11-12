@@ -311,7 +311,8 @@ class ResumeTest(unittest.TestCase):
             shard = next(json.loads(raw) for path, raw in files.items() if "/live/" in path)
             self.assertTrue(all("tagging" in row for row in shard["rows"]))
 
-            def fetch(url, maximum=collect.MAX_BYTES, fresh=False):
+            def fetch(url, maximum=collect.MAX_BYTES, fresh=False, ceiling=collect.FETCH_CEILING):
+                assert maximum <= ceiling and (ceiling == collect.FETCH_CEILING or url == collect.PUBLIC_BRIEFS)
                 if url not in files:
                     raise OSError("HTTP Error 404: Not Found")
                 return files[url]
