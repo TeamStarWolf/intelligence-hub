@@ -83,7 +83,7 @@ export function resultCard(row, route, cveIndex) {
   if (row.exploited !== "unknown") chips.append(node("span", "chip chip-exp-" + row.exploited, EXPLOITATION_LABELS[row.exploited]));
   if (row.score !== null) chips.append(node("span", "chip", "CVSS " + row.score.toFixed(1) + (row.t.cvss && row.t.cvss.version ? " (v" + row.t.cvss.version + ")" : "")));
   const epss = epssOf(row, cveIndex);
-  if (epss !== null) chips.append(node("span", "chip", "EPSS " + epssPercent(epss)));
+  if (epss !== null) chips.append(node("span", "chip", "FIRST EPSS " + epssPercent(epss)));
   for (const [field, key] of [["vendor", "vendor"], ["product", "product"], ["actor", "actor"], ["malware", "malware"]]) {
     for (const item of row.t[field].slice(0, 2)) chips.append(routeLink(label(item[0]), formatRoute(withQuery(listRoute(route, row), { [key]: item[0].replace(/^[a-z]+:/, "") })), "chip chip-entity"));
   }

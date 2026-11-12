@@ -39,7 +39,7 @@ export function brief(cve, fields = {}) {
 
 // FIRST's EPSS blocks as the collector keeps them: a high and a low score on one score date.
 export const EPSS_HIGH = { score: 0.94333, percentile: 0.99901, date: "2026-11-02", model: "v2026.06.15" };
-export const EPSS_LOW = { score: 0.00043, percentile: 0.12345, date: "2026-11-02", model: "v2026.06.15" };
+export const EPSS_LOW = { score: 0.00043, percentile: 0.12345, date: "2026-11-01", model: "v2026.06.15" };
 
 // CISA's ADP block as the collector projects it for CVE-2026-1000: its own CVSS (a different
 // score from the CNA's 9.8, so a test can tell a blended number from either issuer's) and its
@@ -109,7 +109,7 @@ export function files({ schema = 7, layout = "b".repeat(64), extra = {}, omit = 
     feed_content_revision: feedRevision, layout_revision: layout, window: { history_start: "1998-01-01", live_start: "2024-12-01", end: CONTENT_DATE },
     runs: [{ generated_at: "2026-11-03T12:00:00+00:00", trigger: "schedule", changed: true }, { generated_at: "2026-11-03T07:42:00+00:00", trigger: "schedule", changed: true }],
     observed_interval_hours: { median: 4.3, max: 10.2, runs_counted: 10 }, requested_cron: "7 */2 * * *",
-    counts: { articles: 6, kev: 2, cves: 3, live_rows: 5, history_rows: 1, epss_scored: 2, epss_model: "v2026.06.15", epss_date: "2026-11-02" },
+    counts: { articles: 6, kev: 2, cves: 3, live_rows: 5, history_rows: 1, epss_scored: 2, epss_model: "v2026.06.15", epss_date: "2026-11-02", epss_oldest_date: "2026-11-01" },
     shards: entries, v6_files: [{ path: "data/feed.json", bytes: 10, sha256: "e".repeat(64) }, { path: "data/briefs.json", bytes: 10, sha256: "f".repeat(64) }],
     cve_buckets: { published: false, note: "Not yet." }, notices: ["Publisher rows carry headlines and links only."],
     exports: { status: "ok", reason: null, files: [{ path: "exports/articles-2026.csv", bytes: 100, sha256: "1".repeat(64) }, { path: "exports/manifest.json", bytes: 50, sha256: "2".repeat(64) }, { path: "exports/data-dictionary.md", bytes: 50, sha256: "3".repeat(64) }] },

@@ -337,6 +337,11 @@ def merge_retained(local, remote, cve, safe_url, normalize_date):
     result["projection_notes"] = []
     latest = max(values, key=lambda item: clock(item, "source_attempted_at"))
     result.update(source_status=latest["source_status"], source_attempted_at=latest.get("source_attempted_at"))
+    # FIRST's EPSS block is read apart from the CNA record, so it is merged apart: the block with the
+    # newest score date among the valid records, whichever record carried it and whether or not that
+    # record's CNA read succeeded, so a retained score survives a resume and a failed batch.
+    blocks = [item["epss"] for item in values if valid_score(item.get("epss"))]
+    result["epss"] = max(blocks, key=lambda block: block["date"]) if blocks else None
     return result
 
 

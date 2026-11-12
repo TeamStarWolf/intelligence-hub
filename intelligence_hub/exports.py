@@ -167,7 +167,13 @@ def epss_fields(article, scores):
     best = best_epss(article, scores)
     if best is None:
         return {"epss": "", "epss_percentile": "", "epss_date": "", "epss_model": ""}
-    return {"epss": format(best["score"], "g"), "epss_percentile": format(best["percentile"], "g"), "epss_date": best["date"], "epss_model": best["model"]}
+    return {"epss": _decimal(best["score"]), "epss_percentile": _decimal(best["percentile"]), "epss_date": best["date"], "epss_model": best["model"]}
+
+
+def _decimal(value):
+    """A probability as a plain decimal with up to five places (0.00004, never 4e-05)."""
+    text = format(value, ".5f").rstrip("0").rstrip(".")
+    return text or "0"
 
 
 def record(article, block, source_class, scores=None):

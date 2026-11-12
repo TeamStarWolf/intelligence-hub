@@ -81,7 +81,7 @@ def valid_score(value):
     for key in ("score", "percentile"):
         if type(value[key]) not in (int, float) or not 0 <= value[key] <= 1:
             return False
-    return (_day(value["date"]) == value["date"] and isinstance(value["model"], str) and
+    return (isinstance(value["date"], str) and _day(value["date"]) == value["date"] and isinstance(value["model"], str) and
             MODEL_FORM.fullmatch(value["model"]) is not None)
 
 

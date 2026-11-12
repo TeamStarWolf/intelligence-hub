@@ -35,8 +35,14 @@ function controls(ctx) {
 }
 
 // An EPSS cell: the percentage and the percentile, or the words for no score (never 0).
-export function epssCell(epss) {
-  return epss ? epssPercent(epss.score) + " (p" + (epss.percentile * 100).toFixed(1) + ")" : "No score";
+export function epssCell(epss, counts = null) {
+  if (!epss) return "No score";
+  // A retained score (a batch that failed after others succeeded) keeps its own date and model;
+  // the cell names them when they are not the ones the caption states.
+  const own = [];
+  if (!counts || epss.date !== counts.epss_date) own.push(dateLabel(epss.date));
+  if (!counts || epss.model !== counts.epss_model) own.push("model " + epss.model);
+  return epssPercent(epss.score) + " (p" + (epss.percentile * 100).toFixed(1) + ")" + (own.length ? ", " + own.join(", ") : "");
 }
 
 // The EPSS attribution for a register or a brief: the scorer, the model and the score date the index records.
@@ -46,10 +52,19 @@ export function epssNote(counts) {
   return "EPSS by FIRST" + (model ? ", model " + model : "") + (day ? ", score date " + dateLabel(day) : "");
 }
 
+// The register caption's EPSS sentence: the newest score date, and the oldest when a retained
+// score is older, so a cell's own date is read against it.
+export function registerEpssNote(counts) {
+  const newest = counts && typeof counts.epss_date === "string" ? counts.epss_date : null;
+  const oldest = counts && typeof counts.epss_oldest_date === "string" ? counts.epss_oldest_date : null;
+  const mixed = newest && oldest && oldest !== newest;
+  return epssNote(counts) + (mixed ? " (the newest; scores kept from an earlier read date back to " + dateLabel(oldest) + ", and a cell names its own date and model when they differ)" : "");
+}
+
 export function registerTable(rows, counts = null) {
   const table = node("table", "data-table");
   table.append(node("caption", "", "CVEs that saved entries mention. Guidance is the brief's own label; KEV and the CISA required action are separate catalog facts. The CVSS column is the CNA's metric, versions not normalized; CISA's ADP CVSS and SSVC values are in the brief. " +
-    epssNote(counts) + ": the probability that the CVE is exploited in the next 30 days with its percentile; a CVE without a score on that date reads No score, never 0."));
+    registerEpssNote(counts) + ": the probability that the CVE is exploited in the next 30 days with its percentile; a CVE without a score on that date reads No score, never 0."));
   const head = node("tr");
   for (const label of ["CVE", "Guidance", "KEV added", "CNA CVSS", "EPSS", "CWE"]) { const cell = node("th", "", label); cell.scope = "col"; head.append(cell); }
   const thead = node("thead"); thead.append(head);
@@ -62,7 +77,7 @@ export function registerTable(rows, counts = null) {
     if (row.required_action) guidance.append(node("span", "cell-note", "CISA required action"));
     if (row.source_status !== "ok") guidance.append(node("span", "cell-note", "CNA lookup " + row.source_status));
     tr.append(id, guidance, node("td", "", row.kev_added ? dateLabel(row.kev_added) : "Not in KEV"), node("td", "", row.score === null ? "Unknown" : row.score.toFixed(1) + " (v" + (row.version || "?") + ")"),
-      node("td", "", epssCell(row.epss)), node("td", "", row.weaknesses.join(", ") || "None supplied"));
+      node("td", "", epssCell(row.epss, counts)), node("td", "", row.weaknesses.join(", ") || "None supplied"));
     body.append(tr);
   }
   table.append(thead, body);
@@ -172,7 +187,7 @@ export function briefBody(record, indexRow, rows, lib = null, counts = null) {
   if (record.record_state === "REJECTED") overview.append(node("p", "notice-inline", "This CVE record is rejected. Read its original disposition before treating it as a vulnerability."));
   overview.append(node("p", "", record.description || "Description not supplied in this saved record."));
   overview.append(node("p", "muted", "CNA source updated " + stamp(record.source_updated_at) + " · retrieved " + stamp(record.retrieved_at) + ". Review affected products and your installed version before acting; this is not a device assessment."));
-  if (record.epss) badges.append(node("span", "chip", "EPSS " + epssPercent(record.epss.score)));
+  if (record.epss) badges.append(node("span", "chip", "FIRST EPSS " + epssPercent(record.epss.score)));
   overview.append(elsewhereRow(record.cve, lib));
   parts.push(overview, severityBlock(record), epssBlock(record, counts));
   const action = block("CISA catalog action");

@@ -12,7 +12,7 @@ import support
 from intelligence_hub import collect, epss, exports
 from intelligence_hub.archive import validate_snapshot
 from intelligence_hub.collect import published, safe_url, text
-from intelligence_hub.mitigations import INDEX_FIELDS, INDEX_VERSION, blank, brief_index, build_briefs, index_row, join_publication, valid_projection
+from intelligence_hub.mitigations import INDEX_FIELDS, INDEX_VERSION, blank, brief_index, build_briefs, index_row, join_publication, merge_retained, valid_projection
 import test_exports
 import test_publication
 
@@ -77,7 +77,7 @@ class RecordedAnswerTest(unittest.TestCase):
     def test_valid_score_holds_the_block_to_its_shape(self):
         self.assertTrue(epss.valid_score(score()))
         for bad in (None, {}, {**score(), "extra": 1}, score(value=1.01), score(value=-0.1), score(value=True), score(percentile="0.9"),
-                    score(day="2026-11-31"), score(day="2026-11-10T00:00:00Z"), score(model="2026.06.15"), score(model=5)):
+                    score(day="2026-11-31"), score(day="2026-11-10T00:00:00Z"), score(day=None), score(day=20261110), score(model="2026.06.15"), score(model=5)):
             with self.subTest(bad=bad):
                 self.assertFalse(epss.valid_score(bad))
 
@@ -168,6 +168,25 @@ class BriefTest(unittest.TestCase):
         self.assertIsNone(briefs["CVE-2026-90001"]["epss"])
         self.assertFalse(valid_projection({**good, "epss": {"score": 0.5}}, "CVE-2026-90001", safe_url, published))
 
+    def test_a_resume_merges_the_newest_score_apart_from_the_cna_facts(self):
+        cve = "CVE-2026-90001"
+        local = {**blank(cve), "epss": score(0.3, 0.8, "2026-11-09")}
+        remote = {**blank(cve), "epss": score(0.5, 0.9, "2026-11-10")}
+        # Neither record has a successful CNA read: the facts are blank, the newest score still survives.
+        self.assertEqual(merge_retained(local, remote, cve, safe_url, published)["epss"], score(0.5, 0.9, "2026-11-10"))
+        self.assertEqual(merge_retained(remote, local, cve, safe_url, published)["epss"], score(0.5, 0.9, "2026-11-10"))
+        self.assertEqual(merge_retained(local, None, cve, safe_url, published)["epss"], score(0.3, 0.8, "2026-11-09"))
+        self.assertIsNone(merge_retained({**blank(cve), "epss": None}, None, cve, safe_url, published)["epss"])
+        # A successful CNA read on the record without a score does not erase the other record's score.
+        read = {**blank(cve), "source_status": "ok", "record_state": "PUBLISHED", "retrieved_at": STAMP, "source_attempted_at": STAMP, "source_sha256": "a" * 64}
+        merged = merge_retained(read, local, cve, safe_url, published)
+        self.assertEqual((merged["source_status"], merged["epss"]), ("ok", score(0.3, 0.8, "2026-11-09")))
+        # Equal CNA clocks never decide: the newer score date wins whichever record carries it.
+        older_read = {**read, "epss": score(0.1, 0.2, "2026-11-01")}
+        newer_read = {**read, "epss": score(0.2, 0.3, "2026-11-10")}
+        self.assertEqual(merge_retained(older_read, newer_read, cve, safe_url, published)["epss"], score(0.2, 0.3, "2026-11-10"))
+        self.assertEqual(merge_retained(newer_read, older_read, cve, safe_url, published)["epss"], score(0.2, 0.3, "2026-11-10"))
+
     def test_the_index_carries_the_block_last(self):
         briefs, _, _ = self.briefs(None, {"CVE-2026-90001": score()})
         self.assertEqual(INDEX_FIELDS[-1], "epss")
@@ -215,8 +234,8 @@ class PublicationTest(unittest.TestCase):
 
     def test_the_index_counts_name_the_model_and_the_score_date(self):
         briefs = {"a": {"epss": score(day="2026-11-09")}, "b": {"epss": score(day="2026-11-10")}, "c": {"epss": None}}
-        self.assertEqual(collect.epss_counts(briefs), {"epss_scored": 2, "epss_model": epss.MODEL, "epss_date": "2026-11-10"})
-        self.assertEqual(collect.epss_counts({}), {"epss_scored": 0, "epss_model": epss.MODEL, "epss_date": None})
+        self.assertEqual(collect.epss_counts(briefs), {"epss_scored": 2, "epss_model": epss.MODEL, "epss_date": "2026-11-10", "epss_oldest_date": "2026-11-09"})
+        self.assertEqual(collect.epss_counts({}), {"epss_scored": 0, "epss_model": epss.MODEL, "epss_date": None, "epss_oldest_date": None})
 
     def test_the_block_costs_a_bounded_number_of_bytes_per_brief(self):
         full = {"epss": {"score": 0.99999, "percentile": 1.0, "date": "2026-11-10", "model": "v2026.06.15"}}
@@ -240,6 +259,8 @@ class ExportTest(unittest.TestCase):
         self.assertEqual(lines["feed-e"]["epss"], {**score(0.8, 0.99, "2026-11-09"), "cve": "CVE-2026-90002"})
         self.assertIsNone(lines["feed-f"]["epss"])
         self.assertEqual(exports.best_epss({"cves": ["CVE-2026-90001", "CVE-2026-90000"]}, {"CVE-2026-90000": score(0.2), "CVE-2026-90001": score(0.2)})["cve"], "CVE-2026-90000", "ties go to the lowest id")
+        tiny = exports.epss_fields({"cves": ["CVE-2026-90001"]}, {"CVE-2026-90001": score(0.00004, 1.0)})
+        self.assertEqual((tiny["epss"], tiny["epss_percentile"]), ("0.00004", "1"), "a plain decimal, never scientific notation")
         dictionary = ctx_files["data-dictionary.md"].decode("utf-8")
         self.assertIn("| `epss_model` |", dictionary)
         self.assertIn("FIRST asks for attribution", dictionary)

@@ -1288,7 +1288,8 @@ def epss_counts(briefs):
     """index.json counts for FIRST's EPSS scores: how many briefs carry one, the model and the newest score date."""
     from .epss import MODEL
     scored = [brief["epss"] for brief in briefs.values() if isinstance(brief, dict) and brief.get("epss")]
-    return {"epss_scored": len(scored), "epss_model": MODEL, "epss_date": max((item["date"] for item in scored), default=None)}
+    dates = [item["date"] for item in scored]
+    return {"epss_scored": len(scored), "epss_model": MODEL, "epss_date": max(dates, default=None), "epss_oldest_date": min(dates, default=None)}
 
 
 def content_revision(snapshot):
