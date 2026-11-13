@@ -259,6 +259,8 @@ the two lists equal.
 | Zscaler | `zscaler` | Security platforms | rss (zscaler) | no | `https://trust.zscaler.com/rss-feed` |
 | Chainguard | `chainguard` | Security platforms | json (betterstack) | yes | `https://status.chainguard.dev/index.json` |
 | Zafran | `zafran` | Security platforms | json (betterstack) | yes | `https://us.zafranstatus.com/index.json` |
+| Sumo Logic | `sumo-logic` | Security platforms | statuspage (statuspage) | yes | `https://status.sumologic.com/api/v2/incidents.json`<br>`https://status.sumologic.com/api/v2/summary.json`<br>live: `https://status.sumologic.com/api/v2/status.json` |
+| Tailscale | `tailscale` | Security platforms | statuspage (statuspage) | yes | `https://status.tailscale.com/api/v2/incidents.json`<br>`https://status.tailscale.com/api/v2/summary.json`<br>live: `https://status.tailscale.com/api/v2/status.json` |
 | Amazon Web Services | `aws` | Cloud and SaaS | json (aws) | no | `https://health.aws.amazon.com/public/currentevents` |
 | Microsoft Azure | `azure` | Cloud and SaaS | rss (azure) | no | `https://azure.status.microsoft/en-us/status/feed/` |
 | Microsoft 365 | `microsoft-365` | Cloud and SaaS | json (microsoft) | no | `https://status.cloud.microsoft/api/posts/mac` |
@@ -281,6 +283,13 @@ the two lists equal.
 | Jamf | `jamf` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.jamf.com/api/v2/incidents.json`<br>`https://status.jamf.com/api/v2/summary.json`<br>live: `https://status.jamf.com/api/v2/status.json` |
 | DigitalOcean | `digitalocean` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.digitalocean.com/api/v2/incidents.json`<br>`https://status.digitalocean.com/api/v2/summary.json`<br>live: `https://status.digitalocean.com/api/v2/status.json` |
 | Discord | `discord` | Cloud and SaaS | statuspage (statuspage) | yes | `https://discordstatus.com/api/v2/incidents.json`<br>`https://discordstatus.com/api/v2/summary.json`<br>live: `https://discordstatus.com/api/v2/status.json` |
+| New Relic | `new-relic` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.newrelic.com/api/v2/incidents.json`<br>`https://status.newrelic.com/api/v2/summary.json`<br>live: `https://status.newrelic.com/api/v2/status.json` |
+| Segment | `segment` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.segment.com/api/v2/incidents.json`<br>`https://status.segment.com/api/v2/summary.json`<br>live: `https://status.segment.com/api/v2/status.json` |
+| Linode (Akamai) | `linode` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.linode.com/api/v2/incidents.json`<br>`https://status.linode.com/api/v2/summary.json`<br>live: `https://status.linode.com/api/v2/status.json` |
+| Cloudinary | `cloudinary` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.cloudinary.com/api/v2/incidents.json`<br>`https://status.cloudinary.com/api/v2/summary.json`<br>live: `https://status.cloudinary.com/api/v2/status.json` |
+| CockroachDB Cloud | `cockroachdb` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.cockroachlabs.cloud/api/v2/incidents.json`<br>`https://status.cockroachlabs.cloud/api/v2/summary.json`<br>live: `https://status.cockroachlabs.cloud/api/v2/status.json` |
+| Box | `box` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.box.com/api/v2/incidents.json`<br>`https://status.box.com/api/v2/summary.json`<br>live: `https://status.box.com/api/v2/status.json` |
+| Confluent | `confluent` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.confluent.cloud/api/v2/incidents.json`<br>`https://status.confluent.cloud/api/v2/summary.json`<br>live: `https://status.confluent.cloud/api/v2/status.json` |
 | GitHub | `github` | Developer services | statuspage (statuspage) | yes | `https://www.githubstatus.com/api/v2/incidents.json`<br>`https://www.githubstatus.com/api/v2/summary.json`<br>live: `https://www.githubstatus.com/api/v2/status.json` |
 | GitLab | `gitlab` | Developer services | json (statusio) | yes | `https://status.gitlab.com/1.0/status/5b36dc6502d06804c08349f7` |
 | Azure DevOps | `azure-devops` | Developer services | json (azure-devops) | yes | `https://status.dev.azure.com/_apis/status/health?api-version=7.1-preview.1` |
@@ -291,6 +300,9 @@ the two lists equal.
 | Heroku | `heroku` | Developer services | json (heroku) | yes | `https://status.heroku.com/api/v4/current-status` |
 | Netlify | `netlify` | Developer services | statuspage (statuspage) | yes | `https://www.netlifystatus.com/api/v2/incidents.json`<br>`https://www.netlifystatus.com/api/v2/summary.json`<br>live: `https://www.netlifystatus.com/api/v2/status.json` |
 | Vercel | `vercel` | Developer services | statuspage (statuspage) | yes | `https://www.vercel-status.com/api/v2/incidents.json`<br>`https://www.vercel-status.com/api/v2/summary.json`<br>live: `https://www.vercel-status.com/api/v2/status.json` |
+| CircleCI | `circleci` | Developer services | statuspage (statuspage) | yes | `https://status.circleci.com/api/v2/incidents.json`<br>`https://status.circleci.com/api/v2/summary.json`<br>live: `https://status.circleci.com/api/v2/status.json` |
+| Sentry | `sentry` | Developer services | statuspage (statuspage) | yes | `https://status.sentry.io/api/v2/incidents.json`<br>`https://status.sentry.io/api/v2/summary.json`<br>live: `https://status.sentry.io/api/v2/status.json` |
+| LaunchDarkly | `launchdarkly` | Developer services | statuspage (statuspage) | yes | `https://status.launchdarkly.com/api/v2/incidents.json`<br>`https://status.launchdarkly.com/api/v2/summary.json`<br>live: `https://status.launchdarkly.com/api/v2/status.json` |
 | IODA (Georgia Tech) | `ioda` | Internet outage signals | ioda (ioda) | yes | `https://api.ioda.inetintel.cc.gatech.edu/v2/outages/events` |
 | Cloudflare Radar outage annotations | `cloudflare-radar` | Internet outage signals | radar (radar) | no | `https://api.cloudflare.com/client/v4/radar/annotations/outages` |
 
