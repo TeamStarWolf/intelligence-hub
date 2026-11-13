@@ -189,7 +189,7 @@ select:disabled { opacity: .6; }
 .chips { margin: 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 /* Chips: the colour in the text on the measured --tsw-chip-bg tint, with a hairline of the
    same colour; no chip is a full fill. */
-.chip { display: inline-flex; align-items: center; min-height: 28px; padding: 2px 10px; border-radius: 999px; background: var(--tsw-chip-bg); color: var(--tsw-chip-fg); font-size: var(--text-xs); font-variant-numeric: tabular-nums; text-decoration: none; border: 1px solid transparent; border-color: color-mix(in srgb, currentColor 30%, transparent); transition: border-color 160ms ease; }
+.chip { display: inline-flex; align-items: center; min-height: 28px; padding: 2px 10px; border-radius: 999px; white-space: nowrap; background: var(--tsw-chip-bg); color: var(--tsw-chip-fg); font-size: var(--text-xs); font-variant-numeric: tabular-nums; text-decoration: none; border: 1px solid transparent; border-color: color-mix(in srgb, currentColor 30%, transparent); transition: border-color 160ms ease; }
 a.chip:hover { border-color: var(--tsw-link); color: var(--tsw-chip-fg); }
 .chip-cve { font-family: var(--tsw-mono); letter-spacing: 0.02em; }
 .chip-kev, .chip-exp-known { color: var(--tsw-red-text); }
