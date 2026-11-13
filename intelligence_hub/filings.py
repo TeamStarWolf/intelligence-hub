@@ -87,12 +87,26 @@ def row_for(source):
             "references": [{"label": "8-K filing on SEC EDGAR", "url": url}], "origin": ORIGIN}
 
 
+def hits_of(payload):
+    """(hits list, total or None) from a search response. The response is untrusted upstream data, so
+    an unexpected shape raises ValueError rather than letting an AttributeError abort the whole run."""
+    if not isinstance(payload, dict):
+        raise ValueError("EDGAR search response is not an object.")
+    block = payload.get("hits")
+    if not isinstance(block, dict):
+        raise ValueError("EDGAR search response has no hits object.")
+    count = block.get("total")
+    total = count.get("value") if isinstance(count, dict) else None
+    hits = block.get("hits")
+    return (hits if isinstance(hits, list) else []), (total if isinstance(total, int) and total >= 0 else None)
+
+
 def parse_search(documents):
     """Every page's JSON, in order, to de-duplicated rows newest first."""
     rows = {}
     for raw in documents:
-        payload = json.loads(raw.decode("utf-8"), parse_constant=collect.reject_constant)
-        for hit in (payload.get("hits", {}).get("hits") or []):
+        hits, _total = hits_of(json.loads(raw.decode("utf-8"), parse_constant=collect.reject_constant))
+        for hit in hits:
             row = row_for(hit.get("_source") if isinstance(hit, dict) else None)
             if row and row["id"] not in rows:
                 rows[row["id"]] = row
@@ -108,10 +122,10 @@ def read_edgar(fetch, end):
     for page in range(MAX_PAGES):
         payload = fetch(search_url(end, page=page), maximum=MAX_BYTES, accept="application/json")
         documents.append(payload)
-        data = json.loads(payload.decode("utf-8"), parse_constant=collect.reject_constant)
-        hits = data.get("hits", {}).get("hits") or []
-        total = data.get("hits", {}).get("total", {}).get("value") if total is None else total
-        if len(hits) < PAGE_SIZE or (page + 1) * PAGE_SIZE >= min(MAX_FILINGS, total or 0) + PAGE_SIZE:
+        hits, count = hits_of(json.loads(payload.decode("utf-8"), parse_constant=collect.reject_constant))
+        if total is None:
+            total = count or 0
+        if len(hits) < PAGE_SIZE or (page + 1) * PAGE_SIZE >= min(MAX_FILINGS, total) + PAGE_SIZE:
             break
     return documents
 
@@ -126,10 +140,10 @@ def collect_filings(refresh, end, *, fetch=collect.fetch, state=None):
             if cache_path is not None:
                 collect.write_raw(cache_path, (json.dumps(documents_as_text(documents), ensure_ascii=False) + "\n").encode("utf-8"))
             return rows, {"status": "ok", "filings": len(rows), "error": None}
-        except (OSError, ValueError, TypeError, KeyError, UnicodeError) as error:
+        except (OSError, ValueError, TypeError, KeyError, AttributeError, RecursionError, UnicodeError) as error:
             reason = collect.failure_reason(error, "SEC EDGAR unavailable")
             rows = _from_cache(cache_path)
-            return rows, {"status": "failed" if rows is None else "stale", "filings": len(rows or []), "error": reason}
+            return (rows or []), {"status": "failed" if rows is None else "stale", "filings": len(rows or []), "error": reason}
     rows = _from_cache(cache_path)
     return (rows or []), {"status": "cached" if rows else "none", "filings": len(rows or []), "error": None}
 
@@ -140,9 +154,9 @@ def documents_as_text(documents):
 
 def _from_cache(cache_path):
     if cache_path is None or not cache_path.exists():
-        return []
+        return None
     try:
         stored = json.loads(cache_path.read_text(encoding="utf-8"), parse_constant=collect.reject_constant)
         return parse_search([part.encode("utf-8") for part in stored])
-    except (OSError, ValueError, TypeError) as error:
+    except (OSError, ValueError, TypeError, AttributeError, RecursionError) as error:
         return []

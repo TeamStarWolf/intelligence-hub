@@ -62,6 +62,21 @@ class FilingsTest(unittest.TestCase):
             rows, summary = filings.collect_filings(False, date(2026, 11, 1), state=Path(tmp))
             self.assertEqual((rows, summary["status"], summary["filings"]), ([], "none", 0))
 
+    def test_malformed_response_becomes_a_failed_summary_not_a_crash(self):
+        # EDGAR is untrusted upstream data; an unexpected shape must not raise out of the collector.
+        for body in (b"[]", b'"nope"', b"123", b'{"hits": []}', b"not json at all"):
+            rows, summary = filings.collect_filings(True, date(2026, 11, 1), fetch=lambda *a, **k: body)
+            self.assertEqual(rows, [])
+            self.assertEqual(summary["status"], "failed")
+
+    def test_unparseable_cache_is_empty_not_fatal(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            state = Path(tmp)
+            (state / filings.CACHE).write_text('["not-an-object"]', encoding="utf-8")
+            rows, summary = filings.collect_filings(False, date(2026, 11, 1), state=state)
+            self.assertEqual(rows, [])
+            self.assertEqual(summary["status"], "none")
+
     def test_integration_line_is_connected(self):
         line = collect.sec_integration({"status": "ok", "filings": 3})
         self.assertEqual(line["status"], "connected")
