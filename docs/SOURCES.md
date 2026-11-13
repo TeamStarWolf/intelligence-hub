@@ -290,6 +290,9 @@ the two lists equal.
 | CockroachDB Cloud | `cockroachdb` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.cockroachlabs.cloud/api/v2/incidents.json`<br>`https://status.cockroachlabs.cloud/api/v2/summary.json`<br>live: `https://status.cockroachlabs.cloud/api/v2/status.json` |
 | Box | `box` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.box.com/api/v2/incidents.json`<br>`https://status.box.com/api/v2/summary.json`<br>live: `https://status.box.com/api/v2/status.json` |
 | Confluent | `confluent` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.confluent.cloud/api/v2/incidents.json`<br>`https://status.confluent.cloud/api/v2/summary.json`<br>live: `https://status.confluent.cloud/api/v2/status.json` |
+| Notion | `notion` | Cloud and SaaS | statuspage (statuspage) | yes | `https://www.notion-status.com/api/v2/incidents.json`<br>`https://www.notion-status.com/api/v2/summary.json`<br>live: `https://www.notion-status.com/api/v2/status.json` |
+| Grafana | `grafana` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.grafana.com/api/v2/incidents.json`<br>`https://status.grafana.com/api/v2/summary.json`<br>live: `https://status.grafana.com/api/v2/status.json` |
+| Fivetran | `fivetran` | Cloud and SaaS | statuspage (statuspage) | no | `https://status.fivetran.com/api/v2/incidents.json`<br>`https://status.fivetran.com/api/v2/summary.json` |
 | GitHub | `github` | Developer services | statuspage (statuspage) | yes | `https://www.githubstatus.com/api/v2/incidents.json`<br>`https://www.githubstatus.com/api/v2/summary.json`<br>live: `https://www.githubstatus.com/api/v2/status.json` |
 | GitLab | `gitlab` | Developer services | json (statusio) | yes | `https://status.gitlab.com/1.0/status/5b36dc6502d06804c08349f7` |
 | Azure DevOps | `azure-devops` | Developer services | json (azure-devops) | yes | `https://status.dev.azure.com/_apis/status/health?api-version=7.1-preview.1` |

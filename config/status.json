@@ -799,6 +799,57 @@
       "library": null
     },
     {
+      "id": "notion",
+      "name": "Notion",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://www.notion-status.com/api/v2/status.json",
+        "summary": "https://www.notion-status.com/api/v2/summary.json",
+        "incidents": "https://www.notion-status.com/api/v2/incidents.json"
+      },
+      "home": "https://www.notion-status.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "grafana",
+      "name": "Grafana",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.grafana.com/api/v2/status.json",
+        "summary": "https://status.grafana.com/api/v2/summary.json",
+        "incidents": "https://status.grafana.com/api/v2/incidents.json"
+      },
+      "home": "https://status.grafana.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "fivetran",
+      "name": "Fivetran",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.fivetran.com/api/v2/status.json",
+        "summary": "https://status.fivetran.com/api/v2/summary.json",
+        "incidents": "https://status.fivetran.com/api/v2/incidents.json"
+      },
+      "home": "https://status.fivetran.com/",
+      "cors": false,
+      "library": null
+    },
+    {
       "id": "github",
       "name": "GitHub",
       "vendor": null,
