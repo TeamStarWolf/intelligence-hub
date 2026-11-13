@@ -32,7 +32,7 @@
     {
       "value": "filing",
       "label": "Filing",
-      "definition": "A regulatory filing. No filing source is connected today, so no row carries this value yet."
+      "definition": "A regulatory filing. SEC 8-K filings under Item 1.05 (Material Cybersecurity Incidents), read from EDGAR full-text search, carry this value."
     },
     {
       "value": "bulletin",

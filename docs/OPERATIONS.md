@@ -512,10 +512,11 @@ it only to `api.cloudflare.com`, never into a file, a log line or the page. Unti
 the secret exists the collector makes no Radar request and `status/outages.json`
 says `not_configured`.
 
-Direct SEC filing intake is pending after HTTP 403. The SEC filter is not evidence
-that filings have been connected, and reporting about a filing is not complete
-Item 1.05/8.01 coverage. Accepted access and an operational contact policy remain
-prerequisites; do not bypass a source's access refusal.
+SEC Item 1.05 (Material Cybersecurity Incidents) 8-K filings are read from EDGAR
+full-text search each run and listed as filing rows in the Explorer. Item 8.01
+cyber notices and filings older than the 120-day window are not included, and
+nothing beyond a filing's own EDGAR header is inferred; the filing is the only
+claim made. The read keeps well under the SEC's ten-requests-per-second guidance.
 
 ### Supplemental publisher context
 

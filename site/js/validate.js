@@ -43,7 +43,7 @@ export function timestamp(value, nullable = true) {
 
 const KINDS = ["advisory", "research", "reporting", "incident", "kev", "filing", "bulletin", "note", "change", "lifecycle"];
 const EXPLOITATION = ["known", "reported", "unknown"];
-const ORIGIN = /^(?:publisher-feed|cisa-kev|library-curation|service-status|history:[a-z0-9][a-z0-9-]{0,39})$/;
+const ORIGIN = /^(?:publisher-feed|cisa-kev|library-curation|service-status|sec-filing|history:[a-z0-9][a-z0-9-]{0,39})$/;
 const CVE = /^CVE-\d{4}-\d{4,19}$/;
 // The same pattern as SHARD_PATH in intelligence_hub/shards.py and the typed check in publish.yml;
 // tests/test_shards.py holds the three in step.

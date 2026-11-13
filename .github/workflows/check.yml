@@ -33,6 +33,7 @@ jobs:
         run: |
           python -I tests/fixtures/build_fixture.py --check
           python -I tests/fixtures/status/build_cache.py --check
+          python -I tests/fixtures/filings/build_cache.py --check
       - name: History check (offline)
         # Schema, sort order, unique ids, URL safety, in-year dates, caps, coverage agreement
         # and every fixture re-parsed to its golden file. -E -s for the same reason as below.
@@ -46,6 +47,8 @@ jobs:
           cp -R tests/fixtures/patch-tuesday/documents .state/patch-tuesday-documents
           # Service-health observations made by the real normalizers from tests/fixtures/status/documents.
           cp tests/fixtures/status-cache.json .state/status-cache.json
+          # SEC Item 1.05 filing search bodies the filings step reads offline (intelligence_hub/filings.py).
+          cp tests/fixtures/filings/filings-cache.json .state/filings-cache.json
           python -E -s -m intelligence_hub --cached --start 1998-01-01 --end 2026-11-01
       - name: Validate the offline snapshot
         shell: python

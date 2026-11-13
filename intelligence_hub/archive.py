@@ -339,7 +339,7 @@ def validate_snapshot(value):
     keys(value["integrations"], {"xai", "x", "sec"})
     for integration in value["integrations"].values():
         keys(integration, {"status", "message"})
-        require(integration["status"] == "not_connected", "Unsupported integration metadata.")
+        require(integration["status"] in {"not_connected", "connected"}, "Unsupported integration metadata.")
         strings(integration["message"])
     if modern:
         validate_intelligence(value["intelligence"], wanted, safe_url)

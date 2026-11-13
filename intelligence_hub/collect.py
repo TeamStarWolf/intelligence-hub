@@ -792,6 +792,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     require(service_health["summary"].get("status") != "held", "Service health: " + str(service_health["summary"].get("reason")) +
             ". Nothing was written; the deployed publication is preserved and the next run reads the status files again.")
     patch = collect_patch_tuesday(registry, refresh, previous, patch_limit)
+    filing_rows, filing_summary = collect_filings(refresh, end)
     failures = [{"id": key, "error": item.get("error")} for key, item in [*sorted(cache["sources"].items()), ("cisa-kev", cache["kev"])]
                 if item.get("status") == "failed"]
     for failure in failures:
@@ -879,10 +880,10 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
         "refresh": {"requested_minutes": 120, "mode": "scheduled-check", "status_url": "https://github.com/TeamStarWolf/intelligence-hub/actions/workflows/publish.yml",
             "notes": ["The workflow asks GitHub for a run every two hours (cron 7 */2 * * *). GitHub does not guarantee scheduled runs: they start late, are sometimes dropped, and stop after long repository inactivity.", "data/v7/index.json records the last 20 published runs and the observed gap between them. The content date is the only freshness promise; a new item can take several hours to appear.", "Snapshot and source dates describe the last published collection; a run that finds nothing new does not republish."]},
         "coverage": {"kev_records": counts["cisa-kev"], "curated_events": counts["library-curation"], "feed_articles": counts["publisher-feed"],
-            "notes": ["This is a selected collection within the declared date window, not every cyber incident, article or vulnerability.", "KEV dates indicate catalog addition, not first disclosure or first exploitation.", "RSS usually exposes recent posts; historical curation and legacy feeds do not form a complete historical archive.", "Unknown dates remain explicit. Failed sources retain last-good input when available; public snapshot resume helps retain prior publisher items.", "Per-feed retained history is bounded to 600 articles. Missing, evicted or changed inputs can leave coverage gaps.", "Publisher intake reports describe only the latest bounded response selection window of at most 150 processed entries. Rejected or unprocessed entries are not newly admitted; unprocessed entries may include recent items, and older retained versions may remain.", "Last accepted input is not exhaustive publisher coverage. Legacy observations without intake reports have unknown window completeness.", "Canonical article URLs are deduplicated; distinct publishers covering one CVE remain separate evidence.", "CVE mentions can come from RSS metadata/body text; they do not mean every mentioned CVE was exploited.", "Headlines link to publishers; full article bodies are not copied. No environment exposure is inferred.", "Threatpost is a legacy archive with observed August 2022 items; a successful fetch does not imply current reporting.", "SEC direct filing access is pending after HTTP 403; news reporting about filings is not complete Item 1.05 or 8.01 coverage."]},
+            "notes": ["This is a selected collection within the declared date window, not every cyber incident, article or vulnerability.", "KEV dates indicate catalog addition, not first disclosure or first exploitation.", "RSS usually exposes recent posts; historical curation and legacy feeds do not form a complete historical archive.", "Unknown dates remain explicit. Failed sources retain last-good input when available; public snapshot resume helps retain prior publisher items.", "Per-feed retained history is bounded to 600 articles. Missing, evicted or changed inputs can leave coverage gaps.", "Publisher intake reports describe only the latest bounded response selection window of at most 150 processed entries. Rejected or unprocessed entries are not newly admitted; unprocessed entries may include recent items, and older retained versions may remain.", "Last accepted input is not exhaustive publisher coverage. Legacy observations without intake reports have unknown window completeness.", "Canonical article URLs are deduplicated; distinct publishers covering one CVE remain separate evidence.", "CVE mentions can come from RSS metadata/body text; they do not mean every mentioned CVE was exploited.", "Headlines link to publishers; full article bodies are not copied. No environment exposure is inferred.", "Threatpost is a legacy archive with observed August 2022 items; a successful fetch does not imply current reporting.", "SEC 8-K filings under Item 1.05 (Material Cybersecurity Incidents) from the last 120 days are read from EDGAR full-text search and listed as filing rows; Item 8.01 cyber notices and filings older than that window are not included."]},
         "integrations": {"xai": {"status": "not_connected", "message": "The collector makes no Grok or xAI calls and runs no model. Report editions come from a separate desktop compiler and name their own tools."},
                          "x": {"status": "not_connected", "message": "The collector reads no X timeline or bookmarks and posts nothing to X. Any future article sharing needs the owner's review."},
-                         "sec": {"status": "not_connected", "message": "The collector has no direct SEC filing intake: the filing feed returned HTTP 403. No direct filings are claimed."}}}
+                         "sec": sec_integration(filing_summary)}}
     if reports["status"] == "unavailable":
         snapshot["coverage"]["notes"].append("Reports unavailable in this run: " + reports["reason"] + ". Feed collection continued without report listings.")
     snapshot["intelligence"] = intelligence
@@ -905,7 +906,7 @@ def build_snapshot(start, end, refresh=True, resume_public=False, enrich_limit=4
     # Exports are built (never written) before the index, so the index can list every export file.
     export_files, exported = build_analytics_exports(snapshot["articles"], tagged, sources, briefs)
     v7 = build_v7(snapshot, previous, kev.get("catalog"), reports, intelligence_inputs, end, feed_raw, briefs_raw, tagged,
-                  exports_index(export_files, exported), patch, service_health=service_health)
+                  exports_index(export_files, exported), patch, service_health=service_health, filings=filing_rows)
     changed = publication_changed(changed, v7["changed_shards"], v7["removed_shards"], v7["exports_changed"], service_health["summary"], v7["feeds_changed"])
     if refresh:
         write_json(cache_path, cache)
@@ -1083,6 +1084,29 @@ def collect_status(refresh, previous, end):
     return status.collect_status(ROOT, refresh=refresh, previous_index=index, deployed=deployed, end=end, fetch=fetch, state=STATE)
 
 
+def collect_filings(refresh, end):
+    """This run's SEC Item 1.05 filing rows and summary (intelligence_hub/filings.py)."""
+    from . import filings
+    return filings.collect_filings(refresh, end, fetch=fetch, state=STATE)
+
+
+def sec_integration(summary):
+    """The feed's SEC integration line: connected now that the collector reads EDGAR, with a message
+    that reflects this run's read."""
+    from . import filings
+    base = ("The collector reads SEC EDGAR full-text search each run for 8-K filings under Item 1.05 "
+            "(Material Cybersecurity Incidents) filed in the last " + str(filings.WINDOW_DAYS) + " days, and lists "
+            "them as filing rows. Item 8.01 cyber notices are not read, and nothing beyond the filing's own "
+            "header is claimed.")
+    status = summary.get("status")
+    if status == "ok":
+        return {"status": "connected", "message": base + " " + str(summary.get("filings", 0)) + " in the current window."}
+    if status in {"stale", "cached"}:
+        return {"status": "connected", "message": base + " The last read did not complete (" + str(summary.get("error") or "no network read this run")
+                + "); the previous read's " + str(summary.get("filings", 0)) + " filings are shown."}
+    return {"status": "connected", "message": base + " No filing was read this run (" + str(summary.get("error") or "no network read this run") + ")."}
+
+
 def status_shards(service_health, tagged, catalog, briefs):
     """(status files, tagged Explorer rows). Rows keep no tagging block when tagging is unavailable."""
     from . import status
@@ -1196,7 +1220,7 @@ def build_patch_tuesday(patch, catalog, briefs, tagged):
     return files, {"status": "ok", **patch_tuesday.summary(files, patch["report"])}
 
 
-def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs_raw, tagged=None, exports_entry=None, patch=None, service_health=None):
+def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs_raw, tagged=None, exports_entry=None, patch=None, service_health=None, filings=None):
     """The schema 7 shards and index for this run, compared with the previous index. Nothing is written here."""
     from . import shards
     from .tagging.engine import compact
@@ -1213,7 +1237,13 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
     if health_held:
         print("Status: " + format(health_held, ",") + " Explorer incident rows held back to keep their live month shards inside the shard bound",
               file=sys.stderr)
-    files = shards.build_shards(rows + history_rows + health_rows, snapshot["sources"], catalog, snapshot["mitigations"],
+    # SEC Item 1.05 filing rows ride the same rail as service-health rows: injected here, bounded to
+    # their live month shard, and rebuilt every run (never resumed from the deployed feed).
+    filing_rows, filing_held = fit_status_rows(rows + history_rows + health_rows, list(filings or []), end)
+    if filing_rows or filings:
+        print("Filings: " + format(len(filing_rows), ",") + " SEC Item 1.05 Explorer rows"
+              + (", " + format(filing_held, ",") + " held back for shard bounds" if filing_held else ""), file=sys.stderr)
+    files = shards.build_shards(rows + history_rows + health_rows + filing_rows, snapshot["sources"], catalog, snapshot["mitigations"],
                                 shards.reports_file(reports, catalog_value, catalog_sha), end,
                                 coverage=history_publish.coverage_file(ROOT, shards.SCHEMA_VERSION), extra=patch_files)
     # Adapter rows never push a year's history shard past its byte bound; any held back are named.
@@ -1265,6 +1295,7 @@ def build_v7(snapshot, previous, catalog, reports, inputs, end, feed_raw, briefs
               "patch_tuesday_months": sum(1 for entry in entries if shards.PATCH_TUESDAY_MONTH.fullmatch(entry["path"])),
               "status_sources": (service_health or {}).get("summary", {}).get("sources", 0),
               "status_incidents": (service_health or {}).get("summary", {}).get("incidents", 0), "status_rows": len(health_rows),
+              "filing_rows": len(filing_rows),
               **epss_counts(snapshot["mitigations"])}
     index = shards.build_index(entries, generated_at=snapshot["generated_at"], end=end, feed_content_revision=snapshot["content_revision"],
                                layout_revision=snapshot["layout_revision"], runs=runs, counts=counts,
@@ -1344,7 +1375,7 @@ def deployed_v7():
         # rows are rebuilt on every run from the status month files (intelligence_hub/status.py).
         articles.extend({key: item for key, item in row.items() if key != "tagging"} if isinstance(row, dict) else row
                         for row in value["rows"] if not (isinstance(row, dict) and (str(row.get("origin", "")).startswith("history:") or
-                                                                                     row.get("origin") == "service-status")))
+                                                                                     row.get("origin") in {"service-status", "sec-filing"})))
     sources = files.get("sources.json")
     require(isinstance(sources, dict) and sources.get("kind") == "sources" and isinstance(sources.get("rows"), list), "Invalid deployed v7 source ledger.")
     return {"schema_version": 7, "generated_at": index["generated_at"], "articles": articles, "sources": sources["rows"],

@@ -450,8 +450,9 @@ export function normalize(raw, byteLength) {
   const coverage = { kev_records: nonnegative(raw.coverage.kev_records), curated_events: nonnegative(raw.coverage.curated_events), feed_articles: nonnegative(raw.coverage.feed_articles), notes: textList(raw.coverage.notes, 100, 4000) };
   const integrations = {};
   for (const key of ["xai", "x", "sec"]) {
-    requireValue(raw.integrations[key]?.status === "not_connected");
-    integrations[key] = { status: "not_connected", message: boundedText(raw.integrations[key].message, 4000, true) };
+    const value = raw.integrations[key]?.status;
+    requireValue(value === "not_connected" || value === "connected");
+    integrations[key] = { status: value, message: boundedText(raw.integrations[key].message, 4000, true) };
   }
   requireValue(Number.isSafeInteger(raw.refresh.requested_minutes) && raw.refresh.requested_minutes > 0 && raw.refresh.requested_minutes <= 1440 && raw.refresh.mode === "scheduled-check");
   const refresh = { requested_minutes: raw.refresh.requested_minutes, mode: raw.refresh.mode, status_url: boundedText(raw.refresh.status_url, 4000), notes: textList(raw.refresh.notes, 100, 4000) };
