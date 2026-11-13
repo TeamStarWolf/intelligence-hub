@@ -280,6 +280,12 @@ the two lists equal.
 | Aqua Security | `aqua-security` | Security platforms | statuspage (statuspage) | yes | `https://status.aquasec.com/api/v2/incidents.json`<br>`https://status.aquasec.com/api/v2/summary.json`<br>live: `https://status.aquasec.com/api/v2/status.json` |
 | Island | `island` | Security platforms | statuspage (statuspage) | yes | `https://status.island.io/api/v2/incidents.json`<br>`https://status.island.io/api/v2/summary.json`<br>live: `https://status.island.io/api/v2/status.json` |
 | Semgrep | `semgrep` | Security platforms | statuspage (statuspage) | yes | `https://status.semgrep.dev/api/v2/incidents.json`<br>`https://status.semgrep.dev/api/v2/summary.json`<br>live: `https://status.semgrep.dev/api/v2/status.json` |
+| Arctic Wolf | `arctic-wolf` | Security platforms | statuspage (statuspage) | yes | `https://status.arcticwolf.com/api/v2/incidents.json`<br>`https://status.arcticwolf.com/api/v2/summary.json`<br>live: `https://status.arcticwolf.com/api/v2/status.json` |
+| Red Canary | `red-canary` | Security platforms | statuspage (statuspage) | yes | `https://status.redcanary.com/api/v2/incidents.json`<br>`https://status.redcanary.com/api/v2/summary.json`<br>live: `https://status.redcanary.com/api/v2/status.json` |
+| Teleport | `teleport` | Security platforms | statuspage (statuspage) | yes | `https://status.teleport.sh/api/v2/incidents.json`<br>`https://status.teleport.sh/api/v2/summary.json`<br>live: `https://status.teleport.sh/api/v2/status.json` |
+| Doppler | `doppler` | Security platforms | statuspage (statuspage) | yes | `https://www.dopplerstatus.com/api/v2/incidents.json`<br>`https://www.dopplerstatus.com/api/v2/summary.json`<br>live: `https://www.dopplerstatus.com/api/v2/status.json` |
+| Infisical | `infisical` | Security platforms | statuspage (statuspage) | yes | `https://status.infisical.com/api/v2/incidents.json`<br>`https://status.infisical.com/api/v2/summary.json`<br>live: `https://status.infisical.com/api/v2/status.json` |
+| Cloudsmith | `cloudsmith` | Security platforms | statuspage (statuspage) | yes | `https://status.cloudsmith.com/api/v2/incidents.json`<br>`https://status.cloudsmith.com/api/v2/summary.json`<br>live: `https://status.cloudsmith.com/api/v2/status.json` |
 | Amazon Web Services | `aws` | Cloud and SaaS | json (aws) | no | `https://health.aws.amazon.com/public/currentevents` |
 | Microsoft Azure | `azure` | Cloud and SaaS | rss (azure) | no | `https://azure.status.microsoft/en-us/status/feed/` |
 | Microsoft 365 | `microsoft-365` | Cloud and SaaS | json (microsoft) | no | `https://status.cloud.microsoft/api/posts/mac` |
@@ -330,6 +336,11 @@ the two lists equal.
 | Webflow | `webflow` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.webflow.com/api/v2/incidents.json`<br>`https://status.webflow.com/api/v2/summary.json`<br>live: `https://status.webflow.com/api/v2/status.json` |
 | Contentful | `contentful` | Cloud and SaaS | statuspage (statuspage) | yes | `https://www.contentfulstatus.com/api/v2/incidents.json`<br>`https://www.contentfulstatus.com/api/v2/summary.json`<br>live: `https://www.contentfulstatus.com/api/v2/status.json` |
 | Sanity | `sanity` | Cloud and SaaS | statuspage (statuspage) | yes | `https://www.sanity-status.com/api/v2/incidents.json`<br>`https://www.sanity-status.com/api/v2/summary.json`<br>live: `https://www.sanity-status.com/api/v2/status.json` |
+| Honeycomb | `honeycomb` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.honeycomb.io/api/v2/incidents.json`<br>`https://status.honeycomb.io/api/v2/summary.json`<br>live: `https://status.honeycomb.io/api/v2/status.json` |
+| Cohere | `cohere` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.cohere.com/api/v2/incidents.json`<br>`https://status.cohere.com/api/v2/summary.json`<br>live: `https://status.cohere.com/api/v2/status.json` |
+| Mistral | `mistral` | Cloud and SaaS | statuspage (statuspage) | no | `https://status.mistral.ai/api/v2/incidents.json`<br>`https://status.mistral.ai/api/v2/summary.json` |
+| Gandi | `gandi` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.gandi.net/api/v2/incidents.json`<br>`https://status.gandi.net/api/v2/summary.json`<br>live: `https://status.gandi.net/api/v2/status.json` |
+| Asana | `asana` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.asana.com/api/v2/incidents.json`<br>`https://status.asana.com/api/v2/summary.json`<br>live: `https://status.asana.com/api/v2/status.json` |
 | GitHub | `github` | Developer services | statuspage (statuspage) | yes | `https://www.githubstatus.com/api/v2/incidents.json`<br>`https://www.githubstatus.com/api/v2/summary.json`<br>live: `https://www.githubstatus.com/api/v2/status.json` |
 | GitLab | `gitlab` | Developer services | json (statusio) | yes | `https://status.gitlab.com/1.0/status/5b36dc6502d06804c08349f7` |
 | Azure DevOps | `azure-devops` | Developer services | json (azure-devops) | yes | `https://status.dev.azure.com/_apis/status/health?api-version=7.1-preview.1` |
@@ -348,6 +359,8 @@ the two lists equal.
 | Kong | `kong` | Developer services | statuspage (statuspage) | yes | `https://status.konghq.com/api/v2/incidents.json`<br>`https://status.konghq.com/api/v2/summary.json`<br>live: `https://status.konghq.com/api/v2/status.json` |
 | Postman | `postman` | Developer services | statuspage (statuspage) | yes | `https://status.postman.com/api/v2/incidents.json`<br>`https://status.postman.com/api/v2/summary.json`<br>live: `https://status.postman.com/api/v2/status.json` |
 | Temporal | `temporal` | Developer services | statuspage (statuspage) | yes | `https://status.temporal.io/api/v2/incidents.json`<br>`https://status.temporal.io/api/v2/summary.json`<br>live: `https://status.temporal.io/api/v2/status.json` |
+| Opsgenie | `opsgenie` | Developer services | statuspage (statuspage) | yes | `https://opsgenie.status.atlassian.com/api/v2/incidents.json`<br>`https://opsgenie.status.atlassian.com/api/v2/summary.json`<br>live: `https://opsgenie.status.atlassian.com/api/v2/status.json` |
+| Retool | `retool` | Developer services | statuspage (statuspage) | yes | `https://status.retool.com/api/v2/incidents.json`<br>`https://status.retool.com/api/v2/summary.json`<br>live: `https://status.retool.com/api/v2/status.json` |
 | IODA (Georgia Tech) | `ioda` | Internet outage signals | ioda (ioda) | yes | `https://api.ioda.inetintel.cc.gatech.edu/v2/outages/events` |
 | Cloudflare Radar outage annotations | `cloudflare-radar` | Internet outage signals | radar (radar) | no | `https://api.cloudflare.com/client/v4/radar/annotations/outages` |
 

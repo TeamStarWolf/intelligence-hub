@@ -645,6 +645,108 @@
       "library": null
     },
     {
+      "id": "arctic-wolf",
+      "name": "Arctic Wolf",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.arcticwolf.com/api/v2/status.json",
+        "summary": "https://status.arcticwolf.com/api/v2/summary.json",
+        "incidents": "https://status.arcticwolf.com/api/v2/incidents.json"
+      },
+      "home": "https://status.arcticwolf.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "red-canary",
+      "name": "Red Canary",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.redcanary.com/api/v2/status.json",
+        "summary": "https://status.redcanary.com/api/v2/summary.json",
+        "incidents": "https://status.redcanary.com/api/v2/incidents.json"
+      },
+      "home": "https://status.redcanary.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "teleport",
+      "name": "Teleport",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.teleport.sh/api/v2/status.json",
+        "summary": "https://status.teleport.sh/api/v2/summary.json",
+        "incidents": "https://status.teleport.sh/api/v2/incidents.json"
+      },
+      "home": "https://status.teleport.sh/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "doppler",
+      "name": "Doppler",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://www.dopplerstatus.com/api/v2/status.json",
+        "summary": "https://www.dopplerstatus.com/api/v2/summary.json",
+        "incidents": "https://www.dopplerstatus.com/api/v2/incidents.json"
+      },
+      "home": "https://www.dopplerstatus.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "infisical",
+      "name": "Infisical",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.infisical.com/api/v2/status.json",
+        "summary": "https://status.infisical.com/api/v2/summary.json",
+        "incidents": "https://status.infisical.com/api/v2/incidents.json"
+      },
+      "home": "https://status.infisical.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "cloudsmith",
+      "name": "Cloudsmith",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.cloudsmith.com/api/v2/status.json",
+        "summary": "https://status.cloudsmith.com/api/v2/summary.json",
+        "incidents": "https://status.cloudsmith.com/api/v2/incidents.json"
+      },
+      "home": "https://status.cloudsmith.com/",
+      "cors": true,
+      "library": null
+    },
+    {
       "id": "aws",
       "name": "Amazon Web Services",
       "vendor": "vendor:aws",
@@ -1479,6 +1581,91 @@
       "library": null
     },
     {
+      "id": "honeycomb",
+      "name": "Honeycomb",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.honeycomb.io/api/v2/status.json",
+        "summary": "https://status.honeycomb.io/api/v2/summary.json",
+        "incidents": "https://status.honeycomb.io/api/v2/incidents.json"
+      },
+      "home": "https://status.honeycomb.io/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "cohere",
+      "name": "Cohere",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.cohere.com/api/v2/status.json",
+        "summary": "https://status.cohere.com/api/v2/summary.json",
+        "incidents": "https://status.cohere.com/api/v2/incidents.json"
+      },
+      "home": "https://status.cohere.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "mistral",
+      "name": "Mistral",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.mistral.ai/api/v2/status.json",
+        "summary": "https://status.mistral.ai/api/v2/summary.json",
+        "incidents": "https://status.mistral.ai/api/v2/incidents.json"
+      },
+      "home": "https://status.mistral.ai/",
+      "cors": false,
+      "library": null
+    },
+    {
+      "id": "gandi",
+      "name": "Gandi",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.gandi.net/api/v2/status.json",
+        "summary": "https://status.gandi.net/api/v2/summary.json",
+        "incidents": "https://status.gandi.net/api/v2/incidents.json"
+      },
+      "home": "https://status.gandi.net/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "asana",
+      "name": "Asana",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.asana.com/api/v2/status.json",
+        "summary": "https://status.asana.com/api/v2/summary.json",
+        "incidents": "https://status.asana.com/api/v2/incidents.json"
+      },
+      "home": "https://status.asana.com/",
+      "cors": true,
+      "library": null
+    },
+    {
       "id": "github",
       "name": "GitHub",
       "vendor": null,
@@ -1775,6 +1962,40 @@
         "incidents": "https://status.temporal.io/api/v2/incidents.json"
       },
       "home": "https://status.temporal.io/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "opsgenie",
+      "name": "Opsgenie",
+      "vendor": null,
+      "group": "developer-services",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://opsgenie.status.atlassian.com/api/v2/status.json",
+        "summary": "https://opsgenie.status.atlassian.com/api/v2/summary.json",
+        "incidents": "https://opsgenie.status.atlassian.com/api/v2/incidents.json"
+      },
+      "home": "https://opsgenie.status.atlassian.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "retool",
+      "name": "Retool",
+      "vendor": null,
+      "group": "developer-services",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.retool.com/api/v2/status.json",
+        "summary": "https://status.retool.com/api/v2/summary.json",
+        "incidents": "https://status.retool.com/api/v2/incidents.json"
+      },
+      "home": "https://status.retool.com/",
       "cors": true,
       "library": null
     },
