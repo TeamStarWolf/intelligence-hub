@@ -33,6 +33,8 @@ SOURCES = {
     "salesforce": {"active": "salesforce/active.json"},
     "gitlab": {"status": "statusio/status.json"},
     "azure-devops": {"health": "azure-devops/health.json"},
+    "microsoft-365": {"posts": "microsoft/mac.json"},
+    "power-platform": {"posts": "microsoft/ppac.json"},
     "chainguard": {"index": "betterstack/index.json"},
     "zscaler": {"feed": "zscaler/rss-feed.xml"},
     "oracle-cloud": {"status": "statuspage-rss/status.json", "feed": "statuspage-rss/history.rss"},

@@ -616,6 +616,36 @@
       "library": null
     },
     {
+      "id": "microsoft-365",
+      "name": "Microsoft 365",
+      "vendor": "vendor:microsoft",
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "json",
+      "format": "microsoft",
+      "endpoints": {
+        "posts": "https://status.cloud.microsoft/api/posts/mac"
+      },
+      "home": "https://status.cloud.microsoft/",
+      "cors": false,
+      "library": null
+    },
+    {
+      "id": "power-platform",
+      "name": "Power Platform",
+      "vendor": "vendor:microsoft",
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "json",
+      "format": "microsoft",
+      "endpoints": {
+        "posts": "https://status.cloud.microsoft/api/posts/ppac"
+      },
+      "home": "https://status.cloud.microsoft/",
+      "cors": false,
+      "library": null
+    },
+    {
       "id": "github",
       "name": "GitHub",
       "vendor": null,
@@ -894,13 +924,6 @@
       "vendor": "vendor:cisco",
       "home": "https://status.webex.com/",
       "reason": "A script-rendered page: no documented feed was found on 2026-11-04."
-    },
-    {
-      "id": "microsoft-365",
-      "name": "Microsoft 365",
-      "vendor": "vendor:microsoft",
-      "home": "https://status.cloud.microsoft/",
-      "reason": "HTML page only. Tenant service health needs a signed-in Microsoft Graph call, which the Hub does not make."
     }
   ]
 }

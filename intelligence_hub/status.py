@@ -30,6 +30,7 @@ later in this step publishes the previous status files again byte for byte and n
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta, timezone
 import hashlib
+import html
 import http.client
 import json
 import os
@@ -53,11 +54,11 @@ SCHEMA_VERSION = 7
 DIRECTORY = "status"
 GROUPS = ("security-platforms", "cloud-and-saas", "developer-services", "internet")
 # class -> the formats it may use; format -> the endpoint names it reads.
-CLASSES = {"statuspage": {"statuspage"}, "json": {"aws", "google", "slack", "salesforce", "statusio", "azure-devops", "heroku", "betterstack"},
+CLASSES = {"statuspage": {"statuspage"}, "json": {"aws", "google", "slack", "salesforce", "statusio", "azure-devops", "heroku", "betterstack", "microsoft"},
            "rss": {"azure", "zscaler", "statuspage-rss"}, "ioda": {"ioda"}, "radar": {"radar"}}
 ENDPOINTS = {"statuspage": {"status", "summary", "incidents"}, "aws": {"events"}, "google": {"incidents"}, "slack": {"current", "history"},
              "salesforce": {"active"}, "statusio": {"status"}, "azure-devops": {"health"}, "heroku": {"current"}, "betterstack": {"index"},
-             "azure": {"feed"}, "zscaler": {"feed"}, "statuspage-rss": {"status", "feed"}, "ioda": {"events"}, "radar": {"outages"}}
+             "azure": {"feed"}, "zscaler": {"feed"}, "statuspage-rss": {"status", "feed"}, "microsoft": {"posts"}, "ioda": {"events"}, "radar": {"outages"}}
 OUTAGE_FORMATS = {"ioda", "radar"}
 INDICATORS = ("none", "minor", "major", "critical", "maintenance", "unknown")
 IMPACTS = ("none", "minor", "major", "critical")
@@ -600,9 +601,39 @@ def parse_statuspage_rss(source, documents):
     return snapshot(status["status"].get("indicator"), status["status"].get("description"), rows)
 
 
+MICROSOFT_IMPACT = {"service degradation": "major", "service interruption": "critical", "extended recovery": "minor",
+                    "restoring service": "minor", "investigating": "minor", "advisory": "minor", "informational": "none"}
+MICROSOFT_HEALTHY = {"", "available", "service restored", "restored", "resolved", "normal service"}
+
+
+def microsoft_text(message):
+    """The vendor's HTML message as bounded plain text."""
+    if not isinstance(message, str):
+        return None
+    return clean(html.unescape(re.sub(r"<[^>]+>", " ", message)), SUMMARY_MAX) or None
+
+
+def parse_microsoft(source, documents):
+    """status.cloud.microsoft/api/posts/<service>: one JSON post. Microsoft publishes here only when a
+    significant issue may keep administrators out of the admin center, so a status other than Available
+    is a live incident in the vendor's own words. Tenant-specific service health still needs a signed-in
+    Microsoft Graph call, which the Hub does not make."""
+    post = read_json_bytes(documents["posts"])
+    require(isinstance(post, dict) and isinstance(post.get("Status"), str), "Unexpected Microsoft status post.")
+    word = post["Status"].strip()
+    if word.lower() in MICROSOFT_HEALTHY:
+        return snapshot("none", word or "Available", [])
+    impact = MICROSOFT_IMPACT.get(word.lower(), "major")
+    title = post.get("Title") or word
+    row = incident(source, post.get("Id"), title, status_raw=word, impact=impact,
+                   started=stamp(post.get("AuthoredDateTime")), updated=stamp(post.get("LastUpdatedTime")),
+                   url=source["home"], summary=microsoft_text(post.get("Message")))
+    return snapshot(impact if row else "unknown", title, [row] if row else [])
+
+
 PARSERS = {"statuspage": parse_statuspage, "google": parse_google, "aws": parse_aws, "slack": parse_slack, "heroku": parse_heroku,
            "salesforce": parse_salesforce, "statusio": parse_statusio, "azure-devops": parse_azure_devops, "betterstack": parse_betterstack,
-           "azure": parse_azure, "zscaler": parse_zscaler, "statuspage-rss": parse_statuspage_rss}
+           "azure": parse_azure, "zscaler": parse_zscaler, "statuspage-rss": parse_statuspage_rss, "microsoft": parse_microsoft}
 # Endpoints a run reads for each format. The Statuspage status.json is the live board's file; the
 # collector reads the summary, which carries the same indicator.
 READ = {"statuspage": ("summary", "incidents"), "statuspage-rss": ("status", "feed")}

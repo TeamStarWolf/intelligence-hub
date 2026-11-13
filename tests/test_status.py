@@ -131,6 +131,19 @@ class NormalizerTest(unittest.TestCase):
         self.assertIn("AlloyDB for PostgreSQL", row["components"])
         self.assertNotIn("**", row["name"])
 
+    def test_microsoft_posts_json(self):
+        snap = parse("microsoft-365", posts="microsoft/mac.json")
+        self.assertEqual(snap["indicator"], "major")
+        self.assertEqual(snap["description"], "Users may be unable to connect to multiple Microsoft 365 services")
+        row = snap["incidents"][0]
+        self.assertEqual((row["id"], row["impact"], row["status"]), ("0a0b8011-44ef-4168-a7c5-9419c5921052", "major", "other"))
+        self.assertEqual(row["url"], "https://status.cloud.microsoft/")
+        self.assertTrue(status.valid_incident(row, "microsoft-365"))
+        self.assertNotIn("<", row["summary"] or "")
+        self.assertIn("Exchange Online", row["summary"])
+        healthy = parse("power-platform", posts="microsoft/ppac.json")
+        self.assertEqual((healthy["indicator"], healthy["description"], healthy["incidents"]), ("none", "Available", []))
+
     def test_aws_events_in_utf16_with_a_byte_order_mark(self):
         raw = doc("aws/currentevents.json")
         self.assertEqual(raw[:2], b"\xff\xfe")

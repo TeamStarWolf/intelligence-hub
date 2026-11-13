@@ -261,6 +261,8 @@ the two lists equal.
 | Zafran | `zafran` | Security platforms | json (betterstack) | yes | `https://us.zafranstatus.com/index.json` |
 | Amazon Web Services | `aws` | Cloud and SaaS | json (aws) | no | `https://health.aws.amazon.com/public/currentevents` |
 | Microsoft Azure | `azure` | Cloud and SaaS | rss (azure) | no | `https://azure.status.microsoft/en-us/status/feed/` |
+| Microsoft 365 | `microsoft-365` | Cloud and SaaS | json (microsoft) | no | `https://status.cloud.microsoft/api/posts/mac` |
+| Power Platform | `power-platform` | Cloud and SaaS | json (microsoft) | no | `https://status.cloud.microsoft/api/posts/ppac` |
 | Google Cloud | `google-cloud` | Cloud and SaaS | json (google) | yes | `https://status.cloud.google.com/incidents.json` |
 | Google Workspace | `google-workspace` | Cloud and SaaS | json (google) | yes | `https://www.google.com/appsstatus/dashboard/incidents.json` |
 | Oracle Cloud Infrastructure | `oracle-cloud` | Cloud and SaaS | rss (statuspage-rss) | yes | `https://ocistatus.oraclecloud.com/history.rss`<br>`https://ocistatus.oraclecloud.com/api/v2/status.json` |
@@ -312,6 +314,12 @@ the two lists equal.
   means none is posted. **zscaler**: the trust portal RSS feed, of which only the *Recent
   incident* category is read. **statuspage-rss** (Oracle Cloud): a Statuspage-format
   `status.json` for the indicator and an incident-history RSS feed.
+- **microsoft** (Microsoft 365, Power Platform): `status.cloud.microsoft/api/posts/<service>`
+  returns one public JSON post per service. Microsoft publishes to this page only when a
+  significant issue may keep administrators out of the admin center, so a status of `Available`
+  is operational and any other status is a live incident, titled and described in Microsoft's own
+  words. Tenant-specific service health still needs a signed-in Microsoft Graph call, which the
+  Hub does not make.
 - **ioda**: IODA's `outages/events` API for countries, one request per run covering the 24 hours
   before the read. IODA's API documentation recommends the events API, which removes some noise
   from raw alerts, for most uses. Each response carries IODA's copyright line, which the site
@@ -354,4 +362,3 @@ These are linked from the view and never polled.
 | Invicti | <https://status.invicti.com/> | HTML page only: no feed or JSON endpoint answered on 2026-11-04. |
 | Cisco cloud services | <https://status.cisco.com/> | A script-rendered page: no documented feed was found on 2026-11-04. |
 | Webex | <https://status.webex.com/> | A script-rendered page: no documented feed was found on 2026-11-04. |
-| Microsoft 365 | <https://status.cloud.microsoft/> | HTML page only. Tenant service health needs a signed-in Microsoft Graph call, which the Hub does not make. |

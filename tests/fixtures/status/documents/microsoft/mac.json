@@ -1,0 +1,9 @@
+{
+  "Id": "0a0b8011-44ef-4168-a7c5-9419c5921052",
+  "AuthoredDateTime": "2026-10-30T22:15:00+00:00",
+  "InternalDateTime": "2026-10-30T22:19:00+00:00",
+  "LastUpdatedTime": "2026-11-01T03:07:45+00:00",
+  "Title": "Users may be unable to connect to multiple Microsoft 365 services",
+  "Message": "<div>User impact: Users may be unable to connect to multiple Microsoft 365 services. <div><br></div><div>More info: Features of the Microsoft 365 services below that interact with Exchange Online and email services are impacted.</div><div>- Exchange Online: Users may be unable to access their mailbox using Outlook on the web, Outlook desktop (MAPI), or Exchange ActiveSync (EAS), and email delivery may be delayed.</div><div>- Microsoft Teams: Scenarios that depend on Exchange Online, including calendar, are affected.</div><div><br></div><div>Current status: We&#8217;re identifying alternate workstreams to increase capacity.</div><div>Next update by: Saturday, November 1, 2026, at 4:30 AM UTC</div></div>",
+  "Status": "Service degradation"
+}

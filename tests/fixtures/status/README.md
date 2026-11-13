@@ -1,8 +1,8 @@
 # Service-health fixtures
 
 `documents/` holds trimmed copies of real responses from the sources in `config/status.json`,
-read on 4 November 2026. `make_fixtures.py` made them from the untrimmed responses: it keeps each
-response's own shape and drops only rows and long text.
+read on 4 November 2026 (the Microsoft documents on 12 November 2026). `make_fixtures.py` made them
+from the untrimmed responses: it keeps each response's own shape and drops only rows and long text.
 
 | Document | Source and endpoint |
 | --- | --- |
@@ -15,6 +15,8 @@ response's own shape and drops only rows and long text.
 | `salesforce/active.json` | Salesforce, `api.status.salesforce.com/v1/incidents/active` |
 | `statusio/status.json` | GitLab, `status.gitlab.com/1.0/status/...` (status.io) |
 | `azure-devops/health.json` | Azure DevOps, `status.dev.azure.com/_apis/status/health` |
+| `microsoft/mac.json` | Microsoft 365, `status.cloud.microsoft/api/posts/mac` (one JSON post, here a service degradation) |
+| `microsoft/ppac.json` | Power Platform, `status.cloud.microsoft/api/posts/ppac` (Available, the healthy shape) |
 | `betterstack/index.json` | Chainguard, `status.chainguard.dev/index.json` |
 | `zscaler/rss-feed.xml` | Zscaler, `trust.zscaler.com/rss-feed` (descriptions emptied) |
 | `statuspage-rss/status.json`, `statuspage-rss/history.rss` | Oracle Cloud, `ocistatus.oraclecloud.com` |

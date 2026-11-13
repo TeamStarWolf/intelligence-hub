@@ -377,6 +377,32 @@
    ],
    "status": "ok"
   },
+  "microsoft-365": {
+   "description": "Users may be unable to connect to multiple Microsoft 365 services",
+   "error": null,
+   "fetched_at": "2026-11-01T12:00:00+00:00",
+   "incidents": [
+    {
+     "components": [],
+     "id": "0a0b8011-44ef-4168-a7c5-9419c5921052",
+     "impact": "major",
+     "impact_raw": null,
+     "name": "Users may be unable to connect to multiple Microsoft 365 services",
+     "resolved": null,
+     "source": "microsoft-365",
+     "started": "2026-10-30T22:15:00+00:00",
+     "status": "other",
+     "status_raw": "Service degradation",
+     "summary": "User impact: Users may be unable to connect to multiple Microsoft 365 services. More info: Features of the Microsoft 365 services below that interact with Exchange Online and email services are impacted. - Exchange Online: Users may be unable to access their mailbox using Outlook",
+     "updated": "2026-11-01T03:07:45+00:00",
+     "url": "https://status.cloud.microsoft/",
+     "vendor": "vendor:microsoft"
+    }
+   ],
+   "indicator": "major",
+   "last_success": "2026-11-01T12:00:00+00:00",
+   "status": "ok"
+  },
   "oracle-cloud": {
    "description": "Normal Performance",
    "error": null,
@@ -421,6 +447,15 @@
      "vendor": "vendor:oracle"
     }
    ],
+   "indicator": "none",
+   "last_success": "2026-11-01T12:00:00+00:00",
+   "status": "ok"
+  },
+  "power-platform": {
+   "description": "Available",
+   "error": null,
+   "fetched_at": "2026-11-01T12:00:00+00:00",
+   "incidents": [],
    "indicator": "none",
    "last_success": "2026-11-01T12:00:00+00:00",
    "status": "ok"
