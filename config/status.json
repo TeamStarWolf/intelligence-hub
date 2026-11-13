@@ -322,6 +322,176 @@
       "library": null
     },
     {
+      "id": "jumpcloud",
+      "name": "JumpCloud",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.jumpcloud.com/api/v2/status.json",
+        "summary": "https://status.jumpcloud.com/api/v2/summary.json",
+        "incidents": "https://status.jumpcloud.com/api/v2/incidents.json"
+      },
+      "home": "https://status.jumpcloud.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "ping-identity",
+      "name": "Ping Identity",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.pingidentity.com/api/v2/status.json",
+        "summary": "https://status.pingidentity.com/api/v2/summary.json",
+        "incidents": "https://status.pingidentity.com/api/v2/incidents.json"
+      },
+      "home": "https://status.pingidentity.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "yubico",
+      "name": "Yubico",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.yubico.com/api/v2/status.json",
+        "summary": "https://status.yubico.com/api/v2/summary.json",
+        "incidents": "https://status.yubico.com/api/v2/incidents.json"
+      },
+      "home": "https://status.yubico.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "huntress",
+      "name": "Huntress",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.huntress.com/api/v2/status.json",
+        "summary": "https://status.huntress.com/api/v2/summary.json",
+        "incidents": "https://status.huntress.com/api/v2/incidents.json"
+      },
+      "home": "https://status.huntress.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "abnormal-security",
+      "name": "Abnormal Security",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.abnormalsecurity.com/api/v2/status.json",
+        "summary": "https://status.abnormalsecurity.com/api/v2/summary.json",
+        "incidents": "https://status.abnormalsecurity.com/api/v2/incidents.json"
+      },
+      "home": "https://status.abnormalsecurity.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "gitguardian",
+      "name": "GitGuardian",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.gitguardian.com/api/v2/status.json",
+        "summary": "https://status.gitguardian.com/api/v2/summary.json",
+        "incidents": "https://status.gitguardian.com/api/v2/incidents.json"
+      },
+      "home": "https://status.gitguardian.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "censys",
+      "name": "Censys",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.censys.com/api/v2/status.json",
+        "summary": "https://status.censys.com/api/v2/summary.json",
+        "incidents": "https://status.censys.com/api/v2/incidents.json"
+      },
+      "home": "https://status.censys.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "twingate",
+      "name": "Twingate",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.twingate.com/api/v2/status.json",
+        "summary": "https://status.twingate.com/api/v2/summary.json",
+        "incidents": "https://status.twingate.com/api/v2/incidents.json"
+      },
+      "home": "https://status.twingate.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "vanta",
+      "name": "Vanta",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.vanta.com/api/v2/status.json",
+        "summary": "https://status.vanta.com/api/v2/summary.json",
+        "incidents": "https://status.vanta.com/api/v2/incidents.json"
+      },
+      "home": "https://status.vanta.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "digicert",
+      "name": "DigiCert",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.digicert.com/api/v2/status.json",
+        "summary": "https://status.digicert.com/api/v2/summary.json",
+        "incidents": "https://status.digicert.com/api/v2/incidents.json"
+      },
+      "home": "https://status.digicert.com/",
+      "cors": true,
+      "library": null
+    },
+    {
       "id": "aws",
       "name": "Amazon Web Services",
       "vendor": "vendor:aws",
@@ -850,6 +1020,57 @@
       "library": null
     },
     {
+      "id": "scaleway",
+      "name": "Scaleway",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.scaleway.com/api/v2/status.json",
+        "summary": "https://status.scaleway.com/api/v2/summary.json",
+        "incidents": "https://status.scaleway.com/api/v2/incidents.json"
+      },
+      "home": "https://status.scaleway.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "supabase",
+      "name": "Supabase",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.supabase.com/api/v2/status.json",
+        "summary": "https://status.supabase.com/api/v2/summary.json",
+        "incidents": "https://status.supabase.com/api/v2/incidents.json"
+      },
+      "home": "https://status.supabase.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "planetscale",
+      "name": "PlanetScale",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://www.planetscalestatus.com/api/v2/status.json",
+        "summary": "https://www.planetscalestatus.com/api/v2/summary.json",
+        "incidents": "https://www.planetscalestatus.com/api/v2/incidents.json"
+      },
+      "home": "https://www.planetscalestatus.com/",
+      "cors": true,
+      "library": null
+    },
+    {
       "id": "github",
       "name": "GitHub",
       "vendor": null,
@@ -1061,6 +1282,40 @@
         "incidents": "https://status.launchdarkly.com/api/v2/incidents.json"
       },
       "home": "https://status.launchdarkly.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "fly-io",
+      "name": "Fly.io",
+      "vendor": null,
+      "group": "developer-services",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.flyio.net/api/v2/status.json",
+        "summary": "https://status.flyio.net/api/v2/summary.json",
+        "incidents": "https://status.flyio.net/api/v2/incidents.json"
+      },
+      "home": "https://status.flyio.net/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "render",
+      "name": "Render",
+      "vendor": null,
+      "group": "developer-services",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.render.com/api/v2/status.json",
+        "summary": "https://status.render.com/api/v2/summary.json",
+        "incidents": "https://status.render.com/api/v2/incidents.json"
+      },
+      "home": "https://status.render.com/",
       "cors": true,
       "library": null
     },

@@ -261,6 +261,16 @@ the two lists equal.
 | Zafran | `zafran` | Security platforms | json (betterstack) | yes | `https://us.zafranstatus.com/index.json` |
 | Sumo Logic | `sumo-logic` | Security platforms | statuspage (statuspage) | yes | `https://status.sumologic.com/api/v2/incidents.json`<br>`https://status.sumologic.com/api/v2/summary.json`<br>live: `https://status.sumologic.com/api/v2/status.json` |
 | Tailscale | `tailscale` | Security platforms | statuspage (statuspage) | yes | `https://status.tailscale.com/api/v2/incidents.json`<br>`https://status.tailscale.com/api/v2/summary.json`<br>live: `https://status.tailscale.com/api/v2/status.json` |
+| JumpCloud | `jumpcloud` | Security platforms | statuspage (statuspage) | yes | `https://status.jumpcloud.com/api/v2/incidents.json`<br>`https://status.jumpcloud.com/api/v2/summary.json`<br>live: `https://status.jumpcloud.com/api/v2/status.json` |
+| Ping Identity | `ping-identity` | Security platforms | statuspage (statuspage) | yes | `https://status.pingidentity.com/api/v2/incidents.json`<br>`https://status.pingidentity.com/api/v2/summary.json`<br>live: `https://status.pingidentity.com/api/v2/status.json` |
+| Yubico | `yubico` | Security platforms | statuspage (statuspage) | yes | `https://status.yubico.com/api/v2/incidents.json`<br>`https://status.yubico.com/api/v2/summary.json`<br>live: `https://status.yubico.com/api/v2/status.json` |
+| Huntress | `huntress` | Security platforms | statuspage (statuspage) | yes | `https://status.huntress.com/api/v2/incidents.json`<br>`https://status.huntress.com/api/v2/summary.json`<br>live: `https://status.huntress.com/api/v2/status.json` |
+| Abnormal Security | `abnormal-security` | Security platforms | statuspage (statuspage) | yes | `https://status.abnormalsecurity.com/api/v2/incidents.json`<br>`https://status.abnormalsecurity.com/api/v2/summary.json`<br>live: `https://status.abnormalsecurity.com/api/v2/status.json` |
+| GitGuardian | `gitguardian` | Security platforms | statuspage (statuspage) | yes | `https://status.gitguardian.com/api/v2/incidents.json`<br>`https://status.gitguardian.com/api/v2/summary.json`<br>live: `https://status.gitguardian.com/api/v2/status.json` |
+| Censys | `censys` | Security platforms | statuspage (statuspage) | yes | `https://status.censys.com/api/v2/incidents.json`<br>`https://status.censys.com/api/v2/summary.json`<br>live: `https://status.censys.com/api/v2/status.json` |
+| Twingate | `twingate` | Security platforms | statuspage (statuspage) | yes | `https://status.twingate.com/api/v2/incidents.json`<br>`https://status.twingate.com/api/v2/summary.json`<br>live: `https://status.twingate.com/api/v2/status.json` |
+| Vanta | `vanta` | Security platforms | statuspage (statuspage) | yes | `https://status.vanta.com/api/v2/incidents.json`<br>`https://status.vanta.com/api/v2/summary.json`<br>live: `https://status.vanta.com/api/v2/status.json` |
+| DigiCert | `digicert` | Security platforms | statuspage (statuspage) | yes | `https://status.digicert.com/api/v2/incidents.json`<br>`https://status.digicert.com/api/v2/summary.json`<br>live: `https://status.digicert.com/api/v2/status.json` |
 | Amazon Web Services | `aws` | Cloud and SaaS | json (aws) | no | `https://health.aws.amazon.com/public/currentevents` |
 | Microsoft Azure | `azure` | Cloud and SaaS | rss (azure) | no | `https://azure.status.microsoft/en-us/status/feed/` |
 | Microsoft 365 | `microsoft-365` | Cloud and SaaS | json (microsoft) | no | `https://status.cloud.microsoft/api/posts/mac` |
@@ -293,6 +303,9 @@ the two lists equal.
 | Notion | `notion` | Cloud and SaaS | statuspage (statuspage) | yes | `https://www.notion-status.com/api/v2/incidents.json`<br>`https://www.notion-status.com/api/v2/summary.json`<br>live: `https://www.notion-status.com/api/v2/status.json` |
 | Grafana | `grafana` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.grafana.com/api/v2/incidents.json`<br>`https://status.grafana.com/api/v2/summary.json`<br>live: `https://status.grafana.com/api/v2/status.json` |
 | Fivetran | `fivetran` | Cloud and SaaS | statuspage (statuspage) | no | `https://status.fivetran.com/api/v2/incidents.json`<br>`https://status.fivetran.com/api/v2/summary.json` |
+| Scaleway | `scaleway` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.scaleway.com/api/v2/incidents.json`<br>`https://status.scaleway.com/api/v2/summary.json`<br>live: `https://status.scaleway.com/api/v2/status.json` |
+| Supabase | `supabase` | Cloud and SaaS | statuspage (statuspage) | yes | `https://status.supabase.com/api/v2/incidents.json`<br>`https://status.supabase.com/api/v2/summary.json`<br>live: `https://status.supabase.com/api/v2/status.json` |
+| PlanetScale | `planetscale` | Cloud and SaaS | statuspage (statuspage) | yes | `https://www.planetscalestatus.com/api/v2/incidents.json`<br>`https://www.planetscalestatus.com/api/v2/summary.json`<br>live: `https://www.planetscalestatus.com/api/v2/status.json` |
 | GitHub | `github` | Developer services | statuspage (statuspage) | yes | `https://www.githubstatus.com/api/v2/incidents.json`<br>`https://www.githubstatus.com/api/v2/summary.json`<br>live: `https://www.githubstatus.com/api/v2/status.json` |
 | GitLab | `gitlab` | Developer services | json (statusio) | yes | `https://status.gitlab.com/1.0/status/5b36dc6502d06804c08349f7` |
 | Azure DevOps | `azure-devops` | Developer services | json (azure-devops) | yes | `https://status.dev.azure.com/_apis/status/health?api-version=7.1-preview.1` |
@@ -306,6 +319,8 @@ the two lists equal.
 | CircleCI | `circleci` | Developer services | statuspage (statuspage) | yes | `https://status.circleci.com/api/v2/incidents.json`<br>`https://status.circleci.com/api/v2/summary.json`<br>live: `https://status.circleci.com/api/v2/status.json` |
 | Sentry | `sentry` | Developer services | statuspage (statuspage) | yes | `https://status.sentry.io/api/v2/incidents.json`<br>`https://status.sentry.io/api/v2/summary.json`<br>live: `https://status.sentry.io/api/v2/status.json` |
 | LaunchDarkly | `launchdarkly` | Developer services | statuspage (statuspage) | yes | `https://status.launchdarkly.com/api/v2/incidents.json`<br>`https://status.launchdarkly.com/api/v2/summary.json`<br>live: `https://status.launchdarkly.com/api/v2/status.json` |
+| Fly.io | `fly-io` | Developer services | statuspage (statuspage) | yes | `https://status.flyio.net/api/v2/incidents.json`<br>`https://status.flyio.net/api/v2/summary.json`<br>live: `https://status.flyio.net/api/v2/status.json` |
+| Render | `render` | Developer services | statuspage (statuspage) | yes | `https://status.render.com/api/v2/incidents.json`<br>`https://status.render.com/api/v2/summary.json`<br>live: `https://status.render.com/api/v2/status.json` |
 | IODA (Georgia Tech) | `ioda` | Internet outage signals | ioda (ioda) | yes | `https://api.ioda.inetintel.cc.gatech.edu/v2/outages/events` |
 | Cloudflare Radar outage annotations | `cloudflare-radar` | Internet outage signals | radar (radar) | no | `https://api.cloudflare.com/client/v4/radar/annotations/outages` |
 
