@@ -512,7 +512,7 @@ export function normalizeStatusCurrent(raw) {
   requireValue(isObject(raw) && raw.schema_version === 7 && raw.kind === "status-current", "The service-health board is not a schema 7 file.");
   const groups = list(raw.groups, 8).map(group => { requireValue(isObject(group) && STATUS_GROUPS.includes(group.id)); return { id: group.id, label: boundedText(group.label, 60) }; });
   const seen = new Set();
-  const sources = list(raw.sources, 80).map(item => {
+  const sources = list(raw.sources, 120).map(item => {
     requireValue(isObject(item) && STATUS_GROUPS.includes(item.group) && ["ok", "failed", "not_fetched", "not_configured"].includes(item.status) && STATUS_INDICATORS.includes(item.indicator) && typeof item.cors === "boolean");
     const id = statusId(item.id);
     requireValue(!seen.has(id), "A service-health source is listed twice.");

@@ -492,6 +492,159 @@
       "library": null
     },
     {
+      "id": "barracuda",
+      "name": "Barracuda",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.barracuda.com/api/v2/status.json",
+        "summary": "https://status.barracuda.com/api/v2/summary.json",
+        "incidents": "https://status.barracuda.com/api/v2/incidents.json"
+      },
+      "home": "https://status.barracuda.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "delinea",
+      "name": "Delinea",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.delinea.com/api/v2/status.json",
+        "summary": "https://status.delinea.com/api/v2/summary.json",
+        "incidents": "https://status.delinea.com/api/v2/incidents.json"
+      },
+      "home": "https://status.delinea.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "sailpoint",
+      "name": "SailPoint",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.sailpoint.com/api/v2/status.json",
+        "summary": "https://status.sailpoint.com/api/v2/summary.json",
+        "incidents": "https://status.sailpoint.com/api/v2/incidents.json"
+      },
+      "home": "https://status.sailpoint.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "veracode",
+      "name": "Veracode",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.veracode.com/api/v2/status.json",
+        "summary": "https://status.veracode.com/api/v2/summary.json",
+        "incidents": "https://status.veracode.com/api/v2/incidents.json"
+      },
+      "home": "https://status.veracode.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "sonatype",
+      "name": "Sonatype",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.sonatype.com/api/v2/status.json",
+        "summary": "https://status.sonatype.com/api/v2/summary.json",
+        "incidents": "https://status.sonatype.com/api/v2/incidents.json"
+      },
+      "home": "https://status.sonatype.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "jfrog",
+      "name": "JFrog",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.jfrog.io/api/v2/status.json",
+        "summary": "https://status.jfrog.io/api/v2/summary.json",
+        "incidents": "https://status.jfrog.io/api/v2/incidents.json"
+      },
+      "home": "https://status.jfrog.io/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "aqua-security",
+      "name": "Aqua Security",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.aquasec.com/api/v2/status.json",
+        "summary": "https://status.aquasec.com/api/v2/summary.json",
+        "incidents": "https://status.aquasec.com/api/v2/incidents.json"
+      },
+      "home": "https://status.aquasec.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "island",
+      "name": "Island",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.island.io/api/v2/status.json",
+        "summary": "https://status.island.io/api/v2/summary.json",
+        "incidents": "https://status.island.io/api/v2/incidents.json"
+      },
+      "home": "https://status.island.io/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "semgrep",
+      "name": "Semgrep",
+      "vendor": null,
+      "group": "security-platforms",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.semgrep.dev/api/v2/status.json",
+        "summary": "https://status.semgrep.dev/api/v2/summary.json",
+        "incidents": "https://status.semgrep.dev/api/v2/incidents.json"
+      },
+      "home": "https://status.semgrep.dev/",
+      "cors": true,
+      "library": null
+    },
+    {
       "id": "aws",
       "name": "Amazon Web Services",
       "vendor": "vendor:aws",
@@ -1071,6 +1224,261 @@
       "library": null
     },
     {
+      "id": "bunny",
+      "name": "Bunny.net",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.bunny.net/api/v2/status.json",
+        "summary": "https://status.bunny.net/api/v2/summary.json",
+        "incidents": "https://status.bunny.net/api/v2/incidents.json"
+      },
+      "home": "https://status.bunny.net/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "imgix",
+      "name": "imgix",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.imgix.com/api/v2/status.json",
+        "summary": "https://status.imgix.com/api/v2/summary.json",
+        "incidents": "https://status.imgix.com/api/v2/incidents.json"
+      },
+      "home": "https://status.imgix.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "mux",
+      "name": "Mux",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.mux.com/api/v2/status.json",
+        "summary": "https://status.mux.com/api/v2/summary.json",
+        "incidents": "https://status.mux.com/api/v2/incidents.json"
+      },
+      "home": "https://status.mux.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "mailgun",
+      "name": "Mailgun",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.mailgun.com/api/v2/status.json",
+        "summary": "https://status.mailgun.com/api/v2/summary.json",
+        "incidents": "https://status.mailgun.com/api/v2/incidents.json"
+      },
+      "home": "https://status.mailgun.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "plaid",
+      "name": "Plaid",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.plaid.com/api/v2/status.json",
+        "summary": "https://status.plaid.com/api/v2/summary.json",
+        "incidents": "https://status.plaid.com/api/v2/incidents.json"
+      },
+      "home": "https://status.plaid.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "upstash",
+      "name": "Upstash",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.upstash.com/api/v2/status.json",
+        "summary": "https://status.upstash.com/api/v2/summary.json",
+        "incidents": "https://status.upstash.com/api/v2/incidents.json"
+      },
+      "home": "https://status.upstash.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "clickhouse",
+      "name": "ClickHouse",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.clickhouse.com/api/v2/status.json",
+        "summary": "https://status.clickhouse.com/api/v2/summary.json",
+        "incidents": "https://status.clickhouse.com/api/v2/incidents.json"
+      },
+      "home": "https://status.clickhouse.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "pinecone",
+      "name": "Pinecone",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.pinecone.io/api/v2/status.json",
+        "summary": "https://status.pinecone.io/api/v2/summary.json",
+        "incidents": "https://status.pinecone.io/api/v2/incidents.json"
+      },
+      "home": "https://status.pinecone.io/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "airtable",
+      "name": "Airtable",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.airtable.com/api/v2/status.json",
+        "summary": "https://status.airtable.com/api/v2/summary.json",
+        "incidents": "https://status.airtable.com/api/v2/incidents.json"
+      },
+      "home": "https://status.airtable.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "figma",
+      "name": "Figma",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.figma.com/api/v2/status.json",
+        "summary": "https://status.figma.com/api/v2/summary.json",
+        "incidents": "https://status.figma.com/api/v2/incidents.json"
+      },
+      "home": "https://status.figma.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "miro",
+      "name": "Miro",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.miro.com/api/v2/status.json",
+        "summary": "https://status.miro.com/api/v2/summary.json",
+        "incidents": "https://status.miro.com/api/v2/incidents.json"
+      },
+      "home": "https://status.miro.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "zapier",
+      "name": "Zapier",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.zapier.com/api/v2/status.json",
+        "summary": "https://status.zapier.com/api/v2/summary.json",
+        "incidents": "https://status.zapier.com/api/v2/incidents.json"
+      },
+      "home": "https://status.zapier.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "webflow",
+      "name": "Webflow",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.webflow.com/api/v2/status.json",
+        "summary": "https://status.webflow.com/api/v2/summary.json",
+        "incidents": "https://status.webflow.com/api/v2/incidents.json"
+      },
+      "home": "https://status.webflow.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "contentful",
+      "name": "Contentful",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://www.contentfulstatus.com/api/v2/status.json",
+        "summary": "https://www.contentfulstatus.com/api/v2/summary.json",
+        "incidents": "https://www.contentfulstatus.com/api/v2/incidents.json"
+      },
+      "home": "https://www.contentfulstatus.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "sanity",
+      "name": "Sanity",
+      "vendor": null,
+      "group": "cloud-and-saas",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://www.sanity-status.com/api/v2/status.json",
+        "summary": "https://www.sanity-status.com/api/v2/summary.json",
+        "incidents": "https://www.sanity-status.com/api/v2/incidents.json"
+      },
+      "home": "https://www.sanity-status.com/",
+      "cors": true,
+      "library": null
+    },
+    {
       "id": "github",
       "name": "GitHub",
       "vendor": null,
@@ -1316,6 +1724,57 @@
         "incidents": "https://status.render.com/api/v2/incidents.json"
       },
       "home": "https://status.render.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "kong",
+      "name": "Kong",
+      "vendor": null,
+      "group": "developer-services",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.konghq.com/api/v2/status.json",
+        "summary": "https://status.konghq.com/api/v2/summary.json",
+        "incidents": "https://status.konghq.com/api/v2/incidents.json"
+      },
+      "home": "https://status.konghq.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "postman",
+      "name": "Postman",
+      "vendor": null,
+      "group": "developer-services",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.postman.com/api/v2/status.json",
+        "summary": "https://status.postman.com/api/v2/summary.json",
+        "incidents": "https://status.postman.com/api/v2/incidents.json"
+      },
+      "home": "https://status.postman.com/",
+      "cors": true,
+      "library": null
+    },
+    {
+      "id": "temporal",
+      "name": "Temporal",
+      "vendor": null,
+      "group": "developer-services",
+      "desk": "infrastructure",
+      "class": "statuspage",
+      "format": "statuspage",
+      "endpoints": {
+        "status": "https://status.temporal.io/api/v2/status.json",
+        "summary": "https://status.temporal.io/api/v2/summary.json",
+        "incidents": "https://status.temporal.io/api/v2/incidents.json"
+      },
+      "home": "https://status.temporal.io/",
       "cors": true,
       "library": null
     },
