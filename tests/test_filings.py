@@ -48,6 +48,43 @@ class FilingsTest(unittest.TestCase):
         self.assertTrue(row["url"].startswith("https://www.sec.gov/Archives/edgar/data/885725/"))
         self.assertEqual(len(row["references"]), 1)
 
+    def test_sic_maps_to_a_cisa_sector_or_nothing(self):
+        self.assertEqual(filings.sector_tags(["3841"]), [["sector:healthcare-public-health", "sec-sic", "medium"]])  # surgical instruments
+        self.assertEqual(filings.sector_tags(["6022"]), [["sector:financial-services", "sec-sic", "medium"]])        # state commercial banks
+        self.assertEqual(filings.sector_tags(["4813"]), [["sector:communications", "sec-sic", "medium"]])            # telephone communications
+        self.assertEqual(filings.sector_tags(["2834"]), [["sector:healthcare-public-health", "sec-sic", "medium"]])  # drugs, carved out of chemicals
+        self.assertEqual(filings.sector_tags(["4512"]), [["sector:transportation", "sec-sic", "medium"]])                # air transportation
+        self.assertEqual(filings.sector_tags(["5411"]), [["sector:retail", "sec-sic", "medium"]])                       # grocery stores
+        self.assertEqual(filings.sector_tags(["1500"]), [])   # construction: no clean CISA sector, so no tag
+        self.assertEqual(filings.sector_tags([]), [])
+        self.assertEqual(filings.sector_tags(["8000", "8011"]), [["sector:healthcare-public-health", "sec-sic", "medium"]])  # deduped
+
+    def test_every_mapped_sector_is_a_real_vocabulary_id(self):
+        import json
+        vocab = {value["value"] for value in json.loads((support.ROOT / "config" / "vocab" / "sector.json").read_text(encoding="utf-8"))["values"]}
+        for _low, _high, slug in filings.SIC_SECTORS:
+            self.assertIn(slug, vocab, slug + " is not a config/vocab/sector.json id")
+
+    def test_company_slug_is_stable_across_legal_forms(self):
+        self.assertEqual(filings.company_slug("BOSTON SCIENTIFIC CORP"), "boston-scientific")
+        self.assertEqual(filings.company_slug("Boston Scientific Corporation"), "boston-scientific")  # same slug, different suffix
+        self.assertEqual(filings.company_slug("Astrana Health, Inc."), "astrana-health")
+        self.assertEqual(filings.company_slug("The Kroger Co."), "kroger")  # leading "The" and trailing "Co" dropped
+        self.assertEqual(filings.company_slug("UnitedHealth Group Incorporated"), "unitedhealth-group")  # brand word "Group" kept
+        self.assertIsNone(filings.company_slug(""))
+
+    def test_filing_row_is_tagged_by_sector_and_company(self):
+        row = filings.parse_search([body.encode("utf-8") for body in BODIES])[1]  # Boston Scientific, SIC 3841
+        self.assertEqual(row["tagging"]["sector"], [["sector:healthcare-public-health", "sec-sic", "medium"]])
+        self.assertEqual(row["tagging"]["company"], [["company:boston-scientific", "sec-filer", "high"]])
+
+    def test_a_filing_without_a_sic_still_tags_the_company(self):
+        source = {"items": ["1.05"], "adsh": "0000320193-26-000010", "ciks": ["0000320193"], "file_date": "2026-10-01",
+                  "display_names": ["Example Registrant LLC  (CIK 0000320193)"]}  # no sics, no ticker
+        row = filings.row_for(source)
+        self.assertNotIn("sector", row["tagging"])
+        self.assertEqual(row["tagging"]["company"], [["company:example-registrant", "sec-filer", "high"]])
+
     def test_collect_filings_offline_reads_the_cache(self):
         with tempfile.TemporaryDirectory() as tmp:
             state = Path(tmp)

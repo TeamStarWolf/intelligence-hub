@@ -11,7 +11,7 @@ const INTROS = {
   research: "Research teams' posts, newest first.",
   news: "Press reporting: publisher headlines and links only."
 };
-const SELECTS = ["desk", "kind", "class", "event", "exp", "sector", "region", "vendor", "product", "actor", "malware", "cwe", "tech", "source", "year", "month"];
+const SELECTS = ["desk", "kind", "class", "event", "exp", "sector", "company", "region", "vendor", "product", "actor", "malware", "cwe", "tech", "source", "year", "month"];
 const FILTER_KEYS = [...SELECTS, "kev", "action", "range"];
 
 export function activeFilters(route) {
@@ -51,6 +51,7 @@ function fillFilters(ctx, rows) {
   fillSelect(el("#f-event"), "All event types", facetOptions(found.event, value => label("event:" + value)), route.query.event);
   fillSelect(el("#f-exp"), "All exploitation states", facetOptions(found.exp, value => EXPLOITATION_LABELS[value] || value), route.query.exp);
   fillSelect(el("#f-sector"), "All sectors", facetOptions(found.sector, plain), route.query.sector);
+  fillSelect(el("#f-company"), "All companies", facetOptions(found.company, plain), route.query.company);
   fillSelect(el("#f-region"), "All regions", facetOptions(found.region, value => label("region:" + value)), route.query.region);
   fillSelect(el("#f-vendor"), "All vendors", facetOptions(found.vendor, plain), route.query.vendor);
   fillSelect(el("#f-product"), "All products", facetOptions(found.product, plain), route.query.product);
@@ -191,6 +192,7 @@ export function recordDetail(row, route, cveIndex, lib = null) {
     tagList("Actors", row.t.actor, entity("actor", "actor")),
     tagList("Malware", row.t.malware, entity("malware", "malware")),
     tagList("Sectors", row.t.sector, entity("sector", "sector")),
+    tagList("Companies", row.t.company, entity("company", "company")),
     tagList("Regions", row.t.region, item => node("li", "", label("region:" + item[0]) + " as " + item[1] + confidence(item))),
     tagList("Weaknesses (CWE)", row.t.cwe, item => node("li", "", item[0] + confidence(item)))
   ];

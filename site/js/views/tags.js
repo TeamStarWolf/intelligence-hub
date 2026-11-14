@@ -25,6 +25,7 @@ export const TAG_FIELDS = [
   ["actor", "Actor", value => label("actor:" + value), (value, year) => entityDoor("actor", value, year)],
   ["malware", "Malware and tools", value => label("malware:" + value), (value, year) => entityDoor("malware", value, year)],
   ["sector", "Sector", value => label("sector:" + value), (value, year) => explore({ sector: value, ...year })],
+  ["company", "Company", value => label("company:" + value), (value, year) => explore({ company: value, ...year })],
   ["region", "Region", value => label("region:" + value), (value, year) => explore({ region: value, ...year })],
   ["cwe", "Weakness (CWE)", value => value, (value, year) => explore({ cwe: value, ...year })],
   ["tech", "ATT&CK technique (low confidence, through CWE and CAPEC)", value => value, (value, year) => explore({ tech: value, ...year })],

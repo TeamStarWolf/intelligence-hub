@@ -133,12 +133,12 @@ function triples(value, width, limit = 500) {
 
 // The row's tagging block (index.json tagging.layout). Fields the page does not read are dropped.
 function normalizeTagging(raw) {
-  const tags = { source_class: null, desk: null, event_type: [], vendor: [], product: [], actor: [], malware: [], sector: [], region: [], cwe: [], attack: [], exploitation: null, kev: null, cvss: null };
+  const tags = { source_class: null, desk: null, event_type: [], vendor: [], product: [], actor: [], malware: [], sector: [], company: [], region: [], cwe: [], attack: [], exploitation: null, kev: null, cvss: null };
   if (raw === undefined || raw === null) return tags;
   requireValue(isObject(raw));
   if (raw.source_class !== undefined) tags.source_class = boundedText(raw.source_class, 40);
   if (raw.desk !== undefined) tags.desk = boundedText(raw.desk, 40);
-  for (const field of ["event_type", "vendor", "product", "actor", "malware", "sector", "cwe"]) if (raw[field] !== undefined) tags[field] = triples(raw[field], 3);
+  for (const field of ["event_type", "vendor", "product", "actor", "malware", "sector", "company", "cwe"]) if (raw[field] !== undefined) tags[field] = triples(raw[field], 3);
   if (raw.region !== undefined) tags.region = triples(raw.region, 4);
   if (raw.attack !== undefined) tags.attack = list(raw.attack, 5000).map(item => { requireValue(typeof item === "string" && /^T\d{4}(?:\.\d{3})?$/.test(item)); return item; });
   if (raw.exploitation !== undefined) { requireValue(Array.isArray(raw.exploitation) && raw.exploitation.length === 3 && EXPLOITATION.includes(raw.exploitation[0])); tags.exploitation = raw.exploitation.map(part => boundedText(part, 60)); }
@@ -183,7 +183,7 @@ export function derive(row) {
   row.exploited = row.t.exploitation ? row.t.exploitation[0] : row.exploitation;
   const values = field => row.t[field].map(item => item[0]);
   row.search = normalized([row.title, row.summary, row.source_name, row.source_id, row.native_id || "", ...row.cves, ...row.tags,
-    ...["vendor", "product", "actor", "malware", "sector"].flatMap(field => values(field).map(id => id.replace(/^[a-z]+:/, "").replaceAll("-", " ")))].join("\n"));
+    ...["vendor", "product", "actor", "malware", "sector", "company"].flatMap(field => values(field).map(id => id.replace(/^[a-z]+:/, "").replaceAll("-", " ")))].join("\n"));
   return row;
 }
 

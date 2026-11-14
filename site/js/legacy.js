@@ -478,7 +478,7 @@ export function legacyData(snapshot) {
   const rows = snapshot.articles.map(article => {
     const linked = article.cves.filter(cve => cveIndex.get(cve)?.kev_added);
     const scores = article.cves.map(cve => cveIndex.get(cve)?.score).filter(score => typeof score === "number");
-    const t = { source_class: null, event_type: [], vendor: [], product: [], actor: [], malware: [], sector: [], region: [], cwe: [], attack: [], exploitation: null,
+    const t = { source_class: null, event_type: [], vendor: [], product: [], actor: [], malware: [], sector: [], company: [], region: [], cwe: [], attack: [], exploitation: null,
       kev: linked.length ? { cves: linked, added: cveIndex.get(linked[0]).kev_added, due: null, ransomware: null, at_publication: false } : null,
       cvss: scores.length ? { base: Math.max(...scores), version: null, vector: null, scorer: null, cve: null } : null };
     return derive({ id: article.id, title: article.title, url: article.url, source_id: article.source_id, source_name: article.source_name, kind: article.kind,

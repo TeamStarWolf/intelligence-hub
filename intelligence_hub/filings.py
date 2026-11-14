@@ -35,6 +35,94 @@ CIK_RE = re.compile(r"(\d{1,10})")
 ADSH_RE = re.compile(r"^[0-9]{10}-[0-9]{2}-[0-9]{6}$")
 NAME_RE = re.compile(r"^(.*?)\s*(?:\(([^)]*)\)\s*)?\(CIK (\d+)\)\s*$")
 
+# SIC (Standard Industrial Classification) ranges mapped to CISA critical-infrastructure
+# sector ids (config/vocab/sector.json). The filer's SIC is a structured EDGAR field, so the
+# sector it implies is tagged at medium confidence (method "sec-sic"); a SIC outside every
+# range yields no sector tag rather than a guess. Narrow carve-outs come before the broad
+# range that contains them (drugs out of chemicals, medical and defence out of manufacturing,
+# computing and communications equipment out of manufacturing): the first match wins.
+SIC_SECTORS = (
+    (100, 999, "food-agriculture"),             # agriculture, forestry and fishing
+    (2000, 2199, "food-agriculture"),           # food, beverages and tobacco
+    (2833, 2836, "healthcare-public-health"),   # drugs and biological products (out of chemicals)
+    (2800, 2899, "chemical"),                    # chemicals and allied products
+    (1300, 1399, "energy"),                      # oil and gas extraction
+    (2900, 2999, "energy"),                      # petroleum refining
+    (4600, 4699, "energy"),                      # pipelines
+    (4900, 4939, "energy"),                      # electric and gas services
+    (4940, 4971, "water-wastewater"),            # water supply and sanitary services
+    (3826, 3851, "healthcare-public-health"),   # medical, surgical and ophthalmic instruments
+    (3570, 3579, "information-technology"),      # computer and office equipment
+    (3670, 3679, "information-technology"),      # semiconductors and electronic components
+    (7370, 7379, "information-technology"),      # computer programming and data processing
+    (3660, 3669, "communications"),             # communications equipment
+    (4800, 4899, "communications"),             # communications services
+    (3480, 3489, "defense-industrial-base"),    # ordnance
+    (3760, 3769, "defense-industrial-base"),    # guided missiles and space vehicles
+    (6000, 6299, "financial-services"),         # credit institutions and brokers
+    (6300, 6499, "financial-services"),         # insurance
+    (6500, 6799, "financial-services"),         # real estate, holding and investment
+    (8000, 8099, "healthcare-public-health"),   # health services
+    (3000, 3599, "critical-manufacturing"),     # rubber, metal and machinery
+    (3700, 3799, "critical-manufacturing"),     # transportation equipment
+    (4000, 4099, "transportation"),             # railroads
+    (4200, 4299, "transportation"),             # motor freight and trucking
+    (4400, 4599, "transportation"),             # water and air transportation
+    (4700, 4789, "transportation"),             # transportation services
+    (5200, 5999, "retail"),                      # retail trade
+    (7000, 7021, "commercial-facilities"),      # hotels and lodging
+    (7900, 7999, "commercial-facilities"),      # amusement and recreation
+    (8200, 8299, "education"),                   # educational services
+    (9100, 9999, "government-facilities"),       # public administration
+)
+
+# Legal-form tokens stripped from a filer name before it is slugged, so the same company tags
+# the same way whether a filing writes "Corp", "Corporation" or nothing. Brand words that vary
+# between real companies ("Group", "Holdings") are kept.
+NAME_SUFFIXES = {"inc", "incorporated", "corp", "corporation", "co", "company", "ltd", "limited",
+                 "llc", "lp", "lllp", "plc", "sa", "nv", "ag", "se", "ab", "oyj", "spa"}
+SLUG_RE = re.compile(r"[a-z0-9]+")
+
+
+def sector_tags(sics):
+    """Compact sector tags for a filer's SIC codes: [[sector:<id>, method, confidence], ...], deduped."""
+    found = []
+    for raw in sics or []:
+        digits = re.sub(r"\D", "", str(raw))
+        if not digits:
+            continue
+        code = int(digits)
+        slug = next((sector for low, high, sector in SIC_SECTORS if low <= code <= high), None)
+        if slug and slug not in found:
+            found.append(slug)
+    return [["sector:" + slug, "sec-sic", "medium"] for slug in sorted(found)]
+
+
+def company_slug(name):
+    """A stable, readable company id slug from a filer name, or None. Legal-form suffixes and a
+    leading "The" are dropped so a company's filings share one slug; the slug is bounded for the
+    tag-length limit."""
+    words = SLUG_RE.findall((name or "").lower())
+    while words and words[-1] in NAME_SUFFIXES:
+        words.pop()
+    if words and words[0] == "the":
+        words.pop(0)
+    slug = "-".join(words)[:80].strip("-")
+    return slug or None
+
+
+def tagging_for(name, sics):
+    """The compact tagging block for a filing row: sector(s) from the SIC, company from the filer.
+    Only non-empty facets are included; an empty block is returned as {} (the site fills defaults)."""
+    block = {}
+    sectors = sector_tags(sics)
+    if sectors:
+        block["sector"] = sectors
+    slug = company_slug(name)
+    if slug:
+        block["company"] = [["company:" + slug, "sec-filer", "high"]]
+    return block
+
 
 def search_url(end, start=None, page=0):
     start = start or (end - timedelta(days=WINDOW_DAYS))
@@ -69,8 +157,8 @@ def row_for(source):
     filed = source.get("file_date")
     if not (isinstance(adsh, str) and ADSH_RE.match(adsh) and isinstance(cik, str) and CIK_RE.fullmatch(cik) and published(filed)):
         return None
-    name, ticker, _cik = parse_name((source.get("display_names") or [""])[0])
-    name = text(name, 200) or "A registrant"
+    parsed_name, ticker, _cik = parse_name((source.get("display_names") or [""])[0])
+    name = text(parsed_name, 200) or "A registrant"
     url = filing_url(cik, adsh)
     if url is None:
         return None
@@ -80,11 +168,15 @@ def row_for(source):
     summary = (label + " filed a Form 8-K under Item 1.05 (Material Cybersecurity Incidents) with the SEC on "
                + filed + "." + (" Principal office in " + state + "." if state else "") + " Items reported: " + items
                + ". Read the filing on EDGAR; the SEC filing is the only claim made here.")
-    return {"id": "sec-" + adsh, "title": text(label + ": 8-K material cybersecurity incident (Item 1.05)", 300),
-            "url": url, "source_id": SOURCE_ID, "source_name": SOURCE_NAME, "kind": "filing",
-            "published_at": filed, "event_date": None, "date_basis": "filing", "summary": text(summary, 500),
-            "cves": [], "tags": [], "exploitation": "unknown",
-            "references": [{"label": "8-K filing on SEC EDGAR", "url": url}], "origin": ORIGIN}
+    row = {"id": "sec-" + adsh, "title": text(label + ": 8-K material cybersecurity incident (Item 1.05)", 300),
+           "url": url, "source_id": SOURCE_ID, "source_name": SOURCE_NAME, "kind": "filing",
+           "published_at": filed, "event_date": None, "date_basis": "filing", "summary": text(summary, 500),
+           "cves": [], "tags": [], "exploitation": "unknown",
+           "references": [{"label": "8-K filing on SEC EDGAR", "url": url}], "origin": ORIGIN}
+    tagging = tagging_for(parsed_name, source.get("sics"))
+    if tagging:
+        row["tagging"] = tagging
+    return row
 
 
 def hits_of(payload):
