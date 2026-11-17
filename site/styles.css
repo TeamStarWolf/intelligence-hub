@@ -290,6 +290,8 @@ a.chip:hover { border-color: var(--tsw-link); color: var(--tsw-chip-fg); }
 .status-quiet { color: var(--tsw-text-muted); }
 .status-pages { margin: 8px 0; font-size: var(--text-sm); }
 .status-pages summary { cursor: pointer; color: var(--tsw-link); min-height: 28px; }
+.status-operational { margin: 0 0 14px; }
+.status-operational summary { cursor: pointer; color: var(--tsw-link); min-height: 28px; font-size: var(--text-sm); }
 .status-posture { margin: 0 0 10px; display: grid; gap: 6px; }
 .status-posture-headline { margin: 0; }
 .status-tally { list-style: none; margin: 2px 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; font-variant-numeric: tabular-nums; }
