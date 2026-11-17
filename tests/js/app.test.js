@@ -222,6 +222,18 @@ test("exportCsv and exportJson serialize the rows in view: headline, link and me
   assert.equal(json[1].source_class, "", "a podcast with no explicit class exports an empty class, never a CVE-implying default");
 });
 
+test("exportCsv neutralizes spreadsheet formula injection in untrusted headline text", () => {
+  const rows = ["=cmd|' /c calc'!A1", "+1+2", "-3", "@SUM(A1)", "\tlead tab", "safe title"].map((title, index) =>
+    ({ day: "2026-11-02", kind: "reporting", source_name: "Src", title, url: "https://ex.org/" + index, cves: [], exploited: "unknown", t: { source_class: "press", desk: "security" } }));
+  const dataLines = exportCsv(rows).trimEnd().split("\r\n").slice(1);
+  // A formula-leading title is prefixed with an apostrophe (and then quoted if it also needs quoting).
+  assert.ok(dataLines[0].includes("\"'=cmd|' /c calc'!A1\"") || dataLines[0].includes("'=cmd|"), "an = formula is neutralized");
+  assert.ok(dataLines[1].includes(",'+1+2,"), "a + formula is neutralized");
+  assert.ok(dataLines[2].includes(",'-3,"), "a - formula is neutralized");
+  assert.ok(dataLines[3].includes(",'@SUM(A1),"), "an @ formula is neutralized");
+  assert.ok(dataLines[5].includes(",safe title,"), "an ordinary title is left untouched");
+});
+
 test("the Explorer exports the rows now in view: a click builds a CSV from the filtered set", async () => {
   const captured = [];
   const view = await boot({ hash: "#/news" });

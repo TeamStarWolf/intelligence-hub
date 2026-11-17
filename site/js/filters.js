@@ -270,7 +270,11 @@ export const EXPORT_COLUMNS = [
 ];
 
 function csvCell(value) {
-  const text = value == null ? "" : String(value);
+  let text = value == null ? "" : String(value);
+  // Neutralize spreadsheet formula injection. A cell that begins with one of these is run as a
+  // formula when the file is opened in Excel or Sheets, and a feed headline or source name is
+  // untrusted, so a leading apostrophe keeps the value literal.
+  if (/^[=+\-@\t\r]/.test(text)) text = "'" + text;
   return /[",\r\n]/.test(text) ? "\"" + text.replaceAll("\"", "\"\"") + "\"" : text;
 }
 
