@@ -621,9 +621,10 @@ def validate_intake(intake, observation, source=None, *, allow_selection=True):
             require(type(cutoff) is str and re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", cutoff) and
                     date.fromisoformat(cutoff).isoformat() == cutoff, "Invalid source selection cutoff date.")
     require(all(type(intake[key]) is int and 0 <= intake[key] <= 40000 for key in counts), "Invalid source intake counts.")
-    require(type(intake["entry_limit"]) is int and intake["entry_limit"] == 150 and
+    require(type(intake["entry_limit"]) is int and 1 <= intake["entry_limit"] <= 150 and
+            (source is None or intake["entry_limit"] == source_entry_limit(source)) and
             type(intake["cve_limit"]) is int and intake["cve_limit"] == 100, "Invalid source intake limits.")
-    require(intake["items_processed"] == min(intake["items_seen"], 150) and
+    require(intake["items_processed"] == min(intake["items_seen"], intake["entry_limit"]) and
             intake["items_seen"] == intake["items_processed"] + intake["items_unprocessed"] and
             intake["items_processed"] == intake["items_admitted"] + intake["items_rejected"] + intake["items_filtered"],
             "Source intake counts do not reconcile.")

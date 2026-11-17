@@ -41,6 +41,23 @@ class ParseFeedTest(unittest.TestCase):
         self.assertEqual((intake["items_seen"], intake["items_processed"], intake["items_unprocessed"]), (160, 150, 10))
         self.assertEqual(len(parsed["articles"]), 150)
 
+    def test_validate_intake_accepts_a_capped_source(self):
+        # The live collect path validates each source's intake. A capped source (max_articles) has a
+        # lower entry_limit, which this validator must accept; a mismatch to the source cap must fail.
+        from intelligence_hub.collect import validate_intake
+        stamp = "2026-10-26T14:00:00+00:00"
+
+        def intake(entry_limit, admitted):
+            return {"items_seen": admitted, "items_processed": admitted, "items_admitted": admitted, "items_rejected": 0, "items_filtered": 0, "items_unprocessed": 0,
+                    "entry_limit": entry_limit, "cve_limit": 100, "rejection_reasons": {"invalid_link_or_title": 0, "cve_limit_exceeded": 0},
+                    "attempted_at": stamp, "response_sha256": "a" * 64}
+
+        observation = {"last_attempt": stamp, "status": "ok", "last_success": stamp, "sha256": "a" * 64}
+        validate_intake(intake(30, 30), observation, {"id": "pod", "name": "Pod", "article_hosts": ["x.example"], "max_articles": 30})
+        validate_intake(intake(150, 150), observation, {"id": "s", "name": "S"})
+        with self.assertRaises(ValueError):
+            validate_intake(intake(30, 30), observation, {"id": "s", "name": "S"})
+
     def test_max_articles_caps_admitted_entries(self):
         source = {**SOURCE, "max_articles": 2}
         parsed = parse_feed(rss([item(index) for index in range(5)]), source)

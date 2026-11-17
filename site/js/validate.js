@@ -277,12 +277,12 @@ function normalizeIntake(value, source) {
   const keys = ["items_seen", "items_processed", "items_admitted", "items_rejected", "items_filtered", "items_unprocessed", "entry_limit", "cve_limit", "rejection_reasons", "attempted_at", "response_sha256"];
   exactKeys(value, hasSelection ? [...keys, "selection"] : keys);
   exactKeys(value.rejection_reasons, ["invalid_link_or_title", "cve_limit_exceeded"]);
-  requireValue(value.entry_limit === 150 && value.cve_limit === 100);
+  requireValue(Number.isInteger(value.entry_limit) && value.entry_limit >= 1 && value.entry_limit <= 150 && value.cve_limit === 100);
   const report = {
     items_seen: intakeCount(value.items_seen, 40000), items_processed: intakeCount(value.items_processed, 150),
     items_admitted: intakeCount(value.items_admitted, 150), items_rejected: intakeCount(value.items_rejected, 150),
     items_filtered: intakeCount(value.items_filtered, 150), items_unprocessed: intakeCount(value.items_unprocessed, 40000),
-    entry_limit: 150, cve_limit: 100,
+    entry_limit: value.entry_limit, cve_limit: 100,
     rejection_reasons: { invalid_link_or_title: intakeCount(value.rejection_reasons.invalid_link_or_title, 150), cve_limit_exceeded: intakeCount(value.rejection_reasons.cve_limit_exceeded, 150) },
     attempted_at: timestamp(value.attempted_at, false), response_sha256: hash(value.response_sha256),
     selection: hasSelection ? normalizeSelection(value.selection, source.id) : null
