@@ -73,7 +73,9 @@ export function registerTable(rows, counts = null) {
     const tr = node("tr");
     const id = node("td"); id.append(routeLink(row.cve, formatRoute({ view: "cve", id: row.cve, query: {} }), "chip chip-cve"));
     if (row.record_state !== "PUBLISHED") id.append(node("span", "cell-note", row.record_state + " record"));
-    const guidance = node("td", "", GUIDANCE[row.guidance]);
+    // "Needs review" is the uninformative default on nearly every row, so it is left blank; a real
+    // guidance label and the data-quality flags below it still show.
+    const guidance = node("td", "", row.guidance === "needs-review" ? "" : GUIDANCE[row.guidance]);
     if (row.required_action) guidance.append(node("span", "cell-note", "CISA required action"));
     if (row.source_status !== "ok") guidance.append(node("span", "cell-note", "CNA lookup " + row.source_status));
     tr.append(id, guidance, node("td", "", row.kev_added ? dateLabel(row.kev_added) : "Not in KEV"), node("td", "", row.score === null ? "Unknown" : row.score.toFixed(1) + " (v" + (row.version || "?") + ")"),
