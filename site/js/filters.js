@@ -254,3 +254,36 @@ export function clusterStories(rows) {
   }
   return groups;
 }
+
+// A client-side export of the rows currently in view: headline, link and metadata only, never
+// article bodies. One row per entry, so a clustered News story still exports each outlet's row.
+export const EXPORT_COLUMNS = [
+  ["date", row => row.day || ""],
+  ["kind", row => row.kind],
+  ["source", row => row.source_name],
+  ["title", row => row.title],
+  ["url", row => row.url],
+  ["cves", row => row.cves.join(" ")],
+  ["desk", row => deskOf(row) || ""],
+  ["source_class", row => classOf(row) || ""],
+  ["exploitation", row => row.exploited]
+];
+
+function csvCell(value) {
+  let text = value == null ? "" : String(value);
+  // Neutralize spreadsheet formula injection. A cell that begins with one of these is run as a
+  // formula when the file is opened in Excel or Sheets, and a feed headline or source name is
+  // untrusted, so a leading apostrophe keeps the value literal.
+  if (/^[=+\-@\t\r]/.test(text)) text = "'" + text;
+  return /[",\r\n]/.test(text) ? "\"" + text.replaceAll("\"", "\"\"") + "\"" : text;
+}
+
+export function exportCsv(rows) {
+  const lines = [EXPORT_COLUMNS.map(column => column[0]).join(",")];
+  for (const row of rows) lines.push(EXPORT_COLUMNS.map(column => csvCell(column[1](row))).join(","));
+  return lines.join("\r\n") + "\r\n";
+}
+
+export function exportJson(rows) {
+  return JSON.stringify(rows.map(row => Object.fromEntries(EXPORT_COLUMNS.map(column => [column[0], column[1](row)]))), null, 2);
+}

@@ -11,7 +11,7 @@ import { CONTENT_DATE, ROOT, files, page, row, server, settle, statusRow, storag
 import { createApp } from "../../site/js/main.js";
 import { RELOAD_KEY } from "../../site/js/guard.js";
 import { SEEN_KEY, nextPatchTuesday } from "../../site/js/views/today.js";
-import { cveRegister, rowMatches, today as todayBuckets } from "../../site/js/filters.js";
+import { cveRegister, exportCsv, exportJson, rowMatches, today as todayBuckets } from "../../site/js/filters.js";
 import { normalizeIntake } from "../../site/js/validate.js";
 import { normalizeCveIndex } from "../../site/js/validate.js";
 
@@ -201,6 +201,53 @@ test("the Podcasts desk suppresses CVE badges on episode rows and hides the CVE-
   assert.equal(news.doc.querySelector('#f-sort option[value="cvss-desc"]').hidden, false, "the CVSS sort stays on News");
   assert.equal(news.doc.querySelector('#f-sort option[value="cve-desc"]').hidden, false, "the CVE sort stays on News");
   assert.equal(news.doc.querySelector("#f-kev").closest("label").hidden, false, "the KEV-linked filter stays on News");
+});
+
+test("exportCsv and exportJson serialize the rows in view: headline, link and metadata only, properly escaped", () => {
+  const rows = [
+    { day: "2026-11-02", kind: "reporting", source_name: "News, Desk", title: "A \"quoted\" title\nwith newline", url: "https://ex.org/a", cves: ["CVE-2026-1", "CVE-2026-2"], exploited: "known", t: { source_class: "press", desk: "security" } },
+    { day: "", kind: "podcast", source_name: "Darknet Diaries", title: "Plain episode", url: "https://ex.org/b", cves: [], exploited: "unknown", t: { desk: "podcasts" } }
+  ];
+  const csv = exportCsv(rows);
+  const lines = csv.split("\r\n");
+  assert.equal(lines[0], "date,kind,source,title,url,cves,desk,source_class,exploitation", "the header names every column");
+  assert.ok(lines[1].startsWith("2026-11-02,reporting,\"News, Desk\","), "a comma in a value is quoted");
+  assert.ok(lines[1].includes("\"A \"\"quoted\"\" title\nwith newline\""), "quotes are doubled and a newline is kept inside the quoted cell");
+  assert.ok(lines[1].includes(",CVE-2026-1 CVE-2026-2,"), "multiple CVEs join with a space");
+  assert.ok(csv.endsWith("\r\n"), "the file ends with a trailing CRLF");
+  const json = JSON.parse(exportJson(rows));
+  assert.equal(json.length, 2);
+  assert.deepEqual(json[0], { date: "2026-11-02", kind: "reporting", source: "News, Desk", title: "A \"quoted\" title\nwith newline", url: "https://ex.org/a", cves: "CVE-2026-1 CVE-2026-2", desk: "security", source_class: "press", exploitation: "known" });
+  assert.equal(json[1].cves, "", "an entry with no CVE exports an empty cves field");
+  assert.equal(json[1].source_class, "", "a podcast with no explicit class exports an empty class, never a CVE-implying default");
+});
+
+test("exportCsv neutralizes spreadsheet formula injection in untrusted headline text", () => {
+  const rows = ["=cmd|' /c calc'!A1", "+1+2", "-3", "@SUM(A1)", "\tlead tab", "safe title"].map((title, index) =>
+    ({ day: "2026-11-02", kind: "reporting", source_name: "Src", title, url: "https://ex.org/" + index, cves: [], exploited: "unknown", t: { source_class: "press", desk: "security" } }));
+  const dataLines = exportCsv(rows).trimEnd().split("\r\n").slice(1);
+  // A formula-leading title is prefixed with an apostrophe (and then quoted if it also needs quoting).
+  assert.ok(dataLines[0].includes("\"'=cmd|' /c calc'!A1\"") || dataLines[0].includes("'=cmd|"), "an = formula is neutralized");
+  assert.ok(dataLines[1].includes(",'+1+2,"), "a + formula is neutralized");
+  assert.ok(dataLines[2].includes(",'-3,"), "a - formula is neutralized");
+  assert.ok(dataLines[3].includes(",'@SUM(A1),"), "an @ formula is neutralized");
+  assert.ok(dataLines[5].includes(",safe title,"), "an ordinary title is left untouched");
+});
+
+test("the Explorer exports the rows now in view: a click builds a CSV from the filtered set", async () => {
+  const captured = [];
+  const view = await boot({ hash: "#/news" });
+  // The page uses an object URL where the browser has one; stub it to capture the serialized text.
+  view.win.Blob = function (parts) { this.text = parts[0]; };
+  view.win.URL = { createObjectURL(blob) { captured.push(blob.text); return "blob:x"; }, revokeObjectURL() {} };
+  view.doc.querySelector("#export-csv").dispatchEvent({ type: "click" });
+  await settle(20);
+  assert.equal(captured.length, 1, "a CSV was produced on click");
+  const csv = captured[0];
+  assert.ok(csv.startsWith("date,kind,source,title,url,cves,desk,source_class,exploitation\r\n"), "the CSV carries the header");
+  assert.ok(csv.trimEnd().split("\r\n").length >= 2, "at least one data row is exported");
+  // The default fixture's press row carries CVE-2026-1002 and shows on News, so the export is the view's rows.
+  assert.ok(csv.includes("CVE-2026-1002"), "the exported rows are the ones the News view shows");
 });
 
 test("the tab strip is two rows: the desks, then only the active desk's views, and the Panels list groups by desk", async () => {
