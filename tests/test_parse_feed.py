@@ -41,6 +41,23 @@ class ParseFeedTest(unittest.TestCase):
         self.assertEqual((intake["items_seen"], intake["items_processed"], intake["items_unprocessed"]), (160, 150, 10))
         self.assertEqual(len(parsed["articles"]), 150)
 
+    def test_exclude_terms_drop_matching_titles_only(self):
+        source = {**SOURCE, "exclude_terms": ["altcoin", "price prediction"]}
+
+        def titled(title, number):
+            return ("<item><title>" + title + "</title><link>https://www.cisa.gov/fixture/" + str(number) + "</link>"
+                    "<pubDate>Mon, 26 Oct 2026 14:00:00 GMT</pubDate><description>body mentions an altcoin</description></item>")
+
+        parsed = parse_feed(rss([
+            titled("How a token became a go-to institutional Altcoin", 1),
+            titled("Market note: Bitcoin Price Prediction for 2026", 2),
+            titled("Critical RCE in an example appliance", 3),
+        ]), source)
+        intake = parsed["intake"]
+        # The two markets titles are filtered; the security title is kept although its body carries a term.
+        self.assertEqual(intake["items_filtered"], 2)
+        self.assertEqual([article["title"] for article in parsed["articles"]], ["Critical RCE in an example appliance"])
+
     def test_more_than_100_cves_rejects_the_entry(self):
         many = " ".join("CVE-2026-" + str(10000 + index) for index in range(101))
         exactly = " ".join("CVE-2026-" + str(20000 + index) for index in range(100))

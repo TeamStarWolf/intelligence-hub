@@ -50,6 +50,17 @@ test("the Explorer is first: only the brand bar and tab strip precede the search
   assert.equal(doc.querySelector(".tabs a[aria-current=page]").getAttribute("data-view"), "explore");
 });
 
+test("the top bar carries a persistent Feeds and exports link to Subscribe, visible on the landing", async () => {
+  const { doc, app } = await boot();
+  const link = doc.querySelector(".bar-actions a[href='#/subscribe']");
+  assert.ok(link, "a header shortcut surfaces the feeds and exports from every view");
+  assert.ok(!link.hidden);
+  assert.equal(link.textContent, "Feeds and exports");
+  app.navigate({ view: "subscribe", id: null, query: {} });
+  await settle(40);
+  assert.equal(doc.querySelector(".tabs a[aria-current=page]").getAttribute("data-view"), "subscribe");
+});
+
 test("the tab strip is two rows: the desks, then only the active desk's views, and the Panels list groups by desk", async () => {
   const { doc, app } = await boot();
   const desks = [...doc.querySelectorAll(".tabs .desks a")];
