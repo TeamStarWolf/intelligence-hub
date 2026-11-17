@@ -40,6 +40,14 @@ function syncControls(ctx) {
   el("#f-month").disabled = !route.query.year;
   const active = activeFilters(route);
   el("#filter-count").textContent = active ? " (" + active + ")" : "";
+  // The Podcasts desk has no CVE, CVSS, EPSS or KEV signal, so its CVE-centric sorts and the
+  // KEV-linked and required-action filters are hidden. Every other view keeps them.
+  const podcasts = route.view === "podcasts";
+  for (const value of ["cve-asc", "cve-desc", "cvss-desc", "cvss-asc", "epss-desc", "epss-asc"]) {
+    const option = el("#f-sort").querySelector('option[value="' + value + '"]');
+    if (option) option.hidden = podcasts;
+  }
+  for (const key of ["kev", "action"]) el("#f-" + key).closest("label").hidden = podcasts;
 }
 
 // One-click filters for the signals that are buried in the rail: the exploited split (the "exp"

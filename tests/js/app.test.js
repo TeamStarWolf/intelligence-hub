@@ -177,6 +177,32 @@ test("the Podcasts view shows podcast episodes, kept out of News and Today's pre
   assert.ok(!today.doc.querySelector("#view").textContent.includes("Darknet Diaries 182 Example Episode"), "the episode is kept out of Today's press feed");
 });
 
+test("the Podcasts desk suppresses CVE badges on episode rows and hides the CVE-centric sorts and filters", async () => {
+  const defaults = files();
+  // A real episode whose title mentions a CVE carries that CVE id, but the desk shows no CVE, KEV, CVSS or EPSS signal.
+  const podcast = row("pod-cve", { kind: "podcast", source_id: "darknet-diaries", source_name: "Darknet Diaries", published_at: "2026-11-02", title: "Darknet Diaries 183 Supply Chain Episode", url: "https://darknetdiaries.com/episode/183/", cves: ["CVE-2026-1000"], tagging: { source_class: "press", desk: "podcasts", event_type: [["disclosure", "kind-default", "high"]], exploitation: ["unknown", "none", "high"] } });
+  const live = JSON.parse(defaults.bodies["./data/v7/live/2026-11.json"]); live.rows = [...live.rows, podcast];
+  const recent = JSON.parse(defaults.bodies["./data/v7/recent.json"]); recent.rows = [...recent.rows, podcast];
+  const make = hash => boot({ hash, site: files({ extra: { "live/2026-11.json": live, "recent.json": recent } }) });
+
+  const pods = await make("#/podcasts");
+  const card = pods.doc.querySelector("#results li.card");
+  assert.ok(card && card.textContent.includes("Darknet Diaries 183 Supply Chain Episode"), "the episode shows on the Podcasts desk");
+  assert.equal(pods.doc.querySelector("#results .chip-cve"), null, "no CVE badge renders on a podcast row that carries a CVE");
+  assert.equal(pods.doc.querySelector('#f-sort option[value="cvss-desc"]').hidden, true, "the CVSS sort is hidden on Podcasts");
+  assert.equal(pods.doc.querySelector('#f-sort option[value="epss-desc"]').hidden, true, "the EPSS sort is hidden on Podcasts");
+  assert.equal(pods.doc.querySelector('#f-sort option[value="cve-desc"]').hidden, true, "the CVE sort is hidden on Podcasts");
+  assert.equal(pods.doc.querySelector("#f-kev").closest("label").hidden, true, "the KEV-linked filter is hidden on Podcasts");
+  assert.equal(pods.doc.querySelector("#f-action").closest("label").hidden, true, "the required-action filter is hidden on Podcasts");
+
+  // Every other view keeps the CVE badges, sorts and filters.
+  const news = await make("#/news");
+  assert.ok(news.doc.querySelector("#results .chip-cve"), "CVE badges still render on News rows");
+  assert.equal(news.doc.querySelector('#f-sort option[value="cvss-desc"]').hidden, false, "the CVSS sort stays on News");
+  assert.equal(news.doc.querySelector('#f-sort option[value="cve-desc"]').hidden, false, "the CVE sort stays on News");
+  assert.equal(news.doc.querySelector("#f-kev").closest("label").hidden, false, "the KEV-linked filter stays on News");
+});
+
 test("the tab strip is two rows: the desks, then only the active desk's views, and the Panels list groups by desk", async () => {
   const { doc, app } = await boot();
   const desks = [...doc.querySelectorAll(".tabs .desks a")];
