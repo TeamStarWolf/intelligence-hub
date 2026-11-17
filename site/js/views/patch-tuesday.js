@@ -62,19 +62,22 @@ export function briefRows(brief) {
 export function headline(brief) {
   const severity = brief.counts.severity;
   const microsoft = brief.counts.cna.get("Microsoft") || 0;
+  // The admin-actionable figure leads: the CVEs Microsoft issued fixes for in this release, then
+  // the signals that decide what to patch first. The full-document total, which also counts CVEs
+  // the release references from other CNAs, is listed last so it does not read as the headline.
   return [
-    ["CVEs in the release", brief.counts.total.toLocaleString("en-US")],
-    ["Issued by Microsoft", microsoft.toLocaleString("en-US")],
-    ["Issued by other CNAs", (brief.counts.total - microsoft).toLocaleString("en-US")],
+    ["Microsoft-issued CVEs (this release's own fixes)", microsoft.toLocaleString("en-US")],
+    ["Exploited in the wild", brief.counts.exploited.toLocaleString("en-US")],
+    ["Already in CISA KEV", brief.counts.in_kev.toLocaleString("en-US")],
+    ["Microsoft KEV additions this month", brief.kev.addedInMonth.length.toLocaleString("en-US")],
+    ["Publicly disclosed", brief.counts.disclosed.toLocaleString("en-US")],
     ["Critical", (severity.get("Critical") || 0).toLocaleString("en-US")],
     ["Important", (severity.get("Important") || 0).toLocaleString("en-US")],
     ["Moderate", (severity.get("Moderate") || 0).toLocaleString("en-US")],
     ["Low", (severity.get("Low") || 0).toLocaleString("en-US")],
     ["Not rated", (severity.get("Not rated") || 0).toLocaleString("en-US")],
-    ["Exploited in the wild", brief.counts.exploited.toLocaleString("en-US")],
-    ["Publicly disclosed", brief.counts.disclosed.toLocaleString("en-US")],
-    ["Already in CISA KEV", brief.counts.in_kev.toLocaleString("en-US")],
-    ["Microsoft KEV additions this month", brief.kev.addedInMonth.length.toLocaleString("en-US")]
+    ["CVEs in the full release document", brief.counts.total.toLocaleString("en-US")],
+    ["Issued by other CNAs in the document", (brief.counts.total - microsoft).toLocaleString("en-US")]
   ];
 }
 
@@ -208,9 +211,11 @@ export async function renderPatchTuesday(ctx) {
     ["Last revised", stamp(brief.msrc.current_release)], ["Package CVEs left out", brief.msrc.left_out.toLocaleString("en-US") + " of " + brief.msrc.listed.toLocaleString("en-US") + " listed"]]);
   const notes = node("p"); notes.append(link("MSRC release notes for " + brief.msrc.id, brief.msrc.url));
   header.append(facts, notes);
+  const microsoft = brief.counts.cna.get("Microsoft") || 0;
   const numbers = section("Headline numbers");
   numbers.append(definitionList(headline(brief)));
-  status.textContent = monthLabel(brief.month) + ": " + count(brief.counts.total, "CVE") + ", " + brief.counts.exploited.toLocaleString("en-US") + " exploited, " + brief.counts.disclosed.toLocaleString("en-US") + " publicly disclosed, " + brief.counts.in_kev.toLocaleString("en-US") + " in CISA KEV.";
+  numbers.append(node("p", "muted", "The Microsoft-issued figure counts the CVEs Microsoft issued fixes for in this release, the number to act on for Microsoft's own products. The full release document total also counts CVEs the release references from other CNAs, such as Chromium that Microsoft ships in Edge and other redistributed components. Azure Linux and CBL-Mariner package CVEs are already left out, as the release facts above record."));
+  status.textContent = monthLabel(brief.month) + ": " + count(microsoft, "CVE") + " issued by Microsoft, " + brief.counts.exploited.toLocaleString("en-US") + " exploited, " + brief.counts.disclosed.toLocaleString("en-US") + " publicly disclosed, " + brief.counts.in_kev.toLocaleString("en-US") + " in CISA KEV (" + brief.counts.total.toLocaleString("en-US") + " CVEs in the full release document).";
   target.replaceChildren(title, intro, status, header, numbers, priorityList(brief, rows), flaggedTable(brief, rows), criticalTable(brief, rows), familyTable(brief),
     kevSection(brief, rows), vendorSection(brief), historyTable(index, brief.month), rulesSection(index));
   return brief;

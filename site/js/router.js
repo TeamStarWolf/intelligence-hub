@@ -12,7 +12,7 @@ const KINDS = ["advisory", "research", "reporting", "incident", "kev", "filing",
 const CLASSES = ["vendor-primary", "government-cert", "researcher", "press"];
 // The desks (config/vocab/desk.json). Every view sits under one desk tab; "it" has no view yet.
 export const DESKS = ["security", "infrastructure", "it"];
-export const VIEW_DESK = { explore: "explore", today: "security", advisories: "security", kev: "security", research: "security", news: "security", cves: "security", cve: "security",
+export const VIEW_DESK = { explore: "security", today: "security", advisories: "security", kev: "security", research: "security", news: "security", cves: "security", cve: "security",
   actors: "security", actor: "security", malware: "security", "patch-tuesday": "security", status: "infrastructure",
   history: "reference", vendors: "reference", vendor: "reference", tags: "reference", reports: "reference", sources: "reference", method: "reference", data: "reference", about: "reference",
   subscribe: "reference" };

@@ -77,12 +77,18 @@ test("the latest brief renders its headline numbers, priority order and the expl
   const text = view.textContent;
   assert.equal(view.querySelector("h1").textContent, "Patch Tuesday");
   assert.ok(text.includes("October 2026 Security Updates"));
-  assert.ok(text.includes("CVEs in the release14"));
+  assert.ok(text.includes("Microsoft-issued CVEs (this release's own fixes)11"));
   assert.ok(text.includes("Critical7"));
   assert.ok(text.includes("Exploited in the wild1"));
   assert.ok(text.includes("Publicly disclosed3"));
   assert.ok(text.includes("Already in CISA KEV2"));
   assert.ok(text.includes("Microsoft KEV additions this month1"));
+  // The full-document total is kept, relabeled and demoted below the admin-actionable figures.
+  assert.ok(text.includes("CVEs in the full release document14"));
+  assert.ok(text.includes("Issued by other CNAs in the document3"));
+  // The one-line summary leads with the Microsoft figure an admin acts on, not the conflated total.
+  assert.ok(text.includes("Oct 2026: 11 CVEs issued by Microsoft,"), text.slice(0, 400));
+  assert.ok(text.includes("(14 CVEs in the full release document)."));
   const order = [...view.querySelectorAll("ol li")].map(item => item.querySelector("a").textContent);
   assert.deepEqual(order.slice(0, 5), ["CVE-2026-96951", "CVE-2026-111497", "CVE-2026-100202", "CVE-2026-70187", "CVE-2026-70571"]);
   const flagged = [...view.querySelectorAll("section")].find(section => section.querySelector("h2").textContent === "Exploited and publicly disclosed");
