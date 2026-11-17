@@ -105,6 +105,21 @@ test("the News view clusters the same story from several outlets, like Today's p
   assert.ok(doc.querySelector("#results-status").textContent.includes("2 entries in 1 story"), doc.querySelector("#results-status").textContent);
 });
 
+test("the Explorer surfaces one-click Exploited and KEV-linked quick filters", async () => {
+  const { doc, app } = await boot();
+  const chipText = () => [...doc.querySelectorAll("#quick-filters a.quick-chip")].map(anchor => anchor.textContent);
+  assert.ok(chipText().some(text => text.startsWith("Known exploited")), chipText().join(" | "));
+  assert.ok(chipText().some(text => text.startsWith("Reported exploited")));
+  assert.ok(chipText().some(text => text.startsWith("KEV-linked")));
+  const known = () => [...doc.querySelectorAll("#quick-filters a.quick-chip")].find(anchor => anchor.textContent.startsWith("Known exploited"));
+  assert.ok(known().getAttribute("href").includes("exp=known"), "the chip sets the exploited filter");
+  assert.equal(known().getAttribute("aria-pressed"), "false");
+  app.navigate({ view: "explore", id: null, query: { exp: "known" } });
+  await settle(40);
+  assert.equal(known().getAttribute("aria-pressed"), "true", "the active filter reads as pressed");
+  assert.ok(known().getAttribute("class").includes("quick-chip-on"));
+});
+
 test("the tab strip is two rows: the desks, then only the active desk's views, and the Panels list groups by desk", async () => {
   const { doc, app } = await boot();
   const desks = [...doc.querySelectorAll(".tabs .desks a")];
