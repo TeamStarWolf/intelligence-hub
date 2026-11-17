@@ -715,11 +715,12 @@ class PageTest(unittest.TestCase):
         page = (support.ROOT / "site" / "index.html").read_text(encoding="utf-8")
         strip = page[page.index('<nav class="tabs"'):page.index("</nav>", page.index('<nav class="tabs"'))]
         tabs = re.findall(r'<a href="#/([a-z-]+)" data-view="[a-z-]+" data-desk="([a-z]+)">', strip)
-        self.assertEqual(tabs[0], ("explore", "explore"))
+        # The Explorer is the Security desk's first view, so the landing surfaces the reading views.
+        self.assertEqual(tabs[0], ("explore", "security"))
         self.assertIn(("status", "infrastructure"), tabs)
         self.assertEqual([view for view, desk in tabs if desk == "infrastructure"], ["status"])
         desks = re.findall(r'<a href="#/([a-z-]+)" data-desk="([a-z]+)">', strip)
-        self.assertEqual(desks, [("explore", "explore"), ("today", "security"), ("status", "infrastructure"), ("history", "reference")])
+        self.assertEqual(desks, [("today", "security"), ("status", "infrastructure"), ("history", "reference")])
         self.assertIn("js/views/status.js", json.loads((support.ROOT / "site" / "files.json").read_text(encoding="utf-8"))["files"])
 
     def test_the_method_view_and_docs_carry_the_privacy_sentence(self):

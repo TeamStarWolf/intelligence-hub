@@ -89,7 +89,7 @@ export function createApp(env) {
   // DOM; the ones on other desks are hidden, and a desk with one view hides the second row.
   function updateTabs() {
     const active = TAB_OF[route.view] || route.view;
-    const desk = VIEW_DESK[route.view] || "explore";
+    const desk = VIEW_DESK[route.view] || "security";
     let activeTab = null;
     for (const tab of doc.querySelectorAll(".tabs .desks a")) {
       if (tab.dataset.desk === desk) tab.setAttribute("aria-current", "location"); else tab.removeAttribute("aria-current");

@@ -53,20 +53,22 @@ test("the Explorer is first: only the brand bar and tab strip precede the search
 test("the tab strip is two rows: the desks, then only the active desk's views, and the Panels list groups by desk", async () => {
   const { doc, app } = await boot();
   const desks = [...doc.querySelectorAll(".tabs .desks a")];
-  assert.deepEqual(desks.map(tab => tab.getAttribute("data-desk")), ["explore", "security", "infrastructure", "reference"]);
-  assert.deepEqual(desks.map(tab => tab.getAttribute("href")), ["#/explore", "#/today", "#/status", "#/history"]);
+  assert.deepEqual(desks.map(tab => tab.getAttribute("data-desk")), ["security", "infrastructure", "reference"]);
+  assert.deepEqual(desks.map(tab => tab.getAttribute("href")), ["#/today", "#/status", "#/history"]);
   const views = [...doc.querySelectorAll(".tabs .views a")];
   assert.equal(views.length, 19, "every view link stays in the DOM");
   const shown = () => views.filter(tab => !tab.hidden).map(tab => tab.getAttribute("data-view"));
-  // The Explorer is a desk of one view, so the second row is hidden.
-  assert.equal(desks.find(tab => tab.getAttribute("aria-current") === "location").getAttribute("data-desk"), "explore");
-  assert.equal(doc.querySelector(".tabs .views").hidden, true);
-  assert.deepEqual(shown(), ["explore"]);
+  // The Explorer landing sits on the Security desk, so its reading views are in the top nav at once.
+  assert.equal(desks.find(tab => tab.getAttribute("aria-current") === "location").getAttribute("data-desk"), "security");
+  assert.equal(doc.querySelector(".tabs .views").hidden, false);
+  assert.deepEqual(shown(), ["explore", "today", "advisories", "kev", "research", "news", "cves", "actors", "patch-tuesday"]);
+  for (const view of ["kev", "cves", "patch-tuesday", "advisories", "news", "research", "actors"]) assert.ok(shown().includes(view), view + " is on the top nav from arrival, not only behind the Panels button");
+  assert.equal(doc.querySelector(".tabs a[aria-current=page]").getAttribute("data-view"), "explore");
   app.navigate({ view: "kev", id: null, query: {} });
   await settle(40);
   assert.equal(desks.find(tab => tab.getAttribute("aria-current") === "location").getAttribute("data-desk"), "security");
   assert.equal(doc.querySelector(".tabs .views").hidden, false);
-  assert.deepEqual(shown(), ["today", "advisories", "kev", "research", "news", "cves", "actors", "patch-tuesday"]);
+  assert.deepEqual(shown(), ["explore", "today", "advisories", "kev", "research", "news", "cves", "actors", "patch-tuesday"]);
   assert.equal(doc.querySelector(".tabs a[aria-current=page]").getAttribute("data-view"), "kev");
   app.navigate({ view: "vendor", id: "fortinet", query: {} });
   await settle(40);
