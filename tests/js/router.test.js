@@ -184,7 +184,7 @@ test("the desk key, the reserved kinds and event types and the wall key round-tr
 });
 
 test("every view sits under exactly one desk, and the desk row's targets are views on their desk", () => {
-  for (const view of VIEWS) assert.ok(["explore", "security", "infrastructure", "reference"].includes(VIEW_DESK[view]), view);
+  for (const view of VIEWS) assert.ok(["explore", "security", "infrastructure", "podcasts", "reference"].includes(VIEW_DESK[view]), view);
   assert.deepEqual(Object.keys(VIEW_DESK).sort(), [...VIEWS].sort());
   // The Explorer sits on the Security desk, so the landing surfaces the reading views at once.
   assert.equal(VIEW_DESK.explore, "security");

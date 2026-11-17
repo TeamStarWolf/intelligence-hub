@@ -41,7 +41,7 @@ export function timestamp(value, nullable = true) {
   return value;
 }
 
-const KINDS = ["advisory", "research", "reporting", "incident", "kev", "filing", "bulletin", "note", "change", "lifecycle"];
+const KINDS = ["advisory", "research", "reporting", "incident", "kev", "filing", "bulletin", "note", "change", "lifecycle", "podcast"];
 const EXPLOITATION = ["known", "reported", "unknown"];
 const ORIGIN = /^(?:publisher-feed|cisa-kev|library-curation|service-status|sec-filing|history:[a-z0-9][a-z0-9-]{0,39})$/;
 const CVE = /^CVE-\d{4}-\d{4,19}$/;

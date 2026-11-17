@@ -720,7 +720,7 @@ class PageTest(unittest.TestCase):
         self.assertIn(("status", "infrastructure"), tabs)
         self.assertEqual([view for view, desk in tabs if desk == "infrastructure"], ["status"])
         desks = re.findall(r'<a href="#/([a-z-]+)" data-desk="([a-z]+)">', strip)
-        self.assertEqual(desks, [("today", "security"), ("status", "infrastructure"), ("history", "reference")])
+        self.assertEqual(desks, [("today", "security"), ("status", "infrastructure"), ("podcasts", "podcasts"), ("history", "reference")])
         self.assertIn("js/views/status.js", json.loads((support.ROOT / "site" / "files.json").read_text(encoding="utf-8"))["files"])
 
     def test_the_method_view_and_docs_carry_the_privacy_sentence(self):

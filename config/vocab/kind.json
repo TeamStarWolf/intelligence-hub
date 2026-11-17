@@ -53,6 +53,11 @@
       "value": "lifecycle",
       "label": "Lifecycle",
       "definition": "An end-of-support or release-schedule row from a lifecycle source. Reserved for the end-of-life desk the revision plan adds; no row carries it yet."
+    },
+    {
+      "value": "podcast",
+      "label": "Podcast",
+      "definition": "A podcast or webcast episode from a show's feed: its title, link and publication date. Headline and link only, like every publisher-feed row; no audio and no transcript."
     }
   ]
 }

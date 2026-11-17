@@ -7,11 +7,11 @@ import assert from "node:assert/strict";
 import { webcrypto } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { inOrder } from "./dom.js";
-import { CONTENT_DATE, ROOT, files, page, server, settle, statusRow, storage } from "./fixtures.js";
+import { CONTENT_DATE, ROOT, files, page, row, server, settle, statusRow, storage } from "./fixtures.js";
 import { createApp } from "../../site/js/main.js";
 import { RELOAD_KEY } from "../../site/js/guard.js";
 import { SEEN_KEY, nextPatchTuesday } from "../../site/js/views/today.js";
-import { cveRegister } from "../../site/js/filters.js";
+import { cveRegister, rowMatches, today as todayBuckets } from "../../site/js/filters.js";
 import { normalizeCveIndex } from "../../site/js/validate.js";
 
 async function boot({ hash = "", search = "", site = files(), session = storage(), local = storage(), moduleUrl = null, hidden = false } = {}) {
@@ -136,13 +136,42 @@ test("the Explorer surfaces one-click Exploited and KEV-linked quick filters", a
   assert.ok(known().getAttribute("class").includes("quick-chip-on"));
 });
 
+test("the kind=podcast guard: podcasts match only the Podcasts view, never News, and drop from Today's press bucket", () => {
+  const pod = { id: "pod-1", time: 1, kind: "podcast", day: "2026-11-02", cves: [], source_name: "Darknet Diaries", title: "Episode", search: "episode", source_id: "darknet-diaries", exploited: "unknown", t: { source_class: "press", desk: "podcasts" } };
+  const press = { ...pod, id: "press-1", time: 2, kind: "reporting", source_id: "news", source_name: "News Desk" };
+  assert.equal(rowMatches(pod, {}, { view: "podcasts" }), true, "the Podcasts view matches podcast rows");
+  assert.equal(rowMatches(pod, {}, { view: "news" }), false, "a podcast never matches the News view");
+  assert.equal(rowMatches(pod, {}, { view: "advisories" }), false, "a podcast never matches Advisories");
+  assert.equal(rowMatches(press, {}, { view: "news" }), true, "ordinary press is unaffected by the guard");
+  assert.equal(rowMatches(press, {}, { view: "podcasts" }), false, "the Podcasts view shows only podcasts");
+  const day = todayBuckets([pod, press], [], "2026-11-02");
+  assert.ok(day.news.includes(press) && !day.news.includes(pod), "Today's press bucket keeps press and drops podcasts");
+});
+
+test("the Podcasts view shows podcast episodes, kept out of News and Today's press feed", async () => {
+  const defaults = files();
+  const podcast = row("pod-1", { kind: "podcast", source_id: "darknet-diaries", source_name: "Darknet Diaries", published_at: "2026-11-02", title: "Darknet Diaries 182 Example Episode", url: "https://darknetdiaries.com/episode/182/", tagging: { source_class: "press", desk: "podcasts", event_type: [["disclosure", "kind-default", "high"]], exploitation: ["unknown", "none", "high"] } });
+  const live = JSON.parse(defaults.bodies["./data/v7/live/2026-11.json"]); live.rows = [...live.rows, podcast];
+  const recent = JSON.parse(defaults.bodies["./data/v7/recent.json"]); recent.rows = [...recent.rows, podcast];
+  const make = hash => boot({ hash, site: files({ extra: { "live/2026-11.json": live, "recent.json": recent } }) });
+  const pods = await make("#/podcasts");
+  const results = pods.doc.querySelector("#results");
+  assert.equal([...results.querySelectorAll("li.card")].length, 1, "the episode shows on the Podcasts desk");
+  assert.ok(results.textContent.includes("Darknet Diaries 182 Example Episode"));
+  assert.ok(results.querySelector(".badge-podcast"), "it carries the Podcast badge");
+  const news = await make("#/news");
+  assert.ok(!news.doc.querySelector("#results").textContent.includes("Darknet Diaries 182 Example Episode"), "the episode is kept out of News");
+  const today = await make("#/today");
+  assert.ok(!today.doc.querySelector("#view").textContent.includes("Darknet Diaries 182 Example Episode"), "the episode is kept out of Today's press feed");
+});
+
 test("the tab strip is two rows: the desks, then only the active desk's views, and the Panels list groups by desk", async () => {
   const { doc, app } = await boot();
   const desks = [...doc.querySelectorAll(".tabs .desks a")];
-  assert.deepEqual(desks.map(tab => tab.getAttribute("data-desk")), ["security", "infrastructure", "reference"]);
-  assert.deepEqual(desks.map(tab => tab.getAttribute("href")), ["#/today", "#/status", "#/history"]);
+  assert.deepEqual(desks.map(tab => tab.getAttribute("data-desk")), ["security", "infrastructure", "podcasts", "reference"]);
+  assert.deepEqual(desks.map(tab => tab.getAttribute("href")), ["#/today", "#/status", "#/podcasts", "#/history"]);
   const views = [...doc.querySelectorAll(".tabs .views a")];
-  assert.equal(views.length, 19, "every view link stays in the DOM");
+  assert.equal(views.length, 20, "every view link stays in the DOM");
   const shown = () => views.filter(tab => !tab.hidden).map(tab => tab.getAttribute("data-view"));
   // The Explorer landing sits on the Security desk, so its reading views are in the top nav at once.
   assert.equal(desks.find(tab => tab.getAttribute("aria-current") === "location").getAttribute("data-desk"), "security");

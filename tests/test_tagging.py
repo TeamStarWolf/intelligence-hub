@@ -343,7 +343,7 @@ class DeskTest(unittest.TestCase):
     """The desk comes from the source's registry entry, never from a headline (WP-01)."""
 
     def test_every_registry_source_names_a_desk_the_vocabulary_holds(self):
-        self.assertEqual(set(VOCAB.values["desk"]), {"security", "infrastructure", "it"})
+        self.assertEqual(set(VOCAB.values["desk"]), {"security", "infrastructure", "it", "podcasts"})
         for source in REGISTRY:
             self.assertIn(source["desk"], VOCAB.values["desk"], source["id"])
 

@@ -23,7 +23,7 @@ import { createLiveBoard, renderStatus } from "./views/status.js";
 
 const TITLES = { explore: "Explorer", today: "Today", advisories: "Advisories", kev: "Known exploited", research: "Research", news: "News", cves: "CVE register", cve: "CVE",
   history: "History", vendors: "Vendors", vendor: "Vendor", tags: "Tags", actors: "Actors and malware", actor: "Actor", malware: "Malware", reports: "Reports", sources: "Sources", method: "Method", data: "Data", about: "About", "patch-tuesday": "Patch Tuesday", status: "Service health",
-  subscribe: "Subscribe" };
+  subscribe: "Subscribe", podcasts: "Podcasts" };
 const OTHER_VIEWS = { today: renderToday, kev: renderKev, cves: renderCves, cve: renderCves, history: renderHistory, vendors: renderVendors, vendor: renderVendor, tags: renderTags,
   actors: renderActors, actor: renderEntity, malware: renderEntity, reports: renderReports, sources: renderSources, method: renderMethod, data: renderData, about: renderAbout,
   "patch-tuesday": renderPatchTuesday, status: renderStatus, subscribe: renderSubscribe };

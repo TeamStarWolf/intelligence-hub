@@ -5,7 +5,7 @@ import { epssOf, kevLinked } from "../filters.js";
 import { count, dateLabel, epssPercent, humanize, link, node, routeLink, safeUrl } from "../util.js";
 import { pageSize } from "../limits.js";
 
-export const KIND_LABELS = { advisory: "Advisory", research: "Research", reporting: "Reporting", incident: "Incident", kev: "KEV entry", filing: "Filing", bulletin: "Bulletin", note: "Vulnerability note", change: "Change", lifecycle: "Lifecycle" };
+export const KIND_LABELS = { advisory: "Advisory", research: "Research", reporting: "Reporting", incident: "Incident", kev: "KEV entry", filing: "Filing", bulletin: "Bulletin", note: "Vulnerability note", change: "Change", lifecycle: "Lifecycle", podcast: "Podcast" };
 export const EXPLOITATION_LABELS = { known: "Known exploited", reported: "Reported exploited", unknown: "Exploitation unknown" };
 
 // Display labels from the generated vocabulary module, once it has loaded.

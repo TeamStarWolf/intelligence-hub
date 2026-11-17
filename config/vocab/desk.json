@@ -18,6 +18,11 @@
       "value": "it",
       "label": "IT lifecycle",
       "definition": "The IT lifecycle desk: end-of-life and release schedules, standards and benchmark updates, and IT press. Reserved for the sources the revision plan adds; no source carries it yet."
+    },
+    {
+      "value": "podcasts",
+      "label": "Podcasts",
+      "definition": "The podcasts desk: security podcasts and webcasts read from each show's own feed. One row per episode, carrying the episode title, link and date only, never the audio or a transcript."
     }
   ]
 }

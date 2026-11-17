@@ -41,6 +41,26 @@ class ParseFeedTest(unittest.TestCase):
         self.assertEqual((intake["items_seen"], intake["items_processed"], intake["items_unprocessed"]), (160, 150, 10))
         self.assertEqual(len(parsed["articles"]), 150)
 
+    def test_max_articles_caps_admitted_entries(self):
+        source = {**SOURCE, "max_articles": 2}
+        parsed = parse_feed(rss([item(index) for index in range(5)]), source)
+        self.assertEqual(parsed["intake"]["entry_limit"], 2)
+        self.assertEqual((parsed["intake"]["items_processed"], parsed["intake"]["items_unprocessed"]), (2, 3))
+        self.assertEqual(len(parsed["articles"]), 2)
+
+    def test_enclosure_is_a_link_fallback_when_an_item_has_no_link(self):
+        # An audio-only item (podcasts): no <link>, but an <enclosure url> on an allowed host.
+        feed = rss(["<item><title>Audio episode</title>"
+                    "<enclosure url=\"https://www.cisa.gov/audio/ep1.mp3\" type=\"audio/mpeg\"/>"
+                    "<pubDate>Mon, 26 Oct 2026 14:00:00 GMT</pubDate></item>"])
+        self.assertEqual(parse_feed(feed, SOURCE)["articles"][0]["url"], "https://www.cisa.gov/audio/ep1.mp3")
+
+    def test_a_real_link_is_preferred_over_the_enclosure(self):
+        feed = rss(["<item><title>Has both</title><link>https://www.cisa.gov/page</link>"
+                    "<enclosure url=\"https://www.cisa.gov/audio/ep.mp3\"/>"
+                    "<pubDate>Mon, 26 Oct 2026 14:00:00 GMT</pubDate></item>"])
+        self.assertEqual(parse_feed(feed, SOURCE)["articles"][0]["url"], "https://www.cisa.gov/page")
+
     def test_exclude_terms_drop_matching_titles_only(self):
         source = {**SOURCE, "exclude_terms": ["altcoin", "price prediction"]}
 

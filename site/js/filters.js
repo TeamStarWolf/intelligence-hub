@@ -1,6 +1,6 @@
 // Pure filter, facet and sort functions over validated rows. Views call these; nothing here
 // touches the DOM, so tests/js runs them directly.
-import { LIST_VIEWS, defaultRange, defaultSort } from "./router.js";
+import { LIST_VIEWS, VIEW_KIND, VIEW_KIND_NOT, defaultRange, defaultSort } from "./router.js";
 import { addDays, normalized } from "./util.js";
 
 // The source class a row counts under. Rows without a tagging block (the schema 6 fallback)
@@ -48,6 +48,8 @@ const has = (items, id) => items.some(item => item[0] === id);
 export function rowMatches(row, query, { view = "explore", cveIndex = null, window = null } = {}) {
   const constraint = LIST_VIEWS[view];
   if (constraint && (row.kind === "kev" || !constraint.includes(classOf(row)))) return false;
+  if (VIEW_KIND[view] && row.kind !== VIEW_KIND[view]) return false;
+  if (VIEW_KIND_NOT[view] && row.kind === VIEW_KIND_NOT[view]) return false;
   if (window && (row.day === null || row.day < window.from || row.day > window.to)) return false;
   if (query.q && !terms(query.q).every(term => row.search.includes(term))) return false;
   if (query.desk && deskOf(row) !== query.desk) return false;
@@ -118,6 +120,8 @@ export function facets(rows, view = "explore") {
   const constraint = LIST_VIEWS[view];
   for (const row of rows) {
     if (constraint && (row.kind === "kev" || !constraint.includes(classOf(row)))) continue;
+    if (VIEW_KIND[view] && row.kind !== VIEW_KIND[view]) continue;
+    if (VIEW_KIND_NOT[view] && row.kind === VIEW_KIND_NOT[view]) continue;
     add(result.desk, deskOf(row)); add(result.kind, row.kind); add(result.exp, row.exploited); add(result.source, row.source_id, row.source_name);
     const rowClass = classOf(row); if (rowClass) add(result.class, rowClass);
     for (const field of ["event_type", "vendor", "product", "actor", "malware", "sector", "company"]) {
@@ -185,7 +189,8 @@ export function today(rows, kevRows, contentDate) {
     advisories: inWindow.filter(row => row.kind !== "incident" && ["vendor-primary", "government-cert"].includes(classOf(row))),
     incidents: inWindow.filter(row => row.kind === "incident"),
     research: inWindow.filter(row => classOf(row) === "researcher"),
-    news: inWindow.filter(row => classOf(row) === "press")
+    // Podcasts share the press class but have their own desk, so they are kept out of the press feed.
+    news: inWindow.filter(row => classOf(row) === "press" && row.kind !== "podcast")
   };
 }
 

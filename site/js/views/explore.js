@@ -5,11 +5,12 @@ import { classOf, clusterStories, dateWindow, deskOf, facets, filterRows, kevLin
 import { count, dateLabel, link, monthLabel, node, routeLink, stamp } from "../util.js";
 import { EXPLOITATION_LABELS, KIND_LABELS, cveOrgLink, dateBasisLabel, facetOptions, fillSelect, label, libraryDoor, pager, pinnedDoor, resultCard } from "./common.js";
 
-const TITLES = { explore: "Intelligence Explorer", advisories: "Advisories", research: "Research", news: "News" };
+const TITLES = { explore: "Intelligence Explorer", advisories: "Advisories", research: "Research", news: "News", podcasts: "Podcasts" };
 const INTROS = {
   advisories: "Vendor and government advisories, newest first. KEV catalog entries have their own tab.",
   research: "Research teams' posts, newest first.",
-  news: "Press reporting: publisher headlines and links only."
+  news: "Press reporting: publisher headlines and links only.",
+  podcasts: "Security podcasts and webcasts, newest episode first. Each row is one episode, read from the show's own feed: title, link and date only, no audio or transcript. Open an episode on the show's site."
 };
 const SELECTS = ["desk", "kind", "class", "event", "exp", "sector", "company", "region", "vendor", "product", "actor", "malware", "cwe", "tech", "source", "year", "month"];
 const FILTER_KEYS = [...SELECTS, "kev", "action", "range"];
@@ -111,7 +112,7 @@ export async function renderExplore(ctx) {
     const rows = store.rows(paths);
     const found = facets(rows, route.view);
     fillFilters(ctx, found);
-    el("#quick-filters").replaceChildren(quickFilters(route, found));
+    el("#quick-filters").replaceChildren(...(route.view === "podcasts" ? [] : [quickFilters(route, found)]));
     const matching = filterRows(rows, route, { cveIndex, contentDate: store.contentDate() });
     // The News view clusters the same story from several outlets into one card, as Today's press
     // list does; the other list views stay row-per-row.
