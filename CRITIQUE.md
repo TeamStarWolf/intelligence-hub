@@ -16,24 +16,32 @@ network waterfall.
 
 ## A) What sucks (worst first)
 
-### A1. The real product is hidden behind an unlabeled "Panels" button
-The top nav is four words — **Explore / Security / Infrastructure / Reference** — and none of them say
-what they open. "Reference" is a vulnerability archive back to 1998. "Infrastructure" is a status
-board. The desks a security reader actually comes for — **Known exploited, CVEs, Advisories, News,
-Research, Actors & malware, Patch Tuesday** — are *not in the nav at all*. They live behind a generic
-button labeled **"Panels."** A first-time visitor cannot find the KEV desk without hunting. This is the
-single most damaging flaw in the whole product: you built eight good desks and then hid six of them.
+### A1. The product's depth is invisible on arrival
+The top nav is four words — **Explore / Security / Infrastructure / Reference** — and none say what they
+open ("Reference" is a 1998→today archive; "Infrastructure" is a status board). The views a security
+reader comes for — **Known exploited, CVEs, Advisories, News, Research, Actors & malware, Patch
+Tuesday**, *and* the ones that answer half of section D (**Subscribe**, **Data downloads**,
+**Reports**) — live in a second, desk-scoped nav row. *(Precise mechanism, from `site/js/main.js`
+`updateTabs()`: that row renders only the active desk's views and is hidden entirely when a desk has
+fewer than two — which is exactly the case on the default Explore landing.)* So a first-time visitor
+lands on a page showing four vague words and **no hint the other fifteen views exist**; they must guess
+that "Security" unfolds into eight desks and that feeds/exports hide under "Reference." A redundant
+**"Panels"** sidebar duplicates some of this as a third surface. This is the single most damaging flaw
+in the product — damaging enough that a reviewer who deliberately opened every desk *still* missed
+Subscribe, Data and Reports (see §D). If the reviewer missed them, every user does.
 
-### A2. First load is a 70-request, ~7 MB (gzip) waterfall
-Opening the Explorer fires **~70 requests**: one JSON per month for **24 live months** (2024-12 →
-2026-10), plus per-month status files, KEV, patch-tuesday, coverage, sources, reports — and a single
-**`data/briefs.json` that is 12.1 MB uncompressed / 1.1 MB gzip.** A single live month
-(`2026-10.json`) is 1.64 MB raw / 258 KB gzip; twenty-four of them is ~6 MB gzip on their own. So cold
-first paint pulls on the order of **7 MB gzip / 20 MB+ parsed in memory**, as a chatty fan-out of
-small files, before you've read one headline. Versioned URLs mean repeat visits cache well, but a tool
-whose pitch is "glance at it daily" should not cost this much on first visit, on mobile, or after any
-cache bust. The whole dataset is then held and filtered client-side, so the browser is carrying tens
-of MB of parsed JSON the entire session.
+### A2. The Explorer downloads two years of shards to search
+*(Corrected after reading `site/js/store.js`: the app is more disciplined than the raw network trace
+suggested. `briefs.json` (12.1 MB raw / 1.1 MB gzip) is **lazy-loaded** on the first brief/register/
+search, not on paint; the store diffs shards by sha256 and Today reads only `recent.json` plus the
+months its window touches. So the critique is narrower, and aimed at one path.)* Opening the
+**Explorer** eagerly fetches **all ~24 monthly live shards** (2024-12 → 2026-10) — a single month
+(`2026-10.json`) is 1.64 MB raw / 258 KB gzip, so the set is **~6 MB gzip / ~20 MB parsed**, fanned out
+as a chatty fetch — because search and filtering run entirely client-side over the whole window with no
+server index. Versioned URLs cache well on repeat visits, but the first Explorer search still means
+"download two years before the first result," which is heavy on mobile or a cold cache, and the browser
+then holds the full window in memory for the session. The fix is an architecture choice (prebuilt
+search index / load-on-scroll), not a rewrite — see the plan's P2.1.
 
 ### A3. The Patch Tuesday headline number is misleading
 `#/patch-tuesday/2026-11` leads with **"1,387 CVEs."** That conflates Microsoft's *full* MSRC CVRF
@@ -45,8 +53,9 @@ on first is the least trustworthy on the page. The *prioritization recipe below 
 critical RCE in exposed component → CVSS) is genuinely good — it's buried under a scary, wrong total.
 
 ### A4. Most desks are a thinner reskin of free primary sources
-The KEV desk (`#/kev`) is CISA's catalog with fewer features — **no CSV/JSON export, which CISA's own
-page gives you for free.** The CVE register is NVD + FIRST EPSS restated. The status board is 118
+The KEV desk (`#/kev`) is CISA's catalog with fewer features — **no export control on the desk itself,
+where CISA's own page hands you CSV/JSON** (the Hub does publish bulk per-year exports, but on a
+separate, nav-buried `#/data` tab — see D4). The CVE register is NVD + FIRST EPSS restated. The status board is 118
 vendor status pages you could already bookmark. The brief re-states BleepingComputer / The Register /
 CISA. Aggregation has value, but across several desks the Hub *subtracts* capability (export, native
 filtering, the vendor's own incident detail) rather than adding judgment. The parts that add real value
@@ -125,14 +134,20 @@ another year."); theme toggle and the "Act today / KEV due in 14 days" block are
 
 ## D) What's missing (what a real analyst actually wants)
 
-1. **Push, not pull.** There is a "what's new since your last visit" line but **no RSS/Atom, no email
-   digest, no webhook/Slack**. A daily-habit tool has to come to you. Right now you have to remember to
-   visit — which, given A1/A2, you won't.
+1. **Push I can tune.** *(Correction after reading the code: the Hub does ship 3 Atom feeds —
+   `feeds/kev.xml`, `incidents.xml`, `patch-calendar.xml` — surfaced in a `#/subscribe` tab I never
+   found while driving the live app, because the nav buries it. The gap is narrower than "no feeds.")*
+   The feeds are **global** (all KEV, all incidents); there is **no per-vendor/per-watchlist feed** and
+   no email/Slack push. A daily-habit tool has to come to you *about the things you care about* — that
+   it can't do, and it's the strongest evidence for how badly the navigation hurts the product (A1).
 2. **Watchlists / saved searches.** You built a 60-facet filter rail and then can't **save** a view.
    "Alert me on Fortinet / Ivanti / my vendor stack" is the obvious ask and it's absent.
 3. **"Affects me" layer.** No way to upload a vendor/product list and see only relevant KEV/CVE/advisory
    items. Every analyst's first question is "is this in my environment?" — the Hub can't help.
-4. **Export.** No CSV/JSON on any desk. CISA KEV, which you reskin, *does* export. You removed a feature.
+4. **Export the view I'm looking at.** *(Correction: per-year CSV + JSONL + tags-CSV + manifest exports
+   do exist, on a `#/data` tab — also hidden by the nav.)* What's missing is **exporting the current
+   filtered result set** — the bulk per-year files don't help once I've filtered to 40 rows — and the
+   KEV desk itself still has no export control where CISA's own catalog hands you one.
 5. **Story clustering / dedup** (see C6).
 6. **Change tracking on a CVE.** EPSS moved, CISA added it to KEV, CVSS was revised — a CVE brief should
    show *what changed and when*, not just the current snapshot.
@@ -172,11 +187,12 @@ The Intelligence Hub is a well-engineered aggregator wearing the costume of an i
 right now it is **closer to a worse-organized reskin of free primary sources than a tool that beats
 reading them directly.** Three or four things are genuinely good — the Patch Tuesday prioritization
 recipe, the unified single-CVE brief, the "KEV due in 14 days" nudge, the vendor-status board — and they
-are buried behind a nav that hides six of eight desks, a misleading headline CVE count, a 70-request /
-multi-megabyte cold start, and whole desks (Actors-as-tag-cloud, History-as-truncated-archive) that add
-nav bulk and no daily value. It would **not** become my morning habit, because it gives me no reason to
-return (no push, no watchlist, no "affects me") and makes me pay a heavy load for the privilege of
-re-reading the same four headlines I already saw on BleepingComputer. The bones are strong enough that
+are buried behind a nav that hides most of the product on arrival (feeds, exports and digests
+included — see D), a misleading headline CVE count, an Explorer that downloads two years of shards to
+search, and whole desks (Actors-as-tag-cloud, History-as-truncated-archive) that add nav bulk and no
+daily value. It would **not** become my morning habit, because it gives me little reason to return —
+the push it ships is global, not "my vendors," and there's no watchlist or "affects me" — and makes me
+re-read the same four headlines I already saw on BleepingComputer. The bones are strong enough that
 the fix is mostly editorial and product discipline, not engineering: **surface the good desks, delete the
 pointless ones, lead with honest numbers, and give me a reason to come back without visiting.** Do that
 and it's a daily tab. As shipped, it's an impressive demo I'd open once.
