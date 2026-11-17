@@ -97,9 +97,9 @@ export function briefHead(data, board, patch, since) {
   const added = data.days.reduce((total, entry) => total + entry.entries.length, 0);
   const due = data.act.length === 1 ? "1 KEV entry reaches" : data.act.length ? data.act.length.toLocaleString("en-US") + " KEV entries reach" : "no KEV entry reaches";
   list.append(node("li", "", (added ? count(added, "KEV addition") : "No KEV addition") + " in the last " + KEV_STRIP_DAYS + " days; " + due + " a federal due date within " + ACT_WITHIN_DAYS + " days."));
-  const lists = [[data.advisories.length, "advisory", "advisories"], [data.research.length, "research entry", "research entries"], [data.news.length, "press entry", "press entries"]]
+  const lists = [[data.advisories.length, "advisory", "advisories"], [data.incidents.length, "service-health incident", "service-health incidents"], [data.research.length, "research entry", "research entries"], [data.news.length, "press entry", "press entries"]]
     .filter(([total]) => total > 0).map(([total, one, many]) => count(total, one, many));
-  list.append(node("li", "", lists.length ? joinWords(lists) + " in the last " + TODAY_DAYS + " days." : "No advisory, research or press entry in the last " + TODAY_DAYS + " days."));
+  list.append(node("li", "", lists.length ? joinWords(lists) + " in the last " + TODAY_DAYS + " days." : "No advisory, service-health incident, research or press entry in the last " + TODAY_DAYS + " days."));
   if (board) {
     const open = board.sources.reduce((sum, source) => sum + source.open.length, 0);
     const trouble = board.sources.filter(source => TROUBLE.includes(source.indicator)).length;
@@ -215,6 +215,15 @@ export async function renderToday(ctx) {
     if (groups.length > 30) block.append(routeLink("All " + rows.length.toLocaleString("en-US") + " in " + title.toLowerCase(), formatRoute({ view, id: null, query: { range: "3" } }), "more-link"));
     parts.push(block);
   }
+  // Service-health incidents in the window, kept out of the advisories section above and shown
+  // in their own, with a link to the live board. Incident cards route through the Explorer.
+  const incidents = section("Service-health incidents (" + data.incidents.length.toLocaleString("en-US") + ")");
+  const incidentList = node("ol", "results-list");
+  incidentList.append(...data.incidents.slice(0, 30).map(row => resultCard(row, { view: "explore", id: null, query: {} }, cveIndex)));
+  if (!data.incidents.length) incidentList.append(node("li", "empty", "Nothing in these three days."));
+  incidents.append(incidentList);
+  incidents.append(routeLink("Open the Service health board", formatRoute({ view: "status", id: null, query: {} }), "more-link"));
+  parts.push(incidents);
   target.replaceChildren(...parts);
   return data;
 }

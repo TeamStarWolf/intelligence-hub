@@ -180,7 +180,10 @@ export function today(rows, kevRows, contentDate) {
     .sort((a, b) => a.due_date.localeCompare(b.due_date) || a.cve.localeCompare(b.cve, undefined, { numeric: true }));
   return {
     from, to: contentDate, days, act, until,
-    advisories: inWindow.filter(row => ["vendor-primary", "government-cert"].includes(classOf(row))),
+    // Service-health incidents share the vendor-primary class, so they are split out by kind:
+    // the advisories bucket is vendor and government advisories only, and incidents are their own.
+    advisories: inWindow.filter(row => row.kind !== "incident" && ["vendor-primary", "government-cert"].includes(classOf(row))),
+    incidents: inWindow.filter(row => row.kind === "incident"),
     research: inWindow.filter(row => classOf(row) === "researcher"),
     news: inWindow.filter(row => classOf(row) === "press")
   };

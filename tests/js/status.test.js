@@ -250,6 +250,18 @@ test("switching to one source during a live batch reads the chosen source at onc
   board.stop();
 });
 
+test("the board shows problem sources first and collapses the operational ones behind a summary", async () => {
+  const shell = await boot({ hash: "#/status" });
+  const doc = shell.doc;
+  assert.ok(doc.querySelector("details.status-operational"), "operational sources collapse into a details summary");
+  const tenable = doc.querySelector(".status-card[data-source='tenable']");
+  assert.ok(tenable, "the problem card renders");
+  assert.ok(!tenable.closest("details"), "a source with a vendor-stated problem is not hidden");
+  const collapsed = [...doc.querySelectorAll("details.status-operational .status-card")];
+  assert.ok(collapsed.length, "operational cards sit inside the collapsed section");
+  assert.ok(collapsed.every(card => card.closest("details.status-operational")), "every collapsed card is operational, not a problem one");
+});
+
 test("the deep link shows one source, its open incidents and its recent incidents", async () => {
   const shell = await boot({ hash: "#/status?source=tenable" });
   const found = cards(shell.doc);

@@ -61,6 +61,22 @@ test("the top bar carries a persistent Feeds and exports link to Subscribe, visi
   assert.equal(doc.querySelector(".tabs a[aria-current=page]").getAttribute("data-view"), "subscribe");
 });
 
+test("Today lists service-health incidents in their own section, not as advisories", async () => {
+  const defaults = files();
+  const recent = JSON.parse(defaults.bodies["./data/v7/recent.json"]);
+  recent.rows = [...recent.rows, statusRow("inc-1", { published_at: "2026-11-02T09:00:00+00:00", source_name: "Example status page", title: "Example: API latency incident" })];
+  const { doc } = await boot({ hash: "#/today", site: files({ extra: { "recent.json": recent } }) });
+  const view = doc.querySelector("#view");
+  const sectionOf = prefix => [...view.querySelectorAll("section")].find(section => { const h2 = section.querySelector("h2"); return h2 && h2.textContent.startsWith(prefix); });
+  const advisories = sectionOf("Vendor and government advisories");
+  const incidents = sectionOf("Service-health incidents");
+  assert.ok(incidents, "a Service-health incidents section renders");
+  assert.ok(incidents.querySelector("h2").textContent.includes("(1)"));
+  assert.ok(incidents.textContent.includes("API latency incident"), "the incident shows in its own section");
+  assert.ok(!advisories.textContent.includes("API latency incident"), "the incident is not mislabelled as an advisory");
+  assert.ok(incidents.querySelector("a[href='#/status']"), "the section links to the Service health board");
+});
+
 test("the Today press list clusters the same story from several outlets into one card", async () => {
   const defaults = files();
   const recent = JSON.parse(defaults.bodies["./data/v7/recent.json"]);
@@ -91,6 +107,21 @@ test("the CVE register drops the Needs review label but keeps an informative one
   const text = doc.querySelector("#view").textContent;
   assert.ok(!text.includes("Needs review"), "the uninformative default label is not shown");
   assert.ok(text.includes("CISA action"), "an informative guidance label is kept");
+});
+
+test("the Explorer surfaces one-click Exploited and KEV-linked quick filters", async () => {
+  const { doc, app } = await boot();
+  const chipText = () => [...doc.querySelectorAll("#quick-filters a.quick-chip")].map(anchor => anchor.textContent);
+  assert.ok(chipText().some(text => text.startsWith("Known exploited")), chipText().join(" | "));
+  assert.ok(chipText().some(text => text.startsWith("Reported exploited")));
+  assert.ok(chipText().some(text => text.startsWith("KEV-linked")));
+  const known = () => [...doc.querySelectorAll("#quick-filters a.quick-chip")].find(anchor => anchor.textContent.startsWith("Known exploited"));
+  assert.ok(known().getAttribute("href").includes("exp=known"), "the chip sets the exploited filter");
+  assert.equal(known().getAttribute("aria-pressed"), "false");
+  app.navigate({ view: "explore", id: null, query: { exp: "known" } });
+  await settle(40);
+  assert.equal(known().getAttribute("aria-pressed"), "true", "the active filter reads as pressed");
+  assert.ok(known().getAttribute("class").includes("quick-chip-on"));
 });
 
 test("the tab strip is two rows: the desks, then only the active desk's views, and the Panels list groups by desk", async () => {
@@ -297,7 +328,7 @@ test("Today opens with the brief head: the windows in words, zero said in words,
   const empty = await boot({ hash: "#/today", site: files({ extra: { "recent.json": { ...recent, rows: [], kev: [], cves: [] } } }) });
   text = empty.doc.querySelector("#view").textContent;
   assert.ok(text.includes("No KEV addition in the last 7 days; no KEV entry reaches a federal due date within 14 days."), text.slice(0, 900));
-  assert.ok(text.includes("No advisory, research or press entry in the last 3 days."), text.slice(0, 900));
+  assert.ok(text.includes("No advisory, service-health incident, research or press entry in the last 3 days."), text.slice(0, 900));
   assert.ok(text.includes("Nothing in these three days."));
 });
 

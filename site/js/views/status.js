@@ -368,13 +368,34 @@ export async function renderStatus(ctx) {
   board.append(node("p", "", "The collector read every source at " + stamp(current.generated_at) + ". It runs when GitHub starts the scheduled workflow, which is every few hours in practice; the Sources view lists the observed gap between runs."), controls);
   const views = new Map();
   const cards = new Map();
+  const makeCard = source => { const view = card(source, lib, Boolean(chosen)); cards.set(source.id, view); if (source.live) views.set(source.live, view); return view.item; };
   for (const group of current.groups) {
     const members = shown.filter(source => source.group === group.id).sort(compareAttention);
     if (!members.length) continue;
     board.append(node("h3", "status-subtitle", chosen ? group.label : group.label + groupTally(members)));
-    const grid = node("ul", "status-grid");
-    for (const source of members) { const view = card(source, lib, Boolean(chosen)); grid.append(view.item); cards.set(source.id, view); if (source.live) views.set(source.live, view); }
-    board.append(grid);
+    if (chosen) {
+      const grid = node("ul", "status-grid");
+      for (const source of members) grid.append(makeCard(source));
+      board.append(grid);
+      continue;
+    }
+    // Problems first: sources with a vendor-stated problem show at once; the operational ones in
+    // the group collapse behind a summary, so the board is not a wall of green to scroll past.
+    const attention = members.filter(needsAttention);
+    const operational = members.filter(source => !needsAttention(source));
+    if (attention.length) {
+      const grid = node("ul", "status-grid");
+      for (const source of attention) grid.append(makeCard(source));
+      board.append(grid);
+    }
+    if (operational.length) {
+      const details = node("details", "status-operational");
+      details.append(node("summary", "", count(operational.length, "operational source") + " in this group, hidden"));
+      const grid = node("ul", "status-grid");
+      for (const source of operational) grid.append(makeCard(source));
+      details.append(grid);
+      board.append(details);
+    }
   }
   if (!chosen && current.page_only.length) {
     const pages = node("details", "status-pages");
