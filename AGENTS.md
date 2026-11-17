@@ -30,6 +30,13 @@ coding agent that changes this repository.
   Python and Node's built-in `node --test` under `tests/js/` for the site (no npm, no
   dependencies). A change to the collector, a validator or the page logic in `site/js/`
   comes with a test that fails without the change.
+- When adding or changing a feed source, validate its feed through the collector's own
+  `collect.fetch` (which enforces `MAX_BYTES` and rejects redirects) and `parse_feed`, not a
+  raw or uncapped fetch. A feed that loads in a browser or an uncapped fetch can still exceed
+  the byte bound or 301-redirect and only fail on the live collector. A per-source cap
+  (`max_articles`, a lower `entry_limit`) or byte bound (`max_bytes`) must have a test that
+  exercises the capped value through both the Python and the page intake validators, because
+  the offline fixture otherwise only covers the default `entry_limit` of 150.
 - `.github/workflows/check.yml` runs on every pull request: the unit tests, the
   fixture currency check, the offline history check, an offline `--cached` build on
   the committed fixture, the page-file and stamping check, `node --check` on every

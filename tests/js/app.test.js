@@ -12,6 +12,7 @@ import { createApp } from "../../site/js/main.js";
 import { RELOAD_KEY } from "../../site/js/guard.js";
 import { SEEN_KEY, nextPatchTuesday } from "../../site/js/views/today.js";
 import { cveRegister, rowMatches, today as todayBuckets } from "../../site/js/filters.js";
+import { normalizeIntake } from "../../site/js/validate.js";
 import { normalizeCveIndex } from "../../site/js/validate.js";
 
 async function boot({ hash = "", search = "", site = files(), session = storage(), local = storage(), moduleUrl = null, hidden = false } = {}) {
@@ -103,6 +104,17 @@ test("the News view clusters the same story from several outlets, like Today's p
   assert.equal(results.querySelectorAll("li.card").length, 1, "the two outlets collapse to one card");
   assert.ok(results.querySelector(".also-reported"), "the card names the other outlet");
   assert.ok(doc.querySelector("#results-status").textContent.includes("2 entries in 1 story"), doc.querySelector("#results-status").textContent);
+});
+
+test("the page's intake validator accepts a capped source (entry_limit below 150)", () => {
+  const intake = entryLimit => ({ items_seen: 30, items_processed: 30, items_admitted: 30, items_rejected: 0, items_filtered: 0, items_unprocessed: 0,
+    entry_limit: entryLimit, cve_limit: 100, rejection_reasons: { invalid_link_or_title: 0, cve_limit_exceeded: 0 },
+    attempted_at: "2026-11-01T12:00:00+00:00", response_sha256: "a".repeat(64) });
+  const source = { id: "pod", status: "ok" };
+  assert.equal(normalizeIntake(intake(30), source).entry_limit, 30, "a capped podcast source is accepted on the page");
+  assert.equal(normalizeIntake(intake(150), source).entry_limit, 150, "the default still works");
+  assert.throws(() => normalizeIntake(intake(0), source));
+  assert.throws(() => normalizeIntake(intake(151), source));
 });
 
 test("the CVE register keeps published records above rejected or unknown ones", () => {
