@@ -93,6 +93,18 @@ test("the Today press list clusters the same story from several outlets into one
   assert.ok(press.textContent.includes("Also reported by Second Outlet"), press.textContent);
 });
 
+test("the News view clusters the same story from several outlets, like Today's press list", async () => {
+  const defaults = files();
+  const live = JSON.parse(defaults.bodies["./data/v7/live/2026-11.json"]);
+  const press = live.rows.find(row => row.source_id === "news");
+  live.rows = [...live.rows, { ...press, id: "a-press-2", url: "https://publisher.example.org/a-press-2", source_id: "news-2", source_name: "Second Outlet" }];
+  const { doc } = await boot({ hash: "#/news", site: files({ extra: { "live/2026-11.json": live } }) });
+  const results = doc.querySelector("#results");
+  assert.equal(results.querySelectorAll("li.card").length, 1, "the two outlets collapse to one card");
+  assert.ok(results.querySelector(".also-reported"), "the card names the other outlet");
+  assert.ok(doc.querySelector("#results-status").textContent.includes("2 entries in 1 story"), doc.querySelector("#results-status").textContent);
+});
+
 test("the tab strip is two rows: the desks, then only the active desk's views, and the Panels list groups by desk", async () => {
   const { doc, app } = await boot();
   const desks = [...doc.querySelectorAll(".tabs .desks a")];

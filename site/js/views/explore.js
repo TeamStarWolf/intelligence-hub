@@ -1,7 +1,7 @@
 // The Intelligence Explorer: the default route. Advisories, Research and News are the same
 // view with a fixed source-class constraint and a shorter default date range.
 import { defaultRange, defaultSort, formatRoute, withQuery } from "../router.js";
-import { classOf, dateWindow, deskOf, facets, filterRows, kevLinked, requiredAction } from "../filters.js";
+import { classOf, clusterStories, dateWindow, deskOf, facets, filterRows, kevLinked, requiredAction } from "../filters.js";
 import { count, dateLabel, link, monthLabel, node, routeLink, stamp } from "../util.js";
 import { EXPLOITATION_LABELS, KIND_LABELS, cveOrgLink, dateBasisLabel, facetOptions, fillSelect, label, libraryDoor, pager, pinnedDoor, resultCard } from "./common.js";
 
@@ -70,6 +70,18 @@ function fillFilters(ctx, rows) {
   fillSelect(el("#f-month"), "All months", months, route.query.month);
 }
 
+function joinWords(parts) { return parts.length < 2 ? parts.join("") : parts.slice(0, -1).join(", ") + " and " + parts[parts.length - 1]; }
+function outletPhrase(names) { return names.length <= 3 ? joinWords(names) : joinWords([...names.slice(0, 2), count(names.length - 2, "other outlet")]); }
+
+// A clustered News card: the primary row, and a line naming the other outlets that carried the same
+// story. clusterStories groups only high-confidence same-event duplicates within a one-day window.
+function newsCard(group, route, cveIndex) {
+  const card = resultCard(group.primary, route, cveIndex);
+  const names = [...new Set(group.others.map(row => row.source_name).filter(name => name && name !== group.primary.source_name))];
+  if (names.length) card.append(node("p", "muted also-reported", "Also reported by " + outletPhrase(names) + "."));
+  return card;
+}
+
 export async function renderExplore(ctx) {
   const { route, el, store } = ctx;
   el("#explore-title").textContent = TITLES[route.view] || TITLES.explore;
@@ -82,11 +94,17 @@ export async function renderExplore(ctx) {
     const rows = store.rows(paths);
     fillFilters(ctx, rows);
     const matching = filterRows(rows, route, { cveIndex, contentDate: store.contentDate() });
-    const page = pager(el("#pager"), route, matching.length);
-    el("#results").replaceChildren(...matching.slice(page.start, page.start + 25).map(row => resultCard(row, route, cveIndex)));
+    // The News view clusters the same story from several outlets into one card, as Today's press
+    // list does; the other list views stay row-per-row.
+    const clustered = route.view === "news";
+    const units = clustered ? clusterStories(matching) : matching;
+    const page = pager(el("#pager"), route, units.length);
+    const slice = units.slice(page.start, page.start + 25);
+    el("#results").replaceChildren(...(clustered ? slice.map(group => newsCard(group, route, cveIndex)) : slice.map(row => resultCard(row, route, cveIndex))));
     const waiting = paths.filter(path => !store.loaded([path])).length;
     const intro = INTROS[route.view] ? INTROS[route.view] + " " : "";
-    el("#results-status").textContent = intro + count(matching.length, "entry", "entries") + " in " + scopeText(route, store) + ". Content date " + dateLabel(store.contentDate()) + "." +
+    const summary = clustered && units.length < matching.length ? count(matching.length, "entry", "entries") + " in " + count(units.length, "story", "stories") : count(matching.length, "entry", "entries");
+    el("#results-status").textContent = intro + summary + " in " + scopeText(route, store) + ". Content date " + dateLabel(store.contentDate()) + "." +
       (waiting ? " Reading " + count(waiting, "more file") + "." : "");
     if (!matching.length && !waiting) el("#results").append(node("li", "empty", rows.length ? "No loaded entry matches. Clear a filter or choose another year." : "No entries in this date range."));
   };
