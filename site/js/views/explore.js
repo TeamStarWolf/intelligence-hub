@@ -174,11 +174,37 @@ function exportCurrent(ctx, format) {
   });
 }
 
+// Copies a link to the current view. The address already encodes the filters, search, sort and date
+// window, so the copied link reopens exactly what the reader is seeing. The result is announced in a
+// status region for assistive tech and briefly on the button.
+function copyViewLink(ctx) {
+  const { el, win, doc, location } = ctx;
+  const url = (location && location.href) || [location && location.pathname, location && location.search, location && location.hash].filter(Boolean).join("");
+  const announce = ok => {
+    const status = el("#copy-status");
+    if (status) status.textContent = ok ? "Link to this view copied to the clipboard." : "Could not copy. Use the browser's address bar to copy the link.";
+    const button = el("#copy-link");
+    if (button && ok) { button.textContent = "Copied"; if (win && typeof win.setTimeout === "function") win.setTimeout(() => { button.textContent = "Copy link"; }, 1500); }
+  };
+  const clipboard = win && win.navigator && win.navigator.clipboard;
+  if (clipboard && typeof clipboard.writeText === "function") { clipboard.writeText(url).then(() => announce(true), () => announce(false)); return; }
+  try {
+    const area = doc.createElement("textarea");
+    area.value = url;
+    if (doc.body) doc.body.append(area);
+    if (typeof area.select === "function") area.select();
+    const ok = typeof doc.execCommand === "function" && doc.execCommand("copy");
+    if (typeof area.remove === "function") area.remove();
+    announce(Boolean(ok));
+  } catch (_) { announce(false); }
+}
+
 // Wires the form once. Every change replaces the address, so Back leaves the view, not each keystroke.
 export function bindExplore(ctx) {
   const { el, navigate, route: current } = ctx;
   el("#export-csv").addEventListener("click", () => exportCurrent(ctx, "csv"));
   el("#export-json").addEventListener("click", () => exportCurrent(ctx, "json"));
+  el("#copy-link").addEventListener("click", () => copyViewLink(ctx));
   let timer = null;
   el("#explore-form").addEventListener("submit", event => { event.preventDefault(); clearTimeout(timer); navigate(withQuery(current(), { q: el("#q").value }), { replace: true }); });
   el("#q").addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(() => navigate(withQuery(current(), { q: el("#q").value }), { replace: true }), 250); });

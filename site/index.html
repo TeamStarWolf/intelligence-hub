@@ -66,6 +66,8 @@
           <button id="filters-toggle" class="filters-toggle" type="button" aria-controls="filter-rail" aria-expanded="false">Filters<span id="filter-count" class="filter-count"></span></button>
           <button id="export-csv" class="export-btn" type="button" title="Download the rows now in view as CSV">Export CSV</button>
           <button id="export-json" class="export-btn" type="button" title="Download the rows now in view as JSON">Export JSON</button>
+          <button id="copy-link" class="export-btn" type="button" title="Copy a shareable link to this view">Copy link</button>
+          <span id="copy-status" class="sr-only" role="status" aria-live="polite"></span>
           <label class="sort-label"><span class="sr-only">Sort results</span><select id="f-sort"><option value="date-desc">Newest first</option><option value="date-asc">Oldest first</option><option value="title-asc">Title A to Z</option><option value="title-desc">Title Z to A</option><option value="source-asc">Source A to Z</option><option value="source-desc">Source Z to A</option><option value="cve-asc">CVE ascending</option><option value="cve-desc">CVE descending</option><option value="cvss-desc">CVSS highest</option><option value="cvss-asc">CVSS lowest</option><option value="epss-desc">EPSS highest</option><option value="epss-asc">EPSS lowest</option></select></label>
         </form>
         <div class="explore-body">

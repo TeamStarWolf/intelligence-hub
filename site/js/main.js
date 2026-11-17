@@ -236,7 +236,7 @@ export function createApp(env) {
     });
     const skip = el("[data-skip]");
     if (skip) skip.addEventListener("click", event => { event.preventDefault(); (Object.hasOwn(LIST_VIEWS, route.view) ? el("#q") : el("#main")).focus(); });
-    bindExplore({ el, navigate, route: () => route, store, doc, win });
+    bindExplore({ el, navigate, route: () => route, store, doc, win, location });
     for (const [dialog, button, kind] of [["#record-dialog", "#record-close", "record"], ["#cve-dialog", "#cve-close", "cve"]]) {
       el(button).addEventListener("click", () => closeDialog(el(dialog)));
       el(dialog).addEventListener("close", () => leaveRecord(kind));
