@@ -41,9 +41,26 @@ function syncControls(ctx) {
   el("#filter-count").textContent = active ? " (" + active + ")" : "";
 }
 
-function fillFilters(ctx, rows) {
+// One-click filters for the signals that are buried in the rail: the exploited split (the "exp"
+// dropdown is almost all "unknown") and KEV-linked. Each chip toggles its filter, so a reader does
+// not open the rail to reach the rows that matter most. The full rail keeps every state.
+function quickFilters(route, found) {
+  const wrap = node("div", "quick-filters-row");
+  wrap.append(node("span", "quick-label muted", "Exploited:"));
+  const chip = (key, value, text, total) => {
+    const on = route.query[key] === value;
+    const anchor = routeLink(text + (total === null ? "" : " (" + total.toLocaleString("en-US") + ")"), formatRoute(withQuery(route, { [key]: on ? null : value })), "chip quick-chip" + (on ? " quick-chip-on" : ""));
+    anchor.setAttribute("aria-pressed", String(on));
+    return anchor;
+  };
+  wrap.append(chip("exp", "known", "Known exploited", found.exp.get("known") || 0));
+  wrap.append(chip("exp", "reported", "Reported exploited", found.exp.get("reported") || 0));
+  wrap.append(chip("kev", "1", "KEV-linked", null));
+  return wrap;
+}
+
+function fillFilters(ctx, found) {
   const { route, el, store } = ctx;
-  const found = facets(rows, route.view);
   const plain = (value, entry) => entry && entry.label ? label(entry.label) : value;
   fillSelect(el("#f-desk"), "All desks", facetOptions(found.desk, value => label("desk:" + value)), route.query.desk);
   fillSelect(el("#f-kind"), "All kinds", facetOptions(found.kind, value => KIND_LABELS[value] || value), route.query.kind);
@@ -80,7 +97,9 @@ export async function renderExplore(ctx) {
   const paint = cveIndex => {
     if (!ctx.current()) return;
     const rows = store.rows(paths);
-    fillFilters(ctx, rows);
+    const found = facets(rows, route.view);
+    fillFilters(ctx, found);
+    el("#quick-filters").replaceChildren(quickFilters(route, found));
     const matching = filterRows(rows, route, { cveIndex, contentDate: store.contentDate() });
     const page = pager(el("#pager"), route, matching.length);
     el("#results").replaceChildren(...matching.slice(page.start, page.start + 25).map(row => resultCard(row, route, cveIndex)));
