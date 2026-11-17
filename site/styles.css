@@ -162,6 +162,8 @@ html[data-wall="1"] .layout { max-width: none; }
 .filters-toggle { min-height: 44px; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--tsw-border-strong); background: var(--tsw-surface-2); color: var(--tsw-text); cursor: pointer; transition: border-color 160ms ease, transform 160ms ease; }
 .filters-toggle:hover { border-color: var(--tsw-link); transform: translateY(-1px); }
 .filter-count { font-variant-numeric: tabular-nums; }
+.export-btn { min-height: 44px; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--tsw-border-strong); background: var(--tsw-surface-2); color: var(--tsw-text); cursor: pointer; transition: border-color 160ms ease; }
+.export-btn:hover { border-color: var(--tsw-link); }
 .sort-label { margin-left: auto; }
 select { min-height: 44px; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--tsw-border-strong); background: var(--tsw-surface); color: var(--tsw-text); max-width: 100%; }
 select:disabled { opacity: .6; }

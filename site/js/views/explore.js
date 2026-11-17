@@ -1,7 +1,7 @@
 // The Intelligence Explorer: the default route. Advisories, Research and News are the same
 // view with a fixed source-class constraint and a shorter default date range.
 import { defaultRange, defaultSort, formatRoute, withQuery } from "../router.js";
-import { classOf, clusterStories, dateWindow, deskOf, facets, filterRows, kevLinked, requiredAction } from "../filters.js";
+import { classOf, clusterStories, dateWindow, deskOf, exportCsv, exportJson, facets, filterRows, kevLinked, requiredAction } from "../filters.js";
 import { count, dateLabel, link, monthLabel, node, routeLink, stamp } from "../util.js";
 import { EXPLOITATION_LABELS, KIND_LABELS, cveOrgLink, dateBasisLabel, facetOptions, fillSelect, label, libraryDoor, pager, pinnedDoor, resultCard } from "./common.js";
 
@@ -144,9 +144,41 @@ export async function renderExplore(ctx) {
   return { rows: store.rows(paths), cveIndex };
 }
 
+// Hands the reader a file built from the rows in view. An object URL where the browser has one, a
+// data URL otherwise. The anchor click is a no-op outside a browser, so binding stays safe in tests.
+function downloadText(doc, win, filename, mediaType, text) {
+  const anchor = doc.createElement("a");
+  anchor.download = filename;
+  if (win && win.URL && win.URL.createObjectURL && win.Blob) {
+    const url = win.URL.createObjectURL(new win.Blob([text], { type: mediaType + ";charset=utf-8" }));
+    anchor.href = url;
+    if (typeof anchor.click === "function") anchor.click();
+    win.URL.revokeObjectURL(url);
+  } else {
+    anchor.href = "data:" + mediaType + ";charset=utf-8," + encodeURIComponent(text);
+    if (typeof anchor.click === "function") anchor.click();
+  }
+}
+
+// Exports exactly the rows the view is showing: the same filter, search, date window and sort.
+function exportCurrent(ctx, format) {
+  const { store, doc, win, route: current } = ctx;
+  const route = current();
+  const rows = store.rows(store.articlePaths(route));
+  return store.cveIndex().catch(() => null).then(cveIndex => {
+    const matching = filterRows(rows, route, { cveIndex, contentDate: store.contentDate() });
+    const base = "teamstarwolf-" + route.view + "-" + store.contentDate();
+    if (format === "json") downloadText(doc, win, base + ".json", "application/json", exportJson(matching));
+    else downloadText(doc, win, base + ".csv", "text/csv", exportCsv(matching));
+    return matching;
+  });
+}
+
 // Wires the form once. Every change replaces the address, so Back leaves the view, not each keystroke.
 export function bindExplore(ctx) {
   const { el, navigate, route: current } = ctx;
+  el("#export-csv").addEventListener("click", () => exportCurrent(ctx, "csv"));
+  el("#export-json").addEventListener("click", () => exportCurrent(ctx, "json"));
   let timer = null;
   el("#explore-form").addEventListener("submit", event => { event.preventDefault(); clearTimeout(timer); navigate(withQuery(current(), { q: el("#q").value }), { replace: true }); });
   el("#q").addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(() => navigate(withQuery(current(), { q: el("#q").value }), { replace: true }), 250); });

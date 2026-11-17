@@ -254,3 +254,32 @@ export function clusterStories(rows) {
   }
   return groups;
 }
+
+// A client-side export of the rows currently in view: headline, link and metadata only, never
+// article bodies. One row per entry, so a clustered News story still exports each outlet's row.
+export const EXPORT_COLUMNS = [
+  ["date", row => row.day || ""],
+  ["kind", row => row.kind],
+  ["source", row => row.source_name],
+  ["title", row => row.title],
+  ["url", row => row.url],
+  ["cves", row => row.cves.join(" ")],
+  ["desk", row => deskOf(row) || ""],
+  ["source_class", row => classOf(row) || ""],
+  ["exploitation", row => row.exploited]
+];
+
+function csvCell(value) {
+  const text = value == null ? "" : String(value);
+  return /[",\r\n]/.test(text) ? "\"" + text.replaceAll("\"", "\"\"") + "\"" : text;
+}
+
+export function exportCsv(rows) {
+  const lines = [EXPORT_COLUMNS.map(column => column[0]).join(",")];
+  for (const row of rows) lines.push(EXPORT_COLUMNS.map(column => csvCell(column[1](row))).join(","));
+  return lines.join("\r\n") + "\r\n";
+}
+
+export function exportJson(rows) {
+  return JSON.stringify(rows.map(row => Object.fromEntries(EXPORT_COLUMNS.map(column => [column[0], column[1](row)]))), null, 2);
+}
