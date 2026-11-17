@@ -7,7 +7,7 @@
 // first load stays small on any day of the month. An index written before recent.json existed
 // falls back to the live months and the KEV ledger for 60 days.
 import { formatRoute } from "../router.js";
-import { ACT_WITHIN_DAYS, KEV_STRIP_DAYS, TODAY_DAYS, today } from "../filters.js";
+import { ACT_WITHIN_DAYS, clusterStories, KEV_STRIP_DAYS, TODAY_DAYS, today } from "../filters.js";
 import { addDays, count, dateLabel, dayLabel, monthLabel, node, routeLink, stamp } from "../util.js";
 import { resultCard, section } from "./common.js";
 
@@ -50,6 +50,19 @@ export function nextPatchTuesday(day) {
 
 // "a", "a and b", "a, b and c".
 function joinWords(parts) { return parts.length < 2 ? parts.join("") : parts.slice(0, -1).join(", ") + " and " + parts[parts.length - 1]; }
+
+// A press story card: the primary row, and a line naming the other outlets that carried the same
+// story when clustering grouped more than one. Only outlets other than the primary's own are named.
+function outletPhrase(names) {
+  return names.length <= 3 ? joinWords(names) : joinWords([...names.slice(0, 2), count(names.length - 2, "other outlet")]);
+}
+
+function storyCard(group, view, cveIndex) {
+  const card = resultCard(group.primary, { view, id: null, query: {} }, cveIndex);
+  const names = [...new Set(group.others.map(row => row.source_name).filter(name => name && name !== group.primary.source_name))];
+  if (names.length) card.append(node("p", "muted also-reported", "Also reported by " + outletPhrase(names) + "."));
+  return card;
+}
 
 function shownIds(data) {
   const ids = new Set([...data.advisories, ...data.research, ...data.news].map(row => row.id));
@@ -188,12 +201,18 @@ export async function renderToday(ctx) {
   act.append(actStrip(data));
   const parts = [node("h1", "view-title", "Today"), intro, head, act, kev];
   for (const [title, rows, view] of [["Vendor and government advisories", data.advisories, "advisories"], ["Research", data.research, "research"], ["Press", data.news, "news"]]) {
-    const block = section(title + " (" + rows.length.toLocaleString("en-US") + ")");
+    // The press list is clustered so the same story from several outlets reads as one card; the
+    // advisory and research lists stay row-per-row.
+    const groups = view === "news" ? clusterStories(rows) : rows.map(row => ({ primary: row, others: [] }));
+    const heading = view === "news" && groups.length < rows.length
+      ? title + " (" + count(rows.length, "entry", "entries") + " in " + count(groups.length, "story", "stories") + ")"
+      : title + " (" + rows.length.toLocaleString("en-US") + ")";
+    const block = section(heading);
     const list = node("ol", "results-list");
-    list.append(...rows.slice(0, 30).map(row => resultCard(row, { view, id: null, query: {} }, cveIndex)));
+    list.append(...groups.slice(0, 30).map(group => storyCard(group, view, cveIndex)));
     if (!rows.length) list.append(node("li", "empty", "Nothing in these three days."));
     block.append(list);
-    if (rows.length > 30) block.append(routeLink("All " + rows.length.toLocaleString("en-US") + " in " + title.toLowerCase(), formatRoute({ view, id: null, query: { range: "3" } }), "more-link"));
+    if (groups.length > 30) block.append(routeLink("All " + rows.length.toLocaleString("en-US") + " in " + title.toLowerCase(), formatRoute({ view, id: null, query: { range: "3" } }), "more-link"));
     parts.push(block);
   }
   target.replaceChildren(...parts);

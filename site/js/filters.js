@@ -182,3 +182,64 @@ export function today(rows, kevRows, contentDate) {
     news: inWindow.filter(row => classOf(row) === "press")
   };
 }
+
+// Story clustering: collapse one event reported by several outlets into a single primary row.
+// It is deliberately conservative and prefers leaving two rows apart over merging distinct
+// stories. Two rows group only on a high-confidence same-event signal within a one-day window:
+// the same non-empty CVE set, or near-identical headlines. Input order is kept, so the first row
+// of a group is its primary. Callers cluster only their press list, where cross-outlet repeats
+// are the problem; advisories and research stay row-per-row.
+//
+// Headlines are compared on their distinctive words only: the generic security-news vocabulary
+// below (patch, flaw, attack, critical, remote code execution and the like) is dropped first, so
+// two unrelated stories that merely share those words, such as a Microsoft Exchange fix and a
+// Cisco firewall fix, do not look alike. What remains is the product, vendor and subject words,
+// and rows group only when those overlap heavily (Jaccard at or above the threshold), which is
+// reached by syndicated near-duplicate headlines but not by two different stories on one topic.
+const CLUSTER_STOP = new Set([
+  "that", "this", "with", "from", "over", "into", "after", "amid", "their", "they", "them", "what", "when", "your", "about", "could", "will", "have", "been", "than", "more", "most", "also", "then", "only", "onto", "upon", "such", "other", "these", "those", "which", "while", "were", "says", "said", "amid",
+  "patch", "patches", "patched", "patching", "flaw", "flaws", "bugs", "vulnerability", "vulnerabilities", "vulnerable", "exploit", "exploits", "exploited", "exploitation", "attack", "attacks", "attacker", "attackers", "hack", "hacks", "hacked", "hacker", "hackers", "breach", "breaches", "breached", "security", "cyber", "cyberattack", "cyberattacks", "malware", "ransomware", "threat", "threats", "critical", "remote", "code", "execution", "warns", "warned", "warning", "reveal", "reveals", "revealed", "report", "reports", "reported", "release", "released", "update", "updates", "updated", "data", "users", "user", "million", "billion", "group", "groups", "campaign", "campaigns", "target", "targets", "targeted", "targeting", "vendor", "vendors", "firm", "firms", "company", "companies", "affects", "affected", "affecting", "disclose", "disclosed", "disclosure", "zero", "days", "major", "used", "using", "fixes", "fixed", "flawed", "alert", "alerts", "severity", "high"
+]);
+
+function titleTokens(title) {
+  return new Set((String(title || "").toLowerCase().match(/[a-z0-9]+/g) || []).filter(word => word.length >= 4 && !CLUSTER_STOP.has(word)));
+}
+
+function cveSignature(row) {
+  const cves = row.cves || [];
+  return cves.length ? [...cves].sort().join(" ") : null;
+}
+
+function dayIndex(row) {
+  return row.day ? Math.round(Date.parse(row.day + "T00:00:00Z") / 86400000) : null;
+}
+
+// A high-confidence same-event test. Same non-empty CVE set, or distinctive headline words that
+// overlap at Jaccard 0.6 or above with at least two shared words, within one calendar day.
+function sameEvent(a, b, tokensA, tokensB) {
+  const dayA = dayIndex(a), dayB = dayIndex(b);
+  if (dayA === null || dayB === null || Math.abs(dayA - dayB) > 1) return false;
+  const cveA = cveSignature(a);
+  if (cveA && cveA === cveSignature(b)) return true;
+  let shared = 0;
+  for (const word of tokensA) if (tokensB.has(word)) shared++;
+  const union = tokensA.size + tokensB.size - shared;
+  return shared >= 2 && union > 0 && shared / union >= 0.6;
+}
+
+// Groups rows in input order. Each group is {primary, others}: a row joins an existing group only
+// when it matches that group's primary, so a weak chain never pulls unrelated rows together.
+export function clusterStories(rows) {
+  const groups = [];
+  const tokensOf = new Map();
+  for (const row of rows) {
+    const tokens = titleTokens(row.title);
+    tokensOf.set(row, tokens);
+    let group = null;
+    for (const candidate of groups) {
+      if (sameEvent(candidate.primary, row, tokensOf.get(candidate.primary), tokens)) { group = candidate; break; }
+    }
+    if (group) group.others.push(row); else groups.push({ primary: row, others: [] });
+  }
+  return groups;
+}

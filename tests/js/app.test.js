@@ -61,6 +61,22 @@ test("the top bar carries a persistent Feeds and exports link to Subscribe, visi
   assert.equal(doc.querySelector(".tabs a[aria-current=page]").getAttribute("data-view"), "subscribe");
 });
 
+test("the Today press list clusters the same story from several outlets into one card", async () => {
+  const defaults = files();
+  const recent = JSON.parse(defaults.bodies["./data/v7/recent.json"]);
+  const aPress = recent.rows.find(item => item.id === "a-press");
+  const dupe = { ...aPress, id: "a-press-2", url: "https://publisher.example.org/a-press-2", source_id: "news-2", source_name: "Second Outlet" };
+  recent.rows = [...recent.rows, dupe];
+  const { doc } = await boot({ hash: "#/today", site: files({ extra: { "recent.json": recent } }) });
+  const view = doc.querySelector("#view");
+  const press = [...view.querySelectorAll("section")].find(section => { const h2 = section.querySelector("h2"); return h2 && h2.textContent.startsWith("Press"); });
+  assert.ok(press, "the Press section renders");
+  assert.ok(press.querySelector("h2").textContent.includes("2 entries in 1 story"), press.querySelector("h2").textContent);
+  assert.equal(press.querySelectorAll("li.card").length, 1, "the two outlets collapse to one card");
+  assert.ok(press.querySelector(".also-reported"), "the card carries an also-reported line");
+  assert.ok(press.textContent.includes("Also reported by Second Outlet"), press.textContent);
+});
+
 test("the tab strip is two rows: the desks, then only the active desk's views, and the Panels list groups by desk", async () => {
   const { doc, app } = await boot();
   const desks = [...doc.querySelectorAll(".tabs .desks a")];
