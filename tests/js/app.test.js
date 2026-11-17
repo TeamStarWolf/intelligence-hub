@@ -105,6 +105,22 @@ test("the News view clusters the same story from several outlets, like Today's p
   assert.ok(doc.querySelector("#results-status").textContent.includes("2 entries in 1 story"), doc.querySelector("#results-status").textContent);
 });
 
+test("the CVE register keeps published records above rejected or unknown ones", () => {
+  const index = new Map([
+    ["CVE-2026-9999", { cve: "CVE-2026-9999", record_state: "UNKNOWN", guidance: "needs-review", required_action: false, source_status: "failed", kev_added: null, score: null, version: null, epss: null, weaknesses: [] }],
+    ["CVE-2026-1000", { cve: "CVE-2026-1000", record_state: "PUBLISHED", guidance: "needs-review", required_action: false, source_status: "ok", kev_added: null, score: 9.8, version: "3.1", epss: null, weaknesses: ["CWE-787"] }],
+  ]);
+  assert.deepEqual(cveRegister(index, {}).map(row => row.cve), ["CVE-2026-1000", "CVE-2026-9999"], "published first despite the lower CVE number under cve-desc");
+  assert.deepEqual(cveRegister(index, { sort: "cvss-desc" }).map(row => row.cve), ["CVE-2026-1000", "CVE-2026-9999"], "the unknown record stays last by CVSS too");
+});
+
+test("the CVE register drops the Needs review label but keeps an informative one", async () => {
+  const { doc } = await boot({ hash: "#/cves" });
+  const text = doc.querySelector("#view").textContent;
+  assert.ok(!text.includes("Needs review"), "the uninformative default label is not shown");
+  assert.ok(text.includes("CISA action"), "an informative guidance label is kept");
+});
+
 test("the Explorer surfaces one-click Exploited and KEV-linked quick filters", async () => {
   const { doc, app } = await boot();
   const chipText = () => [...doc.querySelectorAll("#quick-filters a.quick-chip")].map(anchor => anchor.textContent);

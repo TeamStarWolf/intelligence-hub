@@ -139,7 +139,10 @@ export function cveRegister(cveIndex, query) {
     words.every(word => normalized(row.cve + " " + row.weaknesses.join(" ") + " " + row.guidance).includes(word)));
   const [key, order] = (query.sort || "cve-desc").split("-");
   const direction = order === "desc" ? -1 : 1;
-  return rows.sort((a, b) => (key === "cvss" ? compareNullable(a.score, b.score, direction, true) : key === "kev" ? compareNullable(a.kev_added, b.kev_added, direction) :
+  // Published records sort above rejected or unknown ones under every sort, so a record whose CNA
+  // lookup failed never leads the register ahead of real CVEs.
+  return rows.sort((a, b) => ((a.record_state === "PUBLISHED" ? 0 : 1) - (b.record_state === "PUBLISHED" ? 0 : 1)) ||
+    (key === "cvss" ? compareNullable(a.score, b.score, direction, true) : key === "kev" ? compareNullable(a.kev_added, b.kev_added, direction) :
     key === "epss" ? compareNullable(a.epss ? a.epss.score : null, b.epss ? b.epss.score : null, direction, true) : 0) ||
     a.cve.localeCompare(b.cve, undefined, { numeric: true }) * (key === "cve" ? direction : -1));
 }
