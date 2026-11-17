@@ -473,6 +473,12 @@ def parse_feed(raw, source, *, selection_cutoff_date=None):
             intake["items_rejected"] += 1
             intake["rejection_reasons"]["invalid_link_or_title"] += 1
             continue
+        # A per-source title deny-list drops off-topic items a feed mixes in, such as markets and
+        # affiliate posts on a security press feed. It matches the display title only, so a term
+        # in an article body never drops a genuine security headline.
+        if source.get("exclude_terms") and any(term.casefold() in title.casefold() for term in source["exclude_terms"]):
+            intake["items_filtered"] += 1
+            continue
         stamp, zone_assumed = feed_published(fields.get("pubDate") or fields.get("published") or fields.get("date") or fields.get("updated") or "")
         basis = "publication" if (fields.get("pubDate") or fields.get("published") or fields.get("date")) else "publisher update" if fields.get("updated") else "unknown"
         if stamp is not None and zone_assumed:
@@ -668,6 +674,8 @@ def validate_registry(registry):
         require(isinstance(source["article_hosts"], list) and 1 <= len(source["article_hosts"]) <= 8 and all(safe_url("https://" + host + "/") is not None for host in source["article_hosts"]), "Invalid publisher hosts.")
         if "include_terms" in source:
             require(isinstance(source["include_terms"], list) and 1 <= len(source["include_terms"]) <= 12 and all(isinstance(term, str) and 1 <= len(term) <= 80 for term in source["include_terms"]), "Invalid source selection terms.")
+        if "exclude_terms" in source:
+            require(isinstance(source["exclude_terms"], list) and 1 <= len(source["exclude_terms"]) <= 24 and all(isinstance(term, str) and 1 <= len(term) <= 80 for term in source["exclude_terms"]), "Invalid source exclusion terms.")
         if "max_bytes" in source:
             require(type(source["max_bytes"]) is int and 1 <= source["max_bytes"] <= FETCH_CEILING, "Invalid source byte bound.")
         # Tagging metadata. Its values are checked against config/vocab by vocab --check;

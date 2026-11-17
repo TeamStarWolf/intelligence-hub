@@ -131,6 +131,7 @@ button, input, select { font: inherit; color: inherit; }
 .brand-product { color: var(--tsw-text-muted); font-size: var(--text-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bar-actions { margin-left: auto; display: flex; gap: 8px; flex: none; }
 .bar-button { min-height: 44px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--tsw-border-strong); background: var(--tsw-surface-2); color: var(--tsw-text); cursor: pointer; font-size: var(--text-sm); transition: border-color 160ms ease, transform 160ms ease; }
+.bar-actions a.bar-button { display: inline-flex; align-items: center; text-decoration: none; }
 .bar-button:hover { border-color: var(--tsw-link); transform: translateY(-1px); }
 .bar-button[aria-expanded="true"] { border-color: var(--tsw-focus); }
 /* Two rows: the desks, then the active desk's views (main.js updateTabs hides the others). */
