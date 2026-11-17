@@ -77,12 +77,14 @@ export function resultCard(row, route, cveIndex) {
   title.append(link(row.title, row.url));
   card.append(meta, title);
   const chips = node("p", "chips");
-  for (const cve of row.cves.slice(0, 4)) chips.append(routeLink(cve, formatRoute({ view: "cve", id: cve, query: {} }), "chip chip-cve"));
-  if (row.cves.length > 4) chips.append(node("span", "chip chip-more", "+" + (row.cves.length - 4) + " CVEs"));
-  if (kevLinked(row, cveIndex) && row.kind !== "kev") chips.append(node("span", "chip chip-kev", "KEV-linked"));
+  // A podcast episode carries no CVE, KEV, CVSS or EPSS signal, so those chips are suppressed on podcast rows.
+  const vuln = row.kind !== "podcast";
+  if (vuln) for (const cve of row.cves.slice(0, 4)) chips.append(routeLink(cve, formatRoute({ view: "cve", id: cve, query: {} }), "chip chip-cve"));
+  if (vuln && row.cves.length > 4) chips.append(node("span", "chip chip-more", "+" + (row.cves.length - 4) + " CVEs"));
+  if (vuln && kevLinked(row, cveIndex) && row.kind !== "kev") chips.append(node("span", "chip chip-kev", "KEV-linked"));
   if (row.exploited !== "unknown") chips.append(node("span", "chip chip-exp-" + row.exploited, EXPLOITATION_LABELS[row.exploited]));
-  if (row.score !== null) chips.append(node("span", "chip", "CVSS " + row.score.toFixed(1) + (row.t.cvss && row.t.cvss.version ? " (v" + row.t.cvss.version + ")" : "")));
-  const epss = epssOf(row, cveIndex);
+  if (vuln && row.score !== null) chips.append(node("span", "chip", "CVSS " + row.score.toFixed(1) + (row.t.cvss && row.t.cvss.version ? " (v" + row.t.cvss.version + ")" : "")));
+  const epss = vuln ? epssOf(row, cveIndex) : null;
   if (epss !== null) chips.append(node("span", "chip", "FIRST EPSS " + epssPercent(epss)));
   for (const [field, key] of [["vendor", "vendor"], ["product", "product"], ["actor", "actor"], ["malware", "malware"]]) {
     for (const item of row.t[field].slice(0, 2)) chips.append(routeLink(label(item[0]), formatRoute(withQuery(listRoute(route, row), { [key]: item[0].replace(/^[a-z]+:/, "") })), "chip chip-entity"));
