@@ -250,6 +250,28 @@ test("the Explorer exports the rows now in view: a click builds a CSV from the f
   assert.ok(csv.includes("CVE-2026-1002"), "the exported rows are the ones the News view shows");
 });
 
+test("Copy link copies a shareable link to the current view and announces the result", async () => {
+  const copied = [];
+  const view = await boot({ hash: "#/news" });
+  view.win.navigator = { clipboard: { writeText(text) { copied.push(text); return Promise.resolve(); } } };
+  view.location.href = "https://teamstarwolf.github.io/intelligence-hub/#/news?q=fortinet";
+  view.doc.querySelector("#copy-link").dispatchEvent({ type: "click" });
+  await settle(20);
+  assert.deepEqual(copied, ["https://teamstarwolf.github.io/intelligence-hub/#/news?q=fortinet"], "the current view's URL is copied");
+  assert.equal(view.doc.querySelector("#copy-status").textContent, "Link to this view copied to the clipboard.", "the result is announced for assistive tech");
+  assert.equal(view.doc.querySelector("#copy-link").textContent, "Copied", "the button confirms the copy");
+});
+
+test("Copy link reports a failure instead of silently dropping it when the clipboard write is rejected", async () => {
+  const view = await boot({ hash: "#/explore" });
+  view.win.navigator = { clipboard: { writeText() { return Promise.reject(new Error("denied")); } } };
+  view.location.href = "https://teamstarwolf.github.io/intelligence-hub/#/explore";
+  view.doc.querySelector("#copy-link").dispatchEvent({ type: "click" });
+  await settle(20);
+  assert.ok(view.doc.querySelector("#copy-status").textContent.startsWith("Could not copy"), "a rejected copy is reported");
+  assert.equal(view.doc.querySelector("#copy-link").textContent, "Copy link", "the button label is not left on Copied after a failure");
+});
+
 test("the / key jumps to the search box on a list view, but never while typing, in a dialog, or with a modifier", async () => {
   const { doc } = await boot({ hash: "#/explore" });
   const search = doc.querySelector("#q");
