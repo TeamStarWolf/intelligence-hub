@@ -250,6 +250,36 @@ test("the Explorer exports the rows now in view: a click builds a CSV from the f
   assert.ok(csv.includes("CVE-2026-1002"), "the exported rows are the ones the News view shows");
 });
 
+test("the / key jumps to the search box on a list view, but never while typing, in a dialog, or with a modifier", async () => {
+  const { doc } = await boot({ hash: "#/explore" });
+  const search = doc.querySelector("#q");
+  assert.equal(doc.querySelector(".search-kbd").textContent, "/", "a visible / hint renders in the search field");
+  assert.equal(search.getAttribute("aria-keyshortcuts"), "/", "the search box advertises its shortcut to assistive tech");
+  // Nothing focused: / focuses search and is consumed so it is not also typed.
+  let prevented = false;
+  doc.dispatchEvent({ type: "keydown", key: "/", preventDefault() { prevented = true; } });
+  assert.equal(doc.activeElement, search, "/ focuses the search box");
+  assert.equal(prevented, true, "the key is consumed");
+  // The search box now has focus (an input): / is left alone so the character is typed.
+  prevented = false;
+  doc.dispatchEvent({ type: "keydown", key: "/", preventDefault() { prevented = true; } });
+  assert.equal(prevented, false, "/ is not hijacked while an input has focus");
+  // A modifier combo is left to the browser.
+  doc.activeElement = doc.querySelector("#main");
+  prevented = false;
+  doc.dispatchEvent({ type: "keydown", key: "/", ctrlKey: true, preventDefault() { prevented = true; } });
+  assert.equal(prevented, false, "Ctrl+/ is left alone");
+});
+
+test("the / key does nothing on a view without a search box", async () => {
+  const { doc } = await boot({ hash: "#/status" });
+  const before = doc.activeElement;
+  let prevented = false;
+  doc.dispatchEvent({ type: "keydown", key: "/", preventDefault() { prevented = true; } });
+  assert.equal(prevented, false, "/ is not consumed off a list view");
+  assert.equal(doc.activeElement, before, "focus is unchanged");
+});
+
 test("the tab strip is two rows: the desks, then only the active desk's views, and the Panels list groups by desk", async () => {
   const { doc, app } = await boot();
   const desks = [...doc.querySelectorAll(".tabs .desks a")];

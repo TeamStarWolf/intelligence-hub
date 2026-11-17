@@ -245,6 +245,21 @@ export function createApp(env) {
     el("#sidebar-toggle").addEventListener("click", () => setSidebar(!sidebarOpen()));
     el("#sidebar-close").addEventListener("click", () => { setSidebar(false); el("#sidebar-toggle").focus(); });
     doc.addEventListener("keydown", event => { if (event.key === "Escape" && sidebarOpen() && !el("#record-dialog").open && !el("#cve-dialog").open) { setSidebar(false); el("#sidebar-toggle").focus(); } });
+    // "/" jumps to the search box on the list views, as many search UIs do. It never fires while the
+    // reader is typing in a field or a dialog is open, so it does not steal the key from any input.
+    doc.addEventListener("keydown", event => {
+      if (event.key !== "/" || event.ctrlKey || event.metaKey || event.altKey) return;
+      const active = doc.activeElement;
+      const tag = active && active.localName;
+      if (tag === "input" || tag === "textarea" || tag === "select" || (active && active.isContentEditable)) return;
+      if (el("#record-dialog").open || el("#cve-dialog").open) return;
+      if (!Object.hasOwn(LIST_VIEWS, route.view)) return;
+      const search = el("#q");
+      if (!search) return;
+      event.preventDefault();
+      search.focus();
+      if (typeof search.select === "function") search.select();
+    });
     doc.addEventListener("visibilitychange", () => { if (!doc.hidden && now() - lastPoll >= pollInterval) poll(); });
     pollTimer = every(() => { if (now() - lastPoll >= pollInterval - 1000) poll(); }, pollInterval);
   }

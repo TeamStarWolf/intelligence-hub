@@ -59,7 +59,10 @@
         <h1 id="explore-title" class="sr-only">Intelligence Explorer</h1>
         <form id="explore-form" class="search-row" role="search">
           <label class="sr-only" for="q">Search every loaded entry</label>
-          <input id="q" class="search-input" type="search" maxlength="200" placeholder="Search CVE, vendor, actor, source or keyword" autocomplete="off" spellcheck="false">
+          <div class="search-field">
+            <input id="q" class="search-input" type="search" maxlength="200" placeholder="Search CVE, vendor, actor, source or keyword" autocomplete="off" spellcheck="false" aria-keyshortcuts="/">
+            <kbd class="search-kbd" aria-hidden="true">/</kbd>
+          </div>
           <button id="filters-toggle" class="filters-toggle" type="button" aria-controls="filter-rail" aria-expanded="false">Filters<span id="filter-count" class="filter-count"></span></button>
           <button id="export-csv" class="export-btn" type="button" title="Download the rows now in view as CSV">Export CSV</button>
           <button id="export-json" class="export-btn" type="button" title="Download the rows now in view as JSON">Export JSON</button>
