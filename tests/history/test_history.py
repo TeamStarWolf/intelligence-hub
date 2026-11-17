@@ -383,6 +383,35 @@ class NvdFeedTest(unittest.TestCase):
         self.assertEqual(fetcher.get.call_args.args[0], nvd_cve.FEED.format(year=2002))
         self.assertNotIn("accept", fetcher.get.call_args.kwargs)
 
+    def test_current_version_wins_when_nvd_tags_its_own_score_secondary(self):
+        # NVD often marks its own CVSS 3.1 assessment "Secondary" while a retired CVSS 2.0 entry
+        # stays "Primary" (CVE-2020-1472 Zerologon is the canonical case). The 3.1 score must win,
+        # not fall back to the retired 2.0 one.
+        cve = {"metrics": {
+            "cvssMetricV31": [
+                {"source": "psirt@example.com", "type": "Secondary",
+                 "cvssData": {"version": "3.1", "baseScore": 5.5, "baseSeverity": "MEDIUM"}},
+                {"source": "nvd@nist.gov", "type": "Secondary",
+                 "cvssData": {"version": "3.1", "baseScore": 10.0, "baseSeverity": "CRITICAL"}}],
+            "cvssMetricV2": [
+                {"source": "nvd@nist.gov", "type": "Primary",
+                 "cvssData": {"version": "2.0", "baseScore": 9.3, "baseSeverity": "HIGH"}}]}}
+        self.assertEqual(nvd_cve.metric(cve), ("3.1", 10.0, "CRITICAL"))
+
+    def test_a_primary_entry_is_preferred_within_a_version(self):
+        cve = {"metrics": {"cvssMetricV31": [
+            {"source": "cna@example.com", "type": "Secondary",
+             "cvssData": {"version": "3.1", "baseScore": 4.0, "baseSeverity": "MEDIUM"}},
+            {"source": "nvd@nist.gov", "type": "Primary",
+             "cvssData": {"version": "3.1", "baseScore": 8.8, "baseSeverity": "HIGH"}}]}}
+        self.assertEqual(nvd_cve.metric(cve), ("3.1", 8.8, "HIGH"))
+
+    def test_a_cve_scored_only_under_v2_still_reports_its_v2_score(self):
+        cve = {"metrics": {"cvssMetricV2": [
+            {"source": "nvd@nist.gov", "type": "Primary",
+             "cvssData": {"version": "2.0", "baseScore": 7.5, "baseSeverity": "HIGH"}}]}}
+        self.assertEqual(nvd_cve.metric(cve), ("2.0", 7.5, "HIGH"))
+
 
 class RowRuleTest(unittest.TestCase):
     def setUp(self):
