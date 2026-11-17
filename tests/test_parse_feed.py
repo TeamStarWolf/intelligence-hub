@@ -41,6 +41,13 @@ class ParseFeedTest(unittest.TestCase):
         self.assertEqual((intake["items_seen"], intake["items_processed"], intake["items_unprocessed"]), (160, 150, 10))
         self.assertEqual(len(parsed["articles"]), 150)
 
+    def test_a_redirect_is_rejected_so_a_source_needs_a_canonical_url(self):
+        # The collector refuses redirects (a podcast feed alias that 301s is rejected live); this
+        # covers that path, which the uncapped feed-resolution check never exercised.
+        from intelligence_hub.collect import NoRedirect
+        with self.assertRaises(ValueError):
+            NoRedirect().redirect_request(None, None, 301, "Moved Permanently", {}, "https://elsewhere.example/feed")
+
     def test_validate_intake_accepts_a_capped_source(self):
         # The live collect path validates each source's intake. A capped source (max_articles) has a
         # lower entry_limit, which this validator must accept; a mismatch to the source cap must fail.

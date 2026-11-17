@@ -269,7 +269,7 @@ function normalizeSelection(value, sourceId) {
   return { version: 1, basis: value.basis, cutoff_date: value.cutoff_date };
 }
 
-function normalizeIntake(value, source) {
+export function normalizeIntake(value, source) {
   if (source.id === "cisa-kev") { requireValue(value == null && source.status !== "partial"); return null; }
   if (value == null) { requireValue(source.status !== "partial"); return null; }
   requireValue(source.status !== "not_fetched");
