@@ -55,10 +55,10 @@ MAX_CVE_BRIEFS = 15000  # mirrors mitigations.MAX_RECORDS
 SNAPSHOT_VERSION = 7
 LEGACY_MAX_ARTICLES = 8000
 HISTORY_START = date(1998, 1, 1)
-KINDS = {"advisory", "research", "reporting", "incident", "kev", "filing", "change", "lifecycle"}
+KINDS = {"advisory", "research", "reporting", "incident", "kev", "filing", "change", "lifecycle", "podcast"}
 SOURCE_CLASSES = {"vendor-primary", "government-cert", "researcher", "press"}
 # The desk a source's rows sit on (config/vocab/desk.json): the page groups its views by desk.
-DESKS = {"security", "infrastructure", "it"}
+DESKS = {"security", "infrastructure", "it", "podcasts"}
 CVE = re.compile(r"\bCVE-[0-9]{4}-[0-9]{4,8}\b", re.I)
 PUBLIC_FEED = "https://teamstarwolf.github.io/intelligence-hub/data/feed.json"
 PUBLIC_BRIEFS = "https://teamstarwolf.github.io/intelligence-hub/data/briefs.json"
@@ -401,10 +401,18 @@ def selection_context(source, selection_cutoff_date):
             "cutoff_date": selection_cutoff_date.isoformat() if basis == "publisher-date-desc-v1" else None}
 
 
+def source_entry_limit(source):
+    # How many feed entries a source admits per fetch. Defaults to 150; a source may set a lower
+    # max_articles (podcast shows cap to recent episodes so a long back catalogue is not ingested).
+    limit = source.get("max_articles")
+    return limit if isinstance(limit, int) and 1 <= limit <= 150 else 150
+
+
 def ranked_feed_entries(entries, source, *, selection_cutoff_date=None):
     selection = selection_context(source, selection_cutoff_date)
+    limit = source_entry_limit(source)
     if selection["basis"] == "document-order-v1":
-        return entries[:150], selection
+        return entries[:limit], selection
 
     def rank(candidate):
         index, element = candidate
@@ -436,7 +444,7 @@ def ranked_feed_entries(entries, source, *, selection_cutoff_date=None):
         return (0, -day.year, -day.month, -day.day, -stamp.hour, -stamp.minute, -stamp.second, index)
 
     ranked = sorted(enumerate(entries), key=rank)
-    return [element for _, element in ranked[:150]], selection
+    return [element for _, element in ranked[:limit]], selection
 
 
 def parse_feed(raw, source, *, selection_cutoff_date=None):
@@ -452,13 +460,14 @@ def parse_feed(raw, source, *, selection_cutoff_date=None):
     require(root.tag.rsplit("}", 1)[-1].lower() in {"rss", "feed", "rdf"}, "Response is not RSS or Atom.")
     entries = [element for element in root.iter() if element.tag.rsplit("}", 1)[-1] in {"item", "entry"}]
     selected, selection = ranked_feed_entries(entries, source, selection_cutoff_date=selection_cutoff_date)
+    limit = source_entry_limit(source)
     articles = []
-    intake = {"items_seen": len(entries), "items_processed": min(len(entries), 150),
+    intake = {"items_seen": len(entries), "items_processed": min(len(entries), limit),
         "items_admitted": 0, "items_rejected": 0, "items_filtered": 0,
-        "items_unprocessed": max(0, len(entries) - 150), "entry_limit": 150, "cve_limit": 100,
+        "items_unprocessed": max(0, len(entries) - limit), "entry_limit": limit, "cve_limit": 100,
         "rejection_reasons": {"invalid_link_or_title": 0, "cve_limit_exceeded": 0}, "selection": selection}
     for element in selected:
-        fields, links = {}, []
+        fields, links, enclosures = {}, [], []
         for child in element:
             key = child.tag.rsplit("}", 1)[-1]
             fields.setdefault(key, "".join(child.itertext()))
@@ -467,7 +476,11 @@ def parse_feed(raw, source, *, selection_cutoff_date=None):
                     links.append(child.get("href"))
                 elif child.text:
                     links.append(child.text.strip())
-        url = next((safe_url(link, source["article_hosts"]) for link in links if safe_url(link, source["article_hosts"])), None)
+            elif key == "enclosure" and child.get("url"):
+                # Fallback only: an audio-only feed (podcasts) with no item link still yields a per
+                # episode URL from its enclosure. A real <link> is always preferred when present.
+                enclosures.append(child.get("url"))
+        url = next((safe_url(link, source["article_hosts"]) for link in [*links, *enclosures] if safe_url(link, source["article_hosts"])), None)
         title = text(fields.get("title"))
         if not url or not title:
             intake["items_rejected"] += 1
@@ -516,7 +529,11 @@ def update_source(source, cached, *, selection_cutoff_date=None):
                 "articles": cached.get("articles", []), "intake": intake}
         combined = {article["url"]: article for article in cached.get("articles", [])}
         combined.update({article["url"]: article for article in incoming})
-        articles = sorted(combined.values(), key=lambda article: article.get("published_at") or "", reverse=True)[:600]
+        # A capped source (max_articles) keeps only its most recent rows across runs, so a long back
+        # catalogue never accumulates; others keep up to 600.
+        capped = source.get("max_articles")
+        store_cap = capped if isinstance(capped, int) and 1 <= capped <= 150 else 600
+        articles = sorted(combined.values(), key=lambda article: article.get("published_at") or "", reverse=True)[:store_cap]
         return {"status": "partial" if incomplete else "ok", "last_attempt": attempted, "last_success": now(), "error": None,
                 "sha256": intake["response_sha256"], "articles": articles, "intake": intake}
     except (OSError, ValueError, ET.ParseError) as error:
@@ -678,6 +695,8 @@ def validate_registry(registry):
             require(isinstance(source["exclude_terms"], list) and 1 <= len(source["exclude_terms"]) <= 24 and all(isinstance(term, str) and 1 <= len(term) <= 80 for term in source["exclude_terms"]), "Invalid source exclusion terms.")
         if "max_bytes" in source:
             require(type(source["max_bytes"]) is int and 1 <= source["max_bytes"] <= FETCH_CEILING, "Invalid source byte bound.")
+        if "max_articles" in source:
+            require(type(source["max_articles"]) is int and 1 <= source["max_articles"] <= 150, "Invalid source article cap.")
         # Tagging metadata. Its values are checked against config/vocab by vocab --check;
         # here only the shape is checked, so a vocabulary problem never stops collection.
         require(source.get("source_class") in SOURCE_CLASSES, "Invalid or missing source_class.")

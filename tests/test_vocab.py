@@ -169,7 +169,7 @@ class HubVocabularyTest(unittest.TestCase):
         # The reserved values carry no headline terms, so no headline sets them (WP-01).
         for value in ("maintenance", "end-of-support"):
             self.assertFalse(loaded.values["event_type"][value].get("terms"), value)
-        self.assertEqual(set(loaded.values["desk"]), {"security", "infrastructure", "it"})
+        self.assertEqual(set(loaded.values["desk"]), {"security", "infrastructure", "it", "podcasts"})
         self.assertEqual(len(loaded.values["sector"]), 18)
         for value in loaded.values["sector"]:
             self.assertIn("sector:" + value, loaded.entities)

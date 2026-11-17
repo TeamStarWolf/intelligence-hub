@@ -23,7 +23,8 @@ server rewrite is needed. Values are percent-encoded; a space in `q` may be writ
 | `#/advisories` | The Explorer limited to vendor-primary and government or CERT sources (KEV catalog entries excluded) | last 30 days |
 | `#/kev` | CISA's KEV ledger by date added, with the directive each entry's required action cites | added in the last 30 days |
 | `#/research` | The Explorer limited to research sources | last 30 days |
-| `#/news` | The Explorer limited to press sources | last 7 days |
+| `#/news` | The Explorer limited to press sources, podcast episodes excluded | last 7 days |
+| `#/podcasts` | The Explorer limited to podcast episodes: security shows and webcasts read from each show's own feed, newest first, headline and link only | whole live window |
 | `#/cves` | The CVE register: every CVE a saved entry mentions | none |
 | `#/cve/<CVE-id>` | The register with that CVE's saved brief open in a dialog | none |
 | `#/history` | The year index from 1998: history rows, the sources that supplied them and the coverage statuses for each year | none |
@@ -64,7 +65,7 @@ are dropped.
 | Key | Views | Values | Effect |
 | --- | --- | --- | --- |
 | `q` | list, `kev`, `cves` | free text, 1 to 200 characters, no `<`, `>` or control characters | every word must appear in the entry |
-| `desk` | list | `security`, `infrastructure`, `it` | the desk the entry's source sits on |
+| `desk` | list | `security`, `infrastructure`, `it`, `podcasts` | the desk the entry's source sits on |
 | `kind` | list | `advisory`, `research`, `reporting`, `incident`, `kev`, `filing`, `bulletin`, `note`, `change`, `lifecycle` | entry kind |
 | `class` | list | `vendor-primary`, `government-cert`, `researcher`, `press` | source class |
 | `event` | list | `disclosure`, `exploitation`, `patch`, `breach`, `outage`, `takedown`, `policy`, `analysis`, `unclassified`, `maintenance`, `end-of-support` | event type tag |

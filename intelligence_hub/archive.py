@@ -236,7 +236,7 @@ def validate_snapshot(value):
         source_ids.add(source["id"])
         source_by_id[source["id"]] = source
         strings(source["name"], 100)
-        require(source["name"] and source["kind"] in {"research", "advisory", "reporting", "filing"} and safe_url(source["url"]), "Invalid source provenance.")
+        require(source["name"] and source["kind"] in {"research", "advisory", "reporting", "filing", "podcast"} and safe_url(source["url"]), "Invalid source provenance.")
         if source["id"] == "cisa-kev":
             require(source["name"] == "CISA KEV" and source["kind"] == "advisory", "Invalid KEV ledger identity.")
         require(type(source["articles"]) is int and 0 <= source["articles"] <= (MAX_KEV_ROWS if current else LEGACY_MAX_ARTICLES), "Invalid retained source count.")

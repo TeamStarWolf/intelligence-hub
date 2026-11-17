@@ -4,9 +4,13 @@
 // so nothing from the address bar is ever reflected into the page. docs/URLS.md publishes
 // this contract for links from the library.
 
-export const VIEWS = ["explore", "today", "advisories", "kev", "research", "news", "cves", "cve", "history", "vendors", "vendor", "tags", "actors", "actor", "malware", "reports", "sources", "method", "data", "about", "patch-tuesday", "status", "subscribe"];
+export const VIEWS = ["explore", "today", "advisories", "kev", "research", "news", "cves", "cve", "history", "vendors", "vendor", "tags", "actors", "actor", "malware", "reports", "sources", "method", "data", "about", "patch-tuesday", "status", "subscribe", "podcasts"];
 // Views that are the Explorer with a fixed source-class constraint.
-export const LIST_VIEWS = { explore: null, advisories: ["vendor-primary", "government-cert"], research: ["researcher"], news: ["press"] };
+export const LIST_VIEWS = { explore: null, advisories: ["vendor-primary", "government-cert"], research: ["researcher"], news: ["press"], podcasts: null };
+// The Podcasts view fixes the podcast kind; the News view excludes it, so podcast episodes sit
+// only on the Podcasts desk and never in the News view or Today's press list.
+export const VIEW_KIND = { podcasts: "podcast" };
+export const VIEW_KIND_NOT = { news: "podcast" };
 
 const KINDS = ["advisory", "research", "reporting", "incident", "kev", "filing", "bulletin", "note", "change", "lifecycle"];
 const CLASSES = ["vendor-primary", "government-cert", "researcher", "press"];
@@ -14,6 +18,7 @@ const CLASSES = ["vendor-primary", "government-cert", "researcher", "press"];
 export const DESKS = ["security", "infrastructure", "it"];
 export const VIEW_DESK = { explore: "security", today: "security", advisories: "security", kev: "security", research: "security", news: "security", cves: "security", cve: "security",
   actors: "security", actor: "security", malware: "security", "patch-tuesday": "security", status: "infrastructure",
+  podcasts: "podcasts",
   history: "reference", vendors: "reference", vendor: "reference", tags: "reference", reports: "reference", sources: "reference", method: "reference", data: "reference", about: "reference",
   subscribe: "reference" };
 const EVENTS = ["disclosure", "exploitation", "patch", "breach", "outage", "takedown", "policy", "analysis", "unclassified", "maintenance", "end-of-support"];
