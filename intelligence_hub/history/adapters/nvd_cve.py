@@ -86,16 +86,30 @@ def records(raw, limit=4 * 1024 * 1024 * 1024):
             return
 
 
+def _preferred(items):
+    """The entry NVD would display for one CVSS version: its Primary entry, else NVD's own
+    assessment, else the first entry that carries a score. NVD now often tags its own current
+    score "Secondary" while a retired CVSS 2.0 entry stays "Primary", so choosing on type alone
+    would skip the current version and fall back to the retired one."""
+    scored = [item for item in items if isinstance((item.get("cvssData") or {}).get("baseScore"), (int, float))]
+    for item in scored:
+        if item.get("type") == "Primary":
+            return item
+    for item in scored:
+        if item.get("source") == "nvd@nist.gov":
+            return item
+    return scored[0] if scored else None
+
+
 def metric(cve):
+    metrics = cve.get("metrics") or {}
     for name in METRICS:
-        for item in (cve.get("metrics") or {}).get(name) or []:
+        item = _preferred(metrics.get(name) or [])
+        if item is not None:
             data = item.get("cvssData") or {}
-            if item.get("type") == "Primary" or len((cve.get("metrics") or {}).get(name) or []) == 1:
-                severity = data.get("baseSeverity") or item.get("baseSeverity")
-                score = data.get("baseScore")
-                version = data.get("version") or name[len("cvssMetricV"):]
-                if isinstance(score, (int, float)):
-                    return str(version), float(score), str(severity or "")
+            severity = data.get("baseSeverity") or item.get("baseSeverity")
+            version = data.get("version") or name[len("cvssMetricV"):]
+            return str(version), float(data.get("baseScore")), str(severity or "")
     return None, None, None
 
 
