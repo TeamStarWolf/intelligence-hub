@@ -47,6 +47,13 @@ export function createApp(env) {
   let lastPoll = 0;
   let pollTimer = null;
   let fatal = false;
+  // A single failed index read is usually a transient network blip, not the site being down, so the
+  // first load is retried silently and the background poll surfaces an alarm only after this many
+  // consecutive failures. The alarm clears as soon as a read succeeds again.
+  const INDEX_LOAD_ATTEMPTS = 3;
+  const POLL_FAILURE_LIMIT = 3;
+  let pollFailures = 0;
+  let failureNoticeShown = false;
   // Today's since-last-visit baseline (views/today.js): what this browser had seen before this
   // page session, read from storage once and compared on every render of Today.
   const visit = { today: null };
@@ -213,11 +220,19 @@ export function createApp(env) {
     lastPoll = now();
     try {
       const result = await store.loadIndex();
+      pollFailures = 0;
+      if (failureNoticeShown) { showNotice(""); failureNoticeShown = false; }
       if (result.status === "loaded") { if (applySkew()) return result; showNotice(""); render(); if (sidebarOpen()) setSidebar(true); }
       return result;
     } catch (error) {
       if (error.format && reloadOnce({ storage: session, location, reason: "format" })) { stats.reloads++; return null; }
-      showNotice("The latest index could not be read: " + error.message + " The data on screen stays as it was.");
+      pollFailures++;
+      // A transient blip is not surfaced: the next scheduled poll is the silent retry. Only sustained
+      // failure, where the index is genuinely unreadable, tells the reader, and only once.
+      if (pollFailures >= POLL_FAILURE_LIMIT) {
+        showNotice("The latest index could not be read after " + pollFailures + " tries: " + error.message + " The data on screen stays as it was.");
+        failureNoticeShown = true;
+      }
       return null;
     }
   }
@@ -264,13 +279,24 @@ export function createApp(env) {
     pollTimer = every(() => { if (now() - lastPoll >= pollInterval - 1000) poll(); }, pollInterval);
   }
 
+  // Retries a failed first index read a few times before giving up, so a transient blip on load does
+  // not strand the reader on "No data". A schema-change (format) error is not retried; it reloads.
+  async function loadIndexWithRetry(attempts) {
+    let lastError = null;
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+      try { return await store.loadIndex(); }
+      catch (error) { if (error.format) throw error; lastError = error; }
+    }
+    throw lastError;
+  }
+
   async function start() {
     initTheme({ doc, win, storage, button: el("#theme-toggle") });
     bind();
     updateTabs();
     lastPoll = now();
     try {
-      await store.loadIndex();
+      await loadIndexWithRetry(INDEX_LOAD_ATTEMPTS);
       if (store.state.mode === "v7" && applySkew()) return app;
     } catch (error) {
       if (error.format && reloadOnce({ storage: session, location, reason: "format" })) { stats.reloads++; return app; }

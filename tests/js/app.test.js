@@ -15,11 +15,11 @@ import { cveRegister, exportCsv, exportJson, rowMatches, today as todayBuckets }
 import { normalizeIntake } from "../../site/js/validate.js";
 import { normalizeCveIndex } from "../../site/js/validate.js";
 
-async function boot({ hash = "", search = "", site = files(), session = storage(), local = storage(), moduleUrl = null, hidden = false } = {}) {
+async function boot({ hash = "", search = "", site = files(), session = storage(), local = storage(), moduleUrl = null, hidden = false, fetchImpl = null } = {}) {
   const shell = page(hash, search);
   shell.doc.hidden = hidden;
   const http = server(site.bodies);
-  const app = createApp({ doc: shell.doc, win: shell.win, location: shell.location, history: shell.history, storage: local, session, fetchImpl: http.fetch,
+  const app = createApp({ doc: shell.doc, win: shell.win, location: shell.location, history: shell.history, storage: local, session, fetchImpl: fetchImpl || http.fetch,
     subtle: webcrypto.subtle, moduleUrl, every: () => 0, loadLabels: async () => ({ default: { "vendor:fortinet": "Fortinet", "actor:G0016": "APT29" } }) });
   await app.start();
   await settle(60);
@@ -742,6 +742,38 @@ test("the sidebar and the Sources tab state the observed gap between runs with t
   assert.ok(doc.querySelector("#view").textContent.includes(statement));
   assert.ok(cadenceText(null).includes("could not be read"));
   assert.ok(!cadenceText(null).includes("median"), "no observed schedule is claimed without the run record");
+});
+
+test("a transient index-poll failure stays silent; the alarm shows only after repeated failures and clears on recovery", async () => {
+  const view = await boot();
+  const notice = view.doc.querySelector("#notice");
+  const indexBody = view.site.bodies["./data/v7/index.json"];
+  assert.ok(indexBody, "the fixture has an index body");
+  delete view.site.bodies["./data/v7/index.json"];   // the index is briefly unreachable (404)
+  await view.app.poll();
+  assert.equal(notice.hidden, true, "one transient failure is not surfaced");
+  await view.app.poll();
+  assert.equal(notice.hidden, true, "a second transient failure is still not surfaced");
+  await view.app.poll();
+  assert.equal(notice.hidden, false, "after repeated failures the reader is told");
+  assert.ok(notice.textContent.includes("could not be read"), "the message names the real failure");
+  view.site.bodies["./data/v7/index.json"] = indexBody;   // the index is reachable again
+  await view.app.poll();
+  assert.equal(notice.hidden, true, "the alarm clears once the index reads again");
+});
+
+test("a transient failure on the first index read is retried silently before the app gives up", async () => {
+  const site = files();
+  const http = server(site.bodies);
+  let indexFails = 2;   // the first two index reads blip, then the read succeeds
+  const flaky = async (url, opts) => {
+    if (url.includes("index.json") && indexFails > 0) { indexFails--; throw new TypeError("network blip"); }
+    return http.fetch(url, opts);
+  };
+  const view = await boot({ site, fetchImpl: flaky });
+  assert.equal(indexFails, 0, "both transient failures were consumed by the silent retry");
+  assert.equal(view.doc.querySelector("#notice").hidden, true, "the reader is not stranded on a No-data alarm");
+  assert.ok(view.doc.querySelector("#results li"), "the app loaded and rendered after the retries");
 });
 
 test("the notice is a toast fixed above the results, after them in the DOM, and dismissable", async () => {
