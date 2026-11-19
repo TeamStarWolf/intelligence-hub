@@ -30,8 +30,9 @@ the Explorer on the default route.
   says so and nothing else changes.
 - **Subscribe** lists the Hub's three Atom feeds (below) with the address to copy
   into a feed reader, then podcasts and newsletters as titles and links only. The
-  Hub collects nothing from the newsletters; podcast episodes are read from the
-  shows' feeds and listed on the Podcasts tab.
+  Hub collects nothing from the newsletters. The Podcasts tab lists episodes from
+  the shows whose feeds the Hub reads, which include some of the podcasts linked
+  here but not all.
 
 - **CVEs** lists every CVE an entry mentions. A CVE opens its saved brief in a
   dialog with a link to its CVE.org record. One CVE can have several publisher

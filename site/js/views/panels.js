@@ -120,7 +120,7 @@ function lane(title, intro, items) {
 export function renderSubscribe(ctx) {
   const { target, store } = ctx;
   const parts = [node("h1", "view-title", "Subscribe"),
-    node("p", "view-intro", "The Hub's own feeds for a feed reader, then podcasts and newsletters to follow at the source. The Hub collects nothing from the newsletters; they are titles and links only. Podcast episodes are read from the shows' feeds and listed on the Podcasts tab.")];
+    node("p", "view-intro", "The Hub's own feeds for a feed reader, then podcasts and newsletters to follow at the source, as titles and links only. The Hub collects nothing from the newsletters. The Podcasts tab lists episodes from the shows whose feeds the Hub reads, which include some of the podcasts linked here but not all.")];
   const own = section("The Hub's feeds (Atom)");
   const feeds = store.state.mode === "v7" ? store.state.index.feeds : null;
   if (feeds && feeds.status === "ok") {
