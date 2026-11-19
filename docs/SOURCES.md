@@ -234,9 +234,9 @@ signed-in tenant API such as Microsoft Graph service health or the AWS Health AP
 entry describes the vendor's service as the vendor states it. It says nothing about one
 customer's tenant, region or account.
 
-There are **46 tracked status sources** and **2 internet outage signals** (IODA, and
+There are **118 tracked status sources** and **2 internet outage signals** (IODA, and
 Cloudflare Radar once the owner adds its token). **CORS** says whether the endpoint answered a
-browser origin with `Access-Control-Allow-Origin` on 4 November 2026. The 34 sources with a
+browser origin with `Access-Control-Allow-Origin` on 4 November 2026. The 102 sources with a
 Statuspage-format `status.json` that answered yes are the ones the live board reads from the
 visitor's browser; `site/index.html` lists exactly their hosts in `connect-src`, and a test holds
 the two lists equal.
