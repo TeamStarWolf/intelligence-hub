@@ -90,6 +90,12 @@ test("the Subscribe view lists the Hub's three Atom feeds from the index, then p
   assert.ok(target.textContent.includes("Podcasts") && target.textContent.includes("Newsletters"));
   assert.ok(!shell.http.requests.some(request => request.path.includes("/feeds/")), "the view reads no feed file");
   assert.ok(!target.querySelector("audio") && !target.querySelector("iframe"), "titles and links only");
+  // Podcast episodes are read on the Podcasts desk, so the intro must not claim the Hub collects
+  // nothing from the podcasts; it points there instead. Newsletters stay collected-nothing.
+  const intro = target.querySelector(".view-intro").textContent;
+  assert.ok(!/collects nothing from the podcasts/i.test(intro), "the intro no longer claims the Hub collects nothing from the podcasts");
+  assert.ok(/Podcasts tab/i.test(intro), "the intro points podcast episodes to the Podcasts tab");
+  assert.ok(/collects nothing from the newsletters/i.test(intro), "the newsletters are still stated as collected-nothing");
   // The Panels sidebar names the feeds and links the view.
   shell.doc.querySelector("#sidebar-toggle").dispatchEvent({ type: "click" });
   await settle(80);

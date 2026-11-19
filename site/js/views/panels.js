@@ -20,8 +20,9 @@ export const HUB_FEEDS = [
   ["feeds/incidents.xml", "Service-health incidents", "The latest incidents on the vendor status pages and cloud health feeds the Hub reads, newest update first, each linking to the Hub's Service health view and to the vendor's own incident page."],
   ["feeds/patch-calendar.xml", "Patch Tuesday calendar", "The next expected Patch Tuesday, then every monthly release the Hub has a brief for, with its headline counts."]
 ];
-// Podcasts and newsletters the desk reads, as titles and links only. The Hub collects nothing
-// from them, and a link that fails safeUrl renders as plain text.
+// The podcasts and newsletters the Subscribe view links for following at the source, as titles and
+// links only. Podcast episodes are read separately on the Podcasts desk; a link that fails safeUrl
+// renders as plain text.
 export const PODCASTS = [
   ["SANS Internet Storm Center Stormcast", "https://isc.sans.edu/podcast.html", "The Internet Storm Center's short daily security news podcast."],
   ["Risky Business", "https://risky.biz/", "A weekly security news and interview podcast."],
@@ -119,7 +120,7 @@ function lane(title, intro, items) {
 export function renderSubscribe(ctx) {
   const { target, store } = ctx;
   const parts = [node("h1", "view-title", "Subscribe"),
-    node("p", "view-intro", "The Hub's own feeds for a feed reader, then the podcasts and newsletters the desk reads. The Hub collects nothing from the podcasts and newsletters; they are titles and links only.")];
+    node("p", "view-intro", "The Hub's own feeds for a feed reader, then podcasts and newsletters to follow at the source, as titles and links only. The Hub collects nothing from the newsletters. The Podcasts tab lists episodes from the shows whose feeds the Hub reads, which include some of the podcasts linked here but not all.")];
   const own = section("The Hub's feeds (Atom)");
   const feeds = store.state.mode === "v7" ? store.state.index.feeds : null;
   if (feeds && feeds.status === "ok") {
