@@ -8,10 +8,10 @@ how it was found and how far to trust it.
 
 ## What you can do here
 
-The page opens on the **Intelligence Explorer**: one search box, a filter rail, ten sort orders
+The page opens on the **Intelligence Explorer**: one search box, a filter rail, twelve sort orders
 and the results, over the live window (the last 24 months). Choose a year to add that year's
-history rows, back to 1998. Everything else is a tab under one of four desks (Explore,
-Security, Infrastructure, Reference; an IT lifecycle desk opens with its first view), and
+history rows, back to 1998. Everything else is a tab under one of four desks (Security,
+Infrastructure, Podcasts, Reference); each desk's tab opens its first view, and
 every tab is also listed in the **Panels** sidebar, which starts closed:
 
 | Tab | What it holds |
@@ -52,7 +52,7 @@ written for this project. Full article bodies are not copied.
 
 A Python collector (standard library only, in `intelligence_hub/`) runs in GitHub Actions. It
 reads 62 configured RSS and Atom feeds, the CISA KEV catalog, FIRST's EPSS API for the CVEs it
-shows, and 46 official status sources plus
+shows, and 118 official status sources plus
 IODA's internet outage signals under strict size, time and format bounds, enriches mentioned CVEs
 from the CVE Program's records, tags every row from controlled vocabularies, merges the committed
 history files, and writes static files that the page in `site/` reads. Your browser reads those
