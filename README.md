@@ -21,19 +21,19 @@ every tab is also listed in the **Panels** sidebar, which starts closed:
 | Advisories, Research, News | The Explorer limited to vendor and government sources, research teams, or the press. |
 | Known exploited | CISA's KEV ledger by date added, with the directive each required action cites. |
 | CVEs | Every CVE an entry mentions, with its guidance label, KEV state, CNA CVSS and FIRST's EPSS score (with the model and the score date); a CVE opens its source-led brief, its severity sources, its EPSS block and its CVE.org record. |
+| Actors and malware | Threat groups, malware and tools that entries name, each linking back to its library page. |
+| Patch Tuesday | Microsoft's monthly security release from the MSRC CVRF data: the headline numbers, what to prioritize by fixed rules, the exploited and publicly disclosed CVEs, the Critical CVEs, the product families, the KEV join, Adobe's and SAP's same-day bulletins as headline rows, and a brief for every monthly release back to January 2016. |
+| Service health | The vendors' own status pages and cloud health feeds by group, open incidents, internet outage signals from IODA, and the last 30 days of incidents. |
+| Podcasts | Security podcasts and webcasts, newest episode first. Each row is one episode read from the show's own feed: its title, link and date only, no audio or transcript. Open an episode on the show's site. |
 | History | One page per year from 1998. Each year opens with its per-source coverage statements, so a quiet year is never read as a year when nothing happened. |
 | Vendors | Every vendor with entries or KEV entries, its KEV entries by year added, its products, and its TeamStarWolf library pages. |
 | Tags | Every tag value on at least one entry, with its count and a page or Explorer filter. Values with no entry are not listed. |
-| Actors and malware | Threat groups, malware and tools that entries name, each linking back to its library page. |
 | Reports | Every report edition, the collector's run record and cadence, and the catalog's review notes. |
 | Data | Per-year CSV and JSON Lines exports, the manifest, the data dictionary and the licence table. |
 | Subscribe | The Hub's three Atom feeds (KEV additions, service-health incidents, the Patch Tuesday calendar) with the address to copy into a feed reader, then podcasts and newsletters as titles and links only. |
 | Sources | The run record, the history coverage matrix by source and year, and the source ledger. |
 | Method | The evidence rules, confidence levels, coverage statuses and licence notices. |
 | About | What the Hub is and what it covers. |
-| Patch Tuesday | Microsoft's monthly security release from the MSRC CVRF data: the headline numbers, what to prioritize by fixed rules, the exploited and publicly disclosed CVEs, the Critical CVEs, the product families, the KEV join, Adobe's and SAP's same-day bulletins as headline rows, and a brief for every monthly release back to January 2016. |
-| Service health | The vendors' own status pages and cloud health feeds by group, open incidents, internet outage signals from IODA, and the last 30 days of incidents. |
-| Podcasts | Security podcasts and webcasts, newest episode first. Each row is one episode read from the show's own feed: its title, link and date only, no audio or transcript. Open an episode on the show's site. |
 
 Today and Service health take `?wall=1` for a monitor: the tab rows, controls and footer are
 hidden and the type is larger, and nothing more is read.
