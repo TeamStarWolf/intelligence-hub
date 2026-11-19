@@ -31,7 +31,11 @@ const OTHER_VIEWS = { today: renderToday, kev: renderKev, cves: renderCves, cve:
 const TAB_OF = { cve: "cves", vendor: "vendors", actor: "actors", malware: "actors" };
 
 export function createApp(env) {
-  const { doc, win, location, history, storage = null, session = null, fetchImpl, subtle, moduleUrl = null, now = () => Date.now(), every = (fn, ms) => setInterval(fn, ms), clear = id => clearInterval(id), loadLabels = () => import("./labels.js") } = env;
+  const { doc, win, location, history, storage = null, session = null, fetchImpl, subtle, moduleUrl = null, now = () => Date.now(), every = (fn, ms) => setInterval(fn, ms), clear = id => clearInterval(id), loadLabels = () => import("./labels.js"),
+    // Runs a low-priority job when the browser is idle, so a view can finish loading the rest of a
+    // window after first paint without blocking it. Null where there is no scheduler (the tests'
+    // shell), which keeps the eager, up-front load.
+    idle = win.requestIdleCallback ? fn => win.requestIdleCallback(fn, { timeout: 2000 }) : typeof win.setTimeout === "function" ? fn => win.setTimeout(fn, 1200) : null } = env;
   const el = selector => doc.querySelector(selector);
   const fetcher = createFetcher({ fetchImpl, subtle });
   const store = createStore(fetcher);
@@ -175,7 +179,7 @@ export function createApp(env) {
     el("#view").hidden = list;
     if (route.view !== "status") live.stop();
     if (!store.state.mode || fatal) return;
-    const ctx = { route, store, el, doc, navigate, current, target: el("#view"), live, storage, visit };
+    const ctx = { route, store, el, doc, navigate, current, target: el("#view"), live, storage, visit, idle };
     try {
       if (list) {
         const { rows, cveIndex } = await renderExplore(ctx);

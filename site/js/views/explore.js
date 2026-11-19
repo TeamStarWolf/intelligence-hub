@@ -3,6 +3,7 @@
 import { defaultRange, defaultSort, formatRoute, withQuery } from "../router.js";
 import { classOf, clusterStories, dateWindow, deskOf, exportCsv, exportJson, facets, filterRows, kevLinked, requiredAction } from "../filters.js";
 import { count, dateLabel, link, monthLabel, node, routeLink, stamp } from "../util.js";
+import { pageSize } from "../limits.js";
 import { EXPLOITATION_LABELS, KIND_LABELS, cveOrgLink, dateBasisLabel, facetOptions, fillSelect, label, libraryDoor, pager, pinnedDoor, resultCard } from "./common.js";
 
 const TITLES = { explore: "Intelligence Explorer", advisories: "Advisories", research: "Research", news: "News", podcasts: "Podcasts" };
@@ -127,7 +128,7 @@ export async function renderExplore(ctx) {
     const clustered = route.view === "news";
     const units = clustered ? clusterStories(matching) : matching;
     const page = pager(el("#pager"), route, units.length);
-    const slice = units.slice(page.start, page.start + 25);
+    const slice = units.slice(page.start, page.start + pageSize);
     el("#results").replaceChildren(...(clustered ? slice.map(group => newsCard(group, route, cveIndex)) : slice.map(row => resultCard(row, route, cveIndex))));
     const waiting = paths.filter(path => !store.loaded([path])).length;
     const intro = INTROS[route.view] ? INTROS[route.view] + " " : "";
@@ -139,6 +140,24 @@ export async function renderExplore(ctx) {
   if (!store.loaded(paths)) el("#results-status").textContent = "Reading " + count(paths.length, "file") + " for " + scopeText(route, store) + ".";
   const [cveIndex] = await Promise.all([indexRequest, store.ensure(paths.slice(0, 1))]);
   paint(cveIndex);
+  // Load enough of the newest shards to fill the first page before deciding what can wait.
+  let eager = 1;
+  while (eager < paths.length && store.rows(paths.slice(0, eager)).length < pageSize) {
+    eager += 1;
+    await store.ensure(paths.slice(0, eager));
+    paint(cveIndex);
+  }
+  // On the bare landing (no search, filter, sort or page) the whole live window is in scope but the
+  // reader is looking at the newest page. Load the older shards in the background instead of up
+  // front, so someone who reads the top results and leaves never pays for the rest. Any filter,
+  // search, sort or page change re-renders with query keys and so takes the eager path below, which
+  // keeps search covering the whole window. When there is no idle scheduler (the tests' shell, an
+  // older browser) the eager load stands in.
+  const finish = () => store.ensure(paths, () => paint(cveIndex)).then(() => { if (ctx.current()) paint(cveIndex); });
+  if (ctx.idle && eager < paths.length && Object.keys(route.query).length === 0) {
+    ctx.idle(() => { if (ctx.current()) finish(); });
+    return { rows: store.rows(paths.slice(0, eager)), cveIndex };
+  }
   await store.ensure(paths, () => paint(cveIndex));
   paint(cveIndex);
   return { rows: store.rows(paths), cveIndex };
