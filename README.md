@@ -33,6 +33,7 @@ every tab is also listed in the **Panels** sidebar, which starts closed:
 | About | What the Hub is and what it covers. |
 | Patch Tuesday | Microsoft's monthly security release from the MSRC CVRF data: the headline numbers, what to prioritize by fixed rules, the exploited and publicly disclosed CVEs, the Critical CVEs, the product families, the KEV join, Adobe's and SAP's same-day bulletins as headline rows, and a brief for every monthly release back to January 2016. |
 | Service health | The vendors' own status pages and cloud health feeds by group, open incidents, internet outage signals from IODA, and the last 30 days of incidents. |
+| Podcasts | Security podcasts and webcasts, newest episode first. Each row is one episode read from the show's own feed: its title, link and date only, no audio or transcript. Open an episode on the show's site. |
 
 Today and Service health take `?wall=1` for a monitor: the tab rows, controls and footer are
 hidden and the type is larger, and nothing more is read.
