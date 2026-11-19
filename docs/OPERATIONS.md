@@ -6,7 +6,7 @@ Open the public GitHub Pages address in a desktop or phone browser. Reading does
 not require sign-in.
 
 The page opens on the **Intelligence Explorer**: a search box (all entered words
-must match), a filter rail (behind **Filters** on narrow screens), ten sort
+must match), a filter rail (behind **Filters** on narrow screens), twelve sort
 choices and the results, 25 to a page, over the live window. Choose a year to add
 that year's history rows; date presets count back from the content date, not from
 the device's clock. Every filter, sort, page and open entry is kept in the
@@ -14,7 +14,7 @@ address, so Back and Forward work and a copied link reopens the same view
 ([URLS.md](URLS.md)).
 
 Every other view is a tab under one of the desks in the two-row strip under the brand bar
-(Explore, Security, Infrastructure, Reference) and an entry in the **Panels** sidebar, which
+(Security, Infrastructure, Podcasts, Reference) and an entry in the **Panels** sidebar, which
 starts closed: Today, Advisories, Known exploited,
 Research, News, CVEs, History, Vendors, Tags, Actors and malware, Reports, Data,
 Subscribe, Sources, Method, About and Service health. Nothing from those views is drawn above
