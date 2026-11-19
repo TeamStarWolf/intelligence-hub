@@ -14,13 +14,14 @@ import { SEEN_KEY, nextPatchTuesday } from "../../site/js/views/today.js";
 import { cveRegister, exportCsv, exportJson, rowMatches, today as todayBuckets } from "../../site/js/filters.js";
 import { normalizeIntake } from "../../site/js/validate.js";
 import { normalizeCveIndex } from "../../site/js/validate.js";
+import { pageSize } from "../../site/js/limits.js";
 
-async function boot({ hash = "", search = "", site = files(), session = storage(), local = storage(), moduleUrl = null, hidden = false, fetchImpl = null } = {}) {
+async function boot({ hash = "", search = "", site = files(), session = storage(), local = storage(), moduleUrl = null, hidden = false, fetchImpl = null, idle = undefined } = {}) {
   const shell = page(hash, search);
   shell.doc.hidden = hidden;
   const http = server(site.bodies);
   const app = createApp({ doc: shell.doc, win: shell.win, location: shell.location, history: shell.history, storage: local, session, fetchImpl: fetchImpl || http.fetch,
-    subtle: webcrypto.subtle, moduleUrl, every: () => 0, loadLabels: async () => ({ default: { "vendor:fortinet": "Fortinet", "actor:G0016": "APT29" } }) });
+    subtle: webcrypto.subtle, moduleUrl, every: () => 0, idle, loadLabels: async () => ({ default: { "vendor:fortinet": "Fortinet", "actor:G0016": "APT29" } }) });
   await app.start();
   await settle(60);
   return { ...shell, http, app, site, session, local };
@@ -796,6 +797,49 @@ test("the notice is a toast fixed above the results, after them in the DOM, and 
   assert.ok(all.indexOf(notice) > all.indexOf(doc.querySelector("#results li")), "the notice stays after the results in DOM order");
   doc.querySelector("#notice-close").dispatchEvent({ type: "click" });
   assert.equal(notice.hidden, true);
+});
+
+test("the Explorer landing reads the newest page first and defers the rest of the live window to the browser's idle time", async () => {
+  // A full newest month so the first page fills from one shard, plus older months that can wait.
+  const newest = { schema_version: 7, kind: "articles", period: "2026-11", rows: Array.from({ length: pageSize + 5 }, (_, i) => row("bulk-" + String(i).padStart(2, "0"))) };
+  const older = { schema_version: 7, kind: "articles", period: "2026-09", rows: [row("sep-1", { published_at: "2026-09-10", title: "September advisory" })] };
+  const site = files({ extra: { "live/2026-11.json": newest, "live/2026-09.json": older } });
+  let deferred = null;
+  const view = await boot({ site, idle: fn => { deferred = fn; } });
+  const reads = () => view.http.requests.map(request => request.path);
+  assert.ok(reads().includes("./data/v7/live/2026-11.json"), "the newest shard is read for the first page");
+  assert.ok(!reads().includes("./data/v7/live/2026-10.json"), "an older shard is not read up front");
+  assert.ok(!reads().includes("./data/v7/live/2026-09.json"), "the oldest shard is not read up front");
+  assert.equal(view.doc.querySelectorAll("#results li").length, pageSize, "the first page is full from the newest shard alone");
+  assert.equal(typeof deferred, "function", "the rest of the window is scheduled for when the browser is idle");
+  deferred();
+  await settle(60);
+  assert.ok(reads().includes("./data/v7/live/2026-10.json") && reads().includes("./data/v7/live/2026-09.json"), "the idle job finishes the window so search still covers every month");
+});
+
+test("a reader who leaves the Explorer landing before the idle job runs never pays for the rest of the window", async () => {
+  const newest = { schema_version: 7, kind: "articles", period: "2026-11", rows: Array.from({ length: pageSize + 5 }, (_, i) => row("bulk-" + String(i).padStart(2, "0"))) };
+  const site = files({ extra: { "live/2026-11.json": newest } });
+  let deferred = null;
+  const view = await boot({ site, idle: fn => { deferred = fn; } });
+  const reads = () => view.http.requests.map(request => request.path);
+  assert.ok(!reads().includes("./data/v7/live/2026-10.json"), "the older shard starts deferred");
+  view.app.navigate({ view: "about", id: null, query: {} });
+  await settle(60);
+  deferred();   // the stale idle job fires after the reader has already navigated away
+  await settle(60);
+  assert.ok(!reads().includes("./data/v7/live/2026-10.json"), "the cancelled job does not read the rest of the window");
+});
+
+test("a filtered Explorer landing reads the whole live window up front, so the filter is not understated", async () => {
+  const newest = { schema_version: 7, kind: "articles", period: "2026-11", rows: Array.from({ length: pageSize + 5 }, (_, i) => row("bulk-" + String(i).padStart(2, "0"))) };
+  const older = { schema_version: 7, kind: "articles", period: "2026-09", rows: [row("sep-1", { published_at: "2026-09-10" })] };
+  const site = files({ extra: { "live/2026-11.json": newest, "live/2026-09.json": older } });
+  let deferred = null;
+  const view = await boot({ hash: "#/explore?desk=security", site, idle: fn => { deferred = fn; } });
+  const reads = view.http.requests.map(request => request.path);
+  assert.equal(deferred, null, "a query means the idle scheduler is not used; the load is eager");
+  assert.ok(reads.includes("./data/v7/live/2026-10.json") && reads.includes("./data/v7/live/2026-09.json"), "every month is read so the filter sees the whole window");
 });
 
 test("the theme button follows a system scheme change until a reader picks a theme", async () => {
