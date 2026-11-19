@@ -52,7 +52,7 @@ written for this project. Full article bodies are not copied.
 ## How it works
 
 A Python collector (standard library only, in `intelligence_hub/`) runs in GitHub Actions. It
-reads 62 configured RSS and Atom feeds, the CISA KEV catalog, FIRST's EPSS API for the CVEs it
+reads 62 publisher feeds and 15 podcast feeds, the CISA KEV catalog, FIRST's EPSS API for the CVEs it
 shows, and 118 official status sources plus
 IODA's internet outage signals under strict size, time and format bounds, enriches mentioned CVEs
 from the CVE Program's records, tags every row from controlled vocabularies, merges the committed

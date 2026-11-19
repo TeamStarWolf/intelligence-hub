@@ -30,7 +30,8 @@ the Explorer on the default route.
   says so and nothing else changes.
 - **Subscribe** lists the Hub's three Atom feeds (below) with the address to copy
   into a feed reader, then podcasts and newsletters as titles and links only. The
-  Hub collects nothing from them.
+  Hub collects nothing from the newsletters; podcast episodes are read from the
+  shows' feeds and listed on the Podcasts tab.
 
 - **CVEs** lists every CVE an entry mentions. A CVE opens its saved brief in a
   dialog with a link to its CVE.org record. One CVE can have several publisher
@@ -62,7 +63,7 @@ newer snapshot.
 ## Interpret evidence before action
 
 The configured inputs are the service-health sources in `config/status.json`
-([SOURCES.md](SOURCES.md#service-health-sources)), **62 RSS/Atom publisher feeds**, CISA KEV and **74 curated
+([SOURCES.md](SOURCES.md#service-health-sources)), **62 RSS/Atom publisher feeds**, **15 podcast feeds**, CISA KEV and **74 curated
 primary publications**. A configured feed is not necessarily healthy. Recent RSS,
 bounded retained items and manual curation do not form a complete historical archive.
 See [feed evidence](FEEDS.md) and [history coverage](SOURCES.md).
