@@ -49,10 +49,25 @@ def href_problem(href, where):
     """Why this address is not an allowed TeamStarWolf https link, or None when it is fine."""
     if not isinstance(href, str) or not href.startswith("https://"):
         return where + " is not an https address"
+    # A browser reads a backslash (literal or percent-encoded) as a slash, so it would re-segment
+    # the path and slip past the prefix test.
+    if "\\" in href or "\\" in urllib.parse.unquote(href):
+        return where + " contains a backslash, which a browser reads as a slash"
     parts = urllib.parse.urlsplit(href)
     host = (parts.hostname or "").lower()
     if host not in ALLOWED_HOSTS:
         return where + " points to a host that is not a TeamStarWolf property: " + (host or "(none)")
+    try:
+        port = parts.port
+    except ValueError:
+        return where + " has an invalid port"
+    if port is not None:
+        return where + " has an explicit port, a different origin: " + str(port)
+    # A "." or ".." segment (plain or percent-encoded, e.g. %2e%2e) resolves away in a browser, so
+    # github.com/TeamStarWolf/../someone would pass the prefix test but load another account.
+    for segment in parts.path.split("/"):
+        if urllib.parse.unquote(segment).lower() in (".", ".."):
+            return where + " has a dot path segment, which a browser resolves away: " + parts.path
     if host == "github.com" and not (parts.path == "/TeamStarWolf" or parts.path.startswith("/TeamStarWolf/")):
         return where + " is a github.com address outside /TeamStarWolf: " + parts.path
     return None

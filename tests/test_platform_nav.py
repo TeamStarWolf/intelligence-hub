@@ -47,6 +47,31 @@ class PlatformNavTest(unittest.TestCase):
         menu["items"][1]["href"] = "https://github.com/SomeoneElse/repo"
         self.assertTrue(any("outside /TeamStarWolf" in line for line in run(menu)), run(menu))
 
+    def test_a_dot_dot_path_segment_fails(self):
+        menu = base()
+        menu["items"][1]["href"] = "https://github.com/TeamStarWolf/../someone/repo"
+        self.assertTrue(any("dot path segment" in line for line in run(menu)), run(menu))
+
+    def test_a_percent_encoded_dot_dot_segment_fails(self):
+        menu = base()
+        menu["items"][1]["href"] = "https://github.com/TeamStarWolf/%2e%2e/someone/repo"
+        self.assertTrue(any("dot path segment" in line for line in run(menu)), run(menu))
+
+    def test_a_single_dot_segment_fails(self):
+        menu = base()
+        menu["items"][1]["href"] = "https://github.com/TeamStarWolf/./repo"
+        self.assertTrue(any("dot path segment" in line for line in run(menu)), run(menu))
+
+    def test_a_backslash_address_fails(self):
+        menu = base()
+        menu["items"][1]["href"] = "https://github.com/TeamStarWolf\\..\\someone/repo"
+        self.assertTrue(any("backslash" in line for line in run(menu)), run(menu))
+
+    def test_an_explicit_port_fails(self):
+        menu = base()
+        menu["items"][0]["href"] = "https://teamstarwolf.com:8443/"
+        self.assertTrue(any("explicit port" in line for line in run(menu)), run(menu))
+
     def test_the_home_brand_target_is_checked(self):
         menu = base()
         menu["home"]["href"] = "https://example.org/"
