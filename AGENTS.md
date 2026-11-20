@@ -72,8 +72,9 @@ coding agent that changes this repository.
   python -E -s -m intelligence_hub.site check site
   python -E -s -m intelligence_hub.site labels --check
 
-  # Site script syntax (node --check every module site/files.json lists)
-  for name in $(python -I -c "import json; [print(n) for n in json.load(open('site/files.json'))['files'] if n.endswith('.js')]"); do node --check "site/$name"; done
+  # Site script syntax: node --check every module site/files.json lists. The tr strips the CR
+  # that Git Bash on Windows gets from Python's print; it is a no-op on Linux and macOS.
+  for name in $(python -I -c "import json; [print(n) for n in json.load(open('site/files.json'))['files'] if n.endswith('.js')]" | tr -d '\r'); do node --check "site/$name"; done
 
   # Site tests (node --test, no npm)
   node --test tests/js/*.test.js
