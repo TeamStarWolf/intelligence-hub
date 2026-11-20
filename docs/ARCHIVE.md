@@ -49,7 +49,7 @@ metadata activity remain possible even for read-only connections.
 
 ## Snapshot and version model
 
-The reader admits bounded public **schema 3,4,5 and 6** snapshots. Unknown versions
+The reader admits bounded public **schema 3, 4, 5, 6 and 7** snapshots. Unknown versions
 or top-level/source/article/CVE fields are rejected; header types, dates, source
 observations, partial-intake accounting, article provenance, structured guidance
 and the exact article-mentioned CVE union are checked. Existing pure collector
@@ -64,6 +64,7 @@ support for a version does not mean every otherwise valid public snapshot fits.
 | 4 | Those fields plus required `configured_selection`; an RSS policy enum or explicit `null` for KEV | A legacy report with unknown basis, a typed twelve-field report including `selection`, or `null` under the existing status rules |
 | 5 | The same source ledger and intake semantics as 4 | Full selection evidence is retained unchanged; typed `intelligence` and both CNA weakness fields are required |
 | 6 | Exactly the schema 5 modern source/header/article/CVE shape | The same complete typed evidence, with the separately versioned since 1998 window policy |
+| 7 | Exactly the schema 6 modern source/header/article/CVE shape | The same complete typed evidence; the full CVE briefs are in a separate `briefs.json` and the feed carries a compact `brief_index` |
 
 Schema 6 requires a start on or after **1998-01-01** and a date difference of
 at most **14,610 days**. Schema 5 retains **7,306 days** and schema 3/4 retain
