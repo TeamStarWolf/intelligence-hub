@@ -54,6 +54,10 @@ def href_problem(href, where):
     if "\\" in href or "\\" in urllib.parse.unquote(href):
         return where + " contains a backslash, which a browser reads as a slash"
     parts = urllib.parse.urlsplit(href)
+    # Credentials before the host (userinfo) are rejected outright, as the other TeamStarWolf sites
+    # do, so the allowed host cannot be dressed up with an "@".
+    if "@" in parts.netloc:
+        return where + " has userinfo (an @ before the host)"
     host = (parts.hostname or "").lower()
     if host not in ALLOWED_HOSTS:
         return where + " points to a host that is not a TeamStarWolf property: " + (host or "(none)")

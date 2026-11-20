@@ -72,6 +72,11 @@ class PlatformNavTest(unittest.TestCase):
         menu["items"][0]["href"] = "https://teamstarwolf.com:8443/"
         self.assertTrue(any("explicit port" in line for line in run(menu)), run(menu))
 
+    def test_userinfo_before_an_allowed_host_fails(self):
+        menu = base()
+        menu["items"][0]["href"] = "https://user:pw@teamstarwolf.com/"
+        self.assertTrue(any("userinfo" in line for line in run(menu)), run(menu))
+
     def test_the_home_brand_target_is_checked(self):
         menu = base()
         menu["home"]["href"] = "https://example.org/"
