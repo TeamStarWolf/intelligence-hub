@@ -25,6 +25,10 @@ import tempfile
 ROOT = Path(__file__).resolve().parent.parent
 FILES_JSON = "files.json"
 FILE_NAME = re.compile(r"(?:js/(?:[a-z0-9-]+/)?)?[a-z0-9][a-z0-9-]*(?:\.[a-z0-9-]+)*\.(?:html|css|js|svg)")
+# Data assets the page fetches rather than loads as a module, carried in the Pages artifact beside
+# the page files. The platform bar reads platform-nav.json, an identical copy of the published
+# cross-site menu; it is not stamped, since index.html does not reference it.
+DATA_PAGES = frozenset({"platform-nav.json"})
 MAX_FILES = 200
 REQUIRED = ("index.html", "styles.css", "js/main.js")
 # Relative import specifiers in a module: static imports and exports, and dynamic import().
@@ -64,7 +68,7 @@ def site_files(site):
             "site/files.json must list between 1 and " + str(MAX_FILES) + " files.")
     _refuse(len(set(files)) == len(files), "site/files.json lists a file twice.")
     for name in files:
-        _refuse(FILE_NAME.fullmatch(name) is not None and ".." not in name and name != FILES_JSON,
+        _refuse((FILE_NAME.fullmatch(name) is not None or name in DATA_PAGES) and ".." not in name and name != FILES_JSON,
                 "site/files.json lists a name outside the page-file pattern: " + name)
     for name in REQUIRED:
         _refuse(name in files, "site/files.json must list " + name + ".")

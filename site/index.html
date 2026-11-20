@@ -12,15 +12,28 @@
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./js/main.js"></script>
+  <script type="module" src="./js/platform-bar.js"></script>
 </head>
 <body>
   <header class="bar">
     <a class="skip-link" href="#q" data-skip>Skip to search</a>
-    <a class="brand" href="#/explore" aria-label="TeamStarWolf Intelligence Hub, Explorer"><img src="./icon.svg" width="28" height="28" alt=""><span class="brand-name">TeamStarWolf</span><span class="brand-product">Intelligence Hub</span></a>
-    <div class="bar-actions">
-      <a class="bar-button" href="#/subscribe">Feeds and exports</a>
-      <button id="theme-toggle" class="bar-button" type="button">Theme</button>
-      <button id="sidebar-toggle" class="bar-button" type="button" aria-controls="sidebar" aria-expanded="false">Panels</button>
+    <nav class="tsw-bar" aria-label="TeamStarWolf platform" data-tsw-bar>
+      <ul class="tsw-bar__list">
+        <li class="tsw-bar__item" data-tsw-item="home"><a class="tsw-bar__link" href="https://teamstarwolf.com/" rel="noopener noreferrer">Home</a></li>
+        <li class="tsw-bar__item" data-tsw-item="library"><a class="tsw-bar__link" href="https://library.teamstarwolf.com/" rel="noopener noreferrer">Library</a></li>
+        <li class="tsw-bar__item" data-tsw-item="hub"><a class="tsw-bar__link" href="https://teamstarwolf.github.io/intelligence-hub/" rel="noopener noreferrer">Intelligence Hub</a></li>
+        <li class="tsw-bar__item" data-tsw-item="navi"><a class="tsw-bar__link" href="https://teamstarwolf.github.io/ATTACK-Navi/" rel="noopener noreferrer">ATT&amp;CK-Navi</a></li>
+        <li class="tsw-bar__item" data-tsw-item="bookmarks"><a class="tsw-bar__link" href="https://github.com/TeamStarWolf/cybersecurity-resources" rel="noopener noreferrer">Bookmarks</a></li>
+        <li class="tsw-bar__item" data-tsw-item="github"><a class="tsw-bar__link" href="https://github.com/TeamStarWolf" rel="noopener noreferrer">GitHub</a></li>
+      </ul>
+    </nav>
+    <div class="bar-main">
+      <a class="brand" href="#/explore" aria-label="TeamStarWolf Intelligence Hub, Explorer"><img src="./icon.svg" width="28" height="28" alt=""><span class="brand-name">TeamStarWolf</span><span class="brand-product">Intelligence Hub</span></a>
+      <div class="bar-actions">
+        <a class="bar-button" href="#/subscribe">Feeds and exports</a>
+        <button id="theme-toggle" class="bar-button" type="button">Theme</button>
+        <button id="sidebar-toggle" class="bar-button" type="button" aria-controls="sidebar" aria-expanded="false">Panels</button>
+      </div>
     </div>
   </header>
   <nav class="tabs" aria-label="Hub views">
