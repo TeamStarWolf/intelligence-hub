@@ -20,7 +20,7 @@ The term lists are in `config/vocab/exploitation.json`.
 
 ## Desk
 
-Every row sits on one desk, taken from its source's registry entry (method `source-registry`, high): `security` for every feed, KEV, curated and history source, `infrastructure` for the vendor status pages and cloud health feeds, and `it` for the lifecycle, standards and IT press sources the revision plan adds. The desk is never read from a headline. The page groups its tabs by desk and the Explorer's Desk filter (`desk=` in the address) selects one. The values are in `config/vocab/desk.json`.
+Every row sits on one desk, taken from its source's registry entry (method `source-registry`, high): `security` for the publisher feeds, KEV, curated and history sources, `podcasts` for the Podcasts desk's show feeds, `infrastructure` for the vendor status pages and cloud health feeds, and `it` for the lifecycle, standards and IT press sources the revision plan adds. The desk is never read from a headline. The page groups its tabs by desk and the Explorer's Desk filter (`desk=` in the address) selects one. The values are in `config/vocab/desk.json`.
 
 ## Confidence
 
