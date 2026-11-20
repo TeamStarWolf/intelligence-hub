@@ -122,3 +122,60 @@ test("a click outside the bar closes an open panel; a click inside does not", as
   doc.dispatchEvent({ type: "click", target: doc.querySelector("#q") });
   assert.equal(bar.isOpen("home"), false);
 });
+
+// A captured-timer stand-in so the delayed close can be driven without waiting.
+function timerStub() {
+  const calls = [];
+  let id = 0;
+  return {
+    setTimeoutImpl: (fn, ms) => { const made = ++id; calls.push({ id: made, fn, ms }); return made; },
+    clearTimeoutImpl: cleared => { const at = calls.findIndex(call => call.id === cleared); if (at >= 0) calls.splice(at, 1); },
+    pending: () => calls,
+    fire: () => { const call = calls.shift(); if (call) call.fn(); },
+  };
+}
+
+test("on a fine pointer, hover opens a menu immediately", async () => {
+  const shell = page();
+  const bar = createPlatformBar({ doc: shell.doc, win: shell.win, matchMediaImpl: () => ({ matches: true }) });
+  bar.init();
+  bar.record("home").li.dispatchEvent({ type: "pointerenter" });
+  assert.equal(bar.isOpen("home"), true);
+});
+
+test("the menu closes after the delay when the pointer leaves, and a re-enter cancels the close", async () => {
+  const shell = page();
+  const timers = timerStub();
+  const bar = createPlatformBar({ doc: shell.doc, win: shell.win, matchMediaImpl: () => ({ matches: true }),
+    setTimeoutImpl: timers.setTimeoutImpl, clearTimeoutImpl: timers.clearTimeoutImpl });
+  bar.init();
+  const nav = shell.doc.querySelector("[data-tsw-bar]");
+  bar.open("home");
+  nav.dispatchEvent({ type: "pointerleave" });
+  assert.equal(bar.isOpen("home"), true, "it stays open until the timer fires");
+  assert.equal(timers.pending()[0].ms, 220, "close is scheduled for 220ms");
+  nav.dispatchEvent({ type: "pointerenter" });
+  assert.equal(timers.pending().length, 0, "a re-enter cancels the pending close");
+  assert.equal(bar.isOpen("home"), true);
+  nav.dispatchEvent({ type: "pointerleave" });
+  timers.fire();
+  assert.equal(bar.isOpen("home"), false, "the delayed close runs when the timer fires");
+});
+
+test("a fly-out opens to the right, and flips left when its right edge would cross the viewport", async () => {
+  const shell = page();
+  shell.win.innerWidth = 1000;
+  const bar = createPlatformBar({ doc: shell.doc, win: shell.win, matchMediaImpl: () => ({ matches: true }) });
+  bar.init();
+  const record = bar.record("bookmarks");
+  const index = record.entries.findIndex(entry => entry.subcaret);
+  const entry = record.entries[index];
+  bar.open("bookmarks");
+  entry.submenu.getBoundingClientRect = () => ({ left: 400, right: 600 });
+  entry.subcaret.dispatchEvent({ type: "click", detail: 1 });
+  assert.equal(entry.submenu.classList.contains("tsw-bar__submenu--flip"), false, "opens right when it fits");
+  entry.subcaret.dispatchEvent({ type: "click", detail: 1 }); // close
+  entry.submenu.getBoundingClientRect = () => ({ left: 900, right: 1200 });
+  entry.subcaret.dispatchEvent({ type: "click", detail: 1 }); // reopen near the edge
+  assert.equal(entry.submenu.classList.contains("tsw-bar__submenu--flip"), true, "flips left near the right edge");
+});

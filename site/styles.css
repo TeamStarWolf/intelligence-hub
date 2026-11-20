@@ -173,6 +173,9 @@ button, input, select { font: inherit; color: inherit; }
    so it can time the hover close, flip a fly-out and carry a touch tap. */
 .tsw-bar { height: 44px; display: flex; align-items: stretch; background: var(--tsw-bar-bg); border-bottom: 1px solid var(--tsw-bar-border); font-family: var(--tsw-sans); position: relative; z-index: 25; }
 .tsw-bar__list { list-style: none; margin: 0; padding: 0 8px; display: flex; align-items: stretch; gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: thin; }
+/* The wordmark is off by default; add tsw-bar--wordmark to the nav to show it before Home. */
+.tsw-bar__wordmark { display: none; align-items: center; padding: 0 12px; font-weight: 800; letter-spacing: -0.02em; color: var(--tsw-bar-fg-hover); text-decoration: none; white-space: nowrap; }
+.tsw-bar--wordmark .tsw-bar__wordmark { display: inline-flex; }
 .tsw-bar__item { position: relative; display: flex; align-items: stretch; flex: none; }
 .tsw-bar__link { display: inline-flex; align-items: center; padding: 0 8px; font-size: 13px; font-weight: 500; line-height: 1.2; color: var(--tsw-bar-fg); text-decoration: none; white-space: nowrap; }
 .tsw-bar__link:hover, .tsw-bar__link:focus-visible { color: var(--tsw-bar-fg-hover); }
@@ -192,7 +195,7 @@ button, input, select { font: inherit; color: inherit; }
 .tsw-bar__sublink { display: block; padding: 4px 10px 4px 24px; font-size: 12px; line-height: 1.3; color: var(--tsw-bar-muted); text-decoration: none; border-radius: 6px; }
 .tsw-bar__sublink:hover, .tsw-bar__sublink:focus-visible { background: var(--tsw-bar-hover-bg); }
 .tsw-bar__toggle { display: none; }
-.tsw-bar__link:focus-visible, .tsw-bar__caret:focus-visible, .tsw-bar__subcaret:focus-visible, .tsw-bar__menulink:focus-visible, .tsw-bar__sublink:focus-visible, .tsw-bar__toggle:focus-visible { outline: 2px solid var(--tsw-bar-focus); outline-offset: 2px; }
+.tsw-bar__wordmark:focus-visible, .tsw-bar__link:focus-visible, .tsw-bar__caret:focus-visible, .tsw-bar__subcaret:focus-visible, .tsw-bar__menulink:focus-visible, .tsw-bar__sublink:focus-visible, .tsw-bar__toggle:focus-visible { outline: 2px solid var(--tsw-bar-focus); outline-offset: 2px; }
 /* Without JavaScript the menus open on hover and keyboard focus. */
 .tsw-bar:not(.tsw-bar--js) .tsw-bar__item:hover > .tsw-bar__panel, .tsw-bar:not(.tsw-bar--js) .tsw-bar__item:focus-within > .tsw-bar__panel { display: block; }
 .tsw-bar:not(.tsw-bar--js) .tsw-bar__menuitem:hover > .tsw-bar__submenu, .tsw-bar:not(.tsw-bar--js) .tsw-bar__menuitem:focus-within > .tsw-bar__submenu { display: block; }

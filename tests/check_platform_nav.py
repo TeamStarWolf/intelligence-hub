@@ -28,6 +28,7 @@ from pathlib import Path
 import json
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -38,6 +39,23 @@ TIMEOUT = 8
 MAX_ENTRIES = 14
 START = "<!-- platform-bar:start"
 END = "<!-- platform-bar:end -->"
+# Every address in the menu must be https and point at a TeamStarWolf property. The copy is later
+# refreshed from a file another site publishes, so the check covers where the links go, not just the
+# shape. github.com is allowed only under the TeamStarWolf account.
+ALLOWED_HOSTS = frozenset({"teamstarwolf.com", "library.teamstarwolf.com", "teamstarwolf.github.io", "github.com"})
+
+
+def href_problem(href, where):
+    """Why this address is not an allowed TeamStarWolf https link, or None when it is fine."""
+    if not isinstance(href, str) or not href.startswith("https://"):
+        return where + " is not an https address"
+    parts = urllib.parse.urlsplit(href)
+    host = (parts.hostname or "").lower()
+    if host not in ALLOWED_HOSTS:
+        return where + " points to a host that is not a TeamStarWolf property: " + (host or "(none)")
+    if host == "github.com" and not (parts.path == "/TeamStarWolf" or parts.path.startswith("/TeamStarWolf/")):
+        return where + " is a github.com address outside /TeamStarWolf: " + parts.path
+    return None
 
 
 def problems(raw):
@@ -58,6 +76,10 @@ def problems(raw):
     home = menu.get("home")
     if not (isinstance(home, dict) and isinstance(home.get("label"), str) and isinstance(home.get("href"), str)):
         found.append("home is not a label and href")
+    else:
+        bad = href_problem(home["href"], "home")
+        if bad:
+            found.append(bad)
     items = menu.get("items")
     if not isinstance(items, list) or not items:
         return found + ["items is not a non-empty list"]
@@ -70,6 +92,10 @@ def problems(raw):
         for key in ("id", "label", "href"):
             if not isinstance(item.get(key), str) or not item[key]:
                 found.append(where + " has no " + key)
+        if isinstance(item.get("href"), str):
+            bad = href_problem(item["href"], where)
+            if bad:
+                found.append(bad)
         if item.get("id") in ids:
             found.append(where + " repeats an id")
         ids.add(item.get("id"))
@@ -96,9 +122,10 @@ def entry_problems(menu, where, depth):
         pending = entry.get("pending")
         if pending is not None and (not isinstance(pending, str) or not pending):
             out.append(at + " has an empty pending note")
-        href = entry.get("href")
-        if href is not None and not (isinstance(href, str) and href.startswith("https://")):
-            out.append(at + " href is not an https address")
+        if entry.get("href") is not None:
+            bad = href_problem(entry.get("href"), at)
+            if bad:
+                out.append(bad)
         if "menu" in entry:
             if depth >= 2:
                 out.append(at + " nests deeper than one level")
@@ -116,7 +143,11 @@ def render_bar(menu, indent="    "):
     one level of fly-out sub-menus, every pending entry left out. platform-bar.js enhances this; it
     adds the caret buttons, so the markup here is links only and works without JavaScript."""
     pad = lambda level: indent + "  " * level
+    home = menu["home"]
+    # The wordmark is off by default (the stylesheet hides it); add the tsw-bar--wordmark class to
+    # the nav to show it before Home. It points at the home brand target.
     lines = [indent + '<nav class="tsw-bar" aria-label="TeamStarWolf platform" data-tsw-bar>',
+             pad(1) + '<a class="tsw-bar__wordmark" href="' + escape(home["href"]) + '" rel="noopener noreferrer">' + escape(home["label"]) + '</a>',
              pad(1) + '<ul class="tsw-bar__list">']
     for item in menu["items"]:
         shippable = [entry for entry in item.get("menu", []) if not entry.get("pending")]

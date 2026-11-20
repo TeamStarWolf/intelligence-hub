@@ -50,6 +50,7 @@ PAIRS = [
     ("--tsw-border-strong", "--tsw-surface", UI, "input and button borders"),
     ("--tsw-border-strong", "--tsw-bg", UI, "input borders on the page"),
     ("--tsw-bar-fg", "--tsw-bar-bg", TEXT, "platform bar top-level and menu links"),
+    ("--tsw-bar-fg-hover", "--tsw-bar-bg", TEXT, "platform bar hovered link and the wordmark"),
     ("--tsw-bar-fg-hover", "--tsw-bar-hover-bg", TEXT, "platform bar hovered menu link"),
     ("--tsw-bar-muted", "--tsw-bar-bg", TEXT, "platform bar caret and sub-entries"),
     ("--tsw-bar-muted", "--tsw-bar-hover-bg", TEXT, "platform bar hovered sub-entry"),
