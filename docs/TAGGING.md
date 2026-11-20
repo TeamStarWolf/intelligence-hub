@@ -6,9 +6,9 @@ People who read the Hub ask the same questions of it: which vendors had exploite
 
 | File | Owner | What it holds |
 | --- | --- | --- |
-| `config/vocab/kind.json` | Hub | What a row is: advisory, research, reporting, incident, kev, filing, bulletin, note, and the reserved change and lifecycle values for the sources the revision plan adds. |
+| `config/vocab/kind.json` | Hub | What a row is: advisory, research, reporting, incident, kev, filing, bulletin, note, podcast, and the reserved change and lifecycle values for the sources the revision plan adds. |
 | `config/vocab/source_class.json` | Hub | Who publishes it: vendor-primary, government-cert, researcher, press. Also the class of KEV and curated source ids that are not in `config/sources.json`. |
-| `config/vocab/desk.json` | Hub | The desk a row sits on: security, infrastructure or it. Set per source in `config/sources.json` (every feed is security today) and `config/status.json` (every status source is infrastructure); history adapters and the KEV and curated ids are security. The page groups its views by desk and the Explorer filters on it. |
+| `config/vocab/desk.json` | Hub | The desk a row sits on: security, infrastructure, it or podcasts. Set per source in `config/sources.json` (the publisher feeds are security, the podcast feeds are podcasts) and `config/status.json` (every status source is infrastructure); history adapters and the KEV and curated ids are security. The page groups its views by desk and the Explorer filters on it. |
 | `config/vocab/exploitation.json` | Hub | known, reported, unknown, the evidence each needs, and the headline terms and negations. |
 | `config/vocab/event_type.json` | Hub | disclosure, exploitation, patch, breach, outage, takedown, policy, analysis, unclassified, with headline terms, and the reserved maintenance and end-of-support values, which carry no terms. |
 | `config/vocab/sector.json` | Hub | The library's 18 sector ids with headline terms. |
@@ -62,7 +62,7 @@ Where two entities of one type share a matched name, neither is tagged. Where on
 
 ## Fields
 
-- `desk`: the desk of the row's source, by method `source-registry` (high): security for every feed, KEV, curated and history source, infrastructure for every service-health source (`intelligence_hub/status.py` sets it when it builds the Explorer rows), it for the lifecycle, standards and IT press sources the revision plan adds. Never from a headline.
+- `desk`: the desk of the row's source, by method `source-registry` (high): security for the publisher feeds, KEV, curated and history sources, podcasts for the podcast feeds, infrastructure for every service-health source (`intelligence_hub/status.py` sets it when it builds the Explorer rows), it for the lifecycle, standards and IT press sources the revision plan adds. Never from a headline.
 - `event_type`: a service-health incident row (origin `service-status`) gets `outage` by method `status-incident` (high); advisories, bulletins and notes get `disclosure` by kind (high when the source is vendor-primary or the row names a CVE, medium otherwise); vendor-primary advisories also get `patch`; `exploitation` mirrors a known or reported exploitation tag; `breach`, `outage`, `takedown`, `policy`, `patch` and `disclosure` also come from headline terms. A research row with none of these is `analysis`; any other row is `unclassified`.
 - `region`: each tag has a `role`. `publisher` comes from the source's country (high). `mentioned` comes from a country name or demonym in the headline (medium); a mention does not say whether the place is a target, an origin or neither. `target` and `vendor-hq` are reserved for structured fields from the history adapters.
 - `sector`: headline terms from `sector.json` (medium) and the library's multi-word sector names.
