@@ -46,14 +46,46 @@ coding agent that changes this repository.
 - Run the same gates locally:
 
   ```sh
+  # Unit tests
   python -I -m unittest discover -s tests
+
+  # Fixtures are current
   python -I tests/fixtures/build_fixture.py --check
-  python -I tests/check_em_dash.py
+  python -I tests/fixtures/status/build_cache.py --check
+  python -I tests/fixtures/filings/build_cache.py --check
+
+  # History check (offline)
+  python -E -s -m intelligence_hub.history check
+
+  # Offline build on the committed fixture (writes generated output under site/data/; keep it out of Git)
+  mkdir -p .state
+  cp tests/fixtures/public-cache.json .state/public-cache.json
+  cp -R tests/fixtures/patch-tuesday/documents .state/patch-tuesday-documents
+  cp tests/fixtures/status-cache.json .state/status-cache.json
+  cp tests/fixtures/filings/filings-cache.json .state/filings-cache.json
+  python -E -s -m intelligence_hub --cached --start 1998-01-01 --end 2026-11-01
+
+  # Validate the offline snapshot (CI runs this inline after the build)
+  python -c "import json; from intelligence_hub.archive import validate_snapshot; validate_snapshot(json.load(open('site/data/feed.json', encoding='utf-8')))"
+
+  # Page files, stamping and the labels module
   python -E -s -m intelligence_hub.site check site
   python -E -s -m intelligence_hub.site labels --check
-  python -I tests/check_contrast.py
-  python -I tests/check_font_size.py
+
+  # Site script syntax (node --check every module site/files.json lists)
+  for name in $(python -I -c "import json; [print(n) for n in json.load(open('site/files.json'))['files'] if n.endswith('.js')]"); do node --check "site/$name"; done
+
+  # Site tests (node --test, no npm)
   node --test tests/js/*.test.js
+
+  # Contrast of every text pair in both themes
+  python -I tests/check_contrast.py
+
+  # 12 px type floor
+  python -I tests/check_font_size.py
+
+  # Em-dash lint outside reports/
+  python -I tests/check_em_dash.py
   ```
 
 - Never raise a byte, count or time bound (feed size, package estimate, article
