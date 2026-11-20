@@ -1,22 +1,28 @@
-"""Validate the vendored platform menu and, when asked, compare it to the published canonical file.
+"""Validate the vendored platform menu, keep the static bar in index.html in step with it, and,
+when asked, compare the copy to the published canonical file.
 
 site/platform-nav.json is an identical copy of the one cross-site menu every TeamStarWolf site
-shows in its top bar. The published original will live at a public address; each site keeps a byte
-identical copy and renders it in its own stack. This check runs two ways:
+shows in its top bar. site/index.html carries the menu as static markup between the
+"platform-bar" markers, so that with JavaScript off every link still works and the stylesheet opens
+the menus on :hover and :focus-within; site/js/platform-bar.js only enhances that markup. This
+check holds the three in step and runs several ways:
 
   python -I tests/check_platform_nav.py
-      Offline validation only: the copy is plain ASCII, parses, and has the agreed shape (a version,
-      a home brand target, and items whose menus nest at most one level, with every "pending" entry
-      carrying a note). This is what the pull-request check runs.
+      Offline: the copy is plain ASCII, parses, has the agreed shape (a version, a home brand
+      target, items whose menus nest at most one level and hold at most 14 entries, every "pending"
+      entry noted), and the static bar in index.html matches what the copy generates. The
+      pull-request check runs this.
+
+  python -I tests/check_platform_nav.py --emit
+      Print the static bar markup for index.html (what the check compares against). Paste it between
+      the platform-bar markers when the menu changes.
 
   python -I tests/check_platform_nav.py --canonical [URL]
       Also fetch the canonical file (default https://teamstarwolf.com/platform-nav.json) and require
-      the vendored copy to match it byte for byte. While the canonical file is not published yet, a
-      404 or an unreachable host is tolerated and reported, not failed; once it is published, a
-      mismatch fails. This is for the publish workflow, which has network access.
+      the vendored copy to match it byte for byte, tolerating "not published yet". For the publish
+      workflow, which has network access.
 
-Exit 0 when the copy is valid (and, with --canonical, matches or the canonical is not published);
-exit 1 on any validation failure or a real mismatch.
+Exit 0 when valid (and, with --canonical, matching or not-yet-published); exit 1 otherwise.
 """
 from pathlib import Path
 import json
@@ -24,9 +30,14 @@ import sys
 import urllib.error
 import urllib.request
 
-COPY = Path(__file__).resolve().parent.parent / "site" / "platform-nav.json"
+ROOT = Path(__file__).resolve().parent.parent
+COPY = ROOT / "site" / "platform-nav.json"
+INDEX = ROOT / "site" / "index.html"
 CANONICAL_DEFAULT = "https://teamstarwolf.com/platform-nav.json"
 TIMEOUT = 8
+MAX_ENTRIES = 14
+START = "<!-- platform-bar:start"
+END = "<!-- platform-bar:end -->"
 
 
 def problems(raw):
@@ -35,8 +46,7 @@ def problems(raw):
     try:
         raw.decode("ascii")
     except UnicodeDecodeError:
-        found.append("the file is not plain ASCII; non-ASCII characters in an address are percent-encoded")
-        return found
+        return ["the file is not plain ASCII; non-ASCII characters in an address are percent-encoded"]
     try:
         menu = json.loads(raw.decode("ascii"))
     except json.JSONDecodeError as error:
@@ -50,8 +60,7 @@ def problems(raw):
         found.append("home is not a label and href")
     items = menu.get("items")
     if not isinstance(items, list) or not items:
-        found.append("items is not a non-empty list")
-        return found
+        return found + ["items is not a non-empty list"]
     ids = set()
     for item in items:
         where = "item " + repr(item.get("id") if isinstance(item, dict) else item)
@@ -69,12 +78,14 @@ def problems(raw):
 
 
 def entry_problems(menu, where, depth):
-    """Problems in a menu list: labels, https or pending-noted addresses, and at most one nested level."""
+    """Problems in a menu list: labels, https or noted addresses, at most 14 entries, one nested level."""
     out = []
     if menu is None:
         return out
     if not isinstance(menu, list):
         return [where + " menu is not a list"]
+    if len(menu) > MAX_ENTRIES:
+        out.append(where + " menu has " + str(len(menu)) + " entries, more than the " + str(MAX_ENTRIES) + " cap")
     for entry in menu:
         at = where + " > " + repr(entry.get("label") if isinstance(entry, dict) else entry)
         if not isinstance(entry, dict):
@@ -96,9 +107,68 @@ def entry_problems(menu, where, depth):
     return out
 
 
+def escape(text):
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+
+
+def render_bar(menu, indent="    "):
+    """The static platform-bar markup for index.html: top-level links and the dropdown panels, with
+    one level of fly-out sub-menus, every pending entry left out. platform-bar.js enhances this; it
+    adds the caret buttons, so the markup here is links only and works without JavaScript."""
+    pad = lambda level: indent + "  " * level
+    lines = [indent + '<nav class="tsw-bar" aria-label="TeamStarWolf platform" data-tsw-bar>',
+             pad(1) + '<ul class="tsw-bar__list">']
+    for item in menu["items"]:
+        shippable = [entry for entry in item.get("menu", []) if not entry.get("pending")]
+        lines.append(pad(2) + '<li class="tsw-bar__item" data-tsw-item="' + escape(item["id"]) + '">')
+        lines.append(pad(3) + '<a class="tsw-bar__link" href="' + escape(item["href"]) + '" rel="noopener noreferrer">' + escape(item["label"]) + '</a>')
+        if shippable:
+            lines.append(pad(3) + '<div class="tsw-bar__panel" id="tsw-bar-panel-' + escape(item["id"]) + '">')
+            lines.append(pad(4) + '<ul class="tsw-bar__menu" aria-label="' + escape(item["label"]) + '">')
+            for index, entry in enumerate(shippable):
+                subs = [sub for sub in entry.get("menu", []) if not sub.get("pending")]
+                link = '<a class="tsw-bar__menulink" href="' + escape(entry["href"]) + '" rel="noopener noreferrer">' + escape(entry["label"]) + '</a>'
+                if not subs:
+                    lines.append(pad(5) + '<li class="tsw-bar__menuitem">' + link + '</li>')
+                    continue
+                lines.append(pad(5) + '<li class="tsw-bar__menuitem tsw-bar__menuitem--parent">')
+                lines.append(pad(6) + link)
+                lines.append(pad(6) + '<ul class="tsw-bar__submenu" id="tsw-bar-sub-' + escape(item["id"]) + "-" + str(index) + '" aria-label="' + escape(entry["label"]) + '">')
+                for sub in subs:
+                    lines.append(pad(7) + '<li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="' + escape(sub["href"]) + '" rel="noopener noreferrer">' + escape(sub["label"]) + '</a></li>')
+                lines.append(pad(6) + '</ul>')
+                lines.append(pad(5) + '</li>')
+            lines.append(pad(4) + '</ul>')
+            lines.append(pad(3) + '</div>')
+        lines.append(pad(2) + '</li>')
+    lines.append(pad(1) + '</ul>')
+    lines.append(indent + '</nav>')
+    return "\n".join(lines)
+
+
+def index_region(html):
+    """The lines between the platform-bar markers in index.html, or None if the markers are missing."""
+    start = html.find(START)
+    end = html.find(END)
+    if start < 0 or end < 0 or end < start:
+        return None
+    start = html.find("\n", start)
+    return html[start + 1:end].rstrip("\n").rstrip()
+
+
+def markup_problems(menu):
+    """The static bar in index.html must equal what the copy generates."""
+    html = INDEX.read_text(encoding="utf-8")
+    region = index_region(html)
+    if region is None:
+        return ["site/index.html is missing the platform-bar markers"]
+    if region != render_bar(menu):
+        return ["site/index.html's platform bar does not match platform-nav.json; run "
+                "`python -I tests/check_platform_nav.py --emit` and paste the result between the markers"]
+    return []
+
+
 def compare_canonical(url, copy_bytes):
-    """Compare the copy to the canonical file. Returns (ok, message); ok is False only on a real
-    mismatch, True when they match or the canonical file is not published yet."""
     request = urllib.request.Request(url, headers={"User-Agent": "platform-nav-check"})
     try:
         with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
@@ -116,12 +186,17 @@ def compare_canonical(url, copy_bytes):
 
 def main(argv):
     raw = COPY.read_bytes()
+    if "--emit" in argv:
+        print(render_bar(json.loads(raw.decode("ascii"))))
+        return 0
     issues = problems(raw)
+    if not issues:
+        issues = markup_problems(json.loads(raw.decode("ascii")))
     for line in issues:
         print("FAIL: " + line)
     if issues:
         return 1
-    print("OK: site/platform-nav.json is valid ASCII with the agreed shape (" + str(len(raw)) + " bytes)")
+    print("OK: site/platform-nav.json is valid and the static bar in index.html matches it (" + str(len(raw)) + " bytes)")
     if "--canonical" in argv:
         rest = [arg for arg in argv if arg != "--canonical"]
         url = rest[0] if rest else CANONICAL_DEFAULT
