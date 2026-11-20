@@ -12,15 +12,170 @@
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./js/main.js"></script>
+  <script type="module" src="./js/platform-bar.js"></script>
 </head>
 <body>
   <header class="bar">
     <a class="skip-link" href="#q" data-skip>Skip to search</a>
-    <a class="brand" href="#/explore" aria-label="TeamStarWolf Intelligence Hub, Explorer"><img src="./icon.svg" width="28" height="28" alt=""><span class="brand-name">TeamStarWolf</span><span class="brand-product">Intelligence Hub</span></a>
-    <div class="bar-actions">
-      <a class="bar-button" href="#/subscribe">Feeds and exports</a>
-      <button id="theme-toggle" class="bar-button" type="button">Theme</button>
-      <button id="sidebar-toggle" class="bar-button" type="button" aria-controls="sidebar" aria-expanded="false">Panels</button>
+    <!-- platform-bar:start (generated from platform-nav.json by tests/check_platform_nav.py --emit; do not edit by hand) -->
+    <nav class="tsw-bar" aria-label="TeamStarWolf platform" data-tsw-bar>
+      <a class="tsw-bar__wordmark" href="https://teamstarwolf.com/" rel="noopener noreferrer">TeamStarWolf</a>
+      <ul class="tsw-bar__list">
+        <li class="tsw-bar__item" data-tsw-item="home">
+          <a class="tsw-bar__link" href="https://teamstarwolf.com/" rel="noopener noreferrer">Home</a>
+          <div class="tsw-bar__panel" id="tsw-bar-panel-home">
+            <ul class="tsw-bar__menu" aria-label="Home">
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.com/" rel="noopener noreferrer">Front page</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.com/system" rel="noopener noreferrer">Design system</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="tsw-bar__item" data-tsw-item="library">
+          <a class="tsw-bar__link" href="https://library.teamstarwolf.com/" rel="noopener noreferrer">Library</a>
+          <div class="tsw-bar__panel" id="tsw-bar-panel-library">
+            <ul class="tsw-bar__menu" aria-label="Library">
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://library.teamstarwolf.com/#/guides/HOW_TO_USE_THIS_LIBRARY" rel="noopener noreferrer">Start here</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://library.teamstarwolf.com/#/guides/README" rel="noopener noreferrer">Guides</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://library.teamstarwolf.com/#/disciplines/README" rel="noopener noreferrer">Learning paths</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://library.teamstarwolf.com/#/hubs/README" rel="noopener noreferrer">Domains</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://library.teamstarwolf.com/#/case-studies/README" rel="noopener noreferrer">Case studies</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://library.teamstarwolf.com/#/case-studies/TIMELINE?kind=era" rel="noopener noreferrer">Chronicles</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://library.teamstarwolf.com/#/INDEX" rel="noopener noreferrer">References A to Z</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://library.teamstarwolf.com/#/explore" rel="noopener noreferrer">Frameworks</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://library.teamstarwolf.com/#/detections/README" rel="noopener noreferrer">Detections</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://library.teamstarwolf.com/#/navigator/" rel="noopener noreferrer">Navigator layers</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://library.teamstarwolf.com/#/tools/README" rel="noopener noreferrer">Vendor tools</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://library.teamstarwolf.com/#/ABOUT_THE_DATA" rel="noopener noreferrer">About the data</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="tsw-bar__item" data-tsw-item="hub">
+          <a class="tsw-bar__link" href="https://teamstarwolf.github.io/intelligence-hub/" rel="noopener noreferrer">Intelligence Hub</a>
+          <div class="tsw-bar__panel" id="tsw-bar-panel-hub">
+            <ul class="tsw-bar__menu" aria-label="Intelligence Hub">
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/intelligence-hub/#/explore" rel="noopener noreferrer">Explore</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/intelligence-hub/#/today" rel="noopener noreferrer">Today</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/intelligence-hub/#/kev" rel="noopener noreferrer">Known exploited</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/intelligence-hub/#/cves" rel="noopener noreferrer">CVEs</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/intelligence-hub/#/advisories" rel="noopener noreferrer">Advisories</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/intelligence-hub/#/patch-tuesday" rel="noopener noreferrer">Patch Tuesday</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/intelligence-hub/#/status" rel="noopener noreferrer">Service health</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/intelligence-hub/#/podcasts" rel="noopener noreferrer">Podcasts</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/intelligence-hub/#/reports" rel="noopener noreferrer">Reports</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/intelligence-hub/#/subscribe" rel="noopener noreferrer">Feeds and exports</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="tsw-bar__item" data-tsw-item="navi">
+          <a class="tsw-bar__link" href="https://teamstarwolf.github.io/ATTACK-Navi/" rel="noopener noreferrer">ATT&amp;CK-Navi</a>
+          <div class="tsw-bar__panel" id="tsw-bar-panel-navi">
+            <ul class="tsw-bar__menu" aria-label="ATT&amp;CK-Navi">
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/ATTACK-Navi/#/matrix" rel="noopener noreferrer">Matrix</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/ATTACK-Navi/#/exposure" rel="noopener noreferrer">Exposure</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/ATTACK-Navi/#/intel" rel="noopener noreferrer">Intel</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/ATTACK-Navi/#/detect" rel="noopener noreferrer">Detect</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/ATTACK-Navi/#/coverage" rel="noopener noreferrer">Coverage</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/ATTACK-Navi/#/dashboard" rel="noopener noreferrer">Dashboard</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/ATTACK-Navi/#/reports" rel="noopener noreferrer">Reports</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/ATTACK-Navi/#/library" rel="noopener noreferrer">Library</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://teamstarwolf.github.io/ATTACK-Navi/#/status" rel="noopener noreferrer">Status</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="tsw-bar__item" data-tsw-item="bookmarks">
+          <a class="tsw-bar__link" href="https://github.com/TeamStarWolf/cybersecurity-resources" rel="noopener noreferrer">Bookmarks</a>
+          <div class="tsw-bar__panel" id="tsw-bar-panel-bookmarks">
+            <ul class="tsw-bar__menu" aria-label="Bookmarks">
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#-daily-driver" rel="noopener noreferrer">Daily driver</a></li>
+              <li class="tsw-bar__menuitem tsw-bar__menuitem--parent">
+                <a class="tsw-bar__menulink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#-vulnerability-management" rel="noopener noreferrer">Vulnerability management</a>
+                <ul class="tsw-bar__submenu" id="tsw-bar-sub-bookmarks-1" aria-label="Vulnerability management">
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#cve--vuln-databases" rel="noopener noreferrer">CVE and vuln databases</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#prioritization-kev--epss--cvss--ssvc" rel="noopener noreferrer">Prioritization (KEV, EPSS, CVSS, SSVC)</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#exploits--proof-of-concept" rel="noopener noreferrer">Exploits and proof-of-concept</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#scanners" rel="noopener noreferrer">Scanners</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#lifecycle--end-of-life" rel="noopener noreferrer">Lifecycle and end-of-life</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#weakness-taxonomies" rel="noopener noreferrer">Weakness taxonomies</a></li>
+                </ul>
+              </li>
+              <li class="tsw-bar__menuitem tsw-bar__menuitem--parent">
+                <a class="tsw-bar__menulink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#-vendor-advisories--psirts" rel="noopener noreferrer">Vendor advisories and PSIRTs</a>
+                <ul class="tsw-bar__submenu" id="tsw-bar-sub-bookmarks-2" aria-label="Vendor advisories and PSIRTs">
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#microsoft--cloud" rel="noopener noreferrer">Microsoft and cloud</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#os--linux-distros" rel="noopener noreferrer">OS and Linux distros</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#network--security-vendors" rel="noopener noreferrer">Network and security vendors</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#enterprise-applications" rel="noopener noreferrer">Enterprise applications</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#ics--ot" rel="noopener noreferrer">ICS and OT</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#aggregators--cert" rel="noopener noreferrer">Aggregators and CERT</a></li>
+                </ul>
+              </li>
+              <li class="tsw-bar__menuitem tsw-bar__menuitem--parent">
+                <a class="tsw-bar__menulink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#-threat-intelligence" rel="noopener noreferrer">Threat intelligence</a>
+                <ul class="tsw-bar__submenu" id="tsw-bar-sub-bookmarks-3" aria-label="Threat intelligence">
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#feeds--ioc-lookup" rel="noopener noreferrer">Feeds and IOC lookup</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#apt--adversary-tracking" rel="noopener noreferrer">APT and adversary tracking</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#cti-vendor-research-blogs" rel="noopener noreferrer">CTI vendor research blogs</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#threat-reports--landscape" rel="noopener noreferrer">Threat reports and landscape</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#cti-platforms" rel="noopener noreferrer">CTI platforms</a></li>
+                </ul>
+              </li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#-gov--cert--alerts" rel="noopener noreferrer">Gov, CERT and alerts</a></li>
+              <li class="tsw-bar__menuitem tsw-bar__menuitem--parent">
+                <a class="tsw-bar__menulink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#-frameworks--standards" rel="noopener noreferrer">Frameworks and standards</a>
+                <ul class="tsw-bar__submenu" id="tsw-bar-sub-bookmarks-5" aria-label="Frameworks and standards">
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#mitre" rel="noopener noreferrer">MITRE</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#nist" rel="noopener noreferrer">NIST</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#cis" rel="noopener noreferrer">CIS</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#owasp--appsec" rel="noopener noreferrer">OWASP and AppSec</a></li>
+                </ul>
+              </li>
+              <li class="tsw-bar__menuitem tsw-bar__menuitem--parent">
+                <a class="tsw-bar__menulink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#%EF%B8%8F-offensive--tooling" rel="noopener noreferrer">Offensive and tooling</a>
+                <ul class="tsw-bar__submenu" id="tsw-bar-sub-bookmarks-6" aria-label="Offensive and tooling">
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#recon--osint" rel="noopener noreferrer">Recon and OSINT</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#web-app" rel="noopener noreferrer">Web app</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#active-directory--windows" rel="noopener noreferrer">Active Directory and Windows</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#c2-frameworks" rel="noopener noreferrer">C2 frameworks</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#cheatsheets--payloads" rel="noopener noreferrer">Cheatsheets and payloads</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#scanning--network" rel="noopener noreferrer">Scanning and network</a></li>
+                </ul>
+              </li>
+              <li class="tsw-bar__menuitem tsw-bar__menuitem--parent">
+                <a class="tsw-bar__menulink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#-dfir--malware-analysis" rel="noopener noreferrer">DFIR and malware analysis</a>
+                <ul class="tsw-bar__submenu" id="tsw-bar-sub-bookmarks-7" aria-label="DFIR and malware analysis">
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#sandboxes--lookup" rel="noopener noreferrer">Sandboxes and lookup</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#dfir-tools" rel="noopener noreferrer">DFIR tools</a></li>
+                  <li class="tsw-bar__subitem"><a class="tsw-bar__sublink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#reverse-engineering" rel="noopener noreferrer">Reverse engineering</a></li>
+                </ul>
+              </li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#%EF%B8%8F-cloud--container" rel="noopener noreferrer">Cloud and container</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#-detection-engineering--blue-team" rel="noopener noreferrer">Detection engineering and blue team</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#-labs--training" rel="noopener noreferrer">Labs and training</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://github.com/TeamStarWolf/cybersecurity-resources/blob/main/LINKS.md#-news--research" rel="noopener noreferrer">News and research</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="tsw-bar__item" data-tsw-item="github">
+          <a class="tsw-bar__link" href="https://github.com/TeamStarWolf" rel="noopener noreferrer">GitHub</a>
+          <div class="tsw-bar__panel" id="tsw-bar-panel-github">
+            <ul class="tsw-bar__menu" aria-label="GitHub">
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://github.com/TeamStarWolf/TeamStarWolf" rel="noopener noreferrer">Library repository</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://github.com/TeamStarWolf/intelligence-hub" rel="noopener noreferrer">Intelligence Hub repository</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://github.com/TeamStarWolf/ATTACK-Navi" rel="noopener noreferrer">ATT&amp;CK-Navi repository</a></li>
+              <li class="tsw-bar__menuitem"><a class="tsw-bar__menulink" href="https://github.com/TeamStarWolf/cybersecurity-resources" rel="noopener noreferrer">Bookmarks repository</a></li>
+            </ul>
+          </div>
+        </li>
+      </ul>
+    </nav>
+    <!-- platform-bar:end -->
+    <div class="bar-main">
+      <a class="brand" href="#/explore" aria-label="TeamStarWolf Intelligence Hub, Explorer"><img src="./icon.svg" width="28" height="28" alt=""><span class="brand-name">TeamStarWolf</span><span class="brand-product">Intelligence Hub</span></a>
+      <div class="bar-actions">
+        <a class="bar-button" href="#/subscribe">Feeds and exports</a>
+        <button id="theme-toggle" class="bar-button" type="button">Theme</button>
+        <button id="sidebar-toggle" class="bar-button" type="button" aria-controls="sidebar" aria-expanded="false">Panels</button>
+      </div>
     </div>
   </header>
   <nav class="tabs" aria-label="Hub views">

@@ -50,6 +50,18 @@ class FilesListTest(unittest.TestCase):
             with self.assertRaisesRegex(site.SiteError, "js/main.js"):
                 site.site_files(target)
 
+    def test_platform_nav_json_is_allowed_but_other_json_is_not(self):
+        # platform-nav.json is the one data asset the Pages artifact carries beside the page files;
+        # any other .json name stays outside the page-file pattern.
+        self.assertIn("platform-nav.json", site.site_files(SITE))
+        with tempfile.TemporaryDirectory() as directory:
+            target = copy_site(directory)
+            good = json.loads((target / "files.json").read_text(encoding="utf-8"))
+            value = {**good, "files": good["files"] + ["menu.json"]}
+            (target / "files.json").write_text(json.dumps(value), encoding="utf-8")
+            with self.assertRaises(site.SiteError):
+                site.site_files(target)
+
 
 class StampTest(unittest.TestCase):
     def test_check_stamps_a_copy_and_leaves_the_repository_unchanged(self):

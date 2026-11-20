@@ -40,8 +40,8 @@ coding agent that changes this repository.
 - `.github/workflows/check.yml` runs on every pull request: the unit tests, the
   fixture currency check, the offline history check, an offline `--cached` build on
   the committed fixture, the page-file and stamping check, `node --check` on every
-  module, the site tests, the contrast check, the 12 px type floor and the em-dash
-  lint. Keep it green, and never
+  module, the site tests, the contrast check, the 12 px type floor, the em-dash
+  lint and the platform-menu check. Keep it green, and never
   weaken a check to make a change pass.
 - Run the same gates locally:
 
@@ -87,6 +87,10 @@ coding agent that changes this repository.
 
   # Em-dash lint outside reports/
   python -I tests/check_em_dash.py
+
+  # Platform menu copy is valid ASCII with the agreed shape (the published canonical
+  # comparison, --canonical, runs in the publish workflow, which has network access)
+  python -I tests/check_platform_nav.py
   ```
 
 - Never raise a byte, count or time bound (feed size, package estimate, article
