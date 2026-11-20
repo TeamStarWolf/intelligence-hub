@@ -53,7 +53,7 @@ ARTICLE_COLUMNS = (
     ("month", "Month of published as YYYY-MM, or empty."),
     ("source_id", "Source id from config/sources.json, or a curated or KEV source id."),
     ("source_class", "Who publishes the row: vendor-primary, government-cert, researcher or press (config/vocab/source_class.json)."),
-    ("desk", "The desk the row sits on: security, infrastructure or it (config/vocab/desk.json), set per source and never inferred from a headline. Publisher feeds, KEV, curated and history rows are security; service-health incident rows are infrastructure; it is reserved for the lifecycle, standards and IT press sources the revision plan adds."),
+    ("desk", "The desk the row sits on: security, infrastructure, podcasts or it (config/vocab/desk.json), set per source and never inferred from a headline. Publisher feeds, KEV, curated and history rows are security; podcast feeds are podcasts; service-health incident rows are infrastructure; it is reserved for the lifecycle, standards and IT press sources the revision plan adds."),
     ("kind", "What the row is: advisory, research, reporting, incident, kev, filing, bulletin, note, change, lifecycle or podcast (config/vocab/kind.json)."),
     ("origin", "publisher-feed (headline and link only), cisa-kev (CISA's catalog text) or library-curation (original paraphrase)."),
     ("title", "Publisher headline, CISA's vulnerability name or the curated title. A cell that would start with =, +, -, @, tab or CR is prefixed with ' so that spreadsheets do not read it as a formula."),
