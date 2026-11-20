@@ -215,8 +215,11 @@ button, input, select { font: inherit; color: inherit; }
 /* 760px and narrower: the bar collapses behind one button and the list opens as an accordion, with
    sub-entries dropping inline. */
 @media (max-width: 760px) {
-  .tsw-bar { height: auto; flex-wrap: wrap; }
-  .tsw-bar__toggle { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; background: transparent; border: 0; color: var(--tsw-bar-fg); font: 500 13px/1.2 var(--tsw-sans); cursor: pointer; }
+  /* The closed band is 44px including the border, as on desktop (the 44px box less the 1px border
+     is the 43px interactive row the toggle fills); it grows to auto only once the list is open. */
+  .tsw-bar { height: 44px; flex-wrap: wrap; }
+  .tsw-bar--list-open { height: auto; }
+  .tsw-bar__toggle { display: inline-flex; align-items: center; min-height: 43px; padding: 0 12px; background: transparent; border: 0; color: var(--tsw-bar-fg); font: 500 13px/1.2 var(--tsw-sans); cursor: pointer; }
   .tsw-bar__list { display: none; flex-direction: column; width: 100%; padding: 4px 8px 8px; overflow-x: visible; }
   .tsw-bar--list-open .tsw-bar__list { display: flex; }
   .tsw-bar__item { flex-direction: column; align-items: stretch; }
