@@ -7,7 +7,7 @@ import unittest
 
 import support
 from intelligence_hub import tagging, vocab
-from intelligence_hub.tagging.engine import compact, export_fields, long_tags, tag_row
+from intelligence_hub.tagging.engine import SHARD_LAYOUT, compact, export_fields, long_tags, tag_row
 
 VOCAB = vocab.load()
 REGISTRY = support.sources()
@@ -406,6 +406,15 @@ class AttackCompletenessTest(unittest.TestCase):
         tactics = sorted({tactic for technique in expected for tactic in VOCAB.tactics[technique]["tactics"]})
         self.assertEqual(flat["attack_tactic"].split(";"), tactics)
         self.assertEqual(sorted({value for field, value, *_rest in long_tags(block) if field == "attack_technique"}), expected)
+
+
+class LayoutDescriptorTest(unittest.TestCase):
+    def test_desk_descriptor_names_every_desk(self):
+        # SHARD_LAYOUT is published in data/v7/index.json as tagging.layout; its
+        # desk descriptor must name every desk the vocab defines so it never drifts.
+        descriptor = SHARD_LAYOUT["desk"]
+        for value in VOCAB.values["desk"]:
+            self.assertIn(value, descriptor, value)
 
 
 if __name__ == "__main__":
