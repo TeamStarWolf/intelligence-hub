@@ -162,8 +162,9 @@ test("A4 query keys and old anchors are accepted as legacy aliases and rewritten
 });
 
 test("the desk key, the reserved kinds and event types and the wall key round-trip, and bad values are dropped", () => {
-  assert.deepEqual(DESKS, ["security", "infrastructure", "it"]);
+  assert.deepEqual(DESKS, ["security", "infrastructure", "it", "podcasts"]);
   for (const desk of DESKS) assert.equal(roundTrip("#/explore?desk=" + desk), "#/explore?desk=" + desk);
+  assert.equal(roundTrip("#/explore?desk=podcasts"), "#/explore?desk=podcasts", "the Podcasts desk value survives the router");
   assert.equal(roundTrip("#/news?desk=it&range=30"), "#/news?desk=it&range=30");
   assert.equal(roundTrip("#/explore?kind=advisory&desk=security"), "#/explore?desk=security&kind=advisory", "desk is written right after q");
   for (const hash of ["#/explore?desk=Security", "#/explore?desk=%3Cx%3E", "#/explore?desk=cloud", "#/kev?desk=security", "#/status?desk=infrastructure"]) {

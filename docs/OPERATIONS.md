@@ -15,9 +15,9 @@ address, so Back and Forward work and a copied link reopens the same view
 
 Every other view is a tab under one of the desks in the two-row strip under the brand bar
 (Security, Infrastructure, Podcasts, Reference) and an entry in the **Panels** sidebar, which
-starts closed: Today, Advisories, Known exploited,
-Research, News, CVEs, History, Vendors, Tags, Actors and malware, Reports, Data,
-Subscribe, Sources, Method, About and Service health. Nothing from those views is drawn above
+starts closed: Today, Advisories, Known exploited, Research, News, CVEs, Actors and
+malware, Patch Tuesday, Service health, Podcasts, History, Vendors, Tags, Reports, Data,
+Subscribe, Sources, Method and About. Nothing from those views is drawn above
 the Explorer on the default route.
 
 - **Today** opens with a brief head: the KEV and three-day counts in words, the

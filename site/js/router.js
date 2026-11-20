@@ -15,7 +15,7 @@ export const VIEW_KIND_NOT = { news: "podcast" };
 const KINDS = ["advisory", "research", "reporting", "incident", "kev", "filing", "bulletin", "note", "change", "lifecycle"];
 const CLASSES = ["vendor-primary", "government-cert", "researcher", "press"];
 // The desks (config/vocab/desk.json). Every view sits under one desk tab; "it" has no view yet.
-export const DESKS = ["security", "infrastructure", "it"];
+export const DESKS = ["security", "infrastructure", "it", "podcasts"];
 export const VIEW_DESK = { explore: "security", today: "security", advisories: "security", kev: "security", research: "security", news: "security", cves: "security", cve: "security",
   actors: "security", actor: "security", malware: "security", "patch-tuesday": "security", status: "infrastructure",
   podcasts: "podcasts",

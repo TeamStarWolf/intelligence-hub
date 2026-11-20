@@ -9,7 +9,7 @@ import { MITRE_NOTICES, licenceTable } from "./method.js";
 
 // Every view besides the Explorer, for the sidebar's list, under its desk. The tab strip carries the same views.
 export const OTHER_VIEW_LINKS = [["today", "Today"], ["advisories", "Advisories"], ["kev", "Known exploited"], ["research", "Research"], ["news", "News"], ["cves", "CVE register"],
-  ["actors", "Actors and malware"], ["patch-tuesday", "Patch Tuesday"], ["status", "Service health"],
+  ["actors", "Actors and malware"], ["patch-tuesday", "Patch Tuesday"], ["status", "Service health"], ["podcasts", "Podcasts"],
   ["history", "History, 1998 to today"], ["vendors", "Vendors"], ["tags", "Tags"], ["reports", "Reports and run record"],
   ["data", "Data downloads"], ["subscribe", "Subscribe: feeds, podcasts and newsletters"], ["sources", "Sources and coverage"], ["method", "Method"], ["about", "About"]];
 // The public site, for the feed addresses a reader copies into a feed reader.
@@ -39,7 +39,7 @@ export const NEWSLETTERS = [
   ["tl;dr sec", "https://tldrsec.com/", "A weekly newsletter of security tools, talks and research."],
   ["CyberWire Daily Briefing", "https://thecyberwire.com/newsletters/daily-briefing", "N2K CyberWire's daily security news briefing."]
 ];
-const DESK_NAMES = { security: "Security desk", infrastructure: "Infrastructure desk", reference: "Reference" };
+const DESK_NAMES = { security: "Security desk", infrastructure: "Infrastructure desk", podcasts: "Podcasts desk", reference: "Reference" };
 
 export function cadenceText(index) {
   if (!index) return "The collector's run record could not be read, so no observed schedule is shown. The workflow asks GitHub for a run every two hours, and GitHub does not guarantee it.";
@@ -74,7 +74,7 @@ export async function renderSidebar(ctx) {
   const method = section("Method and limits", "panel side-panel");
   method.append(node("p", "", "A selected collection, not every incident. Publisher headlines link to their sources; no article body is copied. Unknown exploitation never means safe."), more("How every tag is decided", "method"));
   const views = section("All views", "panel side-panel");
-  for (const desk of ["security", "infrastructure", "reference"]) {
+  for (const desk of ["security", "infrastructure", "podcasts", "reference"]) {
     views.append(node("p", "side-desk", DESK_NAMES[desk]));
     const viewList = node("ul", "detail-list side-views");
     for (const [view, text] of OTHER_VIEW_LINKS.filter(([name]) => VIEW_DESK[name] === desk)) { const item = node("li"); item.append(routeLink(text, formatRoute({ view, id: null, query: {} }))); viewList.append(item); }

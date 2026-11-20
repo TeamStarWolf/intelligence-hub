@@ -335,10 +335,11 @@ test("the tab strip is two rows: the desks, then only the active desk's views, a
   assert.equal(doc.querySelector(".tabs .views").hidden, true, "a desk with one view shows no second row");
   doc.querySelector("#sidebar-toggle").dispatchEvent({ type: "click" });
   await settle(80);
-  assert.deepEqual([...doc.querySelectorAll("#sidebar-body .side-desk")].map(item => item.textContent), ["Security desk", "Infrastructure desk", "Reference"]);
+  assert.deepEqual([...doc.querySelectorAll("#sidebar-body .side-desk")].map(item => item.textContent), ["Security desk", "Infrastructure desk", "Podcasts desk", "Reference"]);
   const lists = [...doc.querySelectorAll("#sidebar-body .side-views")].map(list => [...list.querySelectorAll("a")].map(anchor => anchor.getAttribute("href")));
   assert.deepEqual(lists[1], ["#/status"]);
-  assert.ok(lists[0].includes("#/today") && lists[2].includes("#/history"));
+  assert.deepEqual(lists[2], ["#/podcasts"], "the Podcasts desk lists its one view in the sidebar");
+  assert.ok(lists[0].includes("#/today") && lists[3].includes("#/history"));
 });
 
 test("the Desk filter keeps rows of one desk, lists desks with counts, and status rows fall on the infrastructure desk", async () => {
