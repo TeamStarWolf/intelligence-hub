@@ -136,7 +136,7 @@ class ExportTest(unittest.TestCase):
         manifest = json.loads(files["manifest.json"].decode("utf-8"))
         self.assertTrue(manifest["sources"], "the manifest lists sources")
         for source in manifest["sources"]:
-            self.assertIn(source["desk"], {"security", "infrastructure", "it"}, source["id"])
+            self.assertIn(source["desk"], {"security", "infrastructure", "it", "podcasts"}, source["id"])
         long_rows = parse(files["tags-2026.csv"])[1:]
         self.assertIn(["kev-CVE-2026-90001", "2026-10-01", "exploitation", "known", "high", "kev", ""], long_rows)
         for line in long_rows:

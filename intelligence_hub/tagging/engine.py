@@ -194,7 +194,7 @@ def tag_row(row, context):
 
 SHARD_LAYOUT = {
     "source_class": "value (method source-registry, confidence high)",
-    "desk": "value (method source-registry, confidence high): security, infrastructure or it, from the source's registry entry",
+    "desk": "value (method source-registry, confidence high): security, infrastructure, it or podcasts, from the source's registry entry",
     "exploitation": "[value, method, confidence]",
     "event_type, vendor, product, actor, malware, sector, cwe": "[[value, method, confidence], ...]",
     "region": "[[value, role, method, confidence], ...]",

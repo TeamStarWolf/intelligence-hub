@@ -42,7 +42,7 @@ def tag_source_class(row, context):
 
 
 def tag_desk(row, context):
-    """The desk the row's source sits on (security, infrastructure or it), from the registry entry; never from a headline."""
+    """The desk the row's source sits on (security, infrastructure, it or podcasts), from the registry entry; never from a headline."""
     info = source_info(row, context)
     return [tag(info["desk"], "source-registry", "high")] if info and info.get("desk") in context.vocab.values["desk"] else []
 
