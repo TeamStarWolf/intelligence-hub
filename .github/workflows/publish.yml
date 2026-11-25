@@ -109,20 +109,21 @@ jobs:
   canonical:
     # Reports whether the vendored site/platform-nav.json still matches the published canonical file.
     # It runs here because this workflow has network access, which the pull-request check does not.
-    # It is deliberately non-blocking: the deploy job does not depend on it, and the comparison step
-    # swallows its exit code, because during a cross-site rollout the published file changes before
-    # this copy does and the Hub must keep publishing. It surfaces drift in the run log, never stops
-    # a publish.
+    # It is deliberately non-blocking through continue-on-error: when the copies differ the job shows
+    # as failed, but the workflow run still passes and the deploy job (which does not depend on this
+    # one) still publishes. So a cross-site rollout, where the published file changes before this copy
+    # does, is never blocked, while the mismatch is visible rather than buried in a log.
     if: github.repository == 'TeamStarWolf/intelligence-hub' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    continue-on-error: true
     steps:
       - name: Read repository source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
-      - name: Compare the vendored platform menu with the published file (report only)
-        run: python3 -I tests/check_platform_nav.py --canonical || true
+      - name: Compare the vendored platform menu with the published file
+        run: python3 -I tests/check_platform_nav.py --canonical
 
   deploy:
     needs: collect
