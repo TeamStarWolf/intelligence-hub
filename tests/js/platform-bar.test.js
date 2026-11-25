@@ -264,6 +264,22 @@ test("a fly-out whose bottom would overflow is shifted up by the overflow, never
   assert.ok(400 - shift >= 8, "the fly-out top stays on screen: " + (400 - shift));
 });
 
+test("on a viewport too short for the side fly-out, a fly-out is not placed (the accordion takes over)", async () => {
+  const shell = page();
+  shell.win.innerWidth = 1000;
+  shell.win.innerHeight = 500; // too short: wideScreen() must be false
+  // matches everything except the wide-screen query (which asks for min-height).
+  const bar = createPlatformBar({ doc: shell.doc, win: shell.win, matchMediaImpl: query => ({ matches: query.indexOf("min-height") === -1 }) });
+  bar.init();
+  bar.open("bookmarks");
+  const cat = bar.node("bookmarks").children.find(c => c.children.length > 0);
+  cat.region.getBoundingClientRect = () => ({ left: 900, right: 1200, top: 50, bottom: 480 });
+  cat.caret.dispatchEvent({ type: "click", detail: 1 });
+  assert.ok(!cat.region.classList.contains("tsw-bar__flyout--left"), "no side placement on a short viewport");
+  assert.ok(!cat.region.classList.contains("tsw-bar__flyout--scroll"), "no scroll cap on a short viewport");
+  assert.ok(!cat.region.style.top, "no upward shift on a short viewport");
+});
+
 test("Escape on a nested caret closes only that level and does not bubble to close the whole bar", async () => {
   const { bar } = boot();
   bar.init();

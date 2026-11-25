@@ -208,11 +208,13 @@ button, input, select { font: inherit; color: inherit; }
 /* With JavaScript the carets drive it, so the hover timing, fly-out side and taps are controlled. */
 .tsw-bar--js .tsw-bar__disc[aria-expanded="true"] + .tsw-bar__panel { display: block; }
 .tsw-bar--js .tsw-bar__mdisc[aria-expanded="true"] + .tsw-bar__flyout { display: block; }
-/* 761px and wider: a category's or subsection's sub-entries fly out to the side as their own panel;
-   the panel does not clip, so a fly-out can escape it. A fly-out flips left near the right edge, is
-   pulled up near the bottom, and scrolls inside itself only when the viewport is too short to hold
-   it (so at 600px and taller nothing scrolls). Each level is placed on its own. */
-@media (min-width: 761px) {
+/* Wide and tall enough (min-width 761px and min-height 561px): a category's or subsection's
+   sub-entries fly out to the side as their own panel; the panel does not clip, so a fly-out can
+   escape it. A fly-out flips left near the right edge, is shifted up by its overflow near the bottom,
+   and scrolls inside itself only when the viewport is too short to hold it. Each level is placed on
+   its own. A viewport too short for the tallest panel drops to the small-screen layout below instead
+   (a phone held sideways), so a top-level panel never has to scroll. */
+@media (min-width: 761px) and (min-height: 561px) {
   .tsw-bar__panel { overflow: visible; }
   .tsw-bar__mitem--parent > .tsw-bar__mlink { position: relative; }
   .tsw-bar__mitem > .tsw-bar__flyout { position: absolute; top: -7px; left: 100%; min-width: 200px; max-width: 300px; margin: 0; padding: 6px; background: var(--tsw-bar-bg); border: 1px solid var(--tsw-bar-panel-border); border-radius: 10px; box-shadow: 0 10px 28px var(--tsw-bar-shadow); overflow: visible; z-index: 41; }
@@ -222,12 +224,12 @@ button, input, select { font: inherit; color: inherit; }
   /* Only when the viewport is too short to hold the fly-out does it cap its height and scroll. */
   .tsw-bar__mitem > .tsw-bar__flyout--scroll { max-height: calc(100vh - 16px); overflow-y: auto; }
 }
-/* 760px and narrower: the bar collapses behind one button. The band stays 44px whether the menu is
-   open or closed (the 44px box less the 1px border is the 43px row the button fills); the open list
-   overlays the page, absolutely positioned under the band, and scrolls within itself, so it never
-   pushes the page down. Sub-entries drop inline (an accordion) at every level; each caret fills the
-   44px row. */
-@media (max-width: 760px) {
+/* 760px and narrower, or too short for the side fly-out (max-height 560px, e.g. a phone held
+   sideways): the bar collapses behind one button. The band stays 44px whether the menu is open or
+   closed (the 44px box less the 1px border is the 43px row the button fills); the open list overlays
+   the page, absolutely positioned under the band, and scrolls within itself, so it never pushes the
+   page down. Sub-entries drop inline (an accordion) at every level; each caret fills the 44px row. */
+@media (max-width: 760px), (max-height: 560px) {
   .tsw-bar__toggle { display: inline-flex; align-items: center; min-height: 43px; padding: 0 12px; background: transparent; border: 0; color: var(--tsw-bar-fg); font: 500 13px/1.2 var(--tsw-sans); cursor: pointer; }
   .tsw-bar__list { display: none; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; padding: 4px 8px 8px; background: var(--tsw-bar-bg); border-bottom: 1px solid var(--tsw-bar-border); box-shadow: 0 10px 28px var(--tsw-bar-shadow); max-height: calc(100vh - 44px); overflow-y: auto; z-index: 40; }
   .tsw-bar--list-open .tsw-bar__list { display: flex; }

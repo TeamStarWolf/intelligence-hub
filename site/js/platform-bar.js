@@ -18,7 +18,9 @@
 //   - A coarse pointer (touch) ignores hover and uses the buttons.
 
 const HOVER_POINTER = "(hover: hover) and (pointer: fine)";
-const WIDE_SCREEN = "(min-width: 761px)";
+// The side fly-out layout needs room both ways: a viewport too short for the tallest panel uses the
+// small-screen accordion whatever its width (a phone held sideways), matching the stylesheet.
+const WIDE_SCREEN = "(min-width: 761px) and (min-height: 561px)";
 const CLOSE_DELAY = 220;
 
 export function createPlatformBar(env) {
