@@ -86,6 +86,7 @@ jobs:
       - name: Em-dash lint outside reports/
         run: python -I tests/check_em_dash.py
       - name: Platform menu copy is valid ASCII with the agreed shape
-        # The published canonical comparison (--canonical) runs in the publish workflow, which has
-        # network access; this offline step validates the vendored site/platform-nav.json.
+        # The published canonical comparison (--canonical) runs as a separate, non-blocking report
+        # job in the publish workflow, which has network access; this offline step validates the
+        # vendored site/platform-nav.json and is the one the pull-request check gates on.
         run: python -I tests/check_platform_nav.py

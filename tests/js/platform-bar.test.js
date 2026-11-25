@@ -1,7 +1,9 @@
 // The platform bar on site/index.html. The menu is static markup (generated from platform-nav.json),
-// so this test checks it against the copy and then that platform-bar.js enhances it: carets and
-// chevrons, open and close, the keyboard, the side fly-out and the click-away close. No pending
-// entry may appear in the markup.
+// so this test checks the markup against the copy (top-level links, and all 291 external Bookmarks
+// leaves with their new-tab attributes and screen-reader note), then that platform-bar.js enhances
+// it: carets at every level, the three Bookmarks levels opening one path at a time, the keyboard,
+// the side fly-out with its left flip, hover with a delayed close, and the click-away close. No
+// pending entry may appear in the markup.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -9,20 +11,30 @@ import { ROOT, page } from "./fixtures.js";
 import { createPlatformBar } from "../../site/js/platform-bar.js";
 
 const MENU = JSON.parse(readFileSync(ROOT + "site/platform-nav.json", "utf8"));
+const BOOKMARKS = MENU.items.find(item => item.id === "bookmarks");
+const SR_NOTE = "(opens in a new tab on an external site)";
 
-function boot() {
+function boot(env = {}) {
   const shell = page();
-  const bar = createPlatformBar({ doc: shell.doc, win: shell.win });
+  const bar = createPlatformBar({ doc: shell.doc, win: shell.win, ...env });
   return { ...shell, bar };
 }
 
-const hrefsIn = root => [...root.querySelectorAll("a")].map(a => a.getAttribute("href"));
-const pendingHrefs = () => {
+const isLeaf = entry => !Array.isArray(entry.menu);
+function countExternal(entries) {
+  let total = 0;
+  for (const entry of entries || []) {
+    if (isLeaf(entry)) { if (entry.external === true) total += 1; }
+    else total += countExternal(entry.menu);
+  }
+  return total;
+}
+function pendingHrefs() {
   const out = [];
   const walk = node => { for (const entry of node.menu || []) { if (entry.pending) out.push(entry.href); walk(entry); } };
   for (const item of MENU.items) walk(item);
   return out;
-};
+}
 
 test("the static top-level links match the menu file, in order, and no pending address is in the markup", async () => {
   const { doc } = boot();
@@ -30,40 +42,62 @@ test("the static top-level links match the menu file, in order, and no pending a
   assert.deepEqual(items.map(li => li.dataset.tswItem), MENU.items.map(item => item.id));
   for (const li of items) {
     const item = MENU.items.find(entry => entry.id === li.dataset.tswItem);
-    const link = li.querySelector(".tsw-bar__link");
+    const link = [...li.children].find(child => child.classList.contains("tsw-bar__link"));
     assert.equal(link.getAttribute("href"), item.href, item.id + " href");
     assert.equal(link.textContent, item.label, item.id + " label");
   }
   const pending = pendingHrefs();
   assert.ok(pending.length >= 1, "the fixture still has a pending entry to exclude");
-  const barHrefs = hrefsIn(doc.querySelector("[data-tsw-bar]"));
-  for (const href of pending) assert.ok(!barHrefs.includes(href), "pending address absent: " + href);
+  const hrefs = [...doc.querySelector("[data-tsw-bar]").querySelectorAll("a")].map(a => a.getAttribute("href"));
+  for (const href of pending) assert.ok(!hrefs.includes(href), "pending address absent: " + href);
+  const names = [...doc.querySelectorAll(".tsw-bar__mlink")].map(a => a.textContent);
+  assert.ok(!names.some(name => name.startsWith("Security policy")), "pending label absent");
 });
 
-test("enhancing adds a caret per item and a chevron per category, and sets a roving tabindex", async () => {
+test("every external Bookmarks leaf renders with the new-tab attributes, a hidden marker and the note", async () => {
+  const { doc } = boot();
+  const expected = countExternal(BOOKMARKS.menu);
+  assert.equal(expected, 291, "the menu still carries 291 external leaves");
+  const ext = [...doc.querySelectorAll(".tsw-bar__mlink--ext")];
+  assert.equal(ext.length, expected, "every external leaf is rendered");
+  for (const link of ext) {
+    assert.equal(link.getAttribute("target"), "_blank", link.getAttribute("href") + " target");
+    assert.equal(link.getAttribute("rel"), "noopener noreferrer", link.getAttribute("href") + " rel");
+    const marker = [...link.children].find(child => child.classList.contains("tsw-bar__ext"));
+    assert.ok(marker && marker.getAttribute("aria-hidden") === "true", "a hidden arrow marker");
+    const note = [...link.children].find(child => child.classList.contains("tsw-bar__sr"));
+    assert.ok(note && note.textContent.includes(SR_NOTE), "a screen-reader note");
+    assert.ok(link.textContent.trimEnd().endsWith(SR_NOTE), "the accessible name ends with the note");
+    assert.ok(link.getAttribute("href").startsWith("https://"), "an https address");
+  }
+  // A header (a category or subsection) is an internal link, not external.
+  const headers = [...doc.querySelectorAll(".tsw-bar__mitem--parent")].map(li => [...li.children].find(c => c.classList.contains("tsw-bar__mlink")));
+  assert.ok(headers.length >= 42, "categories and subsections are present");
+  for (const header of headers) {
+    assert.ok(!header.classList.contains("tsw-bar__mlink--ext"), "a header is not external");
+    assert.ok(header.getAttribute("href").startsWith("https://github.com/TeamStarWolf/"), "a header is an internal link");
+  }
+});
+
+test("enhancing adds a caret per item and per nested parent, a Menu toggle, and a roving tabindex", async () => {
   const { doc, bar } = boot();
   bar.init();
   assert.ok(doc.querySelector("[data-tsw-bar]").classList.contains("tsw-bar--js"));
-  const home = bar.record("home");
-  assert.ok(home.caret, "home has a caret");
-  assert.equal(home.caret.getAttribute("aria-expanded"), "false");
-  assert.deepEqual(home.entries.map(entry => entry.link.textContent), ["Front page", "Search", "Design system"]);
-  for (const entry of home.entries) assert.equal(entry.link.getAttribute("tabindex"), "-1");
+  assert.ok(doc.querySelector(".tsw-bar__toggle"), "a small-screen Menu toggle");
+  assert.equal([...doc.querySelectorAll(".tsw-bar__disc")].length, MENU.items.length, "one top caret per item");
+  // Categories (12) plus subsections (30) each carry a chevron.
+  assert.equal([...doc.querySelectorAll(".tsw-bar__mdisc")].length, 42, "a chevron per category and subsection");
+  for (const link of doc.querySelectorAll(".tsw-bar__mlink")) assert.equal(link.getAttribute("tabindex"), "-1");
 
   const hub = MENU.items.find(item => item.id === "hub");
-  assert.deepEqual(bar.record("hub").entries.map(entry => entry.link.textContent), hub.menu.map(entry => entry.label));
-
-  // Bookmarks has categories with their own chevron and sub-entries.
-  const parents = bar.record("bookmarks").entries.filter(entry => entry.subcaret);
-  assert.ok(parents.length >= 1, "a bookmarks category carries a chevron");
-  const sub = parents[0].subLinks.map(a => a.textContent);
-  assert.ok(sub.length >= 2 && parents[0].subLinks.every(a => a.getAttribute("tabindex") === "-1"));
+  assert.deepEqual(bar.node("hub").links.map(a => a.textContent), hub.menu.map(entry => entry.label));
+  assert.equal(bar.node("bookmarks").children.length, BOOKMARKS.menu.length, "a node per category");
 });
 
-test("the caret opens and closes the panel; only one is open at a time", async () => {
+test("the caret opens and closes the panel; only one top panel is open at a time", async () => {
   const { bar } = boot();
   bar.init();
-  const home = bar.record("home");
+  const home = bar.node("home");
   home.caret.dispatchEvent({ type: "click", detail: 1 });
   assert.equal(bar.isOpen("home"), true);
   assert.equal(home.caret.getAttribute("aria-expanded"), "true");
@@ -73,14 +107,39 @@ test("the caret opens and closes the panel; only one is open at a time", async (
   assert.equal(bar.isOpen("library"), true);
 });
 
+test("the three Bookmarks levels open, one path at a time at each level", async () => {
+  const { bar } = boot();
+  bar.init();
+  bar.open("bookmarks");
+  const cats = bar.node("bookmarks").children;
+  const subsCat = cats.find(cat => cat.children.length > 0);
+  const otherCat = cats.find(cat => cat !== subsCat);
+  assert.ok(subsCat && otherCat, "a category with subsections and another category");
+
+  subsCat.caret.dispatchEvent({ type: "click", detail: 1 });
+  assert.equal(subsCat.expanded, true, "the category fly-out opens");
+  otherCat.caret.dispatchEvent({ type: "click", detail: 1 });
+  assert.equal(subsCat.expanded, false, "opening a sibling category closes the first");
+  assert.equal(otherCat.expanded, true);
+
+  subsCat.caret.dispatchEvent({ type: "click", detail: 1 });
+  const [sub0, sub1] = subsCat.children;
+  assert.ok(sub0 && sub1, "the category has at least two subsections");
+  sub0.caret.dispatchEvent({ type: "click", detail: 1 });
+  assert.equal(sub0.expanded, true, "a subsection fly-out opens");
+  sub1.caret.dispatchEvent({ type: "click", detail: 1 });
+  assert.equal(sub0.expanded, false, "opening a sibling subsection closes the first");
+  assert.equal(sub1.expanded, true);
+});
+
 test("ArrowDown opens and focuses the first entry; Escape closes and returns focus to the caret", async () => {
   const { doc, bar } = boot();
   bar.init();
-  const home = bar.record("home");
+  const home = bar.node("home");
   home.caret.dispatchEvent({ type: "keydown", key: "ArrowDown", preventDefault() {} });
   assert.equal(bar.isOpen("home"), true);
-  assert.equal(doc.activeElement, home.entries[0].link);
-  home.entries[0].link.dispatchEvent({ type: "keydown", key: "Escape", preventDefault() {} });
+  assert.equal(doc.activeElement, home.links[0]);
+  home.links[0].dispatchEvent({ type: "keydown", key: "Escape", preventDefault() {} });
   assert.equal(bar.isOpen("home"), false);
   assert.equal(doc.activeElement, home.caret);
 });
@@ -88,36 +147,44 @@ test("ArrowDown opens and focuses the first entry; Escape closes and returns foc
 test("ArrowRight opens a category's fly-out and moves in; ArrowLeft closes it and returns", async () => {
   const { doc, bar } = boot();
   bar.init();
-  const record = bar.record("bookmarks");
-  const index = record.entries.findIndex(entry => entry.subcaret);
-  const entry = record.entries[index];
   bar.open("bookmarks");
-  entry.link.dispatchEvent({ type: "keydown", key: "ArrowRight", preventDefault() {} });
-  assert.equal(bar.isFlyoutOpen("bookmarks", index), true);
-  assert.equal(doc.activeElement, entry.subLinks[0]);
-  entry.subLinks[0].dispatchEvent({ type: "keydown", key: "ArrowLeft", preventDefault() {} });
-  assert.equal(bar.isFlyoutOpen("bookmarks", index), false);
-  assert.equal(doc.activeElement, entry.link);
+  const node = bar.node("bookmarks");
+  const subsCat = node.children.find(cat => cat.children.length > 0);
+  const header = subsCat.headerLink;
+  header.dispatchEvent({ type: "keydown", key: "ArrowRight", preventDefault() {} });
+  assert.equal(subsCat.expanded, true);
+  assert.equal(doc.activeElement, subsCat.links[0]);
+  subsCat.links[0].dispatchEvent({ type: "keydown", key: "ArrowLeft", preventDefault() {} });
+  assert.equal(subsCat.expanded, false);
+  assert.equal(doc.activeElement, header);
 });
 
-test("the chevron button toggles its fly-out, and only one fly-out is open at a time", async () => {
-  const { bar } = boot();
+test("Escape walks back out one open level at a time, deepest first", async () => {
+  const { doc, bar } = boot();
   bar.init();
-  const record = bar.record("bookmarks");
-  const parents = record.entries.map((entry, index) => ({ entry, index })).filter(pair => pair.entry.subcaret);
   bar.open("bookmarks");
-  parents[0].entry.subcaret.dispatchEvent({ type: "click", detail: 1 });
-  assert.equal(bar.isFlyoutOpen("bookmarks", parents[0].index), true);
-  parents[1].entry.subcaret.dispatchEvent({ type: "click", detail: 1 });
-  assert.equal(bar.isFlyoutOpen("bookmarks", parents[0].index), false, "opening the second closes the first");
-  assert.equal(bar.isFlyoutOpen("bookmarks", parents[1].index), true);
+  const top = bar.node("bookmarks");
+  const cat = top.children.find(c => c.children.length > 0);
+  bar.node("bookmarks");
+  cat.caret.dispatchEvent({ type: "click", detail: 0 });   // open the category, focus its first entry
+  const sub = cat.children[0];
+  sub.caret.dispatchEvent({ type: "click", detail: 0 });    // open a subsection, focus its first leaf
+  assert.equal(sub.expanded, true);
+  // Escape on the deepest entry closes the subsection and returns to its caret.
+  doc.activeElement.dispatchEvent({ type: "keydown", key: "Escape", preventDefault() {} });
+  assert.equal(sub.expanded, false);
+  assert.equal(cat.expanded, true, "the category stays open");
+  // Escape on the category caret closes the category; the panel stays open.
+  cat.caret.dispatchEvent({ type: "keydown", key: "Escape", preventDefault() {} });
+  assert.equal(cat.expanded, false);
+  assert.equal(bar.isOpen("bookmarks"), true);
 });
 
 test("a click outside the bar closes an open panel; a click inside does not", async () => {
   const { doc, bar } = boot();
   bar.init();
   bar.open("home");
-  doc.dispatchEvent({ type: "click", target: bar.record("home").entries[0].link });
+  doc.dispatchEvent({ type: "click", target: bar.node("home").links[0] });
   assert.equal(bar.isOpen("home"), true);
   doc.dispatchEvent({ type: "click", target: doc.querySelector("#q") });
   assert.equal(bar.isOpen("home"), false);
@@ -136,20 +203,18 @@ function timerStub() {
 }
 
 test("on a fine pointer, hover opens a menu immediately", async () => {
-  const shell = page();
-  const bar = createPlatformBar({ doc: shell.doc, win: shell.win, matchMediaImpl: () => ({ matches: true }) });
+  const { bar, doc } = boot({ matchMediaImpl: () => ({ matches: true }) });
   bar.init();
-  bar.record("home").li.dispatchEvent({ type: "pointerenter" });
+  bar.node("home").owner.dispatchEvent({ type: "pointerenter" });
   assert.equal(bar.isOpen("home"), true);
+  void doc;
 });
 
 test("the menu closes after the delay when the pointer leaves, and a re-enter cancels the close", async () => {
-  const shell = page();
   const timers = timerStub();
-  const bar = createPlatformBar({ doc: shell.doc, win: shell.win, matchMediaImpl: () => ({ matches: true }),
-    setTimeoutImpl: timers.setTimeoutImpl, clearTimeoutImpl: timers.clearTimeoutImpl });
+  const { bar, doc } = boot({ matchMediaImpl: () => ({ matches: true }), setTimeoutImpl: timers.setTimeoutImpl, clearTimeoutImpl: timers.clearTimeoutImpl });
   bar.init();
-  const nav = shell.doc.querySelector("[data-tsw-bar]");
+  const nav = doc.querySelector("[data-tsw-bar]");
   bar.open("home");
   nav.dispatchEvent({ type: "pointerleave" });
   assert.equal(bar.isOpen("home"), true, "it stays open until the timer fires");
@@ -165,17 +230,68 @@ test("the menu closes after the delay when the pointer leaves, and a re-enter ca
 test("a fly-out opens to the right, and flips left when its right edge would cross the viewport", async () => {
   const shell = page();
   shell.win.innerWidth = 1000;
+  shell.win.innerHeight = 900;
   const bar = createPlatformBar({ doc: shell.doc, win: shell.win, matchMediaImpl: () => ({ matches: true }) });
   bar.init();
-  const record = bar.record("bookmarks");
-  const index = record.entries.findIndex(entry => entry.subcaret);
-  const entry = record.entries[index];
   bar.open("bookmarks");
-  entry.submenu.getBoundingClientRect = () => ({ left: 400, right: 600 });
-  entry.subcaret.dispatchEvent({ type: "click", detail: 1 });
-  assert.equal(entry.submenu.classList.contains("tsw-bar__submenu--flip"), false, "opens right when it fits");
-  entry.subcaret.dispatchEvent({ type: "click", detail: 1 }); // close
-  entry.submenu.getBoundingClientRect = () => ({ left: 900, right: 1200 });
-  entry.subcaret.dispatchEvent({ type: "click", detail: 1 }); // reopen near the edge
-  assert.equal(entry.submenu.classList.contains("tsw-bar__submenu--flip"), true, "flips left near the right edge");
+  const cat = bar.node("bookmarks").children.find(c => c.children.length > 0);
+  cat.region.getBoundingClientRect = () => ({ left: 400, right: 600, top: 50, bottom: 300 });
+  cat.caret.dispatchEvent({ type: "click", detail: 1 });
+  assert.equal(cat.region.classList.contains("tsw-bar__flyout--left"), false, "opens right when it fits");
+  cat.caret.dispatchEvent({ type: "click", detail: 1 }); // close
+  cat.region.getBoundingClientRect = () => ({ left: 900, right: 1200, top: 50, bottom: 300 });
+  cat.caret.dispatchEvent({ type: "click", detail: 1 }); // reopen near the edge
+  assert.equal(cat.region.classList.contains("tsw-bar__flyout--left"), true, "flips left near the right edge");
+});
+
+test("a fly-out whose bottom would overflow is shifted up by the overflow, never above the top edge", async () => {
+  const shell = page();
+  shell.win.innerWidth = 1000;
+  shell.win.innerHeight = 600;
+  const bar = createPlatformBar({ doc: shell.doc, win: shell.win, matchMediaImpl: () => ({ matches: true }) });
+  bar.init();
+  bar.open("bookmarks");
+  const cat = bar.node("bookmarks").children.find(c => c.children.length > 0);
+  // A category row low on the screen with a panel taller than the space below it (bottom at 820, a
+  // 600px viewport). The old code anchored its bottom and let the top run off the screen.
+  cat.region.getBoundingClientRect = () => ({ left: 300, right: 500, top: 400, bottom: 820, height: 420 });
+  cat.caret.dispatchEvent({ type: "click", detail: 1 });
+  assert.ok(!cat.region.classList.contains("tsw-bar__flyout--scroll"), "it fits once shifted, so it does not scroll");
+  const top = cat.region.style.top;
+  assert.ok(top, "a vertical shift was applied");
+  const shift = -parseFloat(top) - 7;                 // style.top is "-(7 + shift)px"
+  assert.equal(shift, 228, "shifted up by exactly the bottom overflow (820 - (600 - 8))");
+  assert.ok(400 - shift >= 8, "the fly-out top stays on screen: " + (400 - shift));
+});
+
+test("on a viewport too short for the side fly-out, a fly-out is not placed (the accordion takes over)", async () => {
+  const shell = page();
+  shell.win.innerWidth = 1000;
+  shell.win.innerHeight = 500; // too short: wideScreen() must be false
+  // matches everything except the wide-screen query (which asks for min-height).
+  const bar = createPlatformBar({ doc: shell.doc, win: shell.win, matchMediaImpl: query => ({ matches: query.indexOf("min-height") === -1 }) });
+  bar.init();
+  bar.open("bookmarks");
+  const cat = bar.node("bookmarks").children.find(c => c.children.length > 0);
+  cat.region.getBoundingClientRect = () => ({ left: 900, right: 1200, top: 50, bottom: 480 });
+  cat.caret.dispatchEvent({ type: "click", detail: 1 });
+  assert.ok(!cat.region.classList.contains("tsw-bar__flyout--left"), "no side placement on a short viewport");
+  assert.ok(!cat.region.classList.contains("tsw-bar__flyout--scroll"), "no scroll cap on a short viewport");
+  assert.ok(!cat.region.style.top, "no upward shift on a short viewport");
+});
+
+test("Escape on a nested caret closes only that level and does not bubble to close the whole bar", async () => {
+  const { bar } = boot();
+  bar.init();
+  bar.open("bookmarks");
+  const cat = bar.node("bookmarks").children.find(c => c.children.length > 0);
+  cat.caret.dispatchEvent({ type: "click", detail: 0 });
+  const sub = cat.children[0];
+  sub.caret.dispatchEvent({ type: "click", detail: 0 });
+  assert.equal(sub.expanded, true, "the subsection is open");
+  // A real keydown bubbles to the document; the handler must stop it so only the subsection closes.
+  sub.caret.dispatchEvent({ type: "keydown", key: "Escape", bubbles: true, preventDefault() {}, stopPropagation() { this.cancelBubble = true; } });
+  assert.equal(sub.expanded, false, "the subsection closed");
+  assert.equal(cat.expanded, true, "the category stayed open");
+  assert.equal(bar.isOpen("bookmarks"), true, "the top panel stayed open");
 });
