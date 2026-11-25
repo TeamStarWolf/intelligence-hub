@@ -7,10 +7,13 @@
 // control of its own. createPlatformBar takes every browser object it uses, so tests/js can run it
 // with stand-ins; the real page boots it at the end.
 //
-// The Bookmarks menu nests three levels (category, then subsection, then the links); every other menu
-// is one level. The model is the same at every level: a node is a caret button plus the region it
-// opens (a top-level item's panel, or a category's or subsection's fly-out), holding links and child
-// nodes. Behaviour the reference build settled, held here and in the stylesheet:
+// A top-level item may carry no menu at all (its markup is then just a link, with no panel): it is a
+// plain link, gets no caret, no node and no aria, and hovering or focusing it still closes any open
+// menu, as moving onto a sibling menu would. The Bookmarks menu nests three levels (category, then
+// subsection, then the links); every other menu is one level. The model is the same at every level:
+// a node is a caret button plus the region it opens (a top-level item's panel, or a category's or
+// subsection's fly-out), holding links and child nodes. Behaviour the reference build settled, held
+// here and in the stylesheet:
 //   - A menu opens on hover and from its caret button (aria-expanded); one open path shows at a time.
 //   - A category or subsection with children gets a chevron button; its fly-out opens to the right,
 //     flips left when the right edge would cross the viewport, and is pulled up near the bottom.
@@ -248,11 +251,20 @@ export function createPlatformBar(env) {
     for (const child of node.children) wireTree(child, false);
   }
 
+  // A top-level item with no menu has no panel in the markup: leave it a plain link (no caret, no
+  // node, no aria), but still close any open menu when the pointer or focus lands on it, the same
+  // way opening a sibling menu would.
+  function wirePlainTop(link) {
+    if (finePointer()) link.addEventListener("pointerenter", closeEverything);
+    link.addEventListener("focus", closeEverything);
+  }
+
   function enhanceItem(li) {
     const id = li.dataset.tswItem;
     const link = childWith(li, "tsw-bar__link");
     const panel = childWith(li, "tsw-bar__panel");
-    if (!id || !link || !panel) return;
+    if (!id || !link) return;
+    if (!panel) { wirePlainTop(link); return; }
     const controls = panel.getAttribute("id") || ("tsw-bar-panel-" + id);
     const caret = caretButton("tsw-bar__disc", controls, (link.textContent || id) + " menu");
     insertBefore(li, caret, panel);
