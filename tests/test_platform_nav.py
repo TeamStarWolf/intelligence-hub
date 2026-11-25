@@ -5,7 +5,9 @@ rule (inside Bookmarks, on a leaf flagged external: a real DNS host off the four
 userinfo, IP literal, punycode, dot segment or encoded slash, at most 512 characters, and never an
 address the TeamStarWolf rule would accept). Also the Bookmarks nesting and the entry caps.
 check_platform_nav.py runs as a script in the pull-request check; these exercise its validation."""
+import io
 import json
+import sys
 import unittest
 
 import check_platform_nav as check
@@ -68,6 +70,23 @@ class PlatformNavTest(unittest.TestCase):
                                 "menu": [leaf("https://attack.mitre.org/")]}]),
         ])
         self.assertEqual(run(menu), [])
+
+    # --- a top-level item may be a plain link, with no menu (version 7: Home) ---
+    def test_a_top_level_item_with_no_menu_key_is_valid(self):
+        menu = base()
+        del menu["items"][0]["menu"]
+        self.assertEqual(run(menu), [])
+
+    def test_a_top_level_item_with_an_empty_menu_is_valid(self):
+        menu = base()
+        menu["items"][0]["menu"] = []
+        self.assertEqual(run(menu), [])
+
+    def test_a_plain_link_item_still_has_its_address_checked(self):
+        menu = base()
+        del menu["items"][0]["menu"]
+        menu["items"][0]["href"] = "https://evil.example.com/"
+        self.assertTrue(any("not a TeamStarWolf property" in line for line in run(menu)), run(menu))
 
     # --- the TeamStarWolf https rule (unchanged from every version) ---
     def test_a_host_outside_the_allow_list_fails(self):
@@ -236,6 +255,107 @@ class PlatformNavTest(unittest.TestCase):
                           "menu": [leaf("https://nvd.nist.gov/")]}]}
         menu = bookmarks([category("Daily", [deep])])
         self.assertTrue(any("nests deeper than the Bookmarks item allows" in line for line in run(menu)), run(menu))
+
+
+class RenderBarTest(unittest.TestCase):
+    """render_bar generates the static bar. A top-level item with no menu (or nothing shippable) is a
+    plain link with no panel; a menu-bearing item keeps its panel; pending entries are dropped at
+    every level. These exercise the generator against fixtures, so they do not depend on the shape of
+    the vendored file (which, from version 7, carries no pending entry and a plain Home)."""
+
+    def test_a_menu_less_top_item_renders_as_a_plain_link_with_no_panel(self):
+        menu = base()
+        del menu["items"][0]["menu"]
+        out = check.render_bar(menu)
+        self.assertIn('data-tsw-item="home"', out)
+        self.assertIn('<a class="tsw-bar__link" href="https://teamstarwolf.com/"', out)
+        self.assertNotIn("tsw-bar-panel-home", out)
+
+    def test_an_empty_menu_top_item_renders_as_a_plain_link_with_no_panel(self):
+        menu = base()
+        menu["items"][0]["menu"] = []
+        out = check.render_bar(menu)
+        self.assertIn('data-tsw-item="home"', out)
+        self.assertNotIn("tsw-bar-panel-home", out)
+
+    def test_a_menu_bearing_item_still_renders_its_panel(self):
+        out = check.render_bar(base())
+        self.assertIn('id="tsw-bar-panel-home"', out)
+        self.assertIn('id="tsw-bar-panel-github"', out)
+
+    def test_render_drops_a_pending_top_entry_but_keeps_its_live_sibling(self):
+        menu = base()
+        menu["items"][0]["menu"] = [
+            {"label": "Live page", "href": "https://teamstarwolf.com/live"},
+            {"label": "Later page", "href": "https://teamstarwolf.com/later", "pending": "not live yet"},
+        ]
+        out = check.render_bar(menu)
+        self.assertIn("Live page", out)
+        self.assertIn("https://teamstarwolf.com/live", out)
+        self.assertNotIn("Later page", out)
+        self.assertNotIn("https://teamstarwolf.com/later", out)
+
+    def test_render_drops_a_pending_bookmarks_leaf(self):
+        menu = bookmarks([category("Daily", [
+            {"label": "Live leaf", "href": "https://nvd.nist.gov/live", "external": True},
+            {"label": "Hidden leaf", "href": "https://nvd.nist.gov/hidden", "external": True, "pending": "later"},
+        ])])
+        out = check.render_bar(menu)
+        self.assertIn("Live leaf", out)
+        self.assertNotIn("Hidden leaf", out)
+
+    def test_an_item_whose_menu_is_all_pending_renders_no_panel(self):
+        menu = base()
+        menu["items"][0]["menu"] = [{"label": "Later page", "href": "https://teamstarwolf.com/later", "pending": "not live yet"}]
+        out = check.render_bar(menu)
+        self.assertNotIn("tsw-bar-panel-home", out)
+        self.assertNotIn("Later page", out)
+
+
+class Cp1252Stdout:
+    """A redirected Windows console stand-in: text writes go through cp1252 and raise on a character
+    it cannot encode (as a plain print would), while .buffer takes raw bytes. --emit must reach the
+    bytes, not the text write, so a non-ASCII label (an arrow) does not crash it."""
+    encoding = "cp1252"
+
+    def __init__(self):
+        self.buffer = io.BytesIO()
+
+    def write(self, text):
+        self.buffer.write(text.encode("cp1252"))  # raises UnicodeEncodeError on, for example, U+2192
+
+    def flush(self):
+        pass
+
+
+class EmitTest(unittest.TestCase):
+    def _capture_emit(self, markup):
+        out = Cp1252Stdout()
+        saved = sys.stdout
+        sys.stdout = out
+        try:
+            check.emit(markup)
+        finally:
+            sys.stdout = saved
+        return out.buffer.getvalue()
+
+    def test_emit_writes_utf8_for_a_label_the_console_cannot_encode(self):
+        # The file carries a non-ASCII label character as a \uXXXX escape; emit must not route it
+        # through a cp1252 console, where it would raise UnicodeEncodeError.
+        markup = '<a class="tsw-bar__mlink" href="https://teamstarwolf.com/x">Gov → Alerts</a>'
+        self.assertEqual(self._capture_emit(markup).decode("utf-8"), markup + "\n")
+
+    def test_emit_via_main_does_not_crash_on_a_cp1252_console(self):
+        out = Cp1252Stdout()
+        saved = sys.stdout
+        sys.stdout = out
+        try:
+            rc = check.main(["--emit"])
+        finally:
+            sys.stdout = saved
+        self.assertEqual(rc, 0)
+        menu = json.loads(check.COPY.read_bytes().decode("ascii"))
+        self.assertEqual(out.buffer.getvalue().decode("utf-8").rstrip("\n"), check.render_bar(menu))
 
 
 if __name__ == "__main__":

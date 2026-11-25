@@ -8,6 +8,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { ROOT, page } from "./fixtures.js";
+import { parseHtml } from "./dom.js";
 import { createPlatformBar } from "../../site/js/platform-bar.js";
 
 const MENU = JSON.parse(readFileSync(ROOT + "site/platform-nav.json", "utf8"));
@@ -18,6 +19,53 @@ function boot(env = {}) {
   const shell = page();
   const bar = createPlatformBar({ doc: shell.doc, win: shell.win, ...env });
   return { ...shell, bar };
+}
+
+// A hand-written bar in the version 7 shape, so the menu-behaviour tests do not depend on which real
+// items carry a menu (from version 7, Home is a plain link). It mirrors the class contract render_bar
+// emits: "home" and "empty" are plain links with no panel (a menu-less item and one whose menu is
+// empty both render this way); "docs" has a one-level menu; "marks" has a nested fly-out.
+const FIXTURE_HTML = `<!doctype html><html><head></head><body>
+<nav class="tsw-bar" aria-label="TeamStarWolf platform" data-tsw-bar>
+  <a class="tsw-bar__wordmark" href="https://teamstarwolf.com/" rel="noopener noreferrer">TeamStarWolf</a>
+  <ul class="tsw-bar__list">
+    <li class="tsw-bar__item" data-tsw-item="home"><a class="tsw-bar__link" href="https://teamstarwolf.com/" rel="noopener noreferrer">Home</a></li>
+    <li class="tsw-bar__item" data-tsw-item="empty"><a class="tsw-bar__link" href="https://teamstarwolf.com/empty" rel="noopener noreferrer">Empty</a></li>
+    <li class="tsw-bar__item" data-tsw-item="docs">
+      <a class="tsw-bar__link" href="https://teamstarwolf.com/docs" rel="noopener noreferrer">Docs</a>
+      <div class="tsw-bar__panel" id="tsw-bar-panel-docs">
+        <ul class="tsw-bar__flyout" aria-label="Docs">
+          <li class="tsw-bar__mitem"><a class="tsw-bar__mlink" href="https://teamstarwolf.com/a" rel="noopener noreferrer">Alpha</a></li>
+          <li class="tsw-bar__mitem"><a class="tsw-bar__mlink" href="https://teamstarwolf.com/b" rel="noopener noreferrer">Beta</a></li>
+        </ul>
+      </div>
+    </li>
+    <li class="tsw-bar__item" data-tsw-item="marks">
+      <a class="tsw-bar__link" href="https://teamstarwolf.com/marks" rel="noopener noreferrer">Marks</a>
+      <div class="tsw-bar__panel" id="tsw-bar-panel-marks">
+        <ul class="tsw-bar__flyout" aria-label="Marks">
+          <li class="tsw-bar__mitem tsw-bar__mitem--parent">
+            <a class="tsw-bar__mlink" href="https://github.com/TeamStarWolf/x" rel="noopener noreferrer">Group</a>
+            <ul class="tsw-bar__flyout" aria-label="Group">
+              <li class="tsw-bar__mitem"><a class="tsw-bar__mlink" href="https://teamstarwolf.com/g1" rel="noopener noreferrer">One</a></li>
+              <li class="tsw-bar__mitem"><a class="tsw-bar__mlink" href="https://teamstarwolf.com/g2" rel="noopener noreferrer">Two</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </li>
+  </ul>
+</nav>
+<input id="q">
+</body></html>`;
+
+function fixtureBoot(env = {}) {
+  const doc = parseHtml(FIXTURE_HTML);
+  globalThis.document = doc;
+  const listeners = {};
+  const win = { addEventListener: (type, handler) => (listeners[type] ||= []).push(handler), dispatch: type => (listeners[type] || []).forEach(handler => handler({ type })), matchMedia: () => ({ matches: false }) };
+  const bar = createPlatformBar({ doc, win, ...env });
+  return { doc, win, bar };
 }
 
 const isLeaf = entry => !Array.isArray(entry.menu);
@@ -46,12 +94,11 @@ test("the static top-level links match the menu file, in order, and no pending a
     assert.equal(link.getAttribute("href"), item.href, item.id + " href");
     assert.equal(link.textContent, item.label, item.id + " label");
   }
-  const pending = pendingHrefs();
-  assert.ok(pending.length >= 1, "the fixture still has a pending entry to exclude");
+  // render_bar drops every entry marked "pending", so none reaches the static markup. This holds
+  // whether or not the vendored file currently carries a pending entry (from version 7 it carries
+  // none); the filter itself is exercised against fixtures in tests/test_platform_nav.py.
   const hrefs = [...doc.querySelector("[data-tsw-bar]").querySelectorAll("a")].map(a => a.getAttribute("href"));
-  for (const href of pending) assert.ok(!hrefs.includes(href), "pending address absent: " + href);
-  const names = [...doc.querySelectorAll(".tsw-bar__mlink")].map(a => a.textContent);
-  assert.ok(!names.some(name => name.startsWith("Security policy")), "pending label absent");
+  for (const href of pendingHrefs()) assert.ok(!hrefs.includes(href), "pending address absent: " + href);
 });
 
 test("every external Bookmarks leaf renders with the new-tab attributes, a hidden marker and the note", async () => {
@@ -84,7 +131,10 @@ test("enhancing adds a caret per item and per nested parent, a Menu toggle, and 
   bar.init();
   assert.ok(doc.querySelector("[data-tsw-bar]").classList.contains("tsw-bar--js"));
   assert.ok(doc.querySelector(".tsw-bar__toggle"), "a small-screen Menu toggle");
-  assert.equal([...doc.querySelectorAll(".tsw-bar__disc")].length, MENU.items.length, "one top caret per item");
+  // One top caret per menu-bearing item (a top item with a panel). An item with no menu is a plain
+  // link and gets none, so this counts panels rather than items.
+  const panels = [...doc.querySelectorAll(".tsw-bar__panel")];
+  assert.equal([...doc.querySelectorAll(".tsw-bar__disc")].length, panels.length, "one top caret per menu-bearing item");
   // Categories (12) plus subsections (30) each carry a chevron.
   assert.equal([...doc.querySelectorAll(".tsw-bar__mdisc")].length, 42, "a chevron per category and subsection");
   for (const link of doc.querySelectorAll(".tsw-bar__mlink")) assert.equal(link.getAttribute("tabindex"), "-1");
@@ -95,16 +145,16 @@ test("enhancing adds a caret per item and per nested parent, a Menu toggle, and 
 });
 
 test("the caret opens and closes the panel; only one top panel is open at a time", async () => {
-  const { bar } = boot();
+  const { bar } = fixtureBoot();
   bar.init();
-  const home = bar.node("home");
-  home.caret.dispatchEvent({ type: "click", detail: 1 });
-  assert.equal(bar.isOpen("home"), true);
-  assert.equal(home.caret.getAttribute("aria-expanded"), "true");
-  bar.open("library");
-  assert.equal(bar.isOpen("home"), false);
-  assert.equal(home.caret.getAttribute("aria-expanded"), "false");
-  assert.equal(bar.isOpen("library"), true);
+  const docs = bar.node("docs");
+  docs.caret.dispatchEvent({ type: "click", detail: 1 });
+  assert.equal(bar.isOpen("docs"), true);
+  assert.equal(docs.caret.getAttribute("aria-expanded"), "true");
+  bar.open("marks");
+  assert.equal(bar.isOpen("docs"), false);
+  assert.equal(docs.caret.getAttribute("aria-expanded"), "false");
+  assert.equal(bar.isOpen("marks"), true);
 });
 
 test("the three Bookmarks levels open, one path at a time at each level", async () => {
@@ -133,15 +183,15 @@ test("the three Bookmarks levels open, one path at a time at each level", async 
 });
 
 test("ArrowDown opens and focuses the first entry; Escape closes and returns focus to the caret", async () => {
-  const { doc, bar } = boot();
+  const { doc, bar } = fixtureBoot();
   bar.init();
-  const home = bar.node("home");
-  home.caret.dispatchEvent({ type: "keydown", key: "ArrowDown", preventDefault() {} });
-  assert.equal(bar.isOpen("home"), true);
-  assert.equal(doc.activeElement, home.links[0]);
-  home.links[0].dispatchEvent({ type: "keydown", key: "Escape", preventDefault() {} });
-  assert.equal(bar.isOpen("home"), false);
-  assert.equal(doc.activeElement, home.caret);
+  const docs = bar.node("docs");
+  docs.caret.dispatchEvent({ type: "keydown", key: "ArrowDown", preventDefault() {} });
+  assert.equal(bar.isOpen("docs"), true);
+  assert.equal(doc.activeElement, docs.links[0]);
+  docs.links[0].dispatchEvent({ type: "keydown", key: "Escape", preventDefault() {} });
+  assert.equal(bar.isOpen("docs"), false);
+  assert.equal(doc.activeElement, docs.caret);
 });
 
 test("ArrowRight opens a category's fly-out and moves in; ArrowLeft closes it and returns", async () => {
@@ -181,13 +231,13 @@ test("Escape walks back out one open level at a time, deepest first", async () =
 });
 
 test("a click outside the bar closes an open panel; a click inside does not", async () => {
-  const { doc, bar } = boot();
+  const { doc, bar } = fixtureBoot();
   bar.init();
-  bar.open("home");
-  doc.dispatchEvent({ type: "click", target: bar.node("home").links[0] });
-  assert.equal(bar.isOpen("home"), true);
+  bar.open("docs");
+  doc.dispatchEvent({ type: "click", target: bar.node("docs").links[0] });
+  assert.equal(bar.isOpen("docs"), true);
   doc.dispatchEvent({ type: "click", target: doc.querySelector("#q") });
-  assert.equal(bar.isOpen("home"), false);
+  assert.equal(bar.isOpen("docs"), false);
 });
 
 // A captured-timer stand-in so the delayed close can be driven without waiting.
@@ -203,28 +253,67 @@ function timerStub() {
 }
 
 test("on a fine pointer, hover opens a menu immediately", async () => {
-  const { bar, doc } = boot({ matchMediaImpl: () => ({ matches: true }) });
+  const { bar } = fixtureBoot({ matchMediaImpl: () => ({ matches: true }) });
   bar.init();
-  bar.node("home").owner.dispatchEvent({ type: "pointerenter" });
-  assert.equal(bar.isOpen("home"), true);
-  void doc;
+  bar.node("docs").owner.dispatchEvent({ type: "pointerenter" });
+  assert.equal(bar.isOpen("docs"), true);
 });
 
 test("the menu closes after the delay when the pointer leaves, and a re-enter cancels the close", async () => {
   const timers = timerStub();
-  const { bar, doc } = boot({ matchMediaImpl: () => ({ matches: true }), setTimeoutImpl: timers.setTimeoutImpl, clearTimeoutImpl: timers.clearTimeoutImpl });
+  const { bar, doc } = fixtureBoot({ matchMediaImpl: () => ({ matches: true }), setTimeoutImpl: timers.setTimeoutImpl, clearTimeoutImpl: timers.clearTimeoutImpl });
   bar.init();
   const nav = doc.querySelector("[data-tsw-bar]");
-  bar.open("home");
+  bar.open("docs");
   nav.dispatchEvent({ type: "pointerleave" });
-  assert.equal(bar.isOpen("home"), true, "it stays open until the timer fires");
+  assert.equal(bar.isOpen("docs"), true, "it stays open until the timer fires");
   assert.equal(timers.pending()[0].ms, 220, "close is scheduled for 220ms");
   nav.dispatchEvent({ type: "pointerenter" });
   assert.equal(timers.pending().length, 0, "a re-enter cancels the pending close");
-  assert.equal(bar.isOpen("home"), true);
+  assert.equal(bar.isOpen("docs"), true);
   nav.dispatchEvent({ type: "pointerleave" });
   timers.fire();
-  assert.equal(bar.isOpen("home"), false, "the delayed close runs when the timer fires");
+  assert.equal(bar.isOpen("docs"), false, "the delayed close runs when the timer fires");
+});
+
+// --- version 7: a top-level item that carries no menu is a plain link ---
+test("a top-level item with no menu stays a plain link: no caret, no panel, no node", async () => {
+  const { doc, bar } = fixtureBoot();
+  bar.init();
+  const li = doc.querySelector('[data-tsw-item="home"]');
+  assert.equal([...li.children].filter(child => child.classList.contains("tsw-bar__disc")).length, 0, "no caret button");
+  assert.equal([...li.children].filter(child => child.classList.contains("tsw-bar__panel")).length, 0, "no panel");
+  const link = [...li.children].find(child => child.classList.contains("tsw-bar__link"));
+  assert.ok(!link.hasAttribute("aria-expanded") && !link.hasAttribute("aria-controls"), "the link carries no menu aria");
+  assert.equal(bar.node("home"), null, "it is not a menu node");
+});
+
+test("an item whose menu is empty is also a plain link with no caret", async () => {
+  const { doc, bar } = fixtureBoot();
+  bar.init();
+  const li = doc.querySelector('[data-tsw-item="empty"]');
+  assert.equal([...li.children].filter(child => child.classList.contains("tsw-bar__disc")).length, 0, "no caret button");
+  assert.equal(bar.node("empty"), null, "it is not a menu node");
+});
+
+test("hovering a plain top link closes any open menu", async () => {
+  const { doc, bar } = fixtureBoot({ matchMediaImpl: () => ({ matches: true }) });
+  bar.init();
+  bar.open("docs");
+  assert.equal(bar.isOpen("docs"), true);
+  const homeLink = doc.querySelector('[data-tsw-item="home"] .tsw-bar__link');
+  homeLink.dispatchEvent({ type: "pointerenter" });
+  assert.equal(bar.isOpen("docs"), false, "moving onto the plain Home link closes the open menu");
+});
+
+test("focusing a plain top link closes any open menu", async () => {
+  const { doc, bar } = fixtureBoot();
+  bar.init();
+  bar.open("docs");
+  assert.equal(bar.isOpen("docs"), true);
+  const homeLink = doc.querySelector('[data-tsw-item="home"] .tsw-bar__link');
+  homeLink.dispatchEvent({ type: "focus" });
+  assert.equal(bar.isOpen("docs"), false, "tabbing to the plain Home link closes the open menu");
 });
 
 test("a fly-out opens to the right, and flips left when its right edge would cross the viewport", async () => {

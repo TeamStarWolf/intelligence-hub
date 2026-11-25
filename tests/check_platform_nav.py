@@ -9,9 +9,10 @@ check holds the three in step and runs several ways:
 
   python -I tests/check_platform_nav.py
       Offline: the copy is plain ASCII, parses, has the agreed shape (a version, a home brand
-      target, items whose menus hold the allowed number of entries and nest only where allowed,
-      every "pending" entry noted), every address passes the rule that fits it, and the static bar
-      in index.html matches what the copy generates. The pull-request check runs this.
+      target, items that each carry a link and may or may not carry a menu, whose menus hold the
+      allowed number of entries and nest only where allowed, every "pending" entry noted), every
+      address passes the rule that fits it, and the static bar in index.html matches what the copy
+      generates. The pull-request check runs this.
 
   python -I tests/check_platform_nav.py --emit
       Print the static bar markup for index.html (what the check compares against). Paste it between
@@ -317,8 +318,10 @@ def escape(text):
 def render_bar(menu, indent="    "):
     """The static platform-bar markup for index.html: the top-level links and their dropdown panels.
     Every menu and fly-out link is a real <a>; an external Bookmarks leaf opens in a new tab and
-    carries its marker and screen-reader note. Pending entries are left out. platform-bar.js enhances
-    this: it adds the caret buttons, so the markup here is links only and works without JavaScript."""
+    carries its marker and screen-reader note. Pending entries are left out. A top-level item with no
+    menu, or whose menu holds nothing shippable, is written as a plain link with no panel.
+    platform-bar.js enhances this: it adds the caret buttons, so the markup here is links only and
+    works without JavaScript."""
     pad = lambda level: indent + "  " * level
 
     def mlink(entry):
@@ -403,10 +406,24 @@ def compare_canonical(url, copy_bytes):
     return False, "the vendored copy differs from the published canonical file at " + url
 
 
+def emit(markup):
+    """Write the markup to stdout as UTF-8, whatever the console encoding. A menu label can hold a
+    non-ASCII character (carried in the ASCII file as a \\uXXXX escape, such as an arrow), so a plain
+    print() crashes with a UnicodeEncodeError when stdout is a redirected Windows console (cp1252).
+    The maintainer's documented repair is to run --emit and paste the result, so it must not crash."""
+    data = (markup + "\n").encode("utf-8")
+    buffer = getattr(sys.stdout, "buffer", None)
+    if buffer is not None:
+        buffer.write(data)
+        buffer.flush()
+    else:
+        sys.stdout.write(markup + "\n")
+
+
 def main(argv):
     raw = COPY.read_bytes()
     if "--emit" in argv:
-        print(render_bar(json.loads(raw.decode("ascii"))))
+        emit(render_bar(json.loads(raw.decode("ascii"))))
         return 0
     issues = problems(raw)
     if not issues:
