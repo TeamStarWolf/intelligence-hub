@@ -36,6 +36,7 @@ export class Element extends Node {
     super();
     this.tagName = tagName.toUpperCase(); this.localName = tagName.toLowerCase(); this.attributes = new Map(); this.listeners = {}; this.ownerDocument = ownerDocument;
     this.value = ""; this.checked = false; this.disabled = false; this.open = false; this.maxLength = -1; this.tabIndex = -1;
+    this.style = {};
     this.classList = new ClassList(this);
     const element = this;
     this.dataset = new Proxy({}, {
@@ -51,7 +52,19 @@ export class Element extends Node {
   hasAttribute(name) { return this.attributes.has(name.toLowerCase()); }
   removeAttribute(name) { this.attributes.delete(name.toLowerCase()); }
   addEventListener(type, handler) { (this.listeners[type] ||= []).push(handler); }
-  dispatchEvent(event) { event.target ||= this; for (const handler of this.listeners[event.type] || []) handler(event); return true; }
+  // Fires the element's own listeners, then, when the event opts in with bubbles:true, walks up the
+  // parent chain to the document firing each node's listeners, honouring stopPropagation (which sets
+  // cancelBubble). Events without bubbles behave as before, so existing tests are unaffected.
+  dispatchEvent(event) {
+    if (!event.target) event.target = this;
+    let node = this;
+    while (node) {
+      for (const handler of (node.listeners && node.listeners[event.type]) || []) handler(event);
+      if (!event.bubbles || event.cancelBubble) break;
+      node = node.parentNode;
+    }
+    return !event.defaultPrevented;
+  }
   focus() { this.ownerDocument.activeElement = this; }
   showModal() { this.open = true; this.setAttribute("open", ""); }
   close() { if (!this.open) return; this.open = false; this.removeAttribute("open"); this.dispatchEvent({ type: "close" }); }

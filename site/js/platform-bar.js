@@ -159,20 +159,26 @@ export function createPlatformBar(env) {
   function place(node) {
     const region = node.region;
     if (!node.parent || !region || typeof region.getBoundingClientRect !== "function") return;
-    region.classList.remove("tsw-bar__flyout--left", "tsw-bar__flyout--up", "tsw-bar__flyout--scroll");
+    region.classList.remove("tsw-bar__flyout--left", "tsw-bar__flyout--scroll");
+    if (region.style) region.style.top = "";
     if (!wideScreen()) return;
     try {
       const width = (win && win.innerWidth) || 0;
       const height = (win && win.innerHeight) || 0;
       const rect = region.getBoundingClientRect();
       if (width && rect.right > width - 4) region.classList.add("tsw-bar__flyout--left");
-      if (height && typeof rect.height === "number" && rect.height > height - 8) {
-        // Taller than the viewport can hold: cap it and let it scroll inside itself.
-        region.classList.add("tsw-bar__flyout--scroll");
-      } else if (height && typeof rect.bottom === "number" && rect.bottom > height - 4) {
-        // Fits, but its bottom would cross the edge: anchor it to its bottom so it grows upward.
-        region.classList.add("tsw-bar__flyout--up");
-      }
+      if (!height || typeof rect.bottom !== "number") return;
+      // Keep it on screen vertically: shift it up by just the amount its bottom overflows, but never
+      // so far that its top passes the top edge. If it is taller than the viewport even sitting at the
+      // top, cap its height and let it scroll inside itself. When it fits, the open position is left
+      // alone (so at 600px tall and above nothing is cut off or scrolls). TOP_OFFSET is the -7px the
+      // stylesheet opens it at, which the shift is measured from.
+      const TOP_OFFSET = 7;
+      let shift = rect.bottom > height - 8 ? rect.bottom - (height - 8) : 0;
+      const highestShift = Math.max(0, (typeof rect.top === "number" ? rect.top : 0) - 8);
+      if (shift > highestShift) shift = highestShift;
+      if (shift > 0 && region.style) region.style.top = "-" + (TOP_OFFSET + shift) + "px";
+      if (typeof rect.height === "number" && rect.height > height - 16) region.classList.add("tsw-bar__flyout--scroll");
     } catch (_) { /* no layout: leave it opening to the right */ }
   }
 
@@ -196,7 +202,13 @@ export function createPlatformBar(env) {
         else { event.preventDefault?.(); openNode(node); focusFirst(node); }
       }
       else if (key === "ArrowLeft") { if (top) { event.preventDefault?.(); focusTopCaret(node.caretIndex - 1); } }
-      else if (key === "Escape") { closeNode(node); if (!top && node.headerLink) node.headerLink.focus(); }
+      else if (key === "Escape") {
+        // Close only the deepest open level, and stop the event so the document-level Escape does not
+        // then close the rest. If this caret's own level is already closed, step out to its parent.
+        event.stopPropagation?.();
+        if (node.expanded) closeNode(node);
+        else if (node.parent) { closeNode(node.parent); node.parent.caret.focus(); }
+      }
     });
   }
 
@@ -216,7 +228,7 @@ export function createPlatformBar(env) {
       else if (key === "ArrowLeft") {
         if (owner.parent) { event.preventDefault?.(); closeNode(owner); if (owner.headerLink) owner.headerLink.focus(); }
       }
-      else if (key === "Escape") { event.preventDefault?.(); closeNode(owner); owner.caret.focus(); }
+      else if (key === "Escape") { event.preventDefault?.(); event.stopPropagation?.(); closeNode(owner); owner.caret.focus(); }
       else if (key === "Tab") { closeEverything(); }
     });
   }

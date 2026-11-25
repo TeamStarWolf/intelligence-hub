@@ -216,9 +216,9 @@ button, input, select { font: inherit; color: inherit; }
   .tsw-bar__panel { overflow: visible; }
   .tsw-bar__mitem--parent > .tsw-bar__mlink { position: relative; }
   .tsw-bar__mitem > .tsw-bar__flyout { position: absolute; top: -7px; left: 100%; min-width: 200px; max-width: 300px; margin: 0; padding: 6px; background: var(--tsw-bar-bg); border: 1px solid var(--tsw-bar-panel-border); border-radius: 10px; box-shadow: 0 10px 28px var(--tsw-bar-shadow); overflow: visible; z-index: 41; }
-  /* The placement modifiers are scoped to match the rule above, so they win and actually move it. */
+  /* The left flip is scoped to match the rule above, so it wins and actually moves it. The upward
+     shift near the bottom edge is an inline top set by the script, by just the overflow amount. */
   .tsw-bar__mitem > .tsw-bar__flyout--left { left: auto; right: 100%; }
-  .tsw-bar__mitem > .tsw-bar__flyout--up { top: auto; bottom: -7px; }
   /* Only when the viewport is too short to hold the fly-out does it cap its height and scroll. */
   .tsw-bar__mitem > .tsw-bar__flyout--scroll { max-height: calc(100vh - 16px); overflow-y: auto; }
 }

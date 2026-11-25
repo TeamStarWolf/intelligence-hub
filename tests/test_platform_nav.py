@@ -179,6 +179,28 @@ class PlatformNavTest(unittest.TestCase):
         menu = bookmarks([category("Daily", [leaf("https://xn--80ak6aa92e.com/")])])
         self.assertTrue(any("punycode" in line for line in run(menu)), run(menu))
 
+    def test_an_external_shorthand_ip_host_fails(self):
+        menu = bookmarks([category("Daily", [leaf("https://127.1/")])])
+        self.assertTrue(any("looks like an IP address" in line for line in run(menu)), run(menu))
+
+    def test_an_external_hex_ip_host_fails(self):
+        menu = bookmarks([category("Daily", [leaf("https://0x7f.0.0.1/")])])
+        self.assertTrue(any("looks like an IP address" in line for line in run(menu)), run(menu))
+
+    def test_an_external_three_part_numeric_host_fails(self):
+        menu = bookmarks([category("Daily", [leaf("https://1.2.3/")])])
+        self.assertTrue(any("looks like an IP address" in line for line in run(menu)), run(menu))
+
+    def test_an_external_hex_final_part_host_fails(self):
+        menu = bookmarks([category("Daily", [leaf("https://1.2.3.0x7f/")])])
+        self.assertTrue(any("looks like an IP address" in line for line in run(menu)), run(menu))
+
+    def test_an_external_non_ascii_character_fails(self):
+        # The file carries the non-ASCII character as a \uXXXX escape, so the raw-byte ASCII test
+        # passes and only the parsed address is non-ASCII.
+        menu = bookmarks([category("Daily", [leaf("https://nvd.nist.gov/café")])])
+        self.assertTrue(any("non-printable or non-ASCII" in line for line in run(menu)), run(menu))
+
     def test_an_external_encoded_slash_fails(self):
         menu = bookmarks([category("Daily", [leaf("https://nvd.nist.gov/a%2fb")])])
         self.assertTrue(any("encoded slash or backslash" in line for line in run(menu)), run(menu))

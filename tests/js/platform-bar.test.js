@@ -243,3 +243,39 @@ test("a fly-out opens to the right, and flips left when its right edge would cro
   cat.caret.dispatchEvent({ type: "click", detail: 1 }); // reopen near the edge
   assert.equal(cat.region.classList.contains("tsw-bar__flyout--left"), true, "flips left near the right edge");
 });
+
+test("a fly-out whose bottom would overflow is shifted up by the overflow, never above the top edge", async () => {
+  const shell = page();
+  shell.win.innerWidth = 1000;
+  shell.win.innerHeight = 600;
+  const bar = createPlatformBar({ doc: shell.doc, win: shell.win, matchMediaImpl: () => ({ matches: true }) });
+  bar.init();
+  bar.open("bookmarks");
+  const cat = bar.node("bookmarks").children.find(c => c.children.length > 0);
+  // A category row low on the screen with a panel taller than the space below it (bottom at 820, a
+  // 600px viewport). The old code anchored its bottom and let the top run off the screen.
+  cat.region.getBoundingClientRect = () => ({ left: 300, right: 500, top: 400, bottom: 820, height: 420 });
+  cat.caret.dispatchEvent({ type: "click", detail: 1 });
+  assert.ok(!cat.region.classList.contains("tsw-bar__flyout--scroll"), "it fits once shifted, so it does not scroll");
+  const top = cat.region.style.top;
+  assert.ok(top, "a vertical shift was applied");
+  const shift = -parseFloat(top) - 7;                 // style.top is "-(7 + shift)px"
+  assert.equal(shift, 228, "shifted up by exactly the bottom overflow (820 - (600 - 8))");
+  assert.ok(400 - shift >= 8, "the fly-out top stays on screen: " + (400 - shift));
+});
+
+test("Escape on a nested caret closes only that level and does not bubble to close the whole bar", async () => {
+  const { bar } = boot();
+  bar.init();
+  bar.open("bookmarks");
+  const cat = bar.node("bookmarks").children.find(c => c.children.length > 0);
+  cat.caret.dispatchEvent({ type: "click", detail: 0 });
+  const sub = cat.children[0];
+  sub.caret.dispatchEvent({ type: "click", detail: 0 });
+  assert.equal(sub.expanded, true, "the subsection is open");
+  // A real keydown bubbles to the document; the handler must stop it so only the subsection closes.
+  sub.caret.dispatchEvent({ type: "keydown", key: "Escape", bubbles: true, preventDefault() {}, stopPropagation() { this.cancelBubble = true; } });
+  assert.equal(sub.expanded, false, "the subsection closed");
+  assert.equal(cat.expanded, true, "the category stayed open");
+  assert.equal(bar.isOpen("bookmarks"), true, "the top panel stayed open");
+});

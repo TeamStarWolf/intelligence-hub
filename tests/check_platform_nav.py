@@ -104,9 +104,12 @@ def external_problem(href, where):
         return where + " external address is not https"
     if len(href) > EXTERNAL_MAX:
         return where + " external address is longer than " + str(EXTERNAL_MAX) + " characters"
+    # Only printable ASCII is allowed, so no whitespace or control character, and no character the
+    # file carried as a \uXXXX escape (which decodes to a non-ASCII character the raw-byte ASCII test
+    # does not see). Everything above "~" and below "!" is rejected.
     for char in href:
-        if char.isspace() or ord(char) < 0x20 or ord(char) == 0x7f:
-            return where + " external address has a whitespace or control character"
+        if ord(char) < 0x21 or ord(char) > 0x7e:
+            return where + " external address has a non-printable or non-ASCII character"
     if "\\" in href:
         return where + " external address has a backslash"
     parts = urllib.parse.urlsplit(href)
@@ -133,7 +136,14 @@ def external_problem(href, where):
         pass
     if "." not in host:
         return where + " external address host is a single label (no dot): " + host
-    for label in host.split("."):
+    labels = host.split(".")
+    # A browser also reads several shorthand forms as an IP address that ipaddress does not, such as
+    # 127.1, 1.2.3 and hosts with a hex or decimal final part (0x7f.0.0.1, 1.2.3.0x7f). A real host
+    # never ends in an all-digit or 0x label, so reject that last label.
+    last = labels[-1].lower()
+    if last.isdigit() or last.startswith("0x"):
+        return where + " external address host looks like an IP address (numeric or hex last label): " + host
+    for label in labels:
         if not DNS_LABEL.fullmatch(label):
             return where + " external address host has an invalid DNS label: " + host
         if label.lower().startswith("xn--"):
