@@ -85,3 +85,7 @@ jobs:
         run: python -I tests/check_font_size.py
       - name: Em-dash lint outside reports/
         run: python -I tests/check_em_dash.py
+      - name: Platform menu copy is valid ASCII with the agreed shape
+        # The published canonical comparison (--canonical) runs in the publish workflow, which has
+        # network access; this offline step validates the vendored site/platform-nav.json.
+        run: python -I tests/check_platform_nav.py

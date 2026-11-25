@@ -5,3 +5,5 @@ tests/history/fixtures/** -text
 tests/fixtures/patch-tuesday/** -text
 # Service-health fixtures are byte-exact responses; the AWS one is UTF-16.
 tests/fixtures/status/documents/** -text
+# The platform bar's menu copy stays byte-identical to the published canonical file.
+site/platform-nav.json -text
