@@ -406,10 +406,24 @@ def compare_canonical(url, copy_bytes):
     return False, "the vendored copy differs from the published canonical file at " + url
 
 
+def emit(markup):
+    """Write the markup to stdout as UTF-8, whatever the console encoding. A menu label can hold a
+    non-ASCII character (carried in the ASCII file as a \\uXXXX escape, such as an arrow), so a plain
+    print() crashes with a UnicodeEncodeError when stdout is a redirected Windows console (cp1252).
+    The maintainer's documented repair is to run --emit and paste the result, so it must not crash."""
+    data = (markup + "\n").encode("utf-8")
+    buffer = getattr(sys.stdout, "buffer", None)
+    if buffer is not None:
+        buffer.write(data)
+        buffer.flush()
+    else:
+        sys.stdout.write(markup + "\n")
+
+
 def main(argv):
     raw = COPY.read_bytes()
     if "--emit" in argv:
-        print(render_bar(json.loads(raw.decode("ascii"))))
+        emit(render_bar(json.loads(raw.decode("ascii"))))
         return 0
     issues = problems(raw)
     if not issues:

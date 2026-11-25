@@ -5,7 +5,9 @@ rule (inside Bookmarks, on a leaf flagged external: a real DNS host off the four
 userinfo, IP literal, punycode, dot segment or encoded slash, at most 512 characters, and never an
 address the TeamStarWolf rule would accept). Also the Bookmarks nesting and the entry caps.
 check_platform_nav.py runs as a script in the pull-request check; these exercise its validation."""
+import io
 import json
+import sys
 import unittest
 
 import check_platform_nav as check
@@ -308,6 +310,52 @@ class RenderBarTest(unittest.TestCase):
         out = check.render_bar(menu)
         self.assertNotIn("tsw-bar-panel-home", out)
         self.assertNotIn("Later page", out)
+
+
+class Cp1252Stdout:
+    """A redirected Windows console stand-in: text writes go through cp1252 and raise on a character
+    it cannot encode (as a plain print would), while .buffer takes raw bytes. --emit must reach the
+    bytes, not the text write, so a non-ASCII label (an arrow) does not crash it."""
+    encoding = "cp1252"
+
+    def __init__(self):
+        self.buffer = io.BytesIO()
+
+    def write(self, text):
+        self.buffer.write(text.encode("cp1252"))  # raises UnicodeEncodeError on, for example, U+2192
+
+    def flush(self):
+        pass
+
+
+class EmitTest(unittest.TestCase):
+    def _capture_emit(self, markup):
+        out = Cp1252Stdout()
+        saved = sys.stdout
+        sys.stdout = out
+        try:
+            check.emit(markup)
+        finally:
+            sys.stdout = saved
+        return out.buffer.getvalue()
+
+    def test_emit_writes_utf8_for_a_label_the_console_cannot_encode(self):
+        # The file carries a non-ASCII label character as a \uXXXX escape; emit must not route it
+        # through a cp1252 console, where it would raise UnicodeEncodeError.
+        markup = '<a class="tsw-bar__mlink" href="https://teamstarwolf.com/x">Gov → Alerts</a>'
+        self.assertEqual(self._capture_emit(markup).decode("utf-8"), markup + "\n")
+
+    def test_emit_via_main_does_not_crash_on_a_cp1252_console(self):
+        out = Cp1252Stdout()
+        saved = sys.stdout
+        sys.stdout = out
+        try:
+            rc = check.main(["--emit"])
+        finally:
+            sys.stdout = saved
+        self.assertEqual(rc, 0)
+        menu = json.loads(check.COPY.read_bytes().decode("ascii"))
+        self.assertEqual(out.buffer.getvalue().decode("utf-8").rstrip("\n"), check.render_bar(menu))
 
 
 if __name__ == "__main__":
