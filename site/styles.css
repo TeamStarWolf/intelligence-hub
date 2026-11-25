@@ -170,64 +170,77 @@ button, input, select { font: inherit; color: inherit; }
    markup in index.html, generated from an identical copy of platform-nav.json, so with JavaScript
    off every link works and the menus open on :hover and :focus-within. platform-bar.js enhances it:
    it adds the carets and, through the tsw-bar--js class, opens the menus from aria-expanded instead,
-   so it can time the hover close, flip a fly-out and carry a touch tap. */
+   so it can time the hover close, flip and clamp a fly-out and carry a touch tap. The Bookmarks menu
+   nests three levels (category, subsection, leaf); every other menu is one level. */
 .tsw-bar { height: 44px; display: flex; align-items: stretch; background: var(--tsw-bar-bg); border-bottom: 1px solid var(--tsw-bar-border); font-family: var(--tsw-sans); position: relative; z-index: 25; }
-.tsw-bar__list { list-style: none; margin: 0; padding: 0 8px; display: flex; align-items: stretch; gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: thin; }
+.tsw-bar__list { list-style: none; margin: 0; padding: 0 8px; display: flex; align-items: stretch; gap: 2px; min-width: 0; overflow: visible; }
 /* The wordmark is off by default; add tsw-bar--wordmark to the nav to show it before Home. */
 .tsw-bar__wordmark { display: none; align-items: center; padding: 0 12px; font-weight: 800; letter-spacing: -0.02em; color: var(--tsw-bar-fg-hover); text-decoration: none; white-space: nowrap; }
 .tsw-bar--wordmark .tsw-bar__wordmark { display: inline-flex; }
 .tsw-bar__item { position: relative; display: flex; align-items: stretch; flex: none; }
 .tsw-bar__link { display: inline-flex; align-items: center; padding: 0 8px; font-size: 13px; font-weight: 500; line-height: 1.2; color: var(--tsw-bar-fg); text-decoration: none; white-space: nowrap; }
 .tsw-bar__link:hover, .tsw-bar__link:focus-visible { color: var(--tsw-bar-fg-hover); }
-.tsw-bar__caret { display: inline-flex; align-items: center; justify-content: center; width: 22px; padding: 0; border: 0; background: transparent; color: var(--tsw-bar-muted); cursor: pointer; }
-.tsw-bar__caret::before { content: ""; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid currentColor; transition: transform 160ms ease; }
-.tsw-bar__caret:hover, .tsw-bar__caret[aria-expanded="true"] { color: var(--tsw-bar-fg-hover); }
-.tsw-bar__caret[aria-expanded="true"]::before { transform: rotate(180deg); }
+/* Every disclosure caret is a button at least 24x24px, at every level. */
+.tsw-bar__disc { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; padding: 0; border: 0; background: transparent; color: var(--tsw-bar-muted); cursor: pointer; }
+.tsw-bar__disc::before { content: ""; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid currentColor; transition: transform 160ms ease; }
+.tsw-bar__disc:hover, .tsw-bar__disc[aria-expanded="true"] { color: var(--tsw-bar-fg-hover); }
+.tsw-bar__disc[aria-expanded="true"]::before { transform: rotate(180deg); }
+/* The dropdown panel below a top-level item; it holds the first fly-out list. */
 .tsw-bar__panel { position: absolute; top: 100%; left: 0; min-width: 220px; max-width: 320px; background: var(--tsw-bar-bg); border: 1px solid var(--tsw-bar-panel-border); border-radius: 10px; box-shadow: 0 10px 28px var(--tsw-bar-shadow); padding: 6px; z-index: 40; display: none; }
-.tsw-bar__menu, .tsw-bar__submenu { list-style: none; margin: 0; padding: 0; }
-.tsw-bar__menuitem { position: relative; display: flex; flex-wrap: wrap; align-items: stretch; }
-.tsw-bar__menulink { flex: 1 1 auto; display: block; padding: 6px 10px; font-size: 13px; line-height: 1.3; color: var(--tsw-bar-fg); text-decoration: none; border-radius: 6px; }
-.tsw-bar__menulink:hover, .tsw-bar__menulink:focus-visible { background: var(--tsw-bar-hover-bg); color: var(--tsw-bar-fg-hover); }
-.tsw-bar__subcaret { flex: none; width: 34px; border: 0; background: transparent; color: var(--tsw-bar-muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-.tsw-bar__subcaret::before { content: ""; width: 0; height: 0; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 5px solid currentColor; }
-.tsw-bar__subcaret:hover, .tsw-bar__subcaret:focus-visible, .tsw-bar__subcaret[aria-expanded="true"] { color: var(--tsw-bar-fg-hover); }
-.tsw-bar__submenu { flex-basis: 100%; display: none; }
-.tsw-bar__sublink { display: block; padding: 4px 10px 4px 24px; font-size: 12px; line-height: 1.3; color: var(--tsw-bar-muted); text-decoration: none; border-radius: 6px; }
-.tsw-bar__sublink:hover, .tsw-bar__sublink:focus-visible { background: var(--tsw-bar-hover-bg); }
+.tsw-bar__flyout { list-style: none; margin: 0; padding: 0; }
+.tsw-bar__panel > .tsw-bar__flyout { display: block; }
+.tsw-bar__mitem > .tsw-bar__flyout { display: none; flex-basis: 100%; }
+.tsw-bar__mitem { position: relative; display: flex; flex-wrap: wrap; align-items: stretch; }
+.tsw-bar__mlink { flex: 1 1 auto; display: block; padding: 6px 10px; font-size: 13px; line-height: 1.3; color: var(--tsw-bar-fg); text-decoration: none; border-radius: 6px; }
+.tsw-bar__mlink:hover, .tsw-bar__mlink:focus-visible { background: var(--tsw-bar-hover-bg); color: var(--tsw-bar-fg-hover); }
+/* An external leaf opens in a new tab; a half-opacity arrow marks it, hidden from assistive tech. */
+.tsw-bar__ext { margin-left: 5px; opacity: .55; }
+.tsw-bar__ext::before { content: "\2197"; }
+.tsw-bar__sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.tsw-bar__mdisc { flex: none; min-width: 28px; min-height: 24px; border: 0; background: transparent; color: var(--tsw-bar-muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.tsw-bar__mdisc::before { content: ""; width: 0; height: 0; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 5px solid currentColor; }
+.tsw-bar__mdisc:hover, .tsw-bar__mdisc:focus-visible, .tsw-bar__mdisc[aria-expanded="true"] { color: var(--tsw-bar-fg-hover); }
 .tsw-bar__toggle { display: none; }
-.tsw-bar__wordmark:focus-visible, .tsw-bar__link:focus-visible, .tsw-bar__caret:focus-visible, .tsw-bar__subcaret:focus-visible, .tsw-bar__menulink:focus-visible, .tsw-bar__sublink:focus-visible, .tsw-bar__toggle:focus-visible { outline: 2px solid var(--tsw-bar-focus); outline-offset: 2px; }
-/* Without JavaScript the menus open on hover and keyboard focus. */
+.tsw-bar__wordmark:focus-visible, .tsw-bar__link:focus-visible, .tsw-bar__disc:focus-visible, .tsw-bar__mdisc:focus-visible, .tsw-bar__mlink:focus-visible, .tsw-bar__toggle:focus-visible { outline: 2px solid var(--tsw-bar-focus); outline-offset: 2px; }
+/* Without JavaScript the menus open on hover and keyboard focus, at every level. */
 .tsw-bar:not(.tsw-bar--js) .tsw-bar__item:hover > .tsw-bar__panel, .tsw-bar:not(.tsw-bar--js) .tsw-bar__item:focus-within > .tsw-bar__panel { display: block; }
-.tsw-bar:not(.tsw-bar--js) .tsw-bar__menuitem:hover > .tsw-bar__submenu, .tsw-bar:not(.tsw-bar--js) .tsw-bar__menuitem:focus-within > .tsw-bar__submenu { display: block; }
+.tsw-bar:not(.tsw-bar--js) .tsw-bar__mitem:hover > .tsw-bar__flyout, .tsw-bar:not(.tsw-bar--js) .tsw-bar__mitem:focus-within > .tsw-bar__flyout { display: block; }
 /* With JavaScript the carets drive it, so the hover timing, fly-out side and taps are controlled. */
-.tsw-bar--js .tsw-bar__caret[aria-expanded="true"] + .tsw-bar__panel { display: block; }
-.tsw-bar--js .tsw-bar__subcaret[aria-expanded="true"] + .tsw-bar__submenu { display: block; }
-/* 761px and wider: a category's sub-entries fly out to the side as their own panel; the main panel
-   does not clip, so the fly-out can escape it. The fly-out flips left near the right edge. */
+.tsw-bar--js .tsw-bar__disc[aria-expanded="true"] + .tsw-bar__panel { display: block; }
+.tsw-bar--js .tsw-bar__mdisc[aria-expanded="true"] + .tsw-bar__flyout { display: block; }
+/* 761px and wider: a category's or subsection's sub-entries fly out to the side as their own panel;
+   the panel does not clip, so a fly-out can escape it. A fly-out flips left near the right edge, is
+   pulled up near the bottom, and scrolls inside itself only when the viewport is too short to hold
+   it (so at 600px and taller nothing scrolls). Each level is placed on its own. */
 @media (min-width: 761px) {
   .tsw-bar__panel { overflow: visible; }
-  .tsw-bar__menuitem--parent > .tsw-bar__menulink { position: relative; }
-  .tsw-bar__submenu { position: absolute; top: -7px; left: 100%; min-width: 200px; max-width: 300px; margin: 0; padding: 6px; background: var(--tsw-bar-bg); border: 1px solid var(--tsw-bar-panel-border); border-radius: 10px; box-shadow: 0 10px 28px var(--tsw-bar-shadow); z-index: 41; }
-  .tsw-bar__submenu--flip { left: auto; right: 100%; }
-  .tsw-bar__sublink { padding: 6px 10px; font-size: 13px; color: var(--tsw-bar-fg); }
-  .tsw-bar__sublink:hover, .tsw-bar__sublink:focus-visible { background: var(--tsw-bar-hover-bg); color: var(--tsw-bar-fg-hover); }
+  .tsw-bar__mitem--parent > .tsw-bar__mlink { position: relative; }
+  .tsw-bar__mitem > .tsw-bar__flyout { position: absolute; top: -7px; left: 100%; min-width: 200px; max-width: 300px; margin: 0; padding: 6px; background: var(--tsw-bar-bg); border: 1px solid var(--tsw-bar-panel-border); border-radius: 10px; box-shadow: 0 10px 28px var(--tsw-bar-shadow); overflow: visible; z-index: 41; }
+  /* The placement modifiers are scoped to match the rule above, so they win and actually move it. */
+  .tsw-bar__mitem > .tsw-bar__flyout--left { left: auto; right: 100%; }
+  .tsw-bar__mitem > .tsw-bar__flyout--up { top: auto; bottom: -7px; }
+  /* Only when the viewport is too short to hold the fly-out does it cap its height and scroll. */
+  .tsw-bar__mitem > .tsw-bar__flyout--scroll { max-height: calc(100vh - 16px); overflow-y: auto; }
 }
 /* 760px and narrower: the bar collapses behind one button. The band stays 44px whether the menu is
    open or closed (the 44px box less the 1px border is the 43px row the button fills); the open list
-   overlays the page, absolutely positioned under the band, so it never pushes the page down. */
+   overlays the page, absolutely positioned under the band, and scrolls within itself, so it never
+   pushes the page down. Sub-entries drop inline (an accordion) at every level; each caret fills the
+   44px row. */
 @media (max-width: 760px) {
   .tsw-bar__toggle { display: inline-flex; align-items: center; min-height: 43px; padding: 0 12px; background: transparent; border: 0; color: var(--tsw-bar-fg); font: 500 13px/1.2 var(--tsw-sans); cursor: pointer; }
   .tsw-bar__list { display: none; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; padding: 4px 8px 8px; background: var(--tsw-bar-bg); border-bottom: 1px solid var(--tsw-bar-border); box-shadow: 0 10px 28px var(--tsw-bar-shadow); max-height: calc(100vh - 44px); overflow-y: auto; z-index: 40; }
   .tsw-bar--list-open .tsw-bar__list { display: flex; }
   .tsw-bar__item { flex-direction: column; align-items: stretch; }
-  .tsw-bar__link { min-height: 40px; }
-  .tsw-bar__caret { position: absolute; top: 0; right: 0; width: 44px; height: 40px; }
+  .tsw-bar__link { min-height: 44px; }
+  .tsw-bar__disc { position: absolute; top: 0; right: 0; width: 44px; height: 44px; }
   .tsw-bar__panel { position: static; min-width: 0; max-width: none; border: 0; border-radius: 0; box-shadow: none; padding: 0 0 4px 12px; overflow: visible; }
-  .tsw-bar__submenu { position: static; border: 0; border-radius: 0; box-shadow: none; padding: 0; }
+  .tsw-bar__mitem > .tsw-bar__flyout { padding: 0 0 2px 12px; }
+  .tsw-bar__mdisc { min-width: 44px; min-height: 44px; }
 }
 /* The hover close delay is JavaScript timing, not motion, so it stays; the chevron spin does not. */
 @media (prefers-reduced-motion: reduce) {
-  .tsw-bar__caret::before { transition: none; }
+  .tsw-bar__disc::before { transition: none; }
 }
 
 /* Two rows: the desks, then the active desk's views (main.js updateTabs hides the others). */
