@@ -212,15 +212,12 @@ button, input, select { font: inherit; color: inherit; }
   .tsw-bar__sublink { padding: 6px 10px; font-size: 13px; color: var(--tsw-bar-fg); }
   .tsw-bar__sublink:hover, .tsw-bar__sublink:focus-visible { background: var(--tsw-bar-hover-bg); color: var(--tsw-bar-fg-hover); }
 }
-/* 760px and narrower: the bar collapses behind one button and the list opens as an accordion, with
-   sub-entries dropping inline. */
+/* 760px and narrower: the bar collapses behind one button. The band stays 44px whether the menu is
+   open or closed (the 44px box less the 1px border is the 43px row the button fills); the open list
+   overlays the page, absolutely positioned under the band, so it never pushes the page down. */
 @media (max-width: 760px) {
-  /* The closed band is 44px including the border, as on desktop (the 44px box less the 1px border
-     is the 43px interactive row the toggle fills); it grows to auto only once the list is open. */
-  .tsw-bar { height: 44px; flex-wrap: wrap; }
-  .tsw-bar--list-open { height: auto; }
   .tsw-bar__toggle { display: inline-flex; align-items: center; min-height: 43px; padding: 0 12px; background: transparent; border: 0; color: var(--tsw-bar-fg); font: 500 13px/1.2 var(--tsw-sans); cursor: pointer; }
-  .tsw-bar__list { display: none; flex-direction: column; width: 100%; padding: 4px 8px 8px; overflow-x: visible; }
+  .tsw-bar__list { display: none; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; padding: 4px 8px 8px; background: var(--tsw-bar-bg); border-bottom: 1px solid var(--tsw-bar-border); box-shadow: 0 10px 28px var(--tsw-bar-shadow); max-height: calc(100vh - 44px); overflow-y: auto; z-index: 40; }
   .tsw-bar--list-open .tsw-bar__list { display: flex; }
   .tsw-bar__item { flex-direction: column; align-items: stretch; }
   .tsw-bar__link { min-height: 40px; }

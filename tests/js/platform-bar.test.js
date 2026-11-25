@@ -35,7 +35,7 @@ test("the static top-level links match the menu file, in order, and no pending a
     assert.equal(link.textContent, item.label, item.id + " label");
   }
   const pending = pendingHrefs();
-  assert.ok(pending.length >= 2, "the fixture still has pending entries to exclude");
+  assert.ok(pending.length >= 1, "the fixture still has a pending entry to exclude");
   const barHrefs = hrefsIn(doc.querySelector("[data-tsw-bar]"));
   for (const href of pending) assert.ok(!barHrefs.includes(href), "pending address absent: " + href);
 });
@@ -47,7 +47,7 @@ test("enhancing adds a caret per item and a chevron per category, and sets a rov
   const home = bar.record("home");
   assert.ok(home.caret, "home has a caret");
   assert.equal(home.caret.getAttribute("aria-expanded"), "false");
-  assert.deepEqual(home.entries.map(entry => entry.link.textContent), ["Front page", "Design system"]);
+  assert.deepEqual(home.entries.map(entry => entry.link.textContent), ["Front page", "Search", "Design system"]);
   for (const entry of home.entries) assert.equal(entry.link.getAttribute("tabindex"), "-1");
 
   const hub = MENU.items.find(item => item.id === "hub");
