@@ -7,7 +7,7 @@ import { webcrypto } from "node:crypto";
 import { CVE_ROWS, brief, files, page, server, settle, storage } from "./fixtures.js";
 import { createApp } from "../../site/js/main.js";
 import { parseRoute } from "../../site/js/router.js";
-import { cvePublicExploit, cveRegister, publicExploit } from "../../site/js/filters.js";
+import { EXPLOIT_LABEL, cveExploitState, cvePublicExploit, cveRegister, publicExploit, rowExploitState } from "../../site/js/filters.js";
 import { FormatError, normalizeBrief, normalizeCveIndex, normalizePoc, normalizeRecent } from "../../site/js/validate.js";
 
 async function boot({ hash = "", site = files() } = {}) {
@@ -21,15 +21,33 @@ async function boot({ hash = "", site = files() } = {}) {
 }
 async function go(shell, hash) { shell.app.navigate(parseRoute(hash, "")); await settle(80); return shell.doc.querySelector("#view"); }
 
-test("a CVE has a public exploit from the CNA exploit tag or from CISA's SSVC poc/active, and not otherwise", () => {
-  assert.equal(cvePublicExploit({ poc: 1, ssvc_exploitation: null }), true, "CNA tag alone");
-  assert.equal(cvePublicExploit({ poc: 0, ssvc_exploitation: "poc" }), true, "SSVC poc alone");
-  assert.equal(cvePublicExploit({ poc: 0, ssvc_exploitation: "active" }), true, "SSVC active alone");
-  assert.equal(cvePublicExploit({ poc: 2, ssvc_exploitation: "active" }), true, "both");
-  assert.equal(cvePublicExploit({ poc: 0, ssvc_exploitation: "none" }), false, "SSVC none, no tag");
-  assert.equal(cvePublicExploit({ poc: 0, ssvc_exploitation: null }), false, "nothing");
-  assert.equal(cvePublicExploit(null), false);
-  assert.equal(cvePublicExploit(undefined), false);
+test("the exploitation state is public for the CNA tag or SSVC poc, active for SSVC active, and null otherwise", () => {
+  // The CNA exploit tag and SSVC poc both mean a public exploit exists; SSVC active means exploited
+  // in the wild, worded apart because it does not itself say exploit code is public.
+  assert.equal(cveExploitState({ poc: 1, ssvc_exploitation: null }), "public", "CNA tag");
+  assert.equal(cveExploitState({ poc: 0, ssvc_exploitation: "poc" }), "public", "SSVC poc");
+  assert.equal(cveExploitState({ poc: 2, ssvc_exploitation: "active" }), "public", "tag outranks active");
+  assert.equal(cveExploitState({ poc: 0, ssvc_exploitation: "active" }), "active", "SSVC active only");
+  assert.equal(cveExploitState({ poc: 0, ssvc_exploitation: "none" }), null, "SSVC none, no tag");
+  assert.equal(cveExploitState({ poc: 0, ssvc_exploitation: null }), null, "nothing");
+  assert.equal(cveExploitState(null), null);
+  // The filter predicate covers both states; the row state prefers public over active.
+  for (const e of [{ poc: 1, ssvc_exploitation: null }, { poc: 0, ssvc_exploitation: "poc" }, { poc: 0, ssvc_exploitation: "active" }]) assert.equal(cvePublicExploit(e), true);
+  assert.equal(cvePublicExploit({ poc: 0, ssvc_exploitation: "none" }), false);
+  const index = new Map([["CVE-A", { poc: 0, ssvc_exploitation: "active" }], ["CVE-B", { poc: 3, ssvc_exploitation: null }]]);
+  assert.equal(rowExploitState({ cves: ["CVE-A", "CVE-B"] }, index), "public", "a public CVE outranks an active one on the row");
+  assert.equal(rowExploitState({ cves: ["CVE-A"] }, index), "active");
+  assert.equal(rowExploitState({ cves: [] }, index), null);
+});
+
+test("the wording keeps \"Public exploit\" off SSVC active alone", () => {
+  // The chip, register note and brief badge all read EXPLOIT_LABEL[state]; active never maps to the
+  // words "Public exploit".
+  assert.equal(EXPLOIT_LABEL.public, "Public exploit");
+  assert.equal(EXPLOIT_LABEL.active, "Exploited (CISA SSVC)");
+  assert.ok(!EXPLOIT_LABEL.active.includes("Public exploit"), "active is not labelled a public exploit");
+  const activeOnly = { poc: 0, ssvc_exploitation: "active" };
+  assert.equal(EXPLOIT_LABEL[cveExploitState(activeOnly)], "Exploited (CISA SSVC)");
 });
 
 test("the Explorer filter and chip reflect the unified public-exploit signal", async () => {

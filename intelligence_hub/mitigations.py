@@ -74,9 +74,11 @@ def project_weaknesses(cna, cve, clean):
 def normalize_retained(value, cve):
     """A validated retained projection with the pairs later changes added, read as not_projected when absent."""
     items, status = validate_weaknesses(value, cve, brief_url, legacy=True)
+    # poc rides through as the retained projection carried it ({**value}): absent when the projection
+    # predates the field, so due() can read it again and fill the count instead of publishing a 0
+    # that only means "not read yet". A fresh projection always sets it.
     return {**value, "weaknesses": items, "weaknesses_status": status,
-            "adp": value.get("adp"), "adp_status": value.get("adp_status", "not_projected"), "epss": value.get("epss"),
-            "poc": value.get("poc", 0)}
+            "adp": value.get("adp"), "adp_status": value.get("adp_status", "not_projected"), "epss": value.get("epss")}
 
 # CISA's ADP container on the same record carries its SSVC decision-point values and, when CISA
 # supplied one, its own CVSS metric. It is read beside the CNA's metric and never blended with it.
@@ -384,8 +386,10 @@ def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, saf
     def due(cve):
         record = records[cve]
         # A successful projection made before a later field existed is read again within the
-        # budget, ahead of its 24-hour interval: the weakness pair (schema 5) and CISA's ADP block.
-        if record["source_status"] == "ok" and "not_projected" in (record["weaknesses_status"], record["adp_status"]):
+        # budget, ahead of its 24-hour interval: the weakness pair (schema 5), CISA's ADP block,
+        # and the poc count (a retained projection with no stored poc, so the count is filled from a
+        # fresh read rather than published as 0 until the record's ordinary interval comes round).
+        if record["source_status"] == "ok" and ("not_projected" in (record["weaknesses_status"], record["adp_status"]) or "poc" not in record):
             return True
         previous = record.get("source_attempted_at")
         if previous is None:
@@ -421,7 +425,10 @@ def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, saf
     kev_by_id = {item["cveID"]: item for item in catalog.get("vulnerabilities", [])}
     result = {}
     for cve, projection in records.items():
-        record = {key: projection[key] for key in ("cve", "title", "description", "source_status", "record_state", "source_updated_at", "retrieved_at", "source_attempted_at", "source_sha256", "products", "solutions", "workarounds", "cvss", "references", "weaknesses", "weaknesses_status", "adp", "adp_status", "epss", "poc")}
+        record = {key: projection[key] for key in ("cve", "title", "description", "source_status", "record_state", "source_updated_at", "retrieved_at", "source_attempted_at", "source_sha256", "products", "solutions", "workarounds", "cvss", "references", "weaknesses", "weaknesses_status", "adp", "adp_status", "epss")}
+        # A retained projection made before the poc field has no stored count; publish 0 until a fresh
+        # read (due() has pulled it forward), never a KeyError.
+        record["poc"] = projection.get("poc", 0)
         item = kev_by_id.get(cve)
         cisa_url = "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=" + cve
         action = clean(item.get("requiredAction", ""), 1200) if item else ""

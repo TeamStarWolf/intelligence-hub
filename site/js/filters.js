@@ -27,17 +27,45 @@ export function requiredAction(row, cveIndex) {
   return row.cves.some(cve => Boolean(cveIndex && cveIndex.get(cve)?.required_action));
 }
 
-// Public exploit: a CVE index entry whose CVE record has a reference the CNA tagged "exploit"
-// (poc > 0), or whose CISA SSVC Exploitation value (from the ADP container) is "poc" or "active". The
-// CNA tag alone is sparse (about 7% of shown CVEs) and misses most exploited CVEs; the SSVC value
-// makes the signal consistent, and the brief names which source applies on a given CVE.
-export function cvePublicExploit(entry) {
-  return Boolean(entry) && (entry.poc > 0 || entry.ssvc_exploitation === "poc" || entry.ssvc_exploitation === "active");
+// The chip and note wording for each exploitation state; every surface reads it from here so they
+// never drift apart. The filter and quick-chip label (one toggle over both states) is separate.
+export const EXPLOIT_LABEL = { public: "Public exploit", active: "Exploited (CISA SSVC)" };
+export const EXPLOIT_FILTER_LABEL = "Public exploit or exploited";
+
+// A CVE index entry's exploitation state, worded by what its source actually claims:
+//   "public"  the CNA tagged a reference "exploit" (a public exploit or PoC per the CVE Program
+//             reference taxonomy), or CISA's SSVC Exploitation is "poc" (a public PoC exists);
+//   "active"  CISA's SSVC Exploitation is "active" (exploited in the wild per CERT/CC SSVC), which
+//             reports exploitation, not that exploit code is public, so it reads "Exploited" not "Public exploit";
+//   null      neither.
+// The CNA tag alone is sparse (about 7% of shown CVEs) and misses most exploited CVEs, so the SSVC
+// value is folded in; the two are worded apart because they claim different things.
+export function cveExploitState(entry) {
+  if (!entry) return null;
+  if (entry.poc > 0 || entry.ssvc_exploitation === "poc") return "public";
+  if (entry.ssvc_exploitation === "active") return "active";
+  return null;
 }
 
-// One of the row's CVEs has a public exploit by the rule above.
+// The one filter predicate over both wordings: the CVE has a public exploit or is exploited.
+export function cvePublicExploit(entry) {
+  return cveExploitState(entry) !== null;
+}
+
+// A row's state across its CVEs: a public exploit on any CVE outranks an active-only one.
+export function rowExploitState(row, cveIndex) {
+  let state = null;
+  for (const cve of row.cves) {
+    const here = cveExploitState(cveIndex && cveIndex.get(cve));
+    if (here === "public") return "public";
+    if (here === "active") state = "active";
+  }
+  return state;
+}
+
+// One of the row's CVEs has a public exploit or is exploited.
 export function publicExploit(row, cveIndex) {
-  return row.cves.some(cve => cvePublicExploit(cveIndex && cveIndex.get(cve)));
+  return rowExploitState(row, cveIndex) !== null;
 }
 
 // The calendar-day window a list view shows: a year (and month), or the last N days ending on

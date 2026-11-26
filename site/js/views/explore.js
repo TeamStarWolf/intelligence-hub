@@ -1,7 +1,7 @@
 // The Intelligence Explorer: the default route. Advisories, Research and News are the same
 // view with a fixed source-class constraint and a shorter default date range.
 import { defaultRange, defaultSort, formatRoute, withQuery } from "../router.js";
-import { classOf, clusterStories, dateWindow, deskOf, exportCsv, exportJson, facets, filterRows, kevLinked, requiredAction } from "../filters.js";
+import { EXPLOIT_FILTER_LABEL, classOf, clusterStories, dateWindow, deskOf, exportCsv, exportJson, facets, filterRows, kevLinked, requiredAction } from "../filters.js";
 import { count, dateLabel, link, monthLabel, node, routeLink, stamp } from "../util.js";
 import { pageSize } from "../limits.js";
 import { EXPLOITATION_LABELS, KIND_LABELS, cveOrgLink, dateBasisLabel, facetOptions, fillSelect, label, libraryDoor, pager, pinnedDoor, resultCard } from "./common.js";
@@ -67,7 +67,7 @@ function quickFilters(route, found) {
   wrap.append(chip("exp", "known", "Known exploited", found.exp.get("known") || 0));
   wrap.append(chip("exp", "reported", "Reported exploited", found.exp.get("reported") || 0));
   wrap.append(chip("kev", "1", "KEV-linked", null));
-  wrap.append(chip("poc", "1", "Public exploit", null));
+  wrap.append(chip("poc", "1", EXPLOIT_FILTER_LABEL, null));
   return wrap;
 }
 

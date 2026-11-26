@@ -197,6 +197,23 @@ class ReprojectionTest(unittest.TestCase):
         self.build(projections, 40, calls)
         self.assertEqual(calls, [])
 
+    def test_a_projection_without_the_poc_count_is_due_within_the_budget(self):
+        # A retained projection complete on the weakness pair and the ADP block but made before the
+        # poc field: it is read again to fill the count, not published as 0 until its 24-hour interval.
+        complete = project(record([adp_container()], "CVE-2026-90004"), "CVE-2026-90004")
+        self.assertEqual((complete["adp_status"], complete["weaknesses_status"]), ("supplied", "not_supplied"))
+        no_poc = {key: item for key, item in complete.items() if key != "poc"}
+        self.assertNotIn("poc", no_poc)
+        calls = []
+        briefs, projections, stats = self.build({"CVE-2026-90004": no_poc}, 40, calls)
+        self.assertEqual(calls, [record_url("CVE-2026-90004")], "a record with no stored poc is due ahead of its interval")
+        self.assertIn("poc", projections["CVE-2026-90004"])
+        self.assertEqual(briefs["CVE-2026-90004"]["poc"], 0, "the fresh read fills the count")
+        # The refreshed projection carries poc and is no longer due on that account.
+        calls = []
+        self.build(projections, 40, calls)
+        self.assertEqual(calls, [])
+
     def test_a_failed_attempt_keeps_the_retained_facts_and_stays_due(self):
         old = {key: item for key, item in project(record(None, "CVE-2026-90002"), "CVE-2026-90002").items() if key not in ("adp", "adp_status")}
 

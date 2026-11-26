@@ -72,7 +72,7 @@ are dropped.
 | `exp` | list | `known`, `reported`, `unknown` | exploitation state |
 | `kev` | list, `cves` | `1` | KEV-linked: the entry is a KEV entry or one of its CVEs is in CISA's KEV catalog |
 | `action` | list, `cves` | `1` | one of the entry's CVEs carries CISA's required action |
-| `poc` | list, `cves` | `1` | one of the entry's CVEs has a public exploit: the CNA tagged an exploit reference, or CISA's SSVC Exploitation is `poc` or `active` |
+| `poc` | list, `cves` | `1` | one of the entry's CVEs has a public exploit (the CNA tagged an exploit reference, or CISA's SSVC Exploitation is `poc`) or is exploited in the wild (SSVC `active`) |
 | `vendor` | list | a vocabulary vendor id without its prefix, such as `fortinet` | vendor tag `vendor:<value>` |
 | `product` | list | a product id without its prefix, such as `pan-os` | product tag `product:<value>` |
 | `actor` | list | an actor id without its prefix, such as `G0016` | actor tag `actor:<value>` |
