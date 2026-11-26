@@ -199,7 +199,7 @@ export function briefBody(record, indexRow, rows, lib = null, counts = null) {
   if (exploitState) {
     const sources = [];
     if (pocCount > 0) sources.push("the CNA tagged " + count(pocCount, "reference") + " as a public exploit");
-    if (ssvcExploitation === "poc") sources.push("CISA's SSVC Exploitation is poc (a public proof of concept exists)");
+    if (ssvcExploitation === "poc") sources.push("CISA's SSVC Exploitation is poc (a public proof of concept exists, or the vulnerability has a well-known method of exploitation)");
     if (ssvcExploitation === "active") sources.push("CISA's SSVC Exploitation is active (used in the wild, which does not itself mean exploit code is public)");
     overview.append(node("p", "muted", EXPLOIT_LABEL[exploitState] + ": " + sources.join("; ") + ". None of this establishes exposure on your own devices."));
   }

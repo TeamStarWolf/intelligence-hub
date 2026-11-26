@@ -30,6 +30,17 @@ coding agent that changes this repository.
   Python and Node's built-in `node --test` under `tests/js/` for the site (no npm, no
   dependencies). A change to the collector, a validator or the page logic in `site/js/`
   comes with a test that fails without the change.
+- When changing the shape of a CVE projection or the brief index (a new brief field, a new
+  index column, a version bump), resume from the deployed snapshot before reporting the change,
+  not only the committed fixture. The check's `--cached` build starts from blank briefs, so it
+  never exercises `merge_retained` or `due()` on a projection made before the new field, which is
+  how every record on the live site reads until it is re-read. Prove it two ways: a test that
+  resumes through the real path (`merge_retained`, then `build_briefs`, then the index row) from
+  projections without the new field, alone and mixed with fresh ones; and a run of the collector's
+  resume against a copy of the currently deployed feed and briefs (offline or with a tiny budget),
+  pasting the summary line in the pull request. A projection field is carried through, not forced:
+  `merge_retained`, `normalize_retained` and `build_briefs` keep it missing when the retained
+  projection lacks it, so `due()` reads that record early rather than publishing a default.
 - When adding or changing a feed source, validate its feed through the collector's own
   `collect.fetch` (which enforces `MAX_BYTES` and rejects redirects) and `parse_feed`, not a
   raw or uncapped fetch. A feed that loads in a browser or an uncapped fetch can still exceed

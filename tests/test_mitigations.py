@@ -214,6 +214,40 @@ class ReprojectionTest(unittest.TestCase):
         self.build(projections, 40, calls)
         self.assertEqual(calls, [])
 
+    def test_resume_from_projections_without_poc_does_not_crash_and_fills_the_count(self):
+        # Every brief on the live site predates the poc field. collect.py resumes by calling
+        # merge_retained for each; this walks the real path (merge_retained, build_briefs, index_row)
+        # from such projections and must not raise, must keep the record due, and must publish 0 until
+        # a fresh read fills the true count.
+        cves = ["CVE-2026-90005", "CVE-2026-90006"]
+        old = {cve: {key: item for key, item in project(record([adp_container()], cve), cve).items() if key != "poc"} for cve in cves}
+        fresh = {**project(record([adp_container()], cves[0]), cves[0]), "poc": 2, "retrieved_at": "2026-12-01T00:00:00Z"}
+        # The three resume merges Codex reproduced the KeyError on: old alone, old with old, old with fresh.
+        self.assertNotIn("poc", merge_retained(old[cves[0]], None, cves[0], safe_url, published), "old alone keeps poc missing")
+        self.assertNotIn("poc", merge_retained(old[cves[0]], old[cves[0]], cves[0], safe_url, published), "old with old keeps it missing")
+        with_fresh = merge_retained(old[cves[0]], fresh, cves[0], safe_url, published)
+        self.assertEqual(with_fresh.get("poc"), 2, "a newer projection with the field fills it")
+
+        def no_fetch(_url):
+            raise AssertionError("no record should be fetched at budget 0")
+        retained = {cve: merge_retained(old[cve], None, cve, safe_url, published) for cve in cves}
+        briefs, projections, _ = build_briefs([{"cves": cves}], {}, retained, True, 0, no_fetch, text, safe_url, published, STAMP)
+        for cve in cves:
+            self.assertEqual(briefs[cve]["poc"], 0, "published as 0 until the re-read")
+            self.assertEqual(index_row(briefs[cve])[-1], 0)
+
+        def fetch(url):
+            cve = url.rsplit("/", 1)[1][:-5]
+            doc = json.loads(record([adp_container()], cve).decode("utf-8"))
+            doc["containers"]["cna"]["references"] = [{"url": "https://research.example.org/poc", "tags": ["exploit"]}]
+            return json.dumps(doc).encode("utf-8")
+        retained = {cve: merge_retained(old[cve], None, cve, safe_url, published) for cve in cves}
+        briefs, _, stats = build_briefs([{"cves": cves}], {}, retained, True, 40, fetch, text, safe_url, published, STAMP)
+        self.assertEqual(stats["attempted_this_run"], 2, "both no-poc records were due ahead of their interval")
+        for cve in cves:
+            self.assertEqual(briefs[cve]["poc"], 1, "the fresh read fills the true count")
+            self.assertEqual(index_row(briefs[cve])[-1], 1)
+
     def test_a_failed_attempt_keeps_the_retained_facts_and_stays_due(self):
         old = {key: item for key, item in project(record(None, "CVE-2026-90002"), "CVE-2026-90002").items() if key not in ("adp", "adp_status")}
 

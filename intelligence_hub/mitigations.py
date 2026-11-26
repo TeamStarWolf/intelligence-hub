@@ -356,8 +356,13 @@ def merge_retained(local, remote, cve, safe_url, normalize_date):
         return normalize_date(item.get(field) or "") or ""
     successful = [item for item in values if item.get("retrieved_at") and item.get("source_sha256")]
     facts = normalize_retained(max(successful, key=lambda item: clock(item, "retrieved_at")), cve) if successful else blank(cve)
-    result = {key: facts[key] for key in blank(cve) if key != "projection_notes"}
+    result = {key: facts[key] for key in blank(cve) if key not in ("projection_notes", "poc")}
     result["projection_notes"] = []
+    # poc rides with the facts: a fresh projection and a blank carry it (0 or more), but a projection
+    # made before the field has none, and merge keeps it missing so due() reads that record early
+    # rather than inventing a 0. blank(cve) carries poc, so this is the only key not taken above.
+    if "poc" in facts:
+        result["poc"] = facts["poc"]
     latest = max(values, key=lambda item: clock(item, "source_attempted_at"))
     result.update(source_status=latest["source_status"], source_attempted_at=latest.get("source_attempted_at"))
     # FIRST's EPSS block is read apart from the CNA record, so it is merged apart: the block with the

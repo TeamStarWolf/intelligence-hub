@@ -34,7 +34,8 @@ export const EXPLOIT_FILTER_LABEL = "Public exploit or exploited";
 
 // A CVE index entry's exploitation state, worded by what its source actually claims:
 //   "public"  the CNA tagged a reference "exploit" (a public exploit or PoC per the CVE Program
-//             reference taxonomy), or CISA's SSVC Exploitation is "poc" (a public PoC exists);
+//             reference taxonomy), or CISA's SSVC Exploitation is "poc" (a public PoC exists, or the
+//             vulnerability has a well-known method of exploitation);
 //   "active"  CISA's SSVC Exploitation is "active" (exploited in the wild per CERT/CC SSVC), which
 //             reports exploitation, not that exploit code is public, so it reads "Exploited" not "Public exploit";
 //   null      neither.

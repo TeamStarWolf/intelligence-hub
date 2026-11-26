@@ -134,9 +134,9 @@ other says the CVE is being exploited, and those are not the same claim.
   defines `exploit` as a reference with "an in-depth/detailed description of steps to exploit a
   vulnerability" or legitimate proof-of-concept code or an exploit kit. CERT/CC SSVC
   ([Exploitation ssvc:E:1.1.0](https://certcc.github.io/SSVC/reference/decision_points/exploitation/))
-  defines `poc` as "Typical public PoC exists in sources such as Metasploit or websites like
-  ExploitDB; or the vulnerability has a well-known method of exploitation". Both say a public
-  exploit exists.
+  defines `poc` as "One of the following is true: (1) Typical public PoC exists in sources such
+  as Metasploit or websites like ExploitDB; or (2) the vulnerability has a well-known method of
+  exploitation". Both the tag and `poc` say a public exploit exists.
 - **"Exploited (CISA SSVC)"** when SSVC Exploitation is `active`, which CERT/CC defines as
   "Shared, observable, reliable evidence that the exploit is being used in the wild by real
   attackers; there is credible public reporting". That reports exploitation in the wild, not
