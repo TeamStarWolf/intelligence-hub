@@ -1,6 +1,6 @@
 # Security Policy
 
-This repository builds the TeamStarWolf Intelligence Hub: a Python collector under `intelligence_hub/` that reads public security advisories and reporting, the static site under `site/` that displays them, and the GitHub Actions workflows that publish them. It runs no service and has no user accounts; your browser reads static files and contacts no one. What can go wrong here is a wrong summary, tag or CVE fact, a broken link or one that now leads somewhere it should not, a published file that carries something it should not, or a fault in the collector, the site code or a workflow.
+This repository builds the TeamStarWolf Intelligence Hub: a Python collector under `intelligence_hub/` that reads public security advisories and reporting, the static site under `site/` that displays them, and the GitHub Actions workflows that publish them. It runs no service and has no user accounts, and the pages are static files; the one exception is the Service health view, where your browser reads the listed vendors' public status files directly. What can go wrong here is a wrong summary, tag or CVE fact, a broken link or one that now leads somewhere it should not, a published file that carries something it should not, or a fault in the collector, the site code or a workflow.
 
 ## What to report, and how
 
