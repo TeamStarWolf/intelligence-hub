@@ -67,7 +67,7 @@ function quickFilters(route, found) {
   wrap.append(chip("exp", "known", "Known exploited", found.exp.get("known") || 0));
   wrap.append(chip("exp", "reported", "Reported exploited", found.exp.get("reported") || 0));
   wrap.append(chip("kev", "1", "KEV-linked", null));
-  wrap.append(chip("poc", "1", "Public exploit cited", null));
+  wrap.append(chip("poc", "1", "Public exploit", null));
   return wrap;
 }
 

@@ -16,11 +16,11 @@ every tab is also listed in the **Panels** sidebar, which starts closed:
 
 | Tab | What it holds |
 | --- | --- |
-| Explore | Search, filters (desk, kind, source class, event type, exploitation, KEV-linked, CISA required action, public exploit cited, sector, region, vendor, product, actor, malware, CWE, ATT&CK technique, source, year, month, date range), sort and results. |
+| Explore | Search, filters (desk, kind, source class, event type, exploitation, KEV-linked, CISA required action, public exploit, sector, region, vendor, product, actor, malware, CWE, ATT&CK technique, source, year, month, date range), sort and results. |
 | Today | The brief head (the day's counts in words, the service-health board, the latest Patch Tuesday brief and what is new since this browser's last visit), KEV additions by calendar day, KEV entries due in the next 14 days, then the last three days of advisories, research and press. |
 | Advisories, Research, News | The Explorer limited to vendor and government sources, research teams, or the press. |
 | Known exploited | CISA's KEV ledger by date added, with the directive each required action cites. |
-| CVEs | Every CVE an entry mentions, with its guidance label, KEV state, CNA CVSS, FIRST's EPSS score (with the model and the score date) and whether its CVE record cites a public exploit; a CVE opens its source-led brief, its severity sources, its EPSS block, its public-exploit references and its CVE.org record. |
+| CVEs | Every CVE an entry mentions, with its guidance label, KEV state, CNA CVSS, FIRST's EPSS score (with the model and the score date) and whether a public exploit is known (the CNA tagged an exploit reference, or CISA's SSVC Exploitation is poc or active); a CVE opens its source-led brief, its severity sources, its EPSS block, its public-exploit references and its CVE.org record. |
 | Actors and malware | Threat groups, malware and tools that entries name, each linking back to its library page. |
 | Patch Tuesday | Microsoft's monthly security release from the MSRC CVRF data: the headline numbers, what to prioritize by fixed rules, the exploited and publicly disclosed CVEs, the Critical CVEs, the product families, the KEV join, Adobe's and SAP's same-day bulletins as headline rows, and a brief for every monthly release back to January 2016. |
 | Service health | The vendors' own status pages and cloud health feeds by group, open incidents, internet outage signals from IODA, and the last 30 days of incidents. |

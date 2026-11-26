@@ -27,9 +27,17 @@ export function requiredAction(row, cveIndex) {
   return row.cves.some(cve => Boolean(cveIndex && cveIndex.get(cve)?.required_action));
 }
 
-// Public exploit cited: one of the row's CVEs has a CVE record reference the CNA tagged "exploit".
+// Public exploit: a CVE index entry whose CVE record has a reference the CNA tagged "exploit"
+// (poc > 0), or whose CISA SSVC Exploitation value (from the ADP container) is "poc" or "active". The
+// CNA tag alone is sparse (about 7% of shown CVEs) and misses most exploited CVEs; the SSVC value
+// makes the signal consistent, and the brief names which source applies on a given CVE.
+export function cvePublicExploit(entry) {
+  return Boolean(entry) && (entry.poc > 0 || entry.ssvc_exploitation === "poc" || entry.ssvc_exploitation === "active");
+}
+
+// One of the row's CVEs has a public exploit by the rule above.
 export function publicExploit(row, cveIndex) {
-  return row.cves.some(cve => (cveIndex && cveIndex.get(cve)?.poc) > 0);
+  return row.cves.some(cve => cvePublicExploit(cveIndex && cveIndex.get(cve)));
 }
 
 // The calendar-day window a list view shows: a year (and month), or the last N days ending on
@@ -143,10 +151,10 @@ export function facets(rows, view = "explore") {
 
 // CVE register rows from the CVE index. kev=1 keeps every CVE with a KEV dateAdded, whatever
 // its guidance label; action=1 keeps every CVE whose brief carries CISA's requiredAction; poc=1
-// keeps every CVE whose record cites a public exploit.
+// keeps every CVE with a public exploit (CNA exploit tag, or CISA SSVC poc/active).
 export function cveRegister(cveIndex, query) {
   const words = terms(query.q);
-  const rows = [...cveIndex.values()].filter(row => (!query.kev || row.kev_added) && (!query.action || row.required_action) && (!query.poc || row.poc > 0) &&
+  const rows = [...cveIndex.values()].filter(row => (!query.kev || row.kev_added) && (!query.action || row.required_action) && (!query.poc || cvePublicExploit(row)) &&
     words.every(word => normalized(row.cve + " " + row.weaknesses.join(" ") + " " + row.guidance).includes(word)));
   const [key, order] = (query.sort || "cve-desc").split("-");
   const direction = order === "desc" ? -1 : 1;

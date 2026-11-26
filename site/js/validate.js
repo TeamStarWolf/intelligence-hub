@@ -237,11 +237,11 @@ export function normalizeEpss(value) {
   return { score: fraction(value.score), percentile: fraction(value.percentile), date: calendarDay(value.date), model: value.model };
 }
 
-// The count of the CVE record's references the CNA tagged "exploit" (a public exploit or PoC), 0 or
-// more. Absent on index rows published before version 4; read as 0 there.
+// The count of the CVE record's references the CNA tagged "exploit" (a public exploit or PoC),
+// counted uncapped (0 to the 100 the record is read for). Absent before version 4; read as 0 there.
 export function normalizePoc(value) {
   if (value === null || value === undefined) return 0;
-  requireValue(Number.isInteger(value) && value >= 0 && value <= 20);
+  requireValue(Number.isInteger(value) && value >= 0 && value <= 100);
   return value;
 }
 
@@ -433,7 +433,7 @@ export function normalizeBrief(value, key) {
       steps: list(value.analysis.steps, 100).map(item => ({ title: boundedText(item.title, 2000, true), detail: boundedText(item.detail, 20000, true), evidence_url: optionalText(item.evidence_url, 4000) })),
       limitations: textList(value.analysis.limitations, 100, 20000)
     },
-    weaknesses: [], weaknesses_status: "not_projected", adp: null, adp_status: "not_projected", epss: null
+    weaknesses: [], weaknesses_status: "not_projected", adp: null, adp_status: "not_projected", epss: null, poc: 0
   };
   if (value.cvss !== null) {
     requireValue(isObject(value.cvss) && (value.cvss.score === null || (typeof value.cvss.score === "number" && Number.isFinite(value.cvss.score) && value.cvss.score >= 0 && value.cvss.score <= 10)));
@@ -453,6 +453,7 @@ export function normalizeBrief(value, key) {
     if (value.adp !== null) record.adp = normalizeAdp(value.adp);
   }
   if (Object.hasOwn(value, "epss")) record.epss = normalizeEpss(value.epss);
+  if (Object.hasOwn(value, "poc")) record.poc = normalizePoc(value.poc);
   return record;
 }
 

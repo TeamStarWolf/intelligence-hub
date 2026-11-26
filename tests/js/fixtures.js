@@ -32,7 +32,7 @@ export function brief(cve, fields = {}) {
     retrieved_at: "2026-11-01T00:00:00Z", source_attempted_at: "2026-11-01T00:00:00Z", source_sha256: "a".repeat(64), products: [], solutions: [], workarounds: [],
     cvss: { score: 9.8, version: "3.1", vector: "CVSS:3.1/AV:N", source_url: null }, references: [], required_action: null, required_action_source_url: null, kev: null,
     analysis: { priority: "review", guidance_status: "needs-review", assessment: "Review it.", steps: [], limitations: [] }, weaknesses: [], weaknesses_status: "not_supplied",
-    adp: null, adp_status: "not_supplied", epss: null,
+    adp: null, adp_status: "not_supplied", epss: null, poc: 0,
     ...fields
   };
 }
@@ -102,7 +102,7 @@ export function files({ schema = 7, layout = "b".repeat(64), extra = {}, omit = 
   }
   const feedRevision = "d".repeat(64);
   const briefs = { schema_version: 1, feed_schema_version: 7, generated_at: "2026-11-03T12:00:00+00:00", content_revision: feedRevision,
-    briefs: { "CVE-2026-1000": brief("CVE-2026-1000", { required_action: "Apply mitigations per vendor instructions.", kev: { date_added: "2026-11-02", due_date: "2026-11-10", ransomware: "Known" }, analysis: { priority: "known-exploited", guidance_status: "publisher-guidance", assessment: "Exploited.", steps: [], limitations: [] }, adp: ADP, adp_status: "supplied", epss: EPSS_HIGH,
+    briefs: { "CVE-2026-1000": brief("CVE-2026-1000", { required_action: "Apply mitigations per vendor instructions.", kev: { date_added: "2026-11-02", due_date: "2026-11-10", ransomware: "Known" }, analysis: { priority: "known-exploited", guidance_status: "publisher-guidance", assessment: "Exploited.", steps: [], limitations: [] }, adp: ADP, adp_status: "supplied", epss: EPSS_HIGH, poc: 2,
       references: [{ label: "Official CVE record", url: "https://www.cve.org/CVERecord?id=CVE-2026-1000", kind: "record" }, { label: "Proof of concept", url: "https://research.example.org/poc", kind: "exploit" }, { label: "Exploit module", url: "https://research.example.org/module", kind: "exploit" }] }),
       "CVE-2026-1001": brief("CVE-2026-1001", { epss: EPSS_LOW }), "CVE-2026-1002": brief("CVE-2026-1002", { adp_status: "not_projected" }) } };
   bodies["./data/briefs.json"] = json(briefs);

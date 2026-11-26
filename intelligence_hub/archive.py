@@ -190,7 +190,7 @@ def validate_index(index, wanted):
                 all(isinstance(item, str) and CWE_ID.fullmatch(item) for item in weaknesses), "Invalid brief index weaknesses.")
         require(exploitation is None or isinstance(exploitation, str) and 0 < len(exploitation) <= 40, "Invalid brief index SSVC exploitation.")
         require(epss is None or valid_score(epss), "Invalid brief index EPSS.")
-        require(poc is None or (type(poc) is int and 0 <= poc <= 20), "Invalid brief index PoC count.")
+        require(poc is None or (type(poc) is int and 0 <= poc <= 100), "Invalid brief index PoC count.")
     return rows
 
 
@@ -272,6 +272,9 @@ def validate_snapshot(value):
         # FIRST's EPSS block since WP-03, optional the same way; valid_projection checks its content.
         if modern and "epss" in brief:
             expected = expected | {"epss"}
+        # The exploit-reference count, optional the same way; valid_projection checks its range.
+        if modern and "poc" in brief:
+            expected = expected | {"poc"}
         keys(brief, expected)
         require(CVE.fullmatch(cve) and valid_projection(brief, cve, safe_url, published), "Invalid structured CVE provenance.")
         if modern:

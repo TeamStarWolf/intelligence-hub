@@ -75,7 +75,8 @@ def normalize_retained(value, cve):
     """A validated retained projection with the pairs later changes added, read as not_projected when absent."""
     items, status = validate_weaknesses(value, cve, brief_url, legacy=True)
     return {**value, "weaknesses": items, "weaknesses_status": status,
-            "adp": value.get("adp"), "adp_status": value.get("adp_status", "not_projected"), "epss": value.get("epss")}
+            "adp": value.get("adp"), "adp_status": value.get("adp_status", "not_projected"), "epss": value.get("epss"),
+            "poc": value.get("poc", 0)}
 
 # CISA's ADP container on the same record carries its SSVC decision-point values and, when CISA
 # supplied one, its own CVSS metric. It is read beside the CNA's metric and never blended with it.
@@ -228,7 +229,8 @@ def project_record(raw, cve, clean, safe_url, normalize_date, stamp):
         products.append({"vendor": clean(str(item.get("vendor", "Not stated")), 150),
             "product": clean(str(item.get("product") or item.get("packageName") or "Not stated"), 200),
             "default_status": clean(str(item.get("defaultStatus", "unknown")), 40), "versions": versions})
-    references = [{"label": "Official CVE record", "url": url, "kind": "record"}]
+    candidates = []
+    poc = 0
     values = cna.get("references", [])
     if isinstance(values, list):
         for item in values[:100]:
@@ -237,15 +239,23 @@ def project_record(raw, cve, clean, safe_url, normalize_date, stamp):
             tags = {str(tag) for tag in item["tags"]} if isinstance(item.get("tags"), list) else set()
             # A reference the CNA tagged "exploit" (CVE 5.x reference taxonomy) points at a public
             # exploit or proof of concept. It is a separate signal from guidance; exploit wins when
-            # a reference carries both. The tag is applied by CNAs and is not complete coverage.
+            # a reference carries both. The tag is applied by CNAs and is not complete coverage; only
+            # the CNA container is read for it, because CISA's assessment is the ADP SSVC value.
             exploit = "exploit" in tags
+            if exploit:
+                poc += 1
             guidance = bool(tags & {"vendor-advisory", "patch", "mitigation", "release-notes"})
             kind = "exploit" if exploit else "vendor-guidance" if guidance else "record"
             default = "Public exploit reference" if exploit else "CNA guidance reference" if guidance else "CNA reference"
-            references.append({"label": clean(str(item.get("name") or default), 150),
+            candidates.append({"label": clean(str(item.get("name") or default), 150),
                 "url": safe_url(item["url"]), "kind": kind})
-            if len(references) == 16:
-                break
+    # poc counts every exploit reference the record carries, capped or not. The displayed list keeps
+    # the official record plus up to fifteen CNA references; when that cap would drop every exploit
+    # reference, one of them replaces the last kept reference so the count is always backed by a link.
+    shown = candidates[:15]
+    if poc and not any(ref["kind"] == "exploit" for ref in shown):
+        shown = candidates[:14] + [next(ref for ref in candidates if ref["kind"] == "exploit")]
+    references = [{"label": "Official CVE record", "url": url, "kind": "record"}] + shown
     metrics = cna.get("metrics", [])
     cvss = first_cvss(metrics, clean) if isinstance(metrics, list) else None
     if cvss is not None:
@@ -262,7 +272,7 @@ def project_record(raw, cve, clean, safe_url, normalize_date, stamp):
         "solutions": [{"text": text, "source_url": url} for text in english_values(cna.get("solutions"), clean)],
         "workarounds": [{"text": text, "source_url": url} for text in english_values(cna.get("workarounds"), clean)],
         "cvss": cvss, "references": references, "weaknesses": weaknesses, "weaknesses_status": weakness_status,
-        "adp": adp, "adp_status": adp_status,
+        "adp": adp, "adp_status": adp_status, "poc": poc,
         "projection_notes": ["CNA fields are bounded excerpts; consult the original record and vendor advisories for complete product/version conditions.",
             "Product statements can include unaffected versions. An affected version range is not a fixed-version claim.",
             "The displayed metric is the first supplied metric of the highest available CVSS version, not a product-specific applicability assessment."]}
@@ -281,6 +291,11 @@ def valid_projection(value, cve, safe_url, normalize_date):
         return False
     # FIRST's EPSS block (WP-03) rides on the record: absent or null before a read, else a valid block.
     if value.get("epss") is not None and not valid_score(value["epss"]):
+        return False
+    # poc is the count of exploit-tagged CNA references (0 to the 100 the record is read for): absent
+    # on a projection made before this field, else a non-negative integer.
+    poc = value.get("poc")
+    if poc is not None and (type(poc) is not int or not 0 <= poc <= 100):
         return False
     for field in ("source_updated_at", "retrieved_at", "source_attempted_at"):
         item = value.get(field)
@@ -326,7 +341,7 @@ def blank(cve):
     return {"cve": cve, "title": cve, "description": "", "source_status": "pending", "record_state": "UNKNOWN",
         "source_updated_at": None, "retrieved_at": None, "source_attempted_at": None, "source_sha256": None,
         "products": [], "solutions": [], "workarounds": [], "cvss": None, "weaknesses": [], "weaknesses_status": "not_projected",
-        "adp": None, "adp_status": "not_projected", "epss": None,
+        "adp": None, "adp_status": "not_projected", "epss": None, "poc": 0,
         "references": [{"label": "Official CVE record", "url": brief_url(cve), "kind": "record"}], "projection_notes": []}
 
 
@@ -406,7 +421,7 @@ def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, saf
     kev_by_id = {item["cveID"]: item for item in catalog.get("vulnerabilities", [])}
     result = {}
     for cve, projection in records.items():
-        record = {key: projection[key] for key in ("cve", "title", "description", "source_status", "record_state", "source_updated_at", "retrieved_at", "source_attempted_at", "source_sha256", "products", "solutions", "workarounds", "cvss", "references", "weaknesses", "weaknesses_status", "adp", "adp_status", "epss")}
+        record = {key: projection[key] for key in ("cve", "title", "description", "source_status", "record_state", "source_updated_at", "retrieved_at", "source_attempted_at", "source_sha256", "products", "solutions", "workarounds", "cvss", "references", "weaknesses", "weaknesses_status", "adp", "adp_status", "epss", "poc")}
         item = kev_by_id.get(cve)
         cisa_url = "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=" + cve
         action = clean(item.get("requiredAction", ""), 1200) if item else ""
@@ -478,8 +493,9 @@ def index_fields(version):
 
 
 def poc_count(brief):
-    """How many of the CVE record's references the CNA tagged as a public exploit or proof of concept."""
-    return sum(1 for item in brief.get("references", []) if item.get("kind") == "exploit")
+    """The stored count of exploit-tagged CNA references, counted uncapped when the record was read."""
+    poc = brief.get("poc")
+    return poc if type(poc) is int and poc >= 0 else 0
 
 
 def index_row(brief, version=INDEX_VERSION):

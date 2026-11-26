@@ -254,6 +254,27 @@ class IndexTest(unittest.TestCase):
         self.assertEqual(poc_count(plain), 0)
         self.assertTrue(valid_projection(plain, CVE, safe_url, published))
 
+    def test_an_exploit_reference_past_the_display_cap_is_counted_and_still_shown(self):
+        # Nineteen plain references then an exploit reference at position 20, past the fifteen-reference
+        # display cap. poc counts it, and one exploit reference is kept among the displayed ones.
+        refs = [{"url": "https://example.org/ref%d" % i, "tags": ["third-party-advisory"]} for i in range(19)]
+        refs.append({"url": "https://research.example.org/poc", "tags": ["exploit"], "name": "PoC"})
+        document = json.loads(record().decode("utf-8"))
+        document["containers"]["cna"]["references"] = refs
+        brief = project(json.dumps(document).encode("utf-8"))
+        self.assertEqual(brief["poc"], 1, "the count is uncapped")
+        self.assertEqual(poc_count(brief), 1)
+        self.assertLessEqual(len(brief["references"]), 16, "the record plus up to fifteen CNA references")
+        self.assertTrue(any(item["kind"] == "exploit" for item in brief["references"]), "an exploit reference stays visible")
+        self.assertTrue(valid_projection(brief, CVE, safe_url, published))
+        # Three exploit references past the cap: all are counted, one is shown.
+        more = [{"url": "https://example.org/p%d" % i, "tags": ["third-party-advisory"]} for i in range(15)]
+        more += [{"url": "https://research.example.org/e%d" % i, "tags": ["exploit"]} for i in range(3)]
+        document["containers"]["cna"]["references"] = more
+        brief = project(json.dumps(document).encode("utf-8"))
+        self.assertEqual(brief["poc"], 3)
+        self.assertEqual(sum(1 for item in brief["references"] if item["kind"] == "exploit"), 1)
+
     def test_the_page_mirrors_the_index_fields_and_the_fixture_follows_them(self):
         limits = (support.ROOT / "site" / "js" / "limits.js").read_text(encoding="utf-8")
         self.assertIn("export const indexFields = " + json.dumps(list(INDEX_FIELDS)) + ";", limits)
@@ -301,16 +322,17 @@ class PublicationTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Invalid brief index SSVC exploitation"):
             validate_snapshot(joined)
 
-    def test_the_poc_index_column_counts_exploit_references_and_refuses_a_bad_count(self):
+    def test_the_poc_index_column_carries_the_stored_count_and_refuses_a_bad_one(self):
         joined = self.joined()
         cve = next(iter(joined["mitigations"]))
+        # poc is the stored count the collector derived uncapped; it can exceed the displayed references.
+        joined["mitigations"][cve]["poc"] = 23
         joined["mitigations"][cve]["references"] = joined["mitigations"][cve]["references"] + [
-            {"label": "Proof of concept", "url": "https://research.example.org/poc", "kind": "exploit"},
-            {"label": "Exploit module", "url": "https://research.example.org/module", "kind": "exploit"}]
+            {"label": "Proof of concept", "url": "https://research.example.org/poc", "kind": "exploit"}]
         joined["brief_index"] = brief_index(joined["mitigations"])
         validate_snapshot(joined)
-        self.assertEqual(joined["brief_index"]["rows"][cve][-1], 2, "poc is the count of exploit-tagged references")
-        for bad in (-1, 21, True, "2", 1.5):
+        self.assertEqual(joined["brief_index"]["rows"][cve][-1], 23, "poc is the stored exploit-reference count")
+        for bad in (-1, 101, True, "2", 1.5):
             joined["brief_index"]["rows"][cve][-1] = bad
             with self.assertRaisesRegex(ValueError, "Invalid brief index PoC count"):
                 validate_snapshot(joined)
