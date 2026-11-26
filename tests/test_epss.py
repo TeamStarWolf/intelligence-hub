@@ -187,13 +187,16 @@ class BriefTest(unittest.TestCase):
         self.assertEqual(merge_retained(older_read, newer_read, cve, safe_url, published)["epss"], score(0.2, 0.3, "2026-11-10"))
         self.assertEqual(merge_retained(newer_read, older_read, cve, safe_url, published)["epss"], score(0.2, 0.3, "2026-11-10"))
 
-    def test_the_index_carries_the_block_last(self):
+    def test_the_index_carries_the_block_then_poc_last(self):
         briefs, _, _ = self.briefs(None, {"CVE-2026-90001": score()})
-        self.assertEqual(INDEX_FIELDS[-1], "epss")
-        self.assertEqual(index_row(briefs["CVE-2026-90001"])[-1], score())
-        self.assertIsNone(index_row(briefs["CVE-2026-90002"])[-1])
+        # Version 4 adds poc after epss, so the EPSS block is now the second-to-last index field.
+        self.assertEqual(INDEX_FIELDS[-2:], ("epss", "poc"))
+        row = index_row(briefs["CVE-2026-90001"])
+        self.assertEqual(row[-2], score())
+        self.assertEqual(row[-1], 0, "no exploit-tagged references in this build")
+        self.assertIsNone(index_row(briefs["CVE-2026-90002"])[-2])
         self.assertEqual(brief_index(briefs)["version"], INDEX_VERSION)
-        self.assertEqual(len(index_row(briefs["CVE-2026-90001"], 2)), len(INDEX_FIELDS) - 1)
+        self.assertEqual(len(index_row(briefs["CVE-2026-90001"], 2)), len(INDEX_FIELDS) - 2)
 
 
 class PublicationTest(unittest.TestCase):
@@ -208,8 +211,9 @@ class PublicationTest(unittest.TestCase):
     def test_the_offline_build_carries_no_score_and_says_so(self):
         feed, briefs = json.loads(self.feed_raw), json.loads(self.briefs_raw)
         self.assertTrue(all(brief["epss"] is None for brief in briefs["briefs"].values()), "an offline build reads nothing")
-        self.assertEqual(feed["brief_index"]["version"], 3)
-        self.assertTrue(all(row[-1] is None for row in feed["brief_index"]["rows"].values()))
+        self.assertEqual(feed["brief_index"]["version"], INDEX_VERSION)
+        # epss is the second-to-last column (null here), poc the last (0, no exploit references).
+        self.assertTrue(all(row[-2] is None and row[-1] == 0 for row in feed["brief_index"]["rows"].values()))
         validate_snapshot(feed)
         validate_snapshot(self.joined())
 
@@ -219,10 +223,11 @@ class PublicationTest(unittest.TestCase):
         joined["mitigations"][cve]["epss"] = score()
         joined["brief_index"] = brief_index(joined["mitigations"])
         validate_snapshot(joined)
-        self.assertEqual(joined["brief_index"]["rows"][cve][-1], score())
+        # epss is the second-to-last index column now that poc follows it.
+        self.assertEqual(joined["brief_index"]["rows"][cve][-2], score())
         feed = copy.deepcopy({key: item for key, item in joined.items() if key != "mitigations"})
         validate_snapshot(feed)
-        feed["brief_index"]["rows"][cve][-1] = {"score": 0.5}
+        feed["brief_index"]["rows"][cve][-2] = {"score": 0.5}
         with self.assertRaisesRegex(ValueError, "Invalid brief index EPSS"):
             validate_snapshot(feed)
         joined["mitigations"][cve]["epss"] = {"score": 1.5, "percentile": 0.9, "date": "2026-11-10", "model": epss.MODEL}
