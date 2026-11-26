@@ -33,7 +33,7 @@ The implementation reads structured fields, not an entire advisory as instructio
 | Solutions and workarounds | Up to two English excerpts of each kind, up to 600 characters each |
 | Affected products | First six entries |
 | Version statements per product | First twelve, retaining status, bounds and version type |
-| References | Official record link plus up to fifteen accepted CNA references |
+| References | Official record link plus up to fifteen accepted CNA references, each classified `record`, `vendor-guidance` or `exploit` |
 | CVSS | First supplied valid metric at the highest available supported metric version |
 | CNA weaknesses (schemas 5/6) | Explicit `cna.problemTypes[].descriptions[].cweId` only; at most twenty types, twenty descriptions per type and eight unique canonical CWE IDs |
 
@@ -121,6 +121,28 @@ index and briefs without the block, stay valid resume and archive inputs. The re
 EPSS column and sort, the brief's EPSS block and the Explorer's EPSS sort and chip read
 these values; the exports carry `epss`, `epss_percentile`, `epss_date` and `epss_model`
 per row (the highest score among the row's CVEs).
+
+## Public exploit signal
+
+The CVE Program's reference taxonomy lets a CNA tag a reference `exploit` when it points at
+a public exploit or proof of concept. The collector reads each CNA reference's tags and
+classifies the reference as `exploit`, `vendor-guidance` (a vendor advisory, patch,
+mitigation or release note) or `record`. A reference tagged both ways is an `exploit`. This
+is derived from the CVE record the collector already reads; it adds no network read, no new
+source and no new bound.
+
+| Rule | What it means |
+| --- | --- |
+| It is the CNA's own tag | The signal is only as complete as the CNA's tagging. CNAs apply the exploit tag inconsistently, so no exploit tag is not a claim that no exploit exists |
+| It is not in-the-wild exploitation | A public exploit is not evidence a CVE is being exploited in the wild; CISA's KEV catalog is the separate signal for that, and the two do not imply each other |
+| It is not an exposure claim | A public exploit does not establish that any device is exposed; the brief's review steps still apply |
+
+`cve-index.json` (brief index version 4) carries `poc` per CVE, the count of the record's
+`exploit` references (0 or more), after `epss`. The feeds published before this field, with
+their version 1, 2 or 3 index and no `poc` column, stay valid resume and archive inputs. The
+brief lists its `exploit` references in the Original references block and shows a "Public
+exploit cited" badge; the register adds a "Public exploit cited" note; the Explorer offers a
+"Public exploit cited" filter and chip.
 
 ## CWE, CAPEC and source-attributed context
 

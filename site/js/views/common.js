@@ -1,7 +1,7 @@
 // Building blocks shared by the views: result cards, chips, the pager, select filling and the
 // doors to the TeamStarWolf library.
 import { CVE_ID, LIST_VIEWS, formatRoute, withQuery } from "../router.js";
-import { epssOf, kevLinked } from "../filters.js";
+import { epssOf, kevLinked, publicExploit } from "../filters.js";
 import { count, dateLabel, epssPercent, humanize, link, node, routeLink, safeUrl } from "../util.js";
 import { pageSize } from "../limits.js";
 
@@ -86,6 +86,7 @@ export function resultCard(row, route, cveIndex) {
   if (vuln && row.score !== null) chips.append(node("span", "chip", "CVSS " + row.score.toFixed(1) + (row.t.cvss && row.t.cvss.version ? " (v" + row.t.cvss.version + ")" : "")));
   const epss = vuln ? epssOf(row, cveIndex) : null;
   if (epss !== null) chips.append(node("span", "chip", "FIRST EPSS " + epssPercent(epss)));
+  if (vuln && publicExploit(row, cveIndex)) chips.append(node("span", "chip", "Public exploit cited"));
   for (const [field, key] of [["vendor", "vendor"], ["product", "product"], ["actor", "actor"], ["malware", "malware"]]) {
     for (const item of row.t[field].slice(0, 2)) chips.append(routeLink(label(item[0]), formatRoute(withQuery(listRoute(route, row), { [key]: item[0].replace(/^[a-z]+:/, "") })), "chip chip-entity"));
   }

@@ -237,13 +237,21 @@ export function normalizeEpss(value) {
   return { score: fraction(value.score), percentile: fraction(value.percentile), date: calendarDay(value.date), model: value.model };
 }
 
+// The count of the CVE record's references the CNA tagged "exploit" (a public exploit or PoC), 0 or
+// more. Absent on index rows published before version 4; read as 0 there.
+export function normalizePoc(value) {
+  if (value === null || value === undefined) return 0;
+  requireValue(Number.isInteger(value) && value >= 0 && value <= 20);
+  return value;
+}
+
 function cveRows(rawFields, rawRows) {
   const fields = ["cve", ...indexFields, "bucket"];
   requireValue(Array.isArray(rawFields) && rawFields.length === fields.length && rawFields.every((field, position) => field === fields[position]));
   const rows = new Map();
   for (const row of list(rawRows, 30000)) {
     requireValue(Array.isArray(row) && row.length === fields.length);
-    const [cve, state, status, guidance, action, score, version, added, weaknesses, exploitation, epss, bucket] = row;
+    const [cve, state, status, guidance, action, score, version, added, weaknesses, exploitation, epss, poc, bucket] = row;
     requireValue(typeof cve === "string" && CVE.test(cve) && !rows.has(cve));
     requireValue(["PUBLISHED", "REJECTED", "UNKNOWN"].includes(state) && ["ok", "failed", "pending"].includes(status) && ["publisher-guidance", "cisa-action", "needs-review"].includes(guidance) && typeof action === "boolean");
     requireValue(score === null || (typeof score === "number" && Number.isFinite(score) && score >= 0 && score <= 10));
@@ -253,7 +261,7 @@ function cveRows(rawFields, rawRows) {
       score, version: optionalText(version, 100), kev_added: added === null ? null : calendarDay(added),
       weaknesses: list(weaknesses, 8).map(id => { requireValue(typeof id === "string" && /^CWE-[1-9][0-9]{0,5}$/.test(id)); return id; }),
       // CISA's SSVC Exploitation value from its ADP container, as published, or null; FIRST's EPSS block or null.
-      ssvc_exploitation: optionalText(exploitation, 100), epss: normalizeEpss(epss), bucket
+      ssvc_exploitation: optionalText(exploitation, 100), epss: normalizeEpss(epss), poc: normalizePoc(poc), bucket
     });
   }
   return rows;

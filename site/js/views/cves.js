@@ -77,6 +77,7 @@ export function registerTable(rows, counts = null) {
     // guidance label and the data-quality flags below it still show.
     const guidance = node("td", "", row.guidance === "needs-review" ? "" : GUIDANCE[row.guidance]);
     if (row.required_action) guidance.append(node("span", "cell-note", "CISA required action"));
+    if (row.poc > 0) guidance.append(node("span", "cell-note", "Public exploit cited"));
     if (row.source_status !== "ok") guidance.append(node("span", "cell-note", "CNA lookup " + row.source_status));
     tr.append(id, guidance, node("td", "", row.kev_added ? dateLabel(row.kev_added) : "Not in KEV"), node("td", "", row.score === null ? "Unknown" : row.score.toFixed(1) + " (v" + (row.version || "?") + ")"),
       node("td", "", epssCell(row.epss, counts)), node("td", "", row.weaknesses.join(", ") || "None supplied"));
@@ -180,12 +181,15 @@ export function epssBlock(record, counts = null) {
 
 export function briefBody(record, indexRow, rows, lib = null, counts = null) {
   const parts = [];
+  // References the CNA tagged "exploit" (CVE 5.x taxonomy): a public exploit or proof of concept.
+  const exploitRefs = (record.references || []).filter(reference => reference.kind === "exploit");
   const overview = block(record.title || "Source record title not supplied");
   overview.append(node("p", "chips", ""));
   const badges = overview.lastChild;
   const guidance = record.record_state === "REJECTED" ? "needs-review" : record.analysis.guidance_status;
   badges.append(node("span", "chip", GUIDANCE[guidance]), node("span", "chip", record.record_state + " record, CNA " + record.source_status), node("span", "chip", typeof record.cvss?.score === "number" ? "CNA CVSS " + record.cvss.score.toFixed(1) + " (v" + (record.cvss.version || "?") + ")" : "CNA CVSS not supplied"));
   if (record.kev) badges.append(node("span", "chip chip-kev", "KEV added " + dateLabel(record.kev.date_added)));
+  if (exploitRefs.length) badges.append(node("span", "chip", "Public exploit cited"));
   if (record.record_state === "REJECTED") overview.append(node("p", "notice-inline", "This CVE record is rejected. Read its original disposition before treating it as a vulnerability."));
   overview.append(node("p", "", record.description || "Description not supplied in this saved record."));
   overview.append(node("p", "muted", "CNA source updated " + stamp(record.source_updated_at) + " · retrieved " + stamp(record.retrieved_at) + ". Review affected products and your installed version before acting; this is not a device assessment."));
@@ -225,6 +229,7 @@ export function briefBody(record, indexRow, rows, lib = null, counts = null) {
   if (!record.products.length) products.append(node("p", "muted", "No product or version statements in this saved record."));
   parts.push(products);
   const references = block("Original references");
+  if (exploitRefs.length) references.append(node("p", "muted", "This record cites " + count(exploitRefs.length, "public exploit reference") + ", tagged by the CNA. CNAs tag references inconsistently, so no exploit tag is not proof that no exploit exists."));
   const list = node("ul", "detail-list");
   for (const reference of record.references.slice(0, 100)) { const item = node("li"); item.append(link((reference.label || "Original reference") + (reference.kind ? " (" + reference.kind + ")" : ""), reference.url)); list.append(item); }
   if (!list.children.length) references.append(node("p", "muted", "No original reference links supplied."));

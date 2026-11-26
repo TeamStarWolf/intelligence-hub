@@ -102,6 +102,7 @@ export function renderMethod(ctx) {
     "Published and updated dates are the publisher's own. Event dates are kept separately. A KEV date is the day CISA added the entry to its catalog, not disclosure or first exploitation.",
     "CISA's federal due dates apply to US federal civilian agencies. They are not your deadlines.",
     "CVSS versions stay labelled, with the scorer named. Scores across versions are never merged into one number.",
+    "A CVE reads \"Public exploit cited\" when its CVE record has a reference the CNA tagged as an exploit. CNAs tag references inconsistently, so no tag is not proof that no exploit exists, and a public exploit is not in-the-wild exploitation; CISA's KEV catalog is the separate signal for that.",
     "No entry proves that a device is exposed. Affected version ranges are what the CNA published, not a list of fixed releases."]) dates.append(node("p", "", text));
   parts.push(dates);
   const coverage = rows("History coverage statuses", COVERAGE_RULES, "Every history source has one statement per year from 1998. Curated rows and press feeds are outside these statements.");

@@ -234,10 +234,16 @@ def project_record(raw, cve, clean, safe_url, normalize_date, stamp):
         for item in values[:100]:
             if not isinstance(item, dict) or not safe_url(item.get("url")):
                 continue
-            tags = item.get("tags", [])
-            guidance = isinstance(tags, list) and bool(set(str(tag) for tag in tags) & {"vendor-advisory", "patch", "mitigation", "release-notes"})
-            references.append({"label": clean(str(item.get("name") or ("CNA guidance reference" if guidance else "CNA reference")), 150),
-                "url": safe_url(item["url"]), "kind": "vendor-guidance" if guidance else "record"})
+            tags = {str(tag) for tag in item["tags"]} if isinstance(item.get("tags"), list) else set()
+            # A reference the CNA tagged "exploit" (CVE 5.x reference taxonomy) points at a public
+            # exploit or proof of concept. It is a separate signal from guidance; exploit wins when
+            # a reference carries both. The tag is applied by CNAs and is not complete coverage.
+            exploit = "exploit" in tags
+            guidance = bool(tags & {"vendor-advisory", "patch", "mitigation", "release-notes"})
+            kind = "exploit" if exploit else "vendor-guidance" if guidance else "record"
+            default = "Public exploit reference" if exploit else "CNA guidance reference" if guidance else "CNA reference"
+            references.append({"label": clean(str(item.get("name") or default), 150),
+                "url": safe_url(item["url"]), "kind": kind})
             if len(references) == 16:
                 break
     metrics = cna.get("metrics", [])
@@ -294,7 +300,7 @@ def valid_projection(value, cve, safe_url, normalize_date):
         if any(not isinstance(item, dict) or not isinstance(item.get("text"), str) or len(item["text"]) > 600 or not safe_url(item.get("source_url")) for item in value[field]):
             return False
     refs = value.get("references")
-    if not isinstance(refs, list) or len(refs) > 20 or any(not isinstance(item, dict) or not isinstance(item.get("label"), str) or len(item["label"]) > 150 or not safe_url(item.get("url")) or item.get("kind") not in {"record", "vendor-guidance"} for item in refs):
+    if not isinstance(refs, list) or len(refs) > 20 or any(not isinstance(item, dict) or not isinstance(item.get("label"), str) or len(item["label"]) > 150 or not safe_url(item.get("url")) or item.get("kind") not in {"record", "vendor-guidance", "exploit"} for item in refs):
         return False
     products = value.get("products")
     if not isinstance(products, list) or len(products) > 6:
@@ -446,24 +452,34 @@ def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, saf
 # The public site splits one snapshot into two files. data/feed.json keeps a
 # compact row per CVE for list views; data/briefs.json holds the full briefs and
 # is read only when a reader opens one.
-# Index version 2 added ssvc_exploitation, CISA's SSVC Exploitation value (WP-04); version 3 adds
-# epss, FIRST's EPSS block {score, percentile, date, model} or null (WP-03). cvss_score and
-# cvss_version are the CNA's metric; CISA's ADP CVSS is only in the brief.
-INDEX_VERSION = 3
+# Index version 2 added ssvc_exploitation, CISA's SSVC Exploitation value (WP-04); version 3 added
+# epss, FIRST's EPSS block {score, percentile, date, model} or null (WP-03); version 4 adds poc, the
+# count of this CVE record's references the CNA tagged "exploit" (a public exploit or proof of
+# concept, 0 or more). cvss_score and cvss_version are the CNA's metric; CISA's ADP CVSS is only in
+# the brief. Each field is pinned to the version that introduced it, so the constant can advance
+# without moving the earlier fields.
+EPSS_INDEX_VERSION = 3
+INDEX_VERSION = 4
 INDEX_FIELDS = ("record_state", "source_status", "guidance_status", "required_action",
-                "cvss_score", "cvss_version", "kev_date_added", "weaknesses", "ssvc_exploitation", "epss")
-# The earlier layouts, as the feeds published before WP-04 and before WP-03 carry them; the
-# archive validator still reads both.
-INDEX_FIELDS_V2 = INDEX_FIELDS[:-1]
-INDEX_FIELDS_V1 = INDEX_FIELDS[:-2]
-INDEX_VERSIONS = (1, 2, INDEX_VERSION)
+                "cvss_score", "cvss_version", "kev_date_added", "weaknesses", "ssvc_exploitation", "epss", "poc")
+# The earlier layouts, as the feeds published before each field carry them; the archive validator
+# still reads them all.
+INDEX_FIELDS_V3 = INDEX_FIELDS[:-1]
+INDEX_FIELDS_V2 = INDEX_FIELDS[:-2]
+INDEX_FIELDS_V1 = INDEX_FIELDS[:-3]
+INDEX_VERSIONS = (1, 2, EPSS_INDEX_VERSION, INDEX_VERSION)
 BRIEFS_KEYS = {"schema_version", "feed_schema_version", "generated_at", "content_revision", "briefs"}
 
 
 def index_fields(version):
     if version not in INDEX_VERSIONS:
         raise ValueError("Unsupported brief index version.")
-    return {1: INDEX_FIELDS_V1, 2: INDEX_FIELDS_V2, INDEX_VERSION: INDEX_FIELDS}[version]
+    return {1: INDEX_FIELDS_V1, 2: INDEX_FIELDS_V2, EPSS_INDEX_VERSION: INDEX_FIELDS_V3, INDEX_VERSION: INDEX_FIELDS}[version]
+
+
+def poc_count(brief):
+    """How many of the CVE record's references the CNA tagged as a public exploit or proof of concept."""
+    return sum(1 for item in brief.get("references", []) if item.get("kind") == "exploit")
 
 
 def index_row(brief, version=INDEX_VERSION):
@@ -474,8 +490,10 @@ def index_row(brief, version=INDEX_VERSION):
            [item["id"] for item in brief.get("weaknesses", [])]]
     if version >= 2:
         row.append(((brief.get("adp") or {}).get("ssvc") or {}).get("exploitation"))
-    if version >= INDEX_VERSION:
+    if version >= EPSS_INDEX_VERSION:
         row.append(brief.get("epss"))
+    if version >= INDEX_VERSION:
+        row.append(poc_count(brief))
     return row
 
 

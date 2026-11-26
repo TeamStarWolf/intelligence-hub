@@ -9,9 +9,9 @@ import support
 from intelligence_hub import collect
 from intelligence_hub.archive import validate_snapshot
 from intelligence_hub.collect import published, safe_url, text
-from intelligence_hub.mitigations import (ADP_CONTAINERS, ADP_TEXT, INDEX_FIELDS, INDEX_FIELDS_V1, INDEX_FIELDS_V2, INDEX_VERSION, METRIC_ENTRIES,
+from intelligence_hub.mitigations import (ADP_CONTAINERS, ADP_TEXT, INDEX_FIELDS, INDEX_FIELDS_V1, INDEX_FIELDS_V2, INDEX_FIELDS_V3, INDEX_VERSION, METRIC_ENTRIES,
                                           blank, brief_index, build_briefs, index_row, join_publication, merge_retained,
-                                          project_record, record_url, valid_projection, validate_adp)
+                                          poc_count, project_record, record_url, valid_projection, validate_adp)
 import test_publication
 
 STAMP = "2026-11-01T12:00:00+00:00"
@@ -210,26 +210,49 @@ class ReprojectionTest(unittest.TestCase):
 
 
 class IndexTest(unittest.TestCase):
-    def test_ssvc_exploitation_then_epss_end_the_index_fields(self):
-        self.assertEqual(INDEX_FIELDS[-2:], ("ssvc_exploitation", "epss"))
-        self.assertEqual(INDEX_FIELDS_V2, INDEX_FIELDS[:-1])
-        self.assertEqual(INDEX_FIELDS_V1, INDEX_FIELDS[:-2])
-        self.assertEqual(INDEX_VERSION, 3)
+    def test_ssvc_exploitation_then_epss_then_poc_end_the_index_fields(self):
+        self.assertEqual(INDEX_FIELDS[-3:], ("ssvc_exploitation", "epss", "poc"))
+        self.assertEqual(INDEX_FIELDS_V3, INDEX_FIELDS[:-1])
+        self.assertEqual(INDEX_FIELDS_V2, INDEX_FIELDS[:-2])
+        self.assertEqual(INDEX_FIELDS_V1, INDEX_FIELDS[:-3])
+        self.assertEqual(INDEX_VERSION, 4)
         briefs, _, _ = build_briefs([{"cves": [CVE]}], {}, {CVE: project(record([adp_container()]))}, False, 0, None, text, safe_url, published, STAMP)
         row = index_row(briefs[CVE])
         self.assertEqual(len(row), len(INDEX_FIELDS))
-        self.assertEqual(row[-2:], ["active", None])
+        # ssvc_exploitation, then epss (no score in this build), then poc (0 exploit references here).
+        self.assertEqual(row[-3:], ["active", None, 0])
         self.assertEqual(row[4:6], [9.8, "3.1"], "the score columns stay the CNA's metric")
-        self.assertEqual(index_row(briefs[CVE], 2), row[:-1])
-        self.assertEqual(index_row(briefs[CVE], 1), row[:-2])
-        self.assertEqual(brief_index(briefs), {"version": 3, "fields": list(INDEX_FIELDS), "rows": {CVE: row}})
-        self.assertEqual(brief_index(briefs, 2), {"version": 2, "fields": list(INDEX_FIELDS_V2), "rows": {CVE: row[:-1]}})
-        self.assertEqual(brief_index(briefs, 1), {"version": 1, "fields": list(INDEX_FIELDS_V1), "rows": {CVE: row[:-2]}})
+        self.assertEqual(index_row(briefs[CVE], 3), row[:-1])
+        self.assertEqual(index_row(briefs[CVE], 2), row[:-2])
+        self.assertEqual(index_row(briefs[CVE], 1), row[:-3])
+        self.assertEqual(brief_index(briefs), {"version": 4, "fields": list(INDEX_FIELDS), "rows": {CVE: row}})
+        self.assertEqual(brief_index(briefs, 3), {"version": 3, "fields": list(INDEX_FIELDS_V3), "rows": {CVE: row[:-1]}})
+        self.assertEqual(brief_index(briefs, 2), {"version": 2, "fields": list(INDEX_FIELDS_V2), "rows": {CVE: row[:-2]}})
+        self.assertEqual(brief_index(briefs, 1), {"version": 1, "fields": list(INDEX_FIELDS_V1), "rows": {CVE: row[:-3]}})
         with self.assertRaisesRegex(ValueError, "Unsupported brief index version"):
-            brief_index(briefs, 4)
+            brief_index(briefs, 5)
         pending = blank(CVE)
         pending.update(required_action=None, analysis={"guidance_status": "needs-review"})
-        self.assertEqual(index_row(pending)[-2:], [None, None])
+        self.assertEqual(index_row(pending)[-3:], [None, None, 0])
+
+    def test_an_exploit_tagged_reference_is_a_public_exploit_signal(self):
+        # The CVE 5.x reference taxonomy tags a public exploit or PoC "exploit"; a reference also
+        # tagged a guidance kind is still an exploit. The others keep their existing classification.
+        refs = [{"url": "https://research.example.org/poc", "tags": ["exploit"], "name": "PoC"},
+                {"url": "https://research.example.org/both", "tags": ["exploit", "patch"]},
+                {"url": "https://vendor.example.org/advisory", "tags": ["vendor-advisory"]},
+                {"url": "https://example.org/plain", "tags": ["third-party-advisory"]}]
+        document = json.loads(record().decode("utf-8"))
+        document["containers"]["cna"]["references"] = refs
+        brief = project(json.dumps(document).encode("utf-8"))
+        # references[0] is always the official CVE record; the four CNA references follow in order.
+        self.assertEqual([item["kind"] for item in brief["references"]][1:], ["exploit", "exploit", "vendor-guidance", "record"])
+        self.assertEqual(poc_count(brief), 2)
+        self.assertTrue(valid_projection(brief, CVE, safe_url, published))
+        # A brief with no exploit reference counts zero and still validates.
+        plain = project(record())
+        self.assertEqual(poc_count(plain), 0)
+        self.assertTrue(valid_projection(plain, CVE, safe_url, published))
 
     def test_the_page_mirrors_the_index_fields_and_the_fixture_follows_them(self):
         limits = (support.ROOT / "site" / "js" / "limits.js").read_text(encoding="utf-8")
@@ -252,9 +275,10 @@ class PublicationTest(unittest.TestCase):
         brief = briefs["briefs"]["CVE-2026-99991"]
         # The offline build makes no record request, so the fixture's briefs are pending and unprojected.
         self.assertEqual((brief["adp"], brief["adp_status"]), (None, "not_projected"))
-        self.assertEqual(feed["brief_index"]["version"], 3)
+        self.assertEqual(feed["brief_index"]["version"], 4)
         self.assertEqual(feed["brief_index"]["fields"], list(INDEX_FIELDS))
-        self.assertTrue(all(row[-2] is None and row[-1] is None for row in feed["brief_index"]["rows"].values()))
+        # Pending briefs: ssvc_exploitation and epss unset, and no exploit reference, so poc is 0.
+        self.assertTrue(all(row[-3] is None and row[-2] is None and row[-1] == 0 for row in feed["brief_index"]["rows"].values()))
         validate_snapshot(feed)
         validate_snapshot(self.joined())
 
@@ -264,17 +288,32 @@ class PublicationTest(unittest.TestCase):
         joined["mitigations"][cve].update(adp=copy.deepcopy(SUPPLIED), adp_status="supplied")
         joined["brief_index"] = brief_index(joined["mitigations"])
         validate_snapshot(joined)
-        self.assertEqual(joined["brief_index"]["rows"][cve][-2], "active")
+        # ssvc_exploitation is the third-from-last column now that epss and poc follow it.
+        self.assertEqual(joined["brief_index"]["rows"][cve][-3], "active")
         joined["mitigations"][cve]["adp_status"] = "not_supplied"
         with self.assertRaisesRegex(ValueError, "Invalid structured CVE provenance"):
             validate_snapshot(joined)
         joined["mitigations"][cve]["adp_status"] = "supplied"
-        joined["brief_index"]["rows"][cve][-2] = "poc"
+        joined["brief_index"]["rows"][cve][-3] = "poc"
         with self.assertRaisesRegex(ValueError, "brief index differs"):
             validate_snapshot(joined)
-        joined["brief_index"]["rows"][cve][-2] = "x" * 41
+        joined["brief_index"]["rows"][cve][-3] = "x" * 41
         with self.assertRaisesRegex(ValueError, "Invalid brief index SSVC exploitation"):
             validate_snapshot(joined)
+
+    def test_the_poc_index_column_counts_exploit_references_and_refuses_a_bad_count(self):
+        joined = self.joined()
+        cve = next(iter(joined["mitigations"]))
+        joined["mitigations"][cve]["references"] = joined["mitigations"][cve]["references"] + [
+            {"label": "Proof of concept", "url": "https://research.example.org/poc", "kind": "exploit"},
+            {"label": "Exploit module", "url": "https://research.example.org/module", "kind": "exploit"}]
+        joined["brief_index"] = brief_index(joined["mitigations"])
+        validate_snapshot(joined)
+        self.assertEqual(joined["brief_index"]["rows"][cve][-1], 2, "poc is the count of exploit-tagged references")
+        for bad in (-1, 21, True, "2", 1.5):
+            joined["brief_index"]["rows"][cve][-1] = bad
+            with self.assertRaisesRegex(ValueError, "Invalid brief index PoC count"):
+                validate_snapshot(joined)
 
     def test_files_published_before_this_change_still_validate(self):
         # The feed published before WP-04 carries no pair and a version 1 index; the one before

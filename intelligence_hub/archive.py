@@ -17,7 +17,7 @@ import time
 from .collect import (BRIEFS_MAX_BYTES, FEED_MAX_BYTES, LEGACY_MAX_ARTICLES, MAX_FEED_ROWS, public_bytes, published, rows_over_message,
                       safe_url, validate_article, validate_observation, validate_window)
 from .epss import valid_score
-from .mitigations import INDEX_VERSION, INDEX_VERSIONS, brief_index, index_fields, join_publication, split_publication, valid_projection
+from .mitigations import EPSS_INDEX_VERSION, INDEX_VERSION, INDEX_VERSIONS, brief_index, index_fields, join_publication, split_publication, valid_projection
 from .intelligence import validate_intelligence, validate_weaknesses
 from .mitigations import brief_url
 
@@ -180,7 +180,8 @@ def validate_index(index, wanted):
         require(CVE.fullmatch(cve) and isinstance(row, list) and len(row) == len(index["fields"]), "Invalid brief index row.")
         state, status, guidance, action, score, cvss_version, added, weaknesses = row[:8]
         exploitation = row[8] if version >= 2 else None
-        epss = row[9] if version >= INDEX_VERSION else None
+        epss = row[9] if version >= EPSS_INDEX_VERSION else None
+        poc = row[10] if version >= INDEX_VERSION else None
         require(state in RECORD_STATES and status in SOURCE_STATES and guidance in GUIDANCE_STATES and type(action) is bool, "Invalid brief index state.")
         require(score is None or type(score) in (int, float) and math.isfinite(score) and 0 <= score <= 10, "Invalid brief index score.")
         require(cvss_version is None or isinstance(cvss_version, str) and len(cvss_version) <= 20, "Invalid brief index score version.")
@@ -189,6 +190,7 @@ def validate_index(index, wanted):
                 all(isinstance(item, str) and CWE_ID.fullmatch(item) for item in weaknesses), "Invalid brief index weaknesses.")
         require(exploitation is None or isinstance(exploitation, str) and 0 < len(exploitation) <= 40, "Invalid brief index SSVC exploitation.")
         require(epss is None or valid_score(epss), "Invalid brief index EPSS.")
+        require(poc is None or (type(poc) is int and 0 <= poc <= 20), "Invalid brief index PoC count.")
     return rows
 
 

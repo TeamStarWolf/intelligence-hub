@@ -14,7 +14,7 @@ const INTROS = {
   podcasts: "Security podcasts and webcasts, newest episode first. Each row is one episode, read from the show's own feed: title, link and date only, no audio or transcript. Open an episode on the show's site."
 };
 const SELECTS = ["desk", "kind", "class", "event", "exp", "sector", "company", "region", "vendor", "product", "actor", "malware", "cwe", "tech", "source", "year", "month"];
-const FILTER_KEYS = [...SELECTS, "kev", "action", "range"];
+const FILTER_KEYS = [...SELECTS, "kev", "action", "poc", "range"];
 
 export function activeFilters(route) {
   return FILTER_KEYS.filter(key => Object.hasOwn(route.query, key)).length;
@@ -36,19 +36,20 @@ function syncControls(ctx) {
   el("#f-sort").value = route.query.sort || defaultSort(route.view);
   el("#f-kev").checked = route.query.kev === "1";
   el("#f-action").checked = route.query.action === "1";
+  el("#f-poc").checked = route.query.poc === "1";
   el("#f-range").value = route.query.range || defaultRange(route.view);
   el("#f-range").disabled = Boolean(route.query.year);
   el("#f-month").disabled = !route.query.year;
   const active = activeFilters(route);
   el("#filter-count").textContent = active ? " (" + active + ")" : "";
   // The Podcasts desk has no CVE, CVSS, EPSS or KEV signal, so its CVE-centric sorts and the
-  // KEV-linked and required-action filters are hidden. Every other view keeps them.
+  // KEV-linked, required-action and public-exploit filters are hidden. Every other view keeps them.
   const podcasts = route.view === "podcasts";
   for (const value of ["cve-asc", "cve-desc", "cvss-desc", "cvss-asc", "epss-desc", "epss-asc"]) {
     const option = el("#f-sort").querySelector('option[value="' + value + '"]');
     if (option) option.hidden = podcasts;
   }
-  for (const key of ["kev", "action"]) el("#f-" + key).closest("label").hidden = podcasts;
+  for (const key of ["kev", "action", "poc"]) el("#f-" + key).closest("label").hidden = podcasts;
 }
 
 // One-click filters for the signals that are buried in the rail: the exploited split (the "exp"
@@ -66,6 +67,7 @@ function quickFilters(route, found) {
   wrap.append(chip("exp", "known", "Known exploited", found.exp.get("known") || 0));
   wrap.append(chip("exp", "reported", "Reported exploited", found.exp.get("reported") || 0));
   wrap.append(chip("kev", "1", "KEV-linked", null));
+  wrap.append(chip("poc", "1", "Public exploit cited", null));
   return wrap;
 }
 
@@ -237,7 +239,7 @@ export function bindExplore(ctx) {
   }
   el("#f-range").addEventListener("change", () => navigate(withQuery(current(), { range: el("#f-range").value }), { replace: true }));
   el("#f-sort").addEventListener("change", () => navigate(withQuery(current(), { sort: el("#f-sort").value }), { replace: true }));
-  for (const key of ["kev", "action"]) el("#f-" + key).addEventListener("change", () => navigate(withQuery(current(), { [key]: el("#f-" + key).checked ? "1" : null }), { replace: true }));
+  for (const key of ["kev", "action", "poc"]) el("#f-" + key).addEventListener("change", () => navigate(withQuery(current(), { [key]: el("#f-" + key).checked ? "1" : null }), { replace: true }));
   el("#f-reset").addEventListener("click", () => {
     const route = current();
     navigate({ view: route.view, id: null, query: route.query.sort ? { sort: route.query.sort } : {} }, { replace: true });
