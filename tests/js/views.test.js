@@ -542,3 +542,15 @@ test("on a narrow window the active tab is scrolled into the tab strip's view, s
   await go(shell, "#/explore?q=fortinet");
   assert.equal(strip.scrollLeft, 200, "a filter change on the same tab leaves the strip where the reader put it");
 });
+
+test("the Explorer quick filters render the exploited counts as numbers, never [object Object]", async () => {
+  const shell = await boot({ hash: "#/explore" });
+  const quick = () => [...shell.doc.querySelectorAll(".quick-chip")].map(chip => chip.textContent);
+  const loaded = quick();
+  assert.ok(loaded.length >= 2 && !loaded.some(text => text.includes("[object")), loaded.join(" | "));
+  assert.ok(loaded.some(text => /Known exploited \(\d/.test(text)) && loaded.some(text => /Reported exploited \(\d/.test(text)), loaded.join(" | "));
+  // The quick filters re-render after a filter is applied and still carry a number.
+  await go(shell, "#/explore?kind=advisory");
+  const filtered = quick();
+  assert.ok(!filtered.some(text => text.includes("[object")) && filtered.some(text => /Known exploited \(\d/.test(text)), filtered.join(" | "));
+});
