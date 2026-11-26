@@ -64,8 +64,9 @@ function quickFilters(route, found) {
     anchor.setAttribute("aria-pressed", String(on));
     return anchor;
   };
-  wrap.append(chip("exp", "known", "Known exploited", found.exp.get("known") || 0));
-  wrap.append(chip("exp", "reported", "Reported exploited", found.exp.get("reported") || 0));
+  // found.exp holds {count, label} entries (filters.facets), so read the count, not the object.
+  wrap.append(chip("exp", "known", "Known exploited", (found.exp.get("known") || {}).count || 0));
+  wrap.append(chip("exp", "reported", "Reported exploited", (found.exp.get("reported") || {}).count || 0));
   wrap.append(chip("kev", "1", "KEV-linked", null));
   wrap.append(chip("poc", "1", EXPLOIT_FILTER_LABEL, null));
   return wrap;

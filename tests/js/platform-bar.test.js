@@ -104,7 +104,7 @@ test("the static top-level links match the menu file, in order, and no pending a
 test("every external Bookmarks leaf renders with the new-tab attributes, a hidden marker and the note", async () => {
   const { doc } = boot();
   const expected = countExternal(BOOKMARKS.menu);
-  assert.equal(expected, 291, "the menu still carries 291 external leaves");
+  assert.equal(expected, 492, "the menu still carries 492 external leaves");
   const ext = [...doc.querySelectorAll(".tsw-bar__mlink--ext")];
   assert.equal(ext.length, expected, "every external leaf is rendered");
   for (const link of ext) {
@@ -135,8 +135,8 @@ test("enhancing adds a caret per item and per nested parent, a Menu toggle, and 
   // link and gets none, so this counts panels rather than items.
   const panels = [...doc.querySelectorAll(".tsw-bar__panel")];
   assert.equal([...doc.querySelectorAll(".tsw-bar__disc")].length, panels.length, "one top caret per menu-bearing item");
-  // Categories (12) plus subsections (30) each carry a chevron.
-  assert.equal([...doc.querySelectorAll(".tsw-bar__mdisc")].length, 42, "a chevron per category and subsection");
+  // Categories (15) plus subsections (64) each carry a chevron.
+  assert.equal([...doc.querySelectorAll(".tsw-bar__mdisc")].length, 79, "a chevron per category and subsection");
   for (const link of doc.querySelectorAll(".tsw-bar__mlink")) assert.equal(link.getAttribute("tabindex"), "-1");
 
   const hub = MENU.items.find(item => item.id === "hub");
