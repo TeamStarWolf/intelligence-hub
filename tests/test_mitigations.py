@@ -233,19 +233,25 @@ class ReprojectionTest(unittest.TestCase):
         retained = {cve: merge_retained(old[cve], None, cve, safe_url, published) for cve in cves}
         briefs, projections, _ = build_briefs([{"cves": cves}], {}, retained, True, 0, no_fetch, text, safe_url, published, STAMP)
         for cve in cves:
-            self.assertEqual(briefs[cve]["poc"], 0, "published as 0 until the re-read")
+            # Published with no stored count, not a made-up 0, so the next resume stays due; the derived
+            # index column still carries 0.
+            self.assertNotIn("poc", briefs[cve], "a record not re-read publishes no poc key")
             self.assertEqual(index_row(briefs[cve])[-1], 0)
+
+        # The next run resumes from the published briefs (no local cache): the record is still due.
+        resumed = {cve: merge_retained(None, briefs[cve], cve, safe_url, published) for cve in cves}
+        for cve in cves:
+            self.assertNotIn("poc", resumed[cve], "a published brief with no count stays due on resume")
 
         def fetch(url):
             cve = url.rsplit("/", 1)[1][:-5]
             doc = json.loads(record([adp_container()], cve).decode("utf-8"))
             doc["containers"]["cna"]["references"] = [{"url": "https://research.example.org/poc", "tags": ["exploit"]}]
             return json.dumps(doc).encode("utf-8")
-        retained = {cve: merge_retained(old[cve], None, cve, safe_url, published) for cve in cves}
-        briefs, _, stats = build_briefs([{"cves": cves}], {}, retained, True, 40, fetch, text, safe_url, published, STAMP)
-        self.assertEqual(stats["attempted_this_run"], 2, "both no-poc records were due ahead of their interval")
+        briefs, _, stats = build_briefs([{"cves": cves}], {}, resumed, True, 40, fetch, text, safe_url, published, STAMP)
+        self.assertEqual(stats["attempted_this_run"], 2, "both no-count records were due ahead of their interval")
         for cve in cves:
-            self.assertEqual(briefs[cve]["poc"], 1, "the fresh read fills the true count")
+            self.assertEqual(briefs[cve]["poc"], 1, "the fresh read fills the true count and the key appears")
             self.assertEqual(index_row(briefs[cve])[-1], 1)
 
     def test_a_failed_attempt_keeps_the_retained_facts_and_stays_due(self):

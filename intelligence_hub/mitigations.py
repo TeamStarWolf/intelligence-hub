@@ -431,9 +431,13 @@ def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, saf
     result = {}
     for cve, projection in records.items():
         record = {key: projection[key] for key in ("cve", "title", "description", "source_status", "record_state", "source_updated_at", "retrieved_at", "source_attempted_at", "source_sha256", "products", "solutions", "workarounds", "cvss", "references", "weaknesses", "weaknesses_status", "adp", "adp_status", "epss")}
-        # A retained projection made before the poc field has no stored count; publish 0 until a fresh
-        # read (due() has pulled it forward), never a KeyError.
-        record["poc"] = projection.get("poc", 0)
+        # The brief carries poc only when the projection does: a fresh read, or one that already held
+        # it. A projection not re-read this run (the budget ran out) publishes no poc key, because the
+        # next run resumes from the published briefs, and a published 0 would read back as a counted 0
+        # and lose the early re-read due() owes it. The index column below is derived every build and
+        # carries 0 for such a record, since the index is rebuilt, not resumed from.
+        if "poc" in projection:
+            record["poc"] = projection["poc"]
         item = kev_by_id.get(cve)
         cisa_url = "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=" + cve
         action = clean(item.get("requiredAction", ""), 1200) if item else ""

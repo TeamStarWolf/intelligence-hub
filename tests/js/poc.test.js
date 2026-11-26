@@ -8,6 +8,7 @@ import { CVE_ROWS, brief, files, page, server, settle, storage } from "./fixture
 import { createApp } from "../../site/js/main.js";
 import { parseRoute } from "../../site/js/router.js";
 import { EXPLOIT_LABEL, cveExploitState, cvePublicExploit, cveRegister, publicExploit, rowExploitState } from "../../site/js/filters.js";
+import { briefBody } from "../../site/js/views/cves.js";
 import { FormatError, normalizeBrief, normalizeCveIndex, normalizePoc, normalizeRecent } from "../../site/js/validate.js";
 
 async function boot({ hash = "", site = files() } = {}) {
@@ -101,6 +102,10 @@ test("the brief badges a public exploit, names the source and counts the CNA ref
   await settle(60);
   const plain = shell.doc.querySelector("#cve-body");
   assert.ok(![...plain.querySelectorAll(".chip")].some(chip => chip.textContent === "Public exploit"), "a plain CVE shows no badge");
+  // A brief with the poc key absent (a record not re-read on resume) renders with no badge, no error.
+  const noPoc = brief("CVE-2026-1002"); delete noPoc.poc;
+  const chips = briefBody(noPoc, null, [], null, null).flatMap(part => [...part.querySelectorAll(".chip")].map(chip => chip.textContent));
+  assert.ok(!chips.includes("Public exploit") && !chips.includes("Exploited (CISA SSVC)"), chips.join(" | "));
 });
 
 test("the validators carry the stored poc count and refuse a bad one", () => {

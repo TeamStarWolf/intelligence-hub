@@ -165,11 +165,14 @@ one `exploit` reference when any exist, so the count is backed by a visible link
 
 A projection made before the `poc` field carries no stored count. Such a record is read again
 ahead of its 24-hour interval (as the weakness pair and the ADP block are), so the count is
-filled from a fresh read rather than published as 0. Filling the whole live set is bounded by
-the enrichment budget (up to 2,000 records on the build that follows a merge, then 40 per
-scheduled run every two hours), so the count becomes complete over the first few days after
-this ships; the 214-of-3,135 figure above is a full read, which the live site reaches after
-that fill.
+filled from a fresh read rather than published as 0. A brief for a record not yet re-read is
+published with no `poc` key at all, never a 0: the key is absent, which the page reads as 0 and
+the next run (which resumes from the published briefs, not a local cache) reads as "not counted
+yet" and reads the record early, whereas a published 0 would read back as a counted 0 and lose
+that early read. Filling the whole live set is bounded by the enrichment budget (up to 2,000
+records on the build that follows a merge, then 40 per scheduled run every two hours), so the
+count becomes complete over the first few days after this ships; the 214-of-3,135 figure above
+is a full read, which the live site reaches after that fill.
 
 | Rule | What it means |
 | --- | --- |
