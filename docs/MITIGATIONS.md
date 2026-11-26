@@ -33,7 +33,7 @@ The implementation reads structured fields, not an entire advisory as instructio
 | Solutions and workarounds | Up to two English excerpts of each kind, up to 600 characters each |
 | Affected products | First six entries |
 | Version statements per product | First twelve, retaining status, bounds and version type |
-| References | Official record link plus up to fifteen accepted CNA references |
+| References | Official record link plus up to fifteen accepted CNA references, each classified `record`, `vendor-guidance` or `exploit` |
 | CVSS | First supplied valid metric at the highest available supported metric version |
 | CNA weaknesses (schemas 5/6) | Explicit `cna.problemTypes[].descriptions[].cweId` only; at most twenty types, twenty descriptions per type and eight unique canonical CWE IDs |
 
@@ -121,6 +121,70 @@ index and briefs without the block, stay valid resume and archive inputs. The re
 EPSS column and sort, the brief's EPSS block and the Explorer's EPSS sort and chip read
 these values; the exports carry `epss`, `epss_percentile`, `epss_date` and `epss_model`
 per row (the highest score among the row's CVEs).
+
+## Public exploit signal
+
+The register, the Explorer and the brief mark a CVE from two sources, worded by what each
+source actually says. The wording is deliberate: one source says exploit code is public, the
+other says the CVE is being exploited, and those are not the same claim.
+
+- **"Public exploit"** when the CVE record's CNA tagged a reference `exploit`, or CISA's SSVC
+  Exploitation value is `poc`. The CVE Program reference taxonomy
+  ([reference-tags.json](https://raw.githubusercontent.com/CVEProject/cve-schema/main/schema/tags/reference-tags.json))
+  defines `exploit` as a reference with "an in-depth/detailed description of steps to exploit a
+  vulnerability" or legitimate proof-of-concept code or an exploit kit. CERT/CC SSVC
+  ([Exploitation ssvc:E:1.1.0](https://certcc.github.io/SSVC/reference/decision_points/exploitation/))
+  defines `poc` as "One of the following is true: (1) Typical public PoC exists in sources such
+  as Metasploit or websites like ExploitDB; or (2) the vulnerability has a well-known method of
+  exploitation". Both the tag and `poc` say a public exploit exists.
+- **"Exploited (CISA SSVC)"** when SSVC Exploitation is `active`, which CERT/CC defines as
+  "Shared, observable, reliable evidence that the exploit is being used in the wild by real
+  attackers; there is credible public reporting". That reports exploitation in the wild, not
+  that exploit code is public, so it is never worded "Public exploit".
+
+One filter ("Public exploit or exploited") covers both, because the CNA tag alone is sparse.
+Measured on a full read of the 3,135 CVE records in one live brief set: 214 (6.8%) had a CNA
+`exploit` tag, and of the 1,805 KEV CVEs only 198 (11%) did; the tagging CNAs are a mix of
+vendor and researcher CNAs (mitre 53, microsoft 48, adobe 15, redhat 14, VulnCheck 13, and a
+tail). CISA's SSVC marked 1,921 CVEs (60%) `poc` or `active` (poc 117, active 1,804); the CNA
+tag added only 11 CVEs beyond those. So most of the indication rests on SSVC `active`, which
+is why `active` carries the "Exploited" wording, not "Public exploit".
+
+The collector classifies each CNA reference as `exploit`, `vendor-guidance` (a vendor
+advisory, patch, mitigation or release note) or `record`; a reference tagged both ways is an
+`exploit`. Only the CNA container is read for the tag: CISA's assessment is the SSVC value, so
+reading the ADP container's references for the tag would double-count CISA. The CNA tag adds
+no network read, no new source and no new bound; it is derived from the record the collector
+already reads.
+
+`poc`, stored on the brief and in `cve-index.json` (brief index version 4, after `epss`), is
+the count of `exploit` references counted uncapped across every reference the record carries
+(up to the 100 the collector reads), so a cap on the displayed references never hides one. The
+displayed list keeps the official record plus up to fifteen CNA references, and always keeps
+one `exploit` reference when any exist, so the count is backed by a visible link.
+
+A projection made before the `poc` field carries no stored count. Such a record is read again
+ahead of its 24-hour interval (as the weakness pair and the ADP block are), so the count is
+filled from a fresh read rather than published as 0. A brief for a record not yet re-read is
+published with no `poc` key at all, never a 0: the key is absent, which the page reads as 0 and
+the next run (which resumes from the published briefs, not a local cache) reads as "not counted
+yet" and reads the record early, whereas a published 0 would read back as a counted 0 and lose
+that early read. Filling the whole live set is bounded by the enrichment budget (up to 2,000
+records on the build that follows a merge, then 40 per scheduled run every two hours), so the
+count becomes complete over the first few days after this ships; the 214-of-3,135 figure above
+is a full read, which the live site reaches after that fill.
+
+| Rule | What it means |
+| --- | --- |
+| It is not complete | CNAs tag references inconsistently, so no `exploit` tag is not a claim that no exploit exists; the SSVC value fills much of the gap but is itself CISA's assessment |
+| Public exploit is not exploitation | A public exploit, or SSVC `poc`, is not evidence of exploitation in the wild; SSVC `active` and the KEV catalog are the signals for that, and a public exploit does not imply active exploitation |
+| Exploited is not public code | SSVC `active` says the CVE is exploited in the wild, not that exploit code is public, so it is worded "Exploited (CISA SSVC)" and never "Public exploit" |
+| It is not an exposure claim | None of these establishes that any device is exposed; the brief's review steps still apply |
+
+The feeds published before `poc`, with their version 1, 2 or 3 index and no `poc` column, stay
+valid resume and archive inputs. The brief lists its `exploit` references in the Original
+references block and shows the badge with its source; the register adds the same note; the
+Explorer offers the filter and a quick chip.
 
 ## CWE, CAPEC and source-attributed context
 

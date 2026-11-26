@@ -27,6 +27,48 @@ export function requiredAction(row, cveIndex) {
   return row.cves.some(cve => Boolean(cveIndex && cveIndex.get(cve)?.required_action));
 }
 
+// The chip and note wording for each exploitation state; every surface reads it from here so they
+// never drift apart. The filter and quick-chip label (one toggle over both states) is separate.
+export const EXPLOIT_LABEL = { public: "Public exploit", active: "Exploited (CISA SSVC)" };
+export const EXPLOIT_FILTER_LABEL = "Public exploit or exploited";
+
+// A CVE index entry's exploitation state, worded by what its source actually claims:
+//   "public"  the CNA tagged a reference "exploit" (a public exploit or PoC per the CVE Program
+//             reference taxonomy), or CISA's SSVC Exploitation is "poc" (a public PoC exists, or the
+//             vulnerability has a well-known method of exploitation);
+//   "active"  CISA's SSVC Exploitation is "active" (exploited in the wild per CERT/CC SSVC), which
+//             reports exploitation, not that exploit code is public, so it reads "Exploited" not "Public exploit";
+//   null      neither.
+// The CNA tag alone is sparse (about 7% of shown CVEs) and misses most exploited CVEs, so the SSVC
+// value is folded in; the two are worded apart because they claim different things.
+export function cveExploitState(entry) {
+  if (!entry) return null;
+  if (entry.poc > 0 || entry.ssvc_exploitation === "poc") return "public";
+  if (entry.ssvc_exploitation === "active") return "active";
+  return null;
+}
+
+// The one filter predicate over both wordings: the CVE has a public exploit or is exploited.
+export function cvePublicExploit(entry) {
+  return cveExploitState(entry) !== null;
+}
+
+// A row's state across its CVEs: a public exploit on any CVE outranks an active-only one.
+export function rowExploitState(row, cveIndex) {
+  let state = null;
+  for (const cve of row.cves) {
+    const here = cveExploitState(cveIndex && cveIndex.get(cve));
+    if (here === "public") return "public";
+    if (here === "active") state = "active";
+  }
+  return state;
+}
+
+// One of the row's CVEs has a public exploit or is exploited.
+export function publicExploit(row, cveIndex) {
+  return rowExploitState(row, cveIndex) !== null;
+}
+
 // The calendar-day window a list view shows: a year (and month), or the last N days ending on
 // the content date, or null for the whole loaded scope.
 export function dateWindow(view, query, contentDate) {
@@ -59,6 +101,7 @@ export function rowMatches(row, query, { view = "explore", cveIndex = null, wind
   if (query.exp && row.exploited !== query.exp) return false;
   if (query.kev && !kevLinked(row, cveIndex)) return false;
   if (query.action && !requiredAction(row, cveIndex)) return false;
+  if (query.poc && !publicExploit(row, cveIndex)) return false;
   if (query.vendor && !has(row.t.vendor, "vendor:" + query.vendor)) return false;
   if (query.product && !has(row.t.product, "product:" + query.product)) return false;
   if (query.actor && !has(row.t.actor, "actor:" + query.actor)) return false;
@@ -136,10 +179,11 @@ export function facets(rows, view = "explore") {
 }
 
 // CVE register rows from the CVE index. kev=1 keeps every CVE with a KEV dateAdded, whatever
-// its guidance label; action=1 keeps every CVE whose brief carries CISA's requiredAction.
+// its guidance label; action=1 keeps every CVE whose brief carries CISA's requiredAction; poc=1
+// keeps every CVE with a public exploit (CNA exploit tag, or CISA SSVC poc/active).
 export function cveRegister(cveIndex, query) {
   const words = terms(query.q);
-  const rows = [...cveIndex.values()].filter(row => (!query.kev || row.kev_added) && (!query.action || row.required_action) &&
+  const rows = [...cveIndex.values()].filter(row => (!query.kev || row.kev_added) && (!query.action || row.required_action) && (!query.poc || cvePublicExploit(row)) &&
     words.every(word => normalized(row.cve + " " + row.weaknesses.join(" ") + " " + row.guidance).includes(word)));
   const [key, order] = (query.sort || "cve-desc").split("-");
   const direction = order === "desc" ? -1 : 1;

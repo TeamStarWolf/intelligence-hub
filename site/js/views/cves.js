@@ -2,7 +2,7 @@
 // over the register. The register reads data/v7/cve-index.json; a brief is read on first open,
 // from its bucket when buckets are published, otherwise from data/briefs.json.
 import { formatRoute, withQuery } from "../router.js";
-import { cveRegister, kevLinked } from "../filters.js";
+import { EXPLOIT_LABEL, cveExploitState, cveRegister, kevLinked } from "../filters.js";
 import { count, dateLabel, epssPercent, link, node, routeLink, stamp } from "../util.js";
 import { libraryDoor, pager } from "./common.js";
 import { pageSize } from "../limits.js";
@@ -77,6 +77,8 @@ export function registerTable(rows, counts = null) {
     // guidance label and the data-quality flags below it still show.
     const guidance = node("td", "", row.guidance === "needs-review" ? "" : GUIDANCE[row.guidance]);
     if (row.required_action) guidance.append(node("span", "cell-note", "CISA required action"));
+    const exploitState = cveExploitState(row);
+    if (exploitState) guidance.append(node("span", "cell-note", EXPLOIT_LABEL[exploitState]));
     if (row.source_status !== "ok") guidance.append(node("span", "cell-note", "CNA lookup " + row.source_status));
     tr.append(id, guidance, node("td", "", row.kev_added ? dateLabel(row.kev_added) : "Not in KEV"), node("td", "", row.score === null ? "Unknown" : row.score.toFixed(1) + " (v" + (row.version || "?") + ")"),
       node("td", "", epssCell(row.epss, counts)), node("td", "", row.weaknesses.join(", ") || "None supplied"));
@@ -180,13 +182,27 @@ export function epssBlock(record, counts = null) {
 
 export function briefBody(record, indexRow, rows, lib = null, counts = null) {
   const parts = [];
+  // References the CNA tagged "exploit" (CVE 5.x taxonomy) and the stored uncapped count of them.
+  const exploitRefs = (record.references || []).filter(reference => reference.kind === "exploit");
+  const pocCount = typeof record.poc === "number" ? record.poc : exploitRefs.length;
+  // The exploitation state: the CNA tag or SSVC poc read as a public exploit, SSVC active as exploited.
+  const ssvcExploitation = record.adp && record.adp.ssvc ? record.adp.ssvc.exploitation : null;
+  const exploitState = cveExploitState({ poc: pocCount, ssvc_exploitation: ssvcExploitation });
   const overview = block(record.title || "Source record title not supplied");
   overview.append(node("p", "chips", ""));
   const badges = overview.lastChild;
   const guidance = record.record_state === "REJECTED" ? "needs-review" : record.analysis.guidance_status;
   badges.append(node("span", "chip", GUIDANCE[guidance]), node("span", "chip", record.record_state + " record, CNA " + record.source_status), node("span", "chip", typeof record.cvss?.score === "number" ? "CNA CVSS " + record.cvss.score.toFixed(1) + " (v" + (record.cvss.version || "?") + ")" : "CNA CVSS not supplied"));
   if (record.kev) badges.append(node("span", "chip chip-kev", "KEV added " + dateLabel(record.kev.date_added)));
+  if (exploitState) badges.append(node("span", "chip", EXPLOIT_LABEL[exploitState]));
   if (record.record_state === "REJECTED") overview.append(node("p", "notice-inline", "This CVE record is rejected. Read its original disposition before treating it as a vulnerability."));
+  if (exploitState) {
+    const sources = [];
+    if (pocCount > 0) sources.push("the CNA tagged " + count(pocCount, "reference") + " as a public exploit");
+    if (ssvcExploitation === "poc") sources.push("CISA's SSVC Exploitation is poc (a public proof of concept exists, or the vulnerability has a well-known method of exploitation)");
+    if (ssvcExploitation === "active") sources.push("CISA's SSVC Exploitation is active (used in the wild, which does not itself mean exploit code is public)");
+    overview.append(node("p", "muted", EXPLOIT_LABEL[exploitState] + ": " + sources.join("; ") + ". None of this establishes exposure on your own devices."));
+  }
   overview.append(node("p", "", record.description || "Description not supplied in this saved record."));
   overview.append(node("p", "muted", "CNA source updated " + stamp(record.source_updated_at) + " · retrieved " + stamp(record.retrieved_at) + ". Review affected products and your installed version before acting; this is not a device assessment."));
   if (record.epss) badges.append(node("span", "chip", "FIRST EPSS " + epssPercent(record.epss.score)));
@@ -225,6 +241,7 @@ export function briefBody(record, indexRow, rows, lib = null, counts = null) {
   if (!record.products.length) products.append(node("p", "muted", "No product or version statements in this saved record."));
   parts.push(products);
   const references = block("Original references");
+  if (pocCount > 0) references.append(node("p", "muted", "The CNA tagged " + count(pocCount, "reference") + " as a public exploit" + (exploitRefs.length < pocCount ? " (" + exploitRefs.length + " shown here)" : "") + ". CNAs tag references inconsistently, so no exploit tag is not proof that no exploit exists."));
   const list = node("ul", "detail-list");
   for (const reference of record.references.slice(0, 100)) { const item = node("li"); item.append(link((reference.label || "Original reference") + (reference.kind ? " (" + reference.kind + ")" : ""), reference.url)); list.append(item); }
   if (!list.children.length) references.append(node("p", "muted", "No original reference links supplied."));

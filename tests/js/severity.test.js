@@ -99,14 +99,18 @@ test("the register names the CNA CVSS as the basis of its score column and sort"
   assert.ok(doc.querySelector("#view caption").textContent.includes("CNA's metric"));
 });
 
-test("the CVE index and recent.json carry ssvc_exploitation, then epss, as the last fields before the bucket", () => {
-  assert.deepEqual(indexFields.slice(-2), ["ssvc_exploitation", "epss"]);
+test("the CVE index and recent.json carry ssvc_exploitation, then epss, then poc, as the last fields before the bucket", () => {
+  assert.deepEqual(indexFields.slice(-3), ["ssvc_exploitation", "epss", "poc"]);
   const site = files();
   const index = normalizeCveIndex(JSON.parse(site.bodies["./data/v7/cve-index.json"]));
   assert.equal(index.rows.get("CVE-2026-1000").ssvc_exploitation, "active");
   assert.equal(index.rows.get("CVE-2026-1001").ssvc_exploitation, null);
+  // poc is the count of references the CNA tagged "exploit": two for CVE-2026-1000, none otherwise.
+  assert.equal(index.rows.get("CVE-2026-1000").poc, 2);
+  assert.equal(index.rows.get("CVE-2026-1001").poc, 0);
   const recent = normalizeRecent(JSON.parse(site.bodies["./data/v7/recent.json"]));
   assert.equal(recent.cves.get("CVE-2026-1000").ssvc_exploitation, "active");
+  assert.equal(recent.cves.get("CVE-2026-1000").poc, 2);
   // The layout published before the field, and a row that leaves it out, are refused whole.
   const old = JSON.parse(site.bodies["./data/v7/cve-index.json"]);
   old.fields = old.fields.filter(field => field !== "ssvc_exploitation");
@@ -146,10 +150,10 @@ test("the brief validator accepts the adp block field by field and refuses an in
   }
 });
 
-test("the feed reader for the fallback path reads the version 3 brief index and refuses the earlier layouts", () => {
+test("the feed reader for the fallback path reads the version 4 brief index and refuses the earlier layouts", () => {
   const feed = (version, row) => ({ schema_version: 7, generated_at: "2026-11-03T12:00:00+00:00", window: { start: "1998-01-01", end: "2026-11-01" },
     articles: [{ id: "a-1", title: "An advisory", url: "https://psirt.example.org/a-1", source_id: "vendor-psirt", source_name: "Vendor PSIRT", kind: "advisory", published_at: "2026-10-30", event_date: null, date_basis: "publication", summary: "", cves: ["CVE-2026-1000"], tags: [], exploitation: "unknown", references: [], origin: "publisher-feed" }],
-    sources: [], history_reviewed_at: null, brief_index: { version, fields: ["record_state", "source_status", "guidance_status", "required_action", "cvss_score", "cvss_version", "kev_date_added", "weaknesses", ...(version >= 2 ? ["ssvc_exploitation"] : []), ...(version >= 3 ? ["epss"] : [])], rows: { "CVE-2026-1000": row } },
+    sources: [], history_reviewed_at: null, brief_index: { version, fields: ["record_state", "source_status", "guidance_status", "required_action", "cvss_score", "cvss_version", "kev_date_added", "weaknesses", ...(version >= 2 ? ["ssvc_exploitation"] : []), ...(version >= 3 ? ["epss"] : []), ...(version >= 4 ? ["poc"] : [])], rows: { "CVE-2026-1000": row } },
     mitigation_coverage: {}, deduplication: { url_duplicates_removed: 0 },
     refresh: { requested_minutes: 120, mode: "scheduled-check", status_url: "https://github.com/TeamStarWolf/intelligence-hub/actions", notes: [] },
     coverage: { kev_records: 0, curated_events: 0, feed_articles: 1, notes: [] },
@@ -158,16 +162,18 @@ test("the feed reader for the fallback path reads the version 3 brief index and 
     intelligence: { schema_version: 1, catalog: { version: "1", reviewed_at: null, source_sha256: "a".repeat(64), status: "unreviewed", entities: [], relationships: [], notes: [] },
       reporting: { config_sha256: "a".repeat(64), catalog_sha256: "a".repeat(64), catalog_updated_at: null, configuration: { schema_version: 1, timezone: "America/Chicago", daily_hours: [6, 14, 22], weekday_lookback_hours: 24, weekend_lookback_hours: 48, weekend_iso_days: [6, 7], periodic_hour: 6, weekly_iso_day: 1, fortnight_anchor_start: "2026-10-19", fortnight_days: 14, rolling_months: 6, cadences: ["daily", "weekly", "weekend", "fortnightly", "monthly", "quarterly", "six-month"], schedule_state: "planned", schedule_observed_at: null, notes: [] }, latest_reports: [], indexes: [], notes: [] },
       revisions: { lookback_hours: 96, priority_hours: 48, max_sources: 12, min_success_interval_hours: 8, min_failure_interval_hours: 24, state: "not_run", report_id: null, recorded_at: null, nominal_cutoff: null, records: [], notes: [] }, notes: [] } });
-  const current = feed(3, ["PUBLISHED", "ok", "publisher-guidance", true, 9.8, "3.1", "2026-11-02", ["CWE-787"], "active", { score: 0.5, percentile: 0.9, date: "2026-11-02", model: "v2026.06.15" }]);
+  const current = feed(4, ["PUBLISHED", "ok", "publisher-guidance", true, 9.8, "3.1", "2026-11-02", ["CWE-787"], "active", { score: 0.5, percentile: 0.9, date: "2026-11-02", model: "v2026.06.15" }, 2]);
   const snapshot = normalizeFeed(current, JSON.stringify(current).length);
   assert.equal(snapshot.mitigations.get("CVE-2026-1000").ssvc_exploitation, "active");
   assert.equal(snapshot.mitigations.get("CVE-2026-1000").cvss.score, 9.8);
   assert.equal(snapshot.mitigations.get("CVE-2026-1000").epss.score, 0.5);
-  // The fallback's own CVE index, which the register, the chips and the EPSS sort read, carries both columns.
+  // The fallback's own CVE index, which the register, the chips and the EPSS sort read, carries every column.
   const fallback = legacyData(snapshot).cveIndex.get("CVE-2026-1000");
-  assert.deepEqual([fallback.ssvc_exploitation, fallback.epss], ["active", { score: 0.5, percentile: 0.9, date: "2026-11-02", model: "v2026.06.15" }]);
+  assert.deepEqual([fallback.ssvc_exploitation, fallback.epss, fallback.poc], ["active", { score: 0.5, percentile: 0.9, date: "2026-11-02", model: "v2026.06.15" }, 2]);
   const old = feed(1, ["PUBLISHED", "ok", "publisher-guidance", true, 9.8, "3.1", "2026-11-02", ["CWE-787"]]);
   assert.throws(() => normalizeFeed(old, JSON.stringify(old).length), FormatError);
   const beforeEpss = feed(2, ["PUBLISHED", "ok", "publisher-guidance", true, 9.8, "3.1", "2026-11-02", ["CWE-787"], "active"]);
   assert.throws(() => normalizeFeed(beforeEpss, JSON.stringify(beforeEpss).length), FormatError);
+  const beforePoc = feed(3, ["PUBLISHED", "ok", "publisher-guidance", true, 9.8, "3.1", "2026-11-02", ["CWE-787"], "active", { score: 0.5, percentile: 0.9, date: "2026-11-02", model: "v2026.06.15" }]);
+  assert.throws(() => normalizeFeed(beforePoc, JSON.stringify(beforePoc).length), FormatError);
 });

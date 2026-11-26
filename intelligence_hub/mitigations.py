@@ -74,6 +74,9 @@ def project_weaknesses(cna, cve, clean):
 def normalize_retained(value, cve):
     """A validated retained projection with the pairs later changes added, read as not_projected when absent."""
     items, status = validate_weaknesses(value, cve, brief_url, legacy=True)
+    # poc rides through as the retained projection carried it ({**value}): absent when the projection
+    # predates the field, so due() can read it again and fill the count instead of publishing a 0
+    # that only means "not read yet". A fresh projection always sets it.
     return {**value, "weaknesses": items, "weaknesses_status": status,
             "adp": value.get("adp"), "adp_status": value.get("adp_status", "not_projected"), "epss": value.get("epss")}
 
@@ -228,18 +231,33 @@ def project_record(raw, cve, clean, safe_url, normalize_date, stamp):
         products.append({"vendor": clean(str(item.get("vendor", "Not stated")), 150),
             "product": clean(str(item.get("product") or item.get("packageName") or "Not stated"), 200),
             "default_status": clean(str(item.get("defaultStatus", "unknown")), 40), "versions": versions})
-    references = [{"label": "Official CVE record", "url": url, "kind": "record"}]
+    candidates = []
+    poc = 0
     values = cna.get("references", [])
     if isinstance(values, list):
         for item in values[:100]:
             if not isinstance(item, dict) or not safe_url(item.get("url")):
                 continue
-            tags = item.get("tags", [])
-            guidance = isinstance(tags, list) and bool(set(str(tag) for tag in tags) & {"vendor-advisory", "patch", "mitigation", "release-notes"})
-            references.append({"label": clean(str(item.get("name") or ("CNA guidance reference" if guidance else "CNA reference")), 150),
-                "url": safe_url(item["url"]), "kind": "vendor-guidance" if guidance else "record"})
-            if len(references) == 16:
-                break
+            tags = {str(tag) for tag in item["tags"]} if isinstance(item.get("tags"), list) else set()
+            # A reference the CNA tagged "exploit" (CVE 5.x reference taxonomy) points at a public
+            # exploit or proof of concept. It is a separate signal from guidance; exploit wins when
+            # a reference carries both. The tag is applied by CNAs and is not complete coverage; only
+            # the CNA container is read for it, because CISA's assessment is the ADP SSVC value.
+            exploit = "exploit" in tags
+            if exploit:
+                poc += 1
+            guidance = bool(tags & {"vendor-advisory", "patch", "mitigation", "release-notes"})
+            kind = "exploit" if exploit else "vendor-guidance" if guidance else "record"
+            default = "Public exploit reference" if exploit else "CNA guidance reference" if guidance else "CNA reference"
+            candidates.append({"label": clean(str(item.get("name") or default), 150),
+                "url": safe_url(item["url"]), "kind": kind})
+    # poc counts every exploit reference the record carries, capped or not. The displayed list keeps
+    # the official record plus up to fifteen CNA references; when that cap would drop every exploit
+    # reference, one of them replaces the last kept reference so the count is always backed by a link.
+    shown = candidates[:15]
+    if poc and not any(ref["kind"] == "exploit" for ref in shown):
+        shown = candidates[:14] + [next(ref for ref in candidates if ref["kind"] == "exploit")]
+    references = [{"label": "Official CVE record", "url": url, "kind": "record"}] + shown
     metrics = cna.get("metrics", [])
     cvss = first_cvss(metrics, clean) if isinstance(metrics, list) else None
     if cvss is not None:
@@ -256,7 +274,7 @@ def project_record(raw, cve, clean, safe_url, normalize_date, stamp):
         "solutions": [{"text": text, "source_url": url} for text in english_values(cna.get("solutions"), clean)],
         "workarounds": [{"text": text, "source_url": url} for text in english_values(cna.get("workarounds"), clean)],
         "cvss": cvss, "references": references, "weaknesses": weaknesses, "weaknesses_status": weakness_status,
-        "adp": adp, "adp_status": adp_status,
+        "adp": adp, "adp_status": adp_status, "poc": poc,
         "projection_notes": ["CNA fields are bounded excerpts; consult the original record and vendor advisories for complete product/version conditions.",
             "Product statements can include unaffected versions. An affected version range is not a fixed-version claim.",
             "The displayed metric is the first supplied metric of the highest available CVSS version, not a product-specific applicability assessment."]}
@@ -276,6 +294,11 @@ def valid_projection(value, cve, safe_url, normalize_date):
     # FIRST's EPSS block (WP-03) rides on the record: absent or null before a read, else a valid block.
     if value.get("epss") is not None and not valid_score(value["epss"]):
         return False
+    # poc is the count of exploit-tagged CNA references (0 to the 100 the record is read for): absent
+    # on a projection made before this field, else a non-negative integer.
+    poc = value.get("poc")
+    if poc is not None and (type(poc) is not int or not 0 <= poc <= 100):
+        return False
     for field in ("source_updated_at", "retrieved_at", "source_attempted_at"):
         item = value.get(field)
         if item is not None and (not isinstance(item, str) or len(item) > 40 or normalize_date(item) is None):
@@ -294,7 +317,7 @@ def valid_projection(value, cve, safe_url, normalize_date):
         if any(not isinstance(item, dict) or not isinstance(item.get("text"), str) or len(item["text"]) > 600 or not safe_url(item.get("source_url")) for item in value[field]):
             return False
     refs = value.get("references")
-    if not isinstance(refs, list) or len(refs) > 20 or any(not isinstance(item, dict) or not isinstance(item.get("label"), str) or len(item["label"]) > 150 or not safe_url(item.get("url")) or item.get("kind") not in {"record", "vendor-guidance"} for item in refs):
+    if not isinstance(refs, list) or len(refs) > 20 or any(not isinstance(item, dict) or not isinstance(item.get("label"), str) or len(item["label"]) > 150 or not safe_url(item.get("url")) or item.get("kind") not in {"record", "vendor-guidance", "exploit"} for item in refs):
         return False
     products = value.get("products")
     if not isinstance(products, list) or len(products) > 6:
@@ -320,7 +343,7 @@ def blank(cve):
     return {"cve": cve, "title": cve, "description": "", "source_status": "pending", "record_state": "UNKNOWN",
         "source_updated_at": None, "retrieved_at": None, "source_attempted_at": None, "source_sha256": None,
         "products": [], "solutions": [], "workarounds": [], "cvss": None, "weaknesses": [], "weaknesses_status": "not_projected",
-        "adp": None, "adp_status": "not_projected", "epss": None,
+        "adp": None, "adp_status": "not_projected", "epss": None, "poc": 0,
         "references": [{"label": "Official CVE record", "url": brief_url(cve), "kind": "record"}], "projection_notes": []}
 
 
@@ -333,8 +356,13 @@ def merge_retained(local, remote, cve, safe_url, normalize_date):
         return normalize_date(item.get(field) or "") or ""
     successful = [item for item in values if item.get("retrieved_at") and item.get("source_sha256")]
     facts = normalize_retained(max(successful, key=lambda item: clock(item, "retrieved_at")), cve) if successful else blank(cve)
-    result = {key: facts[key] for key in blank(cve) if key != "projection_notes"}
+    result = {key: facts[key] for key in blank(cve) if key not in ("projection_notes", "poc")}
     result["projection_notes"] = []
+    # poc rides with the facts: a fresh projection and a blank carry it (0 or more), but a projection
+    # made before the field has none, and merge keeps it missing so due() reads that record early
+    # rather than inventing a 0. blank(cve) carries poc, so this is the only key not taken above.
+    if "poc" in facts:
+        result["poc"] = facts["poc"]
     latest = max(values, key=lambda item: clock(item, "source_attempted_at"))
     result.update(source_status=latest["source_status"], source_attempted_at=latest.get("source_attempted_at"))
     # FIRST's EPSS block is read apart from the CNA record, so it is merged apart: the block with the
@@ -363,8 +391,10 @@ def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, saf
     def due(cve):
         record = records[cve]
         # A successful projection made before a later field existed is read again within the
-        # budget, ahead of its 24-hour interval: the weakness pair (schema 5) and CISA's ADP block.
-        if record["source_status"] == "ok" and "not_projected" in (record["weaknesses_status"], record["adp_status"]):
+        # budget, ahead of its 24-hour interval: the weakness pair (schema 5), CISA's ADP block,
+        # and the poc count (a retained projection with no stored poc, so the count is filled from a
+        # fresh read rather than published as 0 until the record's ordinary interval comes round).
+        if record["source_status"] == "ok" and ("not_projected" in (record["weaknesses_status"], record["adp_status"]) or "poc" not in record):
             return True
         previous = record.get("source_attempted_at")
         if previous is None:
@@ -401,6 +431,13 @@ def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, saf
     result = {}
     for cve, projection in records.items():
         record = {key: projection[key] for key in ("cve", "title", "description", "source_status", "record_state", "source_updated_at", "retrieved_at", "source_attempted_at", "source_sha256", "products", "solutions", "workarounds", "cvss", "references", "weaknesses", "weaknesses_status", "adp", "adp_status", "epss")}
+        # The brief carries poc only when the projection does: a fresh read, or one that already held
+        # it. A projection not re-read this run (the budget ran out) publishes no poc key, because the
+        # next run resumes from the published briefs, and a published 0 would read back as a counted 0
+        # and lose the early re-read due() owes it. The index column below is derived every build and
+        # carries 0 for such a record, since the index is rebuilt, not resumed from.
+        if "poc" in projection:
+            record["poc"] = projection["poc"]
         item = kev_by_id.get(cve)
         cisa_url = "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=" + cve
         action = clean(item.get("requiredAction", ""), 1200) if item else ""
@@ -446,24 +483,35 @@ def build_briefs(articles, catalog, retained, refresh, budget, fetch, clean, saf
 # The public site splits one snapshot into two files. data/feed.json keeps a
 # compact row per CVE for list views; data/briefs.json holds the full briefs and
 # is read only when a reader opens one.
-# Index version 2 added ssvc_exploitation, CISA's SSVC Exploitation value (WP-04); version 3 adds
-# epss, FIRST's EPSS block {score, percentile, date, model} or null (WP-03). cvss_score and
-# cvss_version are the CNA's metric; CISA's ADP CVSS is only in the brief.
-INDEX_VERSION = 3
+# Index version 2 added ssvc_exploitation, CISA's SSVC Exploitation value (WP-04); version 3 added
+# epss, FIRST's EPSS block {score, percentile, date, model} or null (WP-03); version 4 adds poc, the
+# count of this CVE record's references the CNA tagged "exploit" (a public exploit or proof of
+# concept, 0 or more). cvss_score and cvss_version are the CNA's metric; CISA's ADP CVSS is only in
+# the brief. Each field is pinned to the version that introduced it, so the constant can advance
+# without moving the earlier fields.
+EPSS_INDEX_VERSION = 3
+INDEX_VERSION = 4
 INDEX_FIELDS = ("record_state", "source_status", "guidance_status", "required_action",
-                "cvss_score", "cvss_version", "kev_date_added", "weaknesses", "ssvc_exploitation", "epss")
-# The earlier layouts, as the feeds published before WP-04 and before WP-03 carry them; the
-# archive validator still reads both.
-INDEX_FIELDS_V2 = INDEX_FIELDS[:-1]
-INDEX_FIELDS_V1 = INDEX_FIELDS[:-2]
-INDEX_VERSIONS = (1, 2, INDEX_VERSION)
+                "cvss_score", "cvss_version", "kev_date_added", "weaknesses", "ssvc_exploitation", "epss", "poc")
+# The earlier layouts, as the feeds published before each field carry them; the archive validator
+# still reads them all.
+INDEX_FIELDS_V3 = INDEX_FIELDS[:-1]
+INDEX_FIELDS_V2 = INDEX_FIELDS[:-2]
+INDEX_FIELDS_V1 = INDEX_FIELDS[:-3]
+INDEX_VERSIONS = (1, 2, EPSS_INDEX_VERSION, INDEX_VERSION)
 BRIEFS_KEYS = {"schema_version", "feed_schema_version", "generated_at", "content_revision", "briefs"}
 
 
 def index_fields(version):
     if version not in INDEX_VERSIONS:
         raise ValueError("Unsupported brief index version.")
-    return {1: INDEX_FIELDS_V1, 2: INDEX_FIELDS_V2, INDEX_VERSION: INDEX_FIELDS}[version]
+    return {1: INDEX_FIELDS_V1, 2: INDEX_FIELDS_V2, EPSS_INDEX_VERSION: INDEX_FIELDS_V3, INDEX_VERSION: INDEX_FIELDS}[version]
+
+
+def poc_count(brief):
+    """The stored count of exploit-tagged CNA references, counted uncapped when the record was read."""
+    poc = brief.get("poc")
+    return poc if type(poc) is int and poc >= 0 else 0
 
 
 def index_row(brief, version=INDEX_VERSION):
@@ -474,8 +522,10 @@ def index_row(brief, version=INDEX_VERSION):
            [item["id"] for item in brief.get("weaknesses", [])]]
     if version >= 2:
         row.append(((brief.get("adp") or {}).get("ssvc") or {}).get("exploitation"))
-    if version >= INDEX_VERSION:
+    if version >= EPSS_INDEX_VERSION:
         row.append(brief.get("epss"))
+    if version >= INDEX_VERSION:
+        row.append(poc_count(brief))
     return row
 
 

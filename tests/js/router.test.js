@@ -90,7 +90,7 @@ test("#/tag/<field>/<value> is rewritten to the Explorer filter for that value",
 });
 
 test("every list filter, sort, page and open record round-trips in canonical order", () => {
-  const hash = "#/explore?q=remote+code&kind=advisory&class=vendor-primary&event=exploitation&exp=known&kev=1&action=1&vendor=palo-alto-networks&product=pan-os" +
+  const hash = "#/explore?q=remote+code&kind=advisory&class=vendor-primary&event=exploitation&exp=known&kev=1&action=1&poc=1&vendor=palo-alto-networks&product=pan-os" +
     "&actor=G0016&malware=S0154&sector=healthcare-public-health&region=US&source=cisa-advisories&year=2025&month=03&sort=cvss-desc&page=3&open=feed-3f41d3f2c16c88f054f7";
   const route = parseRoute(hash, "");
   assert.equal(route.rewrite, false);
@@ -100,7 +100,10 @@ test("every list filter, sort, page and open record round-trips in canonical ord
   assert.equal(roundTrip("#/explore?page=2&q=x&kind=kev"), "#/explore?q=x&kind=kev&page=2");
   for (const view of ["advisories", "research", "news"]) assert.equal(roundTrip("#/" + view + "?range=90&exp=reported"), "#/" + view + "?exp=reported&range=90");
   assert.equal(roundTrip("#/kev?q=fortinet&year=2024&sort=due-asc&page=2"), "#/kev?q=fortinet&year=2024&sort=due-asc&page=2");
-  assert.equal(roundTrip("#/cves?kev=1&action=1&sort=cvss-desc"), "#/cves?kev=1&action=1&sort=cvss-desc");
+  assert.equal(roundTrip("#/cves?kev=1&action=1&poc=1&sort=cvss-desc"), "#/cves?kev=1&action=1&poc=1&sort=cvss-desc");
+  assert.equal(roundTrip("#/cve/CVE-2026-1000?poc=1"), "#/cve/CVE-2026-1000?poc=1", "a CVE brief keeps poc");
+  assert.equal(roundTrip("#/kev?poc=1"), "#/kev", "the KEV ledger does not take poc");
+  assert.equal(roundTrip("#/status?poc=1"), "#/status", "a view without poc drops it");
   assert.equal(roundTrip("#/cves?sort=epss-desc"), "#/cves?sort=epss-desc");
   assert.equal(roundTrip("#/explore?sort=epss-asc"), "#/explore?sort=epss-asc");
   assert.equal(roundTrip("#/kev?sort=epss-desc"), "#/kev", "the KEV ledger has no EPSS sort");

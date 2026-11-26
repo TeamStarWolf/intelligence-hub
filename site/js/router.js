@@ -47,6 +47,7 @@ const KEYS = [
   ["exp", oneOf(EXPLOITATION)],
   ["kev", value => value === "1"],
   ["action", value => value === "1"],
+  ["poc", value => value === "1"],
   ["vendor", slug],
   ["product", slug],
   ["actor", entity],
@@ -70,11 +71,11 @@ const CHECKS = Object.fromEntries(KEYS);
 
 // The keys each view reads. Anything else in the hash is dropped for that view.
 const VIEW_KEYS = {
-  list: ["q", "desk", "kind", "class", "event", "exp", "kev", "action", "vendor", "product", "actor", "malware", "cwe", "tech", "sector", "region", "source", "year", "month", "range", "sort", "page", "open"],
+  list: ["q", "desk", "kind", "class", "event", "exp", "kev", "action", "poc", "vendor", "product", "actor", "malware", "cwe", "tech", "sector", "region", "source", "year", "month", "range", "sort", "page", "open"],
   today: ["wall"],
   kev: ["q", "year", "range", "sort", "page"],
-  cves: ["q", "kev", "action", "sort", "page"],
-  cve: ["q", "kev", "action", "sort", "page"],
+  cves: ["q", "kev", "action", "poc", "sort", "page"],
+  cve: ["q", "kev", "action", "poc", "sort", "page"],
   // history is the year index; a history/<year> page reads the "history-year" keys.
   history: [], "history-year": ["source", "month", "page"],
   vendors: [], vendor: ["page"], tags: ["year"], actors: ["year"], actor: ["page"], malware: ["page"],
